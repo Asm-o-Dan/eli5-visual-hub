@@ -1,0 +1,293 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ELI5: Сервис Валидации Дозировок</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card: #131b2e;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #38bdf8;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-yellow: #f59e0b;
+      --accent-purple: #a855f7;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+      background: radial-gradient(circle at 50% 0%, #17233f 0%, var(--bg) 75%);
+      color: var(--text);
+      padding: 16px;
+      max-width: 800px;
+      margin: 0 auto 60px;
+    }
+    .header-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .back-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--accent-green);
+      color: var(--accent-green);
+      padding: 3px 8px;
+      border-radius: 999px;
+    }
+    h1 {
+      font-size: clamp(22px, 5vw, 32px);
+      font-weight: 800;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+    p.lead {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    @media (min-width: 600px) {
+      .comparison-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .box {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 18px;
+    }
+    .box.bad {
+      border-left: 4px solid var(--accent-red);
+      background: linear-gradient(180deg, rgba(239, 68, 68, 0.06) 0%, var(--card) 100%);
+    }
+    .box.good {
+      border-left: 4px solid var(--accent-green);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, var(--card) 100%);
+    }
+    .box-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .box ul {
+      list-style: none;
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .box li {
+      margin-bottom: 6px;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .diagram-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .diagram-card h2 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    @media (min-width: 600px) {
+      .pillars-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .pillar {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+    }
+    .pillar-num {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .pillar-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .pillar-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    .callout {
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 20px;
+    }
+    .callout-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .callout-text {
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="header-nav">
+    <a href="../index.html" class="back-link">&larr; В хаб</a>
+    <span class="badge">Pharma &bull; Validation</span>
+  </div>
+
+  <h1>Сервис Валидации Дозировок</h1>
+  <p class="lead">Как пайплайн нормализации защищает от фатальной ошибки в 1000 раз между граммами, миллиграммами и каплями.</p>
+
+  <!-- 1. Конфликт -->
+  <div class="comparison-grid">
+    <div class="box bad">
+      <div class="box-title">❌ Без нормализации (Опасно)</div>
+      <ul>
+        <li>⛔ "0.5г" и "500мкг" путаются в 1000 раз</li>
+        <li>⛔ Сырой текст из рецепта ломает поиск</li>
+        <li>⛔ Нет проверки суточного лимита (Overdose)</li>
+      </ul>
+    </div>
+    <div class="box good">
+      <div class="box-title">✅ Сервис Валидации DrugEngine</div>
+      <ul>
+        <li>⚡ Приведение к единому SI-базису (мкг / мг / мл)</li>
+        <li>⚡ Проверка разовой и суточной нормы (Фармакопея)</li>
+        <li>⚡ Блокировка смертельных дозировок на лету</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 2. Схема архитектуры SVG -->
+  <div class="diagram-card">
+    <h2>📐 Пайплайн Проверки Дозировки</h2>
+    <svg viewBox="0 0 720 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="720" height="280" rx="14" fill="#0c1222"/>
+
+      <!-- 1. Входные данные -->
+      <rect x="20" y="95" width="130" height="90" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+      <text x="85" y="130" fill="#f8fafc" font-size="13" font-weight="700" text-anchor="middle">Грязный ввод</text>
+      <text x="85" y="150" fill="#94a3b8" font-size="11" text-anchor="middle">"2 таб по 0.5 г"</text>
+      <text x="85" y="168" fill="#cbd5e1" font-size="10" text-anchor="middle">3 раза в день</text>
+
+      <!-- Стрелка 1 -->
+      <path d="M150 140 H185" stroke="#38bdf8" stroke-width="2.5"/>
+      <polygon points="190,140 182,135 182,145" fill="#38bdf8"/>
+
+      <!-- 2. Парсер и Нормализатор -->
+      <rect x="190" y="70" width="160" height="140" rx="12" fill="#1e1b4b" stroke="#818cf8" stroke-width="1.5"/>
+      <text x="270" y="100" fill="#c7d2fe" font-size="12.5" font-weight="700" text-anchor="middle">🔄 Нормализатор</text>
+      <rect x="205" y="115" width="130" height="24" rx="5" fill="#312e81"/>
+      <text x="270" y="131" fill="#a5b4fc" font-size="10" text-anchor="middle">0.5 г &rarr; 500 мг (SI)</text>
+      <rect x="205" y="145" width="130" height="24" rx="5" fill="#312e81"/>
+      <text x="270" y="161" fill="#a5b4fc" font-size="10" text-anchor="middle">Сутки: 2 &times; 500 &times; 3 = 3000 мг</text>
+      <rect x="205" y="175" width="130" height="24" rx="5" fill="#312e81"/>
+      <text x="270" y="191" fill="#a5b4fc" font-size="10" text-anchor="middle">Форма: Таблетки</text>
+
+      <!-- Стрелка 2 -->
+      <path d="M350 140 H385" stroke="#38bdf8" stroke-width="2.5"/>
+      <polygon points="390,140 382,135 382,145" fill="#38bdf8"/>
+
+      <!-- 3. Клинический Чекер -->
+      <rect x="390" y="70" width="150" height="140" rx="12" fill="#0f2942" stroke="#38bdf8" stroke-width="1.5"/>
+      <text x="465" y="100" fill="#bae6fd" font-size="12.5" font-weight="700" text-anchor="middle">⚖️ База Лимитов</text>
+      <text x="465" y="125" fill="#94a3b8" font-size="10.5" text-anchor="middle">Парацетамол</text>
+      <rect x="405" y="135" width="120" height="22" rx="4" fill="#0369a1"/>
+      <text x="465" y="150" fill="#e0f2fe" font-size="9.5" text-anchor="middle">Разовый макс: 1000 мг</text>
+      <rect x="405" y="165" width="120" height="22" rx="4" fill="#0369a1"/>
+      <text x="465" y="180" fill="#e0f2fe" font-size="9.5" text-anchor="middle">Суточный макс: 4000 мг</text>
+
+      <!-- Разветвление на выходы -->
+      <path d="M540 120 H570 V75 H595" stroke="#10b981" stroke-width="2"/>
+      <polygon points="600,75 592,70 592,80" fill="#10b981"/>
+
+      <path d="M540 160 H570 V205 H595" stroke="#ef4444" stroke-width="2"/>
+      <polygon points="600,205 592,200 592,210" fill="#ef4444"/>
+
+      <!-- 4. Вердикты -->
+      <!-- Зеленый (Безопасно) -->
+      <rect x="600" y="45" width="105" height="60" rx="8" fill="#064e3b" stroke="#10b981" stroke-width="1.5"/>
+      <text x="652" y="70" fill="#ecfdf5" font-size="11" font-weight="700" text-anchor="middle">✅ SAFE</text>
+      <text x="652" y="88" fill="#a7f3d0" font-size="9.5" text-anchor="middle">3000 &le; 4000 мг</text>
+
+      <!-- Красный (Передозировка) -->
+      <rect x="600" y="175" width="105" height="60" rx="8" fill="#450a0a" stroke="#ef4444" stroke-width="1.5"/>
+      <text x="652" y="200" fill="#fef2f2" font-size="11" font-weight="700" text-anchor="middle">🚨 OVERDOSE</text>
+      <text x="652" y="218" fill="#fca5a5" font-size="9.5" text-anchor="middle">&gt; Лимита (Блок)</text>
+    </svg>
+
+    <!-- 3 Столпа валидации -->
+    <div class="pillars-grid">
+      <div class="pillar">
+        <div class="pillar-num">01</div>
+        <div class="pillar-title">SI-Конвертер</div>
+        <div class="pillar-desc">Перевод всех единиц (г, мг, мкг, мл, капли) в строго сопоставимый микро-базис.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">02</div>
+        <div class="pillar-title">Суточный кумулятив</div>
+        <div class="pillar-desc">Расчет: (разовая доза &times; кратность &times; дни). Ловит скрытое отравление.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">03</div>
+        <div class="pillar-title">Hard-Guard API</div>
+        <div class="pillar-desc">Моментальный 422 Unprocessable Entity с точным медицинским обоснованием.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Дополнительный акцент -->
+  <div class="callout">
+    <div class="callout-title">💡 Инженерное правило</div>
+    <div class="callout-text">
+      Никаких плавающих запятых (float) в медицинских дозировках! Все расчеты ведутся в целочисленных микрограммах (BigInt / integer micrograms) во избежание погрешностей округления стандарта IEEE 754.
+    </div>
+  </div>
+</body>
+</html>

@@ -1,5 +1,19 @@
 [
   {
+    "id": "dosage-validation-service",
+    "title": "Сервис Валидации Дозировок",
+    "description": "Как пайплайн нормализации защищает от фатальной ошибки в 1000 раз между граммами и миллиграммами.",
+    "category": "Pharma & Safety",
+    "tags": [
+      "Validation",
+      "Dosage",
+      "Pharma",
+      "Architecture"
+    ],
+    "date": "2026-08-23",
+    "file": "artifacts/dosage-validation-service.html"
+  },
+  {
     "id": "hybrid-drug-search",
     "title": "Hybrid Search Engine: Qdrant + BM25",
     "description": "How hybrid vector fusion eliminates dosage errors and catches synonyms.",
