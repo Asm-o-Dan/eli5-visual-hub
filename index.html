@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ELI5 Visual Hub — Architectural Explainers</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(20, 28, 48, 0.7);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-hover: rgba(35, 48, 80, 0.85);
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --accent-green: #34d399;
+      --accent-purple: #a855f7;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+      background: radial-gradient(circle at 50% 0%, #151f38 0%, var(--bg) 75%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px 16px 60px;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 28px; padding-top: 10px; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: clamp(26px, 5vw, 36px);
+      font-weight: 800;
+      line-height: 1.15;
+      background: linear-gradient(135deg, #ffffff 40%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 15px;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+    .search-box {
+      margin: 22px auto 28px;
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--card-border);
+      padding: 14px 18px;
+      border-radius: 14px;
+      color: var(--text);
+      font-size: 15px;
+      outline: none;
+      transition: all 0.2s;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .search-box input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    @media (min-width: 640px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 20px;
+      backdrop-filter: blur(12px);
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .card:hover, .card:active {
+      transform: translateY(-2px);
+      border-color: var(--accent);
+      background: var(--card-hover);
+      box-shadow: 0 10px 30px rgba(56, 189, 248, 0.15);
+    }
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .category-pill {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-green);
+      background: rgba(52, 211, 153, 0.12);
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .date {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .card h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .card p.desc {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.45;
+      margin-bottom: 16px;
+      flex-grow: 1;
+    }
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .tag {
+      font-size: 11px;
+      padding: 2px 7px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+      color: #cbd5e1;
+    }
+    .btn-open {
+      margin-top: 14px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 12px;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="badge">🚀 ELI5 Visual Hub</div>
+      <h1>Visual Explainers</h1>
+      <p class="subtitle">Architecture, engineering breakthroughs & deep concepts distilled into zero-noise visual HTML artifacts.</p>
+      
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="🔍 Search topics, concepts, tags..." oninput="filterTopics()">
+      </div>
+    </header>
+
+    <div class="grid" id="topicsGrid">
+      <!-- Dynamically filled or static fallback -->
+    </div>
+
+    <footer>
+      ⚡ Powered by Antigravity &bull; Single-file Visual Artifacts &bull; Auto-deployed to GitHub Pages
+    </footer>
+  </div>
+
+  <script>
+    const staticTopics = [
+      {
+        "id": "anthropic-eli5-concept",
+        "title": "Anthropic ELI5: HTML is the New Markdown",
+        "description": "How single-file HTML artifacts with responsive SVG diagrams deliver instant clarity without text walls.",
+        "category": "Architecture & AI",
+        "tags": ["Anthropic", "Claude", "SVG", "ELI5"],
+        "date": "2026-08-23",
+        "file": "artifacts/anthropic-eli5-concept.html"
+      }
+    ];
+
+    async function loadTopics() {
+      let topics = staticTopics;
+      try {
+        const res = await fetch('data/topics.json');
+        if (res.ok) {
+          topics = await res.json();
+        }
+      } catch (e) {
+        console.log('Using static fallback');
+      }
+      window.allTopics = topics;
+      renderTopics(topics);
+    }
+
+    function renderTopics(topics) {
+      const grid = document.getElementById('topicsGrid');
+      if (!topics || topics.length === 0) {
+        grid.innerHTML = '<p style="text-align:center; color:#94a3b8; grid-column:1/-1;">No visual explainers found.</p>';
+        return;
+      }
+      grid.innerHTML = topics.map(t => `
+        <a class="card" href="${t.file}">
+          <div>
+            <div class="card-top">
+              <span class="category-pill">${t.category || 'General'}</span>
+              <span class="date">${t.date || ''}</span>
+            </div>
+            <h2>${t.title}</h2>
+            <p class="desc">${t.description}</p>
+          </div>
+          <div>
+            <div class="tags">
+              ${(t.tags || []).map(tag => `<span class="tag">#${tag}</span>`).join('')}
+            </div>
+            <div class="btn-open">
+              View Visual Artifact <span>&rarr;</span>
+            </div>
+          </div>
+        </a>
+      `).join('');
+    }
+
+    function filterTopics() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      if (!window.allTopics) return;
+      const filtered = window.allTopics.filter(t => 
+        t.title.toLowerCase().includes(q) ||
+        t.description.toLowerCase().includes(q) ||
+        (t.tags && t.tags.some(tag => tag.toLowerCase().includes(q))) ||
+        (t.category && t.category.toLowerCase().includes(q))
+      );
+      renderTopics(filtered);
+    }
+
+    loadTopics();
+  </script>
+</body>
+</html>

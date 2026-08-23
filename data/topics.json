@@ -1,0 +1,16 @@
+[
+  {
+    "id": "anthropic-eli5-concept",
+    "title": "Anthropic ELI5: HTML is the New Markdown",
+    "description": "How single-file HTML artifacts with responsive SVG diagrams deliver instant clarity without text walls.",
+    "category": "Architecture & AI",
+    "tags": [
+      "Anthropic",
+      "Claude",
+      "SVG",
+      "ELI5"
+    ],
+    "date": "2026-08-23",
+    "file": "artifacts/anthropic-eli5-concept.html"
+  }
+]

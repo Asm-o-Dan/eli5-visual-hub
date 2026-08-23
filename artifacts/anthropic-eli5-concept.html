@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ELI5: Anthropic HTML Visual Explainer</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card: #131b2e;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #38bdf8;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-yellow: #f59e0b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      max-width: 800px;
+      margin: 0 auto 60px;
+    }
+    .header-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .back-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 3px 8px;
+      border-radius: 999px;
+    }
+    h1 {
+      font-size: clamp(22px, 5vw, 32px);
+      font-weight: 800;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+    p.lead {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    @media (min-width: 600px) {
+      .comparison-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .box {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 18px;
+    }
+    .box.bad {
+      border-left: 4px solid var(--accent-red);
+      background: linear-gradient(180deg, rgba(239, 68, 68, 0.05) 0%, var(--card) 100%);
+    }
+    .box.good {
+      border-left: 4px solid var(--accent-green);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, var(--card) 100%);
+    }
+    .box-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .box ul {
+      list-style: none;
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .box li {
+      margin-bottom: 6px;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .diagram-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .diagram-card h2 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    @media (min-width: 600px) {
+      .pillars-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .pillar {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+    }
+    .pillar-num {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .pillar-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .pillar-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    .interactive-panel {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 16px;
+      padding: 18px;
+      margin-top: 24px;
+    }
+    .interactive-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .interactive-text {
+      font-size: 13.5px;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+    .prompt-box {
+      background: rgba(0,0,0,0.5);
+      border: 1px dashed rgba(255,255,255,0.2);
+      border-radius: 10px;
+      padding: 12px;
+      font-family: monospace;
+      font-size: 12.5px;
+      color: #38bdf8;
+      margin-top: 10px;
+      word-break: break-word;
+    }
+  </style>
+</head>
+<body>
+  <div class="header-nav">
+    <a href="../index.html" class="back-link">&larr; Back to Hub</a>
+    <span class="badge">ELI5 Visual Spec</span>
+  </div>
+
+  <h1>Anthropic ELI5: HTML is the New Markdown</h1>
+  <p class="lead">Why Claude engineers replaced text walls with Fisher-Price style visual interactive artifacts.</p>
+
+  <!-- 1. The Conflict -->
+  <div class="comparison-grid">
+    <div class="box bad">
+      <div class="box-title">❌ Old Way: Markdown Wall</div>
+      <ul>
+        <li>⛔ 2,000 words of dense text</li>
+        <li>⛔ Mind wanders after 15 seconds</li>
+        <li>⛔ Invisible bugs and architectural leaks</li>
+        <li>⛔ No visual hierarchy or mental model</li>
+      </ul>
+    </div>
+    <div class="box good">
+      <div class="box-title">✅ New Way: ELI5 HTML Artifact</div>
+      <ul>
+        <li>⚡ 0.3-second visual grasp</li>
+        <li>⚡ Pure SVG diagrams with color flows</li>
+        <li>⚡ 4-6 bullet points of high-signal truth</li>
+        <li>⚡ Mobile-first & interactive anywhere</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 2. The Vector Diagram -->
+  <div class="diagram-card">
+    <h2>📐 The Mental Model Pipeline</h2>
+    <svg viewBox="0 0 700 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Background Grid Subtlety -->
+      <rect width="700" height="220" rx="12" fill="#0f1629"/>
+      
+      <!-- Node 1: Complex System -->
+      <rect x="25" y="60" width="160" height="100" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+      <text x="105" y="95" fill="#f8fafc" font-size="14" font-weight="700" text-anchor="middle">Complex Code</text>
+      <text x="105" y="115" fill="#94a3b8" font-size="11" text-anchor="middle">5k LOC / Architecture</text>
+      <text x="105" y="135" fill="#ef4444" font-size="11" font-weight="600" text-anchor="middle">🔥 Cognitive Overload</text>
+
+      <!-- Arrow 1 -->
+      <path d="M195 110 H250" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="4 4"/>
+      <polygon points="255,110 247,105 247,115" fill="#38bdf8"/>
+      <text x="225" y="98" fill="#38bdf8" font-size="11" font-weight="700" text-anchor="middle">/eli5</text>
+
+      <!-- Node 2: AI Agent Engine -->
+      <rect x="265" y="45" width="170" height="130" rx="12" fill="#1e1b4b" stroke="#818cf8" stroke-width="2"/>
+      <text x="350" y="80" fill="#c7d2fe" font-size="13" font-weight="700" text-anchor="middle">🤖 AI Distillation</text>
+      <rect x="280" y="95" width="140" height="24" rx="6" fill="#312e81"/>
+      <text x="350" y="111" fill="#a5b4fc" font-size="10.5" text-anchor="middle">Vectorize Logic (SVG)</text>
+      <rect x="280" y="125" width="140" height="24" rx="6" fill="#312e81"/>
+      <text x="350" y="141" fill="#a5b4fc" font-size="10.5" text-anchor="middle">Filter 90% Noise</text>
+
+      <!-- Arrow 2 -->
+      <path d="M445 110 H500" stroke="#34d399" stroke-width="2.5"/>
+      <polygon points="505,110 497,105 497,115" fill="#34d399"/>
+      <text x="475" y="98" fill="#34d399" font-size="11" font-weight="700" text-anchor="middle">Deploy</text>
+
+      <!-- Node 3: Single-File HTML -->
+      <rect x="515" y="60" width="160" height="100" rx="10" fill="#064e3b" stroke="#10b981" stroke-width="2"/>
+      <text x="595" y="95" fill="#ecfdf5" font-size="14" font-weight="700" text-anchor="middle">Instant Mental Model</text>
+      <text x="595" y="115" fill="#a7f3d0" font-size="11" text-anchor="middle">Clean Visual Artifact</text>
+      <text x="595" y="135" fill="#34d399" font-size="11" font-weight="700" text-anchor="middle">📱 0.3s Clarity on Phone</text>
+    </svg>
+
+    <!-- 3 Pillars -->
+    <div class="pillars-grid">
+      <div class="pillar">
+        <div class="pillar-num">01</div>
+        <div class="pillar-title">Declarative SVG</div>
+        <div class="pillar-desc">No external broken images. Pure vector renders crisp on any device.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">02</div>
+        <div class="pillar-title">Few Words</div>
+        <div class="pillar-desc">Only high-signal constraints, numbers, and direct conclusions.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">03</div>
+        <div class="pillar-title">Mobile Ready</div>
+        <div class="pillar-desc">Viewed seamlessly on your phone screen via GitHub Pages.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prompt Blueprint -->
+  <div class="interactive-panel">
+    <div class="interactive-title">🚀 The Production Prompt Template</div>
+    <div class="interactive-text">Every time this skill triggers, it generates an artifact following this formula:</div>
+    <div class="prompt-box">
+      Explain like I know nothing about this topic, using a single-file self-contained HTML artifact with responsive SVG diagrams, color-coded components, and minimal text.
+    </div>
+  </div>
+</body>
+</html>
