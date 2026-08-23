@@ -1,5 +1,19 @@
 [
   {
+    "id": "github-standup-projects-audit",
+    "title": "Standup & Аудит GitHub Репозиториев",
+    "description": "Полный анализ проектов @Asm-o-Dan, статус коммитов и пошаговый план доведения до совершенства.",
+    "category": "Standup & Strategy",
+    "tags": [
+      "Standup",
+      "Audit",
+      "Roadmap",
+      "Architecture"
+    ],
+    "date": "2026-08-23",
+    "file": "artifacts/github-standup-projects-audit.html"
+  },
+  {
     "id": "dosage-validation-service",
     "title": "Сервис Валидации Дозировок",
     "description": "Как пайплайн нормализации защищает от фатальной ошибки в 1000 раз между граммами и миллиграммами.",

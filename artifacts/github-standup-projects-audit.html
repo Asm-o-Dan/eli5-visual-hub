@@ -1,0 +1,399 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ELI5 Standup: Аудит GitHub и План Доведения Проектов</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card: #131b2e;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #38bdf8;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-yellow: #f59e0b;
+      --accent-purple: #a855f7;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+      background: radial-gradient(circle at 50% 0%, #17233f 0%, var(--bg) 75%);
+      color: var(--text);
+      padding: 16px;
+      max-width: 820px;
+      margin: 0 auto 60px;
+    }
+    .header-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .back-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 3px 8px;
+      border-radius: 999px;
+    }
+    h1 {
+      font-size: clamp(22px, 5vw, 32px);
+      font-weight: 800;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+    p.lead {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    /* Standup Cards Grid */
+    .standup-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    @media (min-width: 600px) {
+      .standup-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .s-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px;
+    }
+    .s-card.highlight {
+      border-left: 4px solid var(--accent);
+    }
+    .s-card.success {
+      border-left: 4px solid var(--accent-green);
+    }
+    .s-card.warning {
+      border-left: 4px solid var(--accent-yellow);
+    }
+    .s-card.purple {
+      border-left: 4px solid var(--accent-purple);
+    }
+    .s-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .s-card ul {
+      list-style: none;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .s-card li {
+      margin-bottom: 6px;
+    }
+
+    /* Diagram Card */
+    .diagram-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .diagram-card h2 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Projects Matrix */
+    .projects-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .project-item {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 18px;
+    }
+    .p-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .p-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .p-status {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .p-status.green { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+    .p-status.yellow { background: rgba(245, 158, 11, 0.15); color: var(--accent-yellow); }
+    .p-status.blue { background: rgba(56, 189, 248, 0.15); color: var(--accent); }
+
+    .p-action {
+      margin-top: 10px;
+      padding: 10px 12px;
+      background: rgba(0,0,0,0.35);
+      border-radius: 10px;
+      font-size: 12.5px;
+      color: #cbd5e1;
+      border-left: 3px solid var(--accent);
+    }
+    .p-action strong { color: var(--accent); }
+
+    /* Action Checklist */
+    .todo-box {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 18px;
+      padding: 20px;
+    }
+    .todo-title {
+      font-size: 16px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+    .todo-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 13.5px;
+      color: #cbd5e1;
+    }
+    .step-num {
+      background: var(--accent);
+      color: #090d16;
+      font-weight: 800;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header-nav">
+    <a href="../index.html" class="back-link">&larr; В хаб</a>
+    <span class="badge">Standup &bull; Ecosystem Audit</span>
+  </div>
+
+  <h1>🚀 GitHub Standup & План Развития</h1>
+  <p class="lead">Анализ репозиториев @Asm-o-Dan, статус активных фичей и пошаговый план вывода ключевых проектов на Middle/Senior уровень.</p>
+
+  <!-- 1. Standup Summary Cards -->
+  <div class="standup-grid">
+    <div class="s-card success">
+      <div class="s-title" style="color: var(--accent-green);">✅ Вчера / Сделано</div>
+      <ul>
+        <li>• <strong>21 коммит рефакторинга</strong> в C# .NET 8 и Python</li>
+        <li>• Исправлены #16–#20: композитные индексы, CancellationToken, Restrict Delete, устранение двойной записи</li>
+        <li>• Запущен <strong>ELI5 Visual Hub</strong> на GitHub Pages</li>
+      </ul>
+    </div>
+    <div class="s-card warning">
+      <div class="s-title" style="color: var(--accent-yellow);">⏳ В работе / Открытые петли</div>
+      <ul>
+        <li>• <strong>DrugsEngine (C#):</strong> ветка на 15 коммитов впереди remote + незакоммичен <code>DrugController.cs</code></li>
+        <li>• <strong>PythonService:</strong> ветка на 6 коммитов впереди remote</li>
+        <li>• <strong>LinkedIn Roadmap:</strong> подготовка Поста #5 (Ghost UUIDs)</li>
+      </ul>
+    </div>
+    <div class="s-card purple">
+      <div class="s-title" style="color: var(--accent-purple);">🎯 North Star (Главная цель)</div>
+      <ul>
+        <li>• Превратить связку <strong>C# + Python + Qdrant + Kafka</strong> в образцовый production-grade бенчмарк для портфолио</li>
+        <li>• Высокая техническая видимость: артефакты + LinkedIn</li>
+      </ul>
+    </div>
+    <div class="s-card highlight">
+      <div class="s-title" style="color: var(--accent);">🔥 Фокус на сегодня</div>
+      <ul>
+        <li>• 1. Запушить 21 локальный коммит в origin</li>
+        <li>• 2. Добавить интеграционные тесты (Testcontainers)</li>
+        <li>• 3. Добавить 1-Click запуск через Docker Compose</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 2. Interactive SVG Ecosystem Map -->
+  <div class="diagram-card">
+    <h2>🗺️ Карта экосистемы проектов и их готовность</h2>
+    <svg viewBox="0 0 740 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="740" height="320" rx="14" fill="#0c1222"/>
+
+      <!-- Core Backend: DrugsEngine C# -->
+      <rect x="25" y="30" width="210" height="110" rx="10" fill="#172554" stroke="#3b82f6" stroke-width="1.5"/>
+      <text x="130" y="58" fill="#93c5fd" font-size="13.5" font-weight="700" text-anchor="middle">DrugsEngine (C# .NET 8)</text>
+      <text x="130" y="78" fill="#bfdbfe" font-size="10.5" text-anchor="middle">Clean Arch &bull; EF Core &bull; Kafka</text>
+      <rect x="40" y="90" width="180" height="18" rx="4" fill="#1e3a8a"/>
+      <text x="130" y="103" fill="#60a5fa" font-size="9.5" font-weight="700" text-anchor="middle">15 коммитов ждут пуша</text>
+      <text x="130" y="128" fill="#34d399" font-size="11" font-weight="800" text-anchor="middle">Готовность: 88%</text>
+
+      <!-- AI Service: DrugsEnginePythonService -->
+      <rect x="25" y="170" width="210" height="110" rx="10" fill="#2e1065" stroke="#a855f7" stroke-width="1.5"/>
+      <text x="130" y="198" fill="#e9d5ff" font-size="13.5" font-weight="700" text-anchor="middle">Python NLP & Qdrant</text>
+      <text x="130" y="218" fill="#f3e8ff" font-size="10.5" text-anchor="middle">FastAPI &bull; Embeddings &bull; Parser</text>
+      <rect x="40" y="230" width="180" height="18" rx="4" fill="#4c1d95"/>
+      <text x="130" y="243" fill="#c084fc" font-size="9.5" font-weight="700" text-anchor="middle">6 коммитов ждут пуша</text>
+      <text x="130" y="268" fill="#34d399" font-size="11" font-weight="800" text-anchor="middle">Готовность: 85%</text>
+
+      <!-- Central Integration: Docker & Kafka -->
+      <path d="M235 85 H320 V140 H340" stroke="#38bdf8" stroke-width="2"/>
+      <path d="M235 225 H320 V180 H340" stroke="#a855f7" stroke-width="2"/>
+      <polygon points="345,160 338,155 338,165" fill="#38bdf8"/>
+
+      <!-- Center Hub -->
+      <rect x="345" y="105" width="160" height="110" rx="12" fill="#064e3b" stroke="#10b981" stroke-width="2"/>
+      <text x="425" y="135" fill="#a7f3d0" font-size="12.5" font-weight="700" text-anchor="middle">⚡ Production Hub</text>
+      <text x="425" y="155" fill="#ecfdf5" font-size="10" text-anchor="middle">Docker Compose</text>
+      <text x="425" y="173" fill="#6ee7b7" font-size="10" text-anchor="middle">Testcontainers Integration</text>
+      <text x="425" y="195" fill="#34d399" font-size="11" font-weight="800" text-anchor="middle">Следующий шаг (P0)</text>
+
+      <!-- Right Side: Portfolio & ELI5 Hub -->
+      <path d="M505 140 H550 V85 H575" stroke="#10b981" stroke-width="2"/>
+      <polygon points="575,85 567,80 567,90" fill="#10b981"/>
+
+      <path d="M505 180 H550 V235 H575" stroke="#10b981" stroke-width="2"/>
+      <polygon points="575,235 567,230 567,240" fill="#10b981"/>
+
+      <rect x="575" y="40" width="140" height="90" rx="10" fill="#1e293b" stroke="#64748b" stroke-width="1.5"/>
+      <text x="645" y="70" fill="#f8fafc" font-size="12" font-weight="700" text-anchor="middle">portfolio</text>
+      <text x="645" y="90" fill="#94a3b8" font-size="10" text-anchor="middle">Сайт-визитка</text>
+      <text x="645" y="112" fill="#38bdf8" font-size="10.5" font-weight="700" text-anchor="middle">Готовность: 90%</text>
+
+      <rect x="575" y="190" width="140" height="90" rx="10" fill="#1e293b" stroke="#64748b" stroke-width="1.5"/>
+      <text x="645" y="220" fill="#f8fafc" font-size="12" font-weight="700" text-anchor="middle">eli5-visual-hub</text>
+      <text x="645" y="240" fill="#94a3b8" font-size="10" text-anchor="middle">GitHub Pages Hub</text>
+      <text x="645" y="262" fill="#10b981" font-size="10.5" font-weight="700" text-anchor="middle">Готовность: 95%</text>
+    </svg>
+  </div>
+
+  <!-- 3. Projects Audit & How to Polish Each -->
+  <h2 style="font-size:18px; margin-bottom:14px;">🛠️ Детальный план доведения ключевых проектов</h2>
+  <div class="projects-list">
+
+    <!-- Project 1: DrugsEngine C# -->
+    <div class="project-item">
+      <div class="p-head">
+        <div>
+          <div class="p-name">1. DrugsEngine (.NET 8 Clean Architecture)</div>
+          <span style="font-size:12px; color:var(--muted);">C# Backend &bull; EF Core &bull; MediatR &bull; Kafka &bull; Redis</span>
+        </div>
+        <span class="p-status yellow">15 коммитов впереди</span>
+      </div>
+      <div class="p-action">
+        <strong>Что сделать наилучшим образом:</strong>
+        <br>1. Закоммитить изменение в <code>DrugController.cs</code> и запушить ветку <code>feature/junior-to-middle-refactoring</code> в remote.
+        <br>2. Создать PR в <code>develop</code> с красивым описанием рефакторинга (#16–#20).
+        <br>3. Добавить интеграционный тест с <strong>Testcontainers</strong> (проверка сохранения и транзакционности в реальном Postgres).
+        <br>4. Включить Swagger с автогенерацией XML-документации.
+      </div>
+    </div>
+
+    <!-- Project 2: DrugsEnginePythonService -->
+    <div class="project-item">
+      <div class="p-head">
+        <div>
+          <div class="p-name">2. DrugsEnginePythonService (AI / NLP Microservice)</div>
+          <span style="font-size:12px; color:var(--muted);">Python &bull; FastAPI &bull; Qdrant &bull; SentenceTransformers</span>
+        </div>
+        <span class="p-status yellow">6 коммитов впереди</span>
+      </div>
+      <div class="p-action">
+        <strong>Что сделать наилучшим образом:</strong>
+        <br>1. Запушить 6 коммитов (closes #2..#7) в GitHub remote.
+        <br>2. Добавить <code>docker-compose.yml</code> в корень связки C# + Python + Qdrant + Kafka, чтобы проект поднимался одной командой <code>docker compose up</code>.
+        <br>3. Написать <code>pytest</code> тесты на векторный поиск с mock Qdrant.
+      </div>
+    </div>
+
+    <!-- Project 3: Portfolio -->
+    <div class="project-item">
+      <div class="p-head">
+        <div>
+          <div class="p-name">3. Portfolio (Сайт инженера Asm-o-Dan)</div>
+          <span style="font-size:12px; color:var(--muted);">Frontend / Showcase &bull; Daniil Gandapas</span>
+        </div>
+        <span class="p-status green">Актуален</span>
+      </div>
+      <div class="p-action">
+        <strong>Что сделать наилучшим образом:</strong>
+        <br>1. Добавить карточку <strong>«ELI5 Visual Hub»</strong> с ссылкой на интерактивные архитектурные схемы.
+        <br>2. Добавить интерактивную схему микросервисного DrugEngine (.NET 8 + Python + Qdrant).
+      </div>
+    </div>
+
+    <!-- Project 4: Tanks1984 & Legacy -->
+    <div class="project-item">
+      <div class="p-head">
+        <div>
+          <div class="p-name">4. Tanks1984, FirstApi & Pet-проекты</div>
+          <span style="font-size:12px; color:var(--muted);">C / C# / Telegram Bots</span>
+        </div>
+        <span class="p-status blue">Шлифовка профиля</span>
+      </div>
+      <div class="p-action">
+        <strong>Что сделать наилучшим образом:</strong>
+        <br>1. Для <strong>Tanks1984 (C)</strong>: добавить GIF-демонстрацию геймплея и инструкцию сборки через <code>make</code> / <code>gcc</code> — отличный показ знания низкоуровневого C!
+        <br>2. В главном `Asm-o-Dan/Asm-o-Dan` профиле оформить красивый Pinned Repositories блок (DrugsEngine, PythonService, Portfolio, ELI5 Hub, Tanks1984).
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 4. Step by step Execution -->
+  <div class="todo-box">
+    <div class="todo-title">⚡ Рекомендуемый порядок действий (Next Actions):</div>
+    <div class="todo-step">
+      <span class="step-num">1</span>
+      <div><strong>Синхронизация Git:</strong> Закоммитить <code>DrugController.cs</code> и запушить ветки <code>feature/junior-to-middle-refactoring</code> в оба репозитория.</div>
+    </div>
+    <div class="todo-step">
+      <span class="step-num">2</span>
+      <div><strong>1-Click Docker Compose:</strong> Собрать единый <code>docker-compose.yml</code> для связки (.NET + Python + Qdrant + Kafka + Postgres).</div>
+    </div>
+    <div class="todo-step">
+      <span class="step-num">3</span>
+      <div><strong>LinkedIn Пост #5:</strong> Опубликовать пост по теме "Ghost UUIDs & Entity Deserialization" по дорожной карте.</div>
+    </div>
+  </div>
+
+</body>
+</html>
