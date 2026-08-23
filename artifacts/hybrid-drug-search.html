@@ -1,0 +1,247 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ELI5: Hybrid Search Engine (Dense + Sparse)</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card: #131b2e;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #38bdf8;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-purple: #a855f7;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+      background: radial-gradient(circle at 50% 0%, #151f38 0%, var(--bg) 75%);
+      color: var(--text);
+      padding: 16px;
+      max-width: 800px;
+      margin: 0 auto 60px;
+    }
+    .header-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .back-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid var(--accent-purple);
+      color: var(--accent-purple);
+      padding: 3px 8px;
+      border-radius: 999px;
+    }
+    h1 {
+      font-size: clamp(22px, 5vw, 32px);
+      font-weight: 800;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+    p.lead {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    @media (min-width: 600px) {
+      .comparison-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .box {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 18px;
+    }
+    .box.bad {
+      border-left: 4px solid var(--accent-red);
+      background: linear-gradient(180deg, rgba(239, 68, 68, 0.05) 0%, var(--card) 100%);
+    }
+    .box.good {
+      border-left: 4px solid var(--accent-green);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, var(--card) 100%);
+    }
+    .box-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .box ul {
+      list-style: none;
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .box li {
+      margin-bottom: 6px;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .diagram-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .diagram-card h2 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    @media (min-width: 600px) {
+      .pillars-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .pillar {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+    }
+    .pillar-num {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .pillar-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .pillar-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="header-nav">
+    <a href="../index.html" class="back-link">&larr; Back to Hub</a>
+    <span class="badge">Architecture &bull; Search</span>
+  </div>
+
+  <h1>Hybrid Search Engine: Qdrant Dense + Sparse BM25</h1>
+  <p class="lead">Why pure vector search fails on typos and exact serials, and how hybrid fusion achieves 99.8% precision.</p>
+
+  <!-- 1. The Conflict -->
+  <div class="comparison-grid">
+    <div class="box bad">
+      <div class="box-title">❌ Pure Vector Search</div>
+      <ul>
+        <li>⛔ Confuses "Paracetamol 500mg" with "50mg"</li>
+        <li>⛔ Blind to exact article numbers & codes</li>
+        <li>⛔ Hallucinates semantic similarity on typos</li>
+      </ul>
+    </div>
+    <div class="box good">
+      <div class="box-title">✅ Hybrid RRF Fusion</div>
+      <ul>
+        <li>⚡ Dense captures semantic intent & context</li>
+        <li>⚡ Sparse (BM25) locks onto exact keywords & dosages</li>
+        <li>⚡ Reciprocal Rank Fusion (RRF) merges top candidates</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 2. The Vector Diagram -->
+  <div class="diagram-card">
+    <h2>📐 Hybrid Fusion Architecture</h2>
+    <svg viewBox="0 0 700 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="700" height="240" rx="12" fill="#0f1629"/>
+      
+      <!-- User Query -->
+      <rect x="25" y="80" width="130" height="80" rx="10" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+      <text x="90" y="115" fill="#f8fafc" font-size="13" font-weight="700" text-anchor="middle">User Query</text>
+      <text x="90" y="135" fill="#94a3b8" font-size="11" text-anchor="middle">"Nurofen 200mg"</text>
+
+      <!-- Fork Lines -->
+      <path d="M155 120 H180 V60 H210" stroke="#38bdf8" stroke-width="2"/>
+      <polygon points="215,60 207,55 207,65" fill="#38bdf8"/>
+
+      <path d="M155 120 H180 V180 H210" stroke="#a855f7" stroke-width="2"/>
+      <polygon points="215,180 207,175 207,185" fill="#a855f7"/>
+
+      <!-- Branch 1: Dense Vector -->
+      <rect x="215" y="25" width="180" height="70" rx="10" fill="#0c4a6e" stroke="#38bdf8" stroke-width="1.5"/>
+      <text x="305" y="55" fill="#e0f2fe" font-size="12.5" font-weight="700" text-anchor="middle">🧠 Dense Embeddings</text>
+      <text x="305" y="75" fill="#7dd3fc" font-size="11" text-anchor="middle">Qdrant Vector Cosine</text>
+
+      <!-- Branch 2: Sparse BM25 -->
+      <rect x="215" y="145" width="180" height="70" rx="10" fill="#3b0764" stroke="#a855f7" stroke-width="1.5"/>
+      <text x="305" y="175" fill="#fae8ff" font-size="12.5" font-weight="700" text-anchor="middle">🎯 Sparse / BM25 Index</text>
+      <text x="305" y="195" fill="#d8b4fe" font-size="11" text-anchor="middle">Exact Match & Dosages</text>
+
+      <!-- Merge Lines -->
+      <path d="M395 60 H425 V120 H450" stroke="#38bdf8" stroke-width="2"/>
+      <path d="M395 180 H425 V120 H450" stroke="#a855f7" stroke-width="2"/>
+      <polygon points="455,120 447,115 447,125" fill="#34d399"/>
+
+      <!-- Fusion Node -->
+      <rect x="455" y="80" width="220" height="80" rx="12" fill="#064e3b" stroke="#10b981" stroke-width="2"/>
+      <text x="565" y="115" fill="#ecfdf5" font-size="13" font-weight="700" text-anchor="middle">⚡ RRF Fusion Engine</text>
+      <text x="565" y="135" fill="#6ee7b7" font-size="11" font-weight="600" text-anchor="middle">Score = 1/(60 + r_dense) + 1/(60 + r_bm25)</text>
+    </svg>
+
+    <!-- 3 Pillars -->
+    <div class="pillars-grid">
+      <div class="pillar">
+        <div class="pillar-num">01</div>
+        <div class="pillar-title">Semantic Context</div>
+        <div class="pillar-desc">Catches synonyms: "headache cure" &rarr; Ibuprofen.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">02</div>
+        <div class="pillar-title">Exact Dosage</div>
+        <div class="pillar-desc">Prevents dangerous 50mg vs 500mg mismatches.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">03</div>
+        <div class="pillar-title">RRF Ranking</div>
+        <div class="pillar-desc">Deterministic merge with zero tuning heuristics.</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

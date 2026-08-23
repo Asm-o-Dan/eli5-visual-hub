@@ -1,5 +1,19 @@
 [
   {
+    "id": "hybrid-drug-search",
+    "title": "Hybrid Search Engine: Qdrant + BM25",
+    "description": "How hybrid vector fusion eliminates dosage errors and catches synonyms.",
+    "category": "Search & AI",
+    "tags": [
+      "Qdrant",
+      "BM25",
+      "RRF",
+      "Search"
+    ],
+    "date": "2026-08-23",
+    "file": "artifacts/hybrid-drug-search.html"
+  },
+  {
     "id": "anthropic-eli5-concept",
     "title": "Anthropic ELI5: HTML is the New Markdown",
     "description": "How single-file HTML artifacts with responsive SVG diagrams deliver instant clarity without text walls.",
