@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>ELI5: Файловая система Linux, Inode и Ссылки</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card: #131b2e;
+      --card-hover: #1a253f;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #38bdf8;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-purple: #a855f7;
+      --accent-amber: #f59e0b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --code-bg: #0b1120;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+      background: radial-gradient(circle at 50% 0%, #17223b 0%, var(--bg) 75%);
+      color: var(--text);
+      padding: 16px;
+      max-width: 840px;
+      margin: 0 auto 60px;
+      line-height: 1.5;
+    }
+    .header-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .back-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--accent-green);
+      color: var(--accent-green);
+      padding: 3px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    h1 {
+      font-size: clamp(22px, 5.5vw, 32px);
+      font-weight: 800;
+      margin-bottom: 8px;
+      line-height: 1.25;
+      background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p.lead {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    /* Comparison Grid */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    @media (min-width: 620px) {
+      .comparison-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .box {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    }
+    .box.bad {
+      border-left: 4px solid var(--accent-red);
+      background: linear-gradient(180deg, rgba(239, 68, 68, 0.06) 0%, var(--card) 100%);
+    }
+    .box.good {
+      border-left: 4px solid var(--accent-green);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, var(--card) 100%);
+    }
+    .box-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .box ul {
+      list-style: none;
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .box li {
+      margin-bottom: 8px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    /* Diagram Cards */
+    .diagram-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    }
+    .diagram-card h2 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #f1f5f9;
+    }
+    .diagram-sub {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+    svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 12px;
+    }
+
+    /* Interactive Simulator */
+    .sim-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .sim-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .sim-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .sim-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .sim-btn.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .sim-stage {
+      background: #0c1322;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 600px) {
+      .sim-stage { grid-template-columns: 1fr 1fr; }
+    }
+    .sim-node {
+      background: #17223b;
+      border-radius: 10px;
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+      font-size: 13px;
+    }
+    .sim-node-title {
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .sim-log {
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: rgba(56, 189, 248, 0.06);
+      border-left: 3px solid var(--accent);
+      font-size: 13px;
+      color: #cbd5e1;
+    }
+
+    /* Grid 2 Info Cards */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    @media (min-width: 620px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+    }
+    .info-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 18px;
+    }
+    .info-card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent);
+    }
+    .info-card p, .info-card li {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .info-card ul {
+      list-style: none;
+      margin-top: 8px;
+    }
+    .info-card li {
+      margin-bottom: 6px;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    /* Code block */
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+      color: #38bdf8;
+      margin: 8px 0;
+      overflow-x: auto;
+    }
+
+    /* Interactive Quiz */
+    .quiz-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .quiz-item {
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .quiz-item:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+    .quiz-question {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .quiz-options {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .quiz-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quiz-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .quiz-btn.correct {
+      background: rgba(16, 185, 129, 0.2) !important;
+      border-color: var(--accent-green) !important;
+      color: #34d399 !important;
+      font-weight: 700;
+    }
+    .quiz-btn.wrong {
+      background: rgba(239, 68, 68, 0.2) !important;
+      border-color: var(--accent-red) !important;
+      color: #f87171 !important;
+    }
+    .quiz-feedback {
+      font-size: 12.5px;
+      margin-top: 8px;
+      line-height: 1.4;
+      display: none;
+    }
+
+    /* Pillars */
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    @media (min-width: 600px) {
+      .pillars-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .pillar {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+    }
+    .pillar-num {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .pillar-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .pillar-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    .tag-pill {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .tag-pill.blue { background: rgba(56, 189, 248, 0.2); color: #38bdf8; }
+    .tag-pill.green { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+    .tag-pill.purple { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
+    .tag-pill.red { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <div class="header-nav">
+    <a href="../index.html" class="back-link">&larr; Каталог ELI5 Hub</a>
+    <span class="badge">Linux &bull; Файлы &bull; Inode</span>
+  </div>
+
+  <!-- Title -->
+  <h1>Файловая система Linux: Inode и Ссылки</h1>
+  <p class="lead">Ментальная модель на пальцах: почему имя файла — это не сам файл, как устроена таблица Inode, чем отличаются жесткие ссылки от символических и как работает удаление в Linux.</p>
+
+  <!-- 1. The Core Conflict -->
+  <div class="comparison-grid">
+    <div class="box bad">
+      <div class="box-title">❌ Наивная интуиция (Windows-стиль)</div>
+      <ul>
+        <li>⛔ <i>«Файл — это его имя и папка, где он лежит».</i></li>
+        <li>⛔ <i>«Жесткая ссылка — это просто скрытая копия файла».</i></li>
+        <li>⛔ <i>«Команда rm стирает данные с диска навсегда».</i></li>
+        <li>⛔ <i>«Каталог хранит внутри себя все файлы физически».</i></li>
+      </ul>
+    </div>
+    <div class="box good">
+      <div class="box-title">✅ Реальность ядра Linux (POSIX / Unix)</div>
+      <ul>
+        <li>⚡ <b>Файл — это Inode:</b> имя — всего лишь указатель в таблице каталога на номер индексного дескриптора.</li>
+        <li>⚡ <b>Жесткая ссылка:</b> второе имя для того же Inode (0 байт лишних данных на диске!).</li>
+        <li>⚡ <b>rm = Unlink:</b> команда удаляет запись в каталоге. Данные стираются, только когда счетчик ссылок Inode = 0.</li>
+        <li>⚡ <b>Каталог:</b> это служебный файл-таблица с парами <code>(имя_файла &rarr; номер_inode)</code>.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 2. Master SVG Diagram: The 3 Layers of Linux Filesystem -->
+  <div class="diagram-card">
+    <h2>📐 Архитектура хранения: Каталог &rarr; Inode &rarr; Блоки диска</h2>
+    <p class="diagram-sub">Как система связывает видимые пользователю имена с физическими секторами накопителя.</p>
+
+    <svg viewBox="0 0 800 350" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="800" height="350" rx="14" fill="#0c1322"/>
+
+      <!-- LAYER 1: Directory Entries -->
+      <g>
+        <rect x="25" y="25" width="220" height="300" rx="10" fill="#131b2e" stroke="rgba(255,255,255,0.08)"/>
+        <text x="135" y="52" fill="#38bdf8" font-size="13" font-weight="700" text-anchor="middle">1. Записи каталога (Dentry)</text>
+        <text x="135" y="68" fill="#94a3b8" font-size="9" text-anchor="middle">Папка /home/user/docs</text>
+
+        <!-- Entry 1: myfile.txt -->
+        <rect x="35" y="85" width="200" height="60" rx="6" fill="#1e293b" stroke="#38bdf8" stroke-width="1.2"/>
+        <text x="45" y="107" fill="#f8fafc" font-size="12" font-weight="700">myfile.txt</text>
+        <text x="45" y="128" fill="#38bdf8" font-size="10">Указывает на &rarr; <tspan font-weight="700">Inode #787622</tspan></text>
+
+        <!-- Entry 2: hardlink -->
+        <rect x="35" y="160" width="200" height="60" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.2"/>
+        <text x="45" y="182" fill="#f8fafc" font-size="12" font-weight="700">hardlink.txt</text>
+        <text x="45" y="203" fill="#10b981" font-size="10">Указывает на &rarr; <tspan font-weight="700">Inode #787622</tspan></text>
+
+        <!-- Entry 3: symlink -->
+        <rect x="35" y="235" width="200" height="70" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="1.2"/>
+        <text x="45" y="257" fill="#f8fafc" font-size="12" font-weight="700">softlink.txt (Symlink)</text>
+        <text x="45" y="276" fill="#f59e0b" font-size="10">Свой <tspan font-weight="700">Inode #990145</tspan></text>
+        <text x="45" y="293" fill="#94a3b8" font-size="9">Путь внутри: "myfile.txt"</text>
+      </g>
+
+      <!-- LAYER 2: Inode Table -->
+      <g>
+        <rect x="285" y="25" width="240" height="300" rx="10" fill="#131b2e" stroke="rgba(255,255,255,0.08)"/>
+        <text x="405" y="52" fill="#a855f7" font-size="13" font-weight="700" text-anchor="middle">2. Таблица Inode (Метаданные)</text>
+        <text x="405" y="68" fill="#94a3b8" font-size="9" text-anchor="middle">Хранит права, размер и ссылки</text>
+
+        <!-- Inode 787622 -->
+        <rect x="295" y="85" width="220" height="135" rx="8" fill="#1e293b" stroke="#a855f7" stroke-width="1.5"/>
+        <rect x="305" y="95" width="200" height="24" rx="4" fill="#3b0764"/>
+        <text x="405" y="111" fill="#f3e8ff" font-size="11" font-weight="700" text-anchor="middle">INODE #787622 (Файл)</text>
+        <text x="310" y="138" fill="#cbd5e1" font-size="10">Права: <tspan fill="#34d399">-rw-r--r--</tspan></text>
+        <text x="310" y="156" fill="#cbd5e1" font-size="10">Владелец: user / group: user</text>
+        <text x="310" y="174" fill="#cbd5e1" font-size="10">Размер: 1024 байта</text>
+        <text x="310" y="193" fill="#38bdf8" font-size="10" font-weight="700">Счетчик ссылок (Links): 2</text>
+        <text x="310" y="210" fill="#fcd34d" font-size="9">Указатели на блоки: [B44, B45]</text>
+
+        <!-- Inode 990145 (Symlink) -->
+        <rect x="295" y="235" width="220" height="70" rx="6" fill="#1e293b" stroke="#f59e0b"/>
+        <text x="310" y="255" fill="#fcd34d" font-size="10" font-weight="700">INODE #990145 (Ссылка)</text>
+        <text x="310" y="272" fill="#cbd5e1" font-size="9">Тип: Символическая ссылка (l)</text>
+        <text x="310" y="290" fill="#94a3b8" font-size="9">Данные ссылки: "myfile.txt"</text>
+      </g>
+
+      <!-- LAYER 3: Data Blocks -->
+      <g>
+        <rect x="565" y="25" width="210" height="300" rx="10" fill="#131b2e" stroke="rgba(255,255,255,0.08)"/>
+        <text x="670" y="52" fill="#10b981" font-size="13" font-weight="700" text-anchor="middle">3. Блоки данных (SSD/HDD)</text>
+        <text x="670" y="68" fill="#94a3b8" font-size="9" text-anchor="middle">Реальное содержимое файлов</text>
+
+        <!-- Block 44 -->
+        <rect x="580" y="85" width="180" height="60" rx="6" fill="#064e3b" stroke="#10b981"/>
+        <text x="670" y="108" fill="#a7f3d0" font-size="11" font-weight="700" text-anchor="middle">Блок #B44 (4 KB)</text>
+        <text x="670" y="128" fill="#6ee7b7" font-size="9" text-anchor="middle">"Hello World! This is data..."</text>
+
+        <!-- Block 45 -->
+        <rect x="580" y="155" width="180" height="60" rx="6" fill="#064e3b" stroke="#10b981"/>
+        <text x="670" y="178" fill="#a7f3d0" font-size="11" font-weight="700" text-anchor="middle">Блок #B45 (4 KB)</text>
+        <text x="670" y="198" fill="#6ee7b7" font-size="9" text-anchor="middle">"...continuation of text"</text>
+
+        <!-- Empty Blocks -->
+        <rect x="580" y="225" width="180" height="80" rx="6" fill="#1e293b" stroke="#64748b" stroke-dasharray="3 3"/>
+        <text x="670" y="260" fill="#94a3b8" font-size="10" text-anchor="middle">Свободные блоки пула</text>
+        <text x="670" y="278" fill="#64748b" font-size="8" text-anchor="middle">Выделяются при росте файла</text>
+      </g>
+
+      <!-- Connecting arrows -->
+      <path d="M235 115 H295" stroke="#38bdf8" stroke-width="2"/>
+      <path d="M235 190 H295" stroke="#10b981" stroke-width="2"/>
+      <path d="M235 270 H295" stroke="#f59e0b" stroke-width="2"/>
+      <path d="M515 150 H580" stroke="#a855f7" stroke-width="2"/>
+    </svg>
+  </div>
+
+  <!-- 3. Interactive Link Lifecycle Simulator -->
+  <div class="sim-card">
+    <h2 style="font-size:18px; font-weight:700; margin-bottom:6px; color:#f8fafc;">🔬 Интерактивный симулятор: Жизненный цикл ссылок</h2>
+    <p style="color:var(--muted); font-size:13px; margin-bottom:14px;">Нажимайте шаги, чтобы увидеть, как меняются Inode, счетчик ссылок и поведение системы при удалении.</p>
+
+    <div class="sim-controls">
+      <button class="sim-btn active" onclick="runSim(1, this)">Шаг 1: Создан файл</button>
+      <button class="sim-btn" onclick="runSim(2, this)">Шаг 2: ln (Жесткая ссылка)</button>
+      <button class="sim-btn" onclick="runSim(3, this)">Шаг 3: ln -s (Символическая)</button>
+      <button class="sim-btn" onclick="runSim(4, this)">Шаг 4: rm myfile.txt (Удаление!)</button>
+    </div>
+
+    <div class="sim-stage" id="simStage">
+      <!-- Generated dynamically -->
+    </div>
+    <div class="sim-log" id="simLog"></div>
+  </div>
+
+  <!-- 4. Deep-Dive Grid -->
+  <div class="grid-2">
+    <!-- Card 1: Paths -->
+    <div class="info-card">
+      <h3>🧭 Навигация: . и .. и слэш /</h3>
+      <p>Дерево Linux имеет <b>единственный корень <code>/</code></b>. Дисков C:, D: в Unix-модели нет — любые разделы монтируются в каталоги общего дерева.</p>
+      <ul>
+        <li><code style="color:var(--accent);">/</code> — Корень файловой системы (абсолютный путь всегда начинается с него).</li>
+        <li><code style="color:var(--accent-green);">.</code> — Текущий рабочий каталог (например: <code>./script.sh</code>).</li>
+        <li><code style="color:var(--accent-purple);">..</code> — Родительский каталог уровнем выше (например: <code>cd ../..</code>).</li>
+      </ul>
+      <div class="code-block">cd /home/user/docs  # Абсолютный переход<br>cd ../pictures      # Относительный переход</div>
+    </div>
+
+    <!-- Card 2: Special Files -->
+    <div class="info-card">
+      <h3>⚙️ Специальные файлы устройств (/dev)</h3>
+      <p>В UNIX действует парадигма: <i>«Всё есть файл»</i>. Даже видеокарта, клавиатура и накопители представлены в файловой системе.</p>
+      <ul>
+        <li><b>Символьные (c):</b> побайтовый поток без кэша (терминал <code>/dev/tty</code>, генератор <code>/dev/urandom</code>, черная дыра <code>/dev/null</code>).</li>
+        <li><b>Блочные (b):</b> блочный обмен с кэшированием в ОЗУ (диски <code>/dev/sda</code>, NVMe <code>/dev/nvme0n1</code>).</li>
+      </ul>
+      <p style="margin-top:6px; font-size:12px; color:var(--accent-amber);">
+        💡 <b>Секрет:</b> Эти файлы занимают 0 байт на диске! Они хранят лишь Major/Minor номер драйвера в ядре.
+      </p>
+    </div>
+
+    <!-- Card 3: vi Modes -->
+    <div class="info-card">
+      <h3>📝 Текстовый редактор vi: 3 режима</h3>
+      <p>Редактор <code>vi</code> (и <code>vim</code>) — модальный редактор. Символы на клавиатуре делают разное в зависимости от режима:</p>
+      <ul>
+        <li><b>1. Командный (Esc):</b> перемещение по файлу (<code>hjkl</code>), удаление строк (<code>dd</code>), копирование (<code>yy</code>), вставка (<code>p</code>).</li>
+        <li><b>2. Ввод текста (i / a):</b> прямой набор текста.</li>
+        <li><b>3. Режим Ex (:):</b> команды в нижней строке:
+          <span style="color:#fcd34d;">:w</span> (сохранить), <span style="color:#fcd34d;">:q!</span> (выйти без сохранения), <span style="color:#fcd34d;">:wq</span> (сохранить и выйти).</li>
+      </ul>
+    </div>
+
+    <!-- Card 4: View Tools -->
+    <div class="info-card">
+      <h3>👁️ Просмотр файлов: cat vs less</h3>
+      <p>Какой инструмент выбрать для чтения файлов в консоли:</p>
+      <ul>
+        <li><code>cat file.txt</code> — вываливает весь файл в терминал разом. Удобно для маленьких конфигов на 10 строк.</li>
+        <li><code>less file.log</code> — открывает постраничный интерактивный просмотр.</li>
+      </ul>
+      <div style="margin-top:8px; background:rgba(255,255,255,0.03); padding:8px 10px; border-radius:8px; font-size:12.5px;">
+        ⚡ <b>Почему `less` лучше на гигантских файлах:</b> Он не загружает гигабайтный лог в оперативную память, а читает диск порциями по мере прокрутки (Space, стрелки, <code>/поиск</code>, выход по <code>q</code>).
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Interactive Blitz Quiz -->
+  <div class="quiz-card">
+    <h2 style="font-size:18px; font-weight:700; margin-bottom:6px; color:#f8fafc;">🎯 Экспресс-тренажер: Проверь свои знания (Лаб. №2)</h2>
+    <p style="color:var(--muted); font-size:13px; margin-bottom:16px;">Выберите правильный ответ. Тренажер мгновенно разберет логику ядра Linux.</p>
+
+    <!-- Q1 -->
+    <div class="quiz-item" id="q1">
+      <div class="quiz-question">1. Хранится ли имя файла внутри его индексного дескриптора (inode)?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn" onclick="checkAnswer(this, false, 'Имя файла никогда не хранится в Inode!')">Да, имя файла всегда записано в Inode вместе с правами</button>
+        <button class="quiz-btn" onclick="checkAnswer(this, true, 'Именно! Имена файлов связываются с номерами Inode исключительно в таблицах каталогов (директорий).')">Нет! Имя файла хранится только в файле-каталоге, который связывает имя с номером Inode</button>
+        <button class="quiz-btn" onclick="checkAnswer(this, false, 'В блоках данных хранится содержимое самого файла (текст, бинарник), а не его имя.')">Имя файла пишется в первый физический блок данных</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="quiz-item" id="q2">
+      <div class="quiz-question">2. Что произойдет, если удалить исходный файл (rm), на который создана жесткая ссылка?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn" onclick="checkAnswer(this, false, 'Нет, жесткая ссылка не ломается при удалении одного из имен.')">Жесткая ссылка сломается и перестанет открываться</button>
+        <button class="quiz-btn" onclick="checkAnswer(this, true, 'Верно! Жесткая ссылка — это равноправное имя того же файла. Пока счетчик ссылок Inode > 0, данные и файл живут.')">Жесткая ссылка продолжит полноценно работать, так как Inode и данные остаются на диске</button>
+        <button class="quiz-btn" onclick="checkAnswer(this, false, 'Данные удаляются только когда удалено ПОСЛЕДНЕЕ имя файла (links = 0).')">Данные сотрутся, но имя ссылки останется в каталоге</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="quiz-item" id="q3">
+      <div class="quiz-question">3. Почему нельзя создать жесткую ссылку между двумя разными разделами диска (например, с SSD на флешку)?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn" onclick="checkAnswer(this, true, 'Абсолютно верно! Номера Inode уникальны только внутри одной конкретной файловой системы. На флешке Inode #787622 указывал бы на чужой случайный файл!')">Номера Inode уникальны только в пределах одной файловой системы</button>
+        <button class="quiz-btn" onclick="checkAnswer(this, false, 'Ограничение связано с архитектурой адресации Inode, а не с правами суперпользователя.')">Потому что это запрещено правами root</button>
+        <button class="quiz-btn" onclick="checkAnswer(this, false, 'Команда ln поддерживает любые носители, ограничение фундаментально в Inode.')">Потому что команда ln не умеет работать с флешками</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="quiz-item" id="q4">
+      <div class="quiz-question">4. Как в редакторе vi сохранить изменения и выйти одной командой?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn" onclick="checkAnswer(this, false, 'Ctrl+S в терминале обычно посылает сигнал XOFF (заморозка вывода).')">Нажать Ctrl+S и затем Ctrl+Q</button>
+        <button class="quiz-btn" onclick="checkAnswer(this, true, 'Правильно! Нажатие Esc переводит в командный режим, а :wq записывает файл (write) и выходит (quit).')">Нажать Esc, затем набрать :wq и нажать Enter</button>
+        <button class="quiz-btn" onclick="checkAnswer(this, false, ':q! выходит БЕЗ сохранения изменений.')">Нажать Esc, затем набрать :q! и нажать Enter</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+  </div>
+
+  <!-- 6. Key Takeaways -->
+  <div class="pillars-grid">
+    <div class="pillar">
+      <div class="pillar-num">01</div>
+      <div class="pillar-title">Каталог = Таблица связей</div>
+      <div class="pillar-desc">Каталог в Linux — это всего лишь блокнот со списком «Человеческое Имя &rarr; Номер Inode».</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-num">02</div>
+      <div class="pillar-title">Счетчик ссылок (Links)</div>
+      <div class="pillar-desc">Файл физически стирается с диска только тогда, когда счетчик ссылок в Inode опускается до 0.</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-num">03</div>
+      <div class="pillar-title">Symlink — это ярлык</div>
+      <div class="pillar-desc">Символическая ссылка хранит текстовую строку пути. Переместили цель — ссылка моментально сломалась.</div>
+    </div>
+  </div>
+
+  <script>
+    const simStages = {
+      1: {
+        stageHtml: `
+          <div class="sim-node" style="border-left: 3px solid var(--accent);">
+            <div class="sim-node-title"><span>📂 Каталог</span> <span class="tag-pill blue">Dentry</span></div>
+            <div>📄 <b>myfile.txt</b> &rarr; Inode #787622</div>
+          </div>
+          <div class="sim-node" style="border-left: 3px solid var(--accent-purple);">
+            <div class="sim-node-title"><span>⚙️ Inode #787622</span> <span class="tag-pill purple">Links: 1</span></div>
+            <div>Размер: 12 B | Блоки: [B01]</div>
+            <div style="color:#34d399; font-size:12px; margin-top:4px;">Содержимое: "Hello Linux!"</div>
+          </div>
+        `,
+        logText: "<b>Шаг 1:</b> Создан файл <code>myfile.txt</code>. Выделен Inode #787622. Счетчик ссылок <code>links = 1</code>."
+      },
+      2: {
+        stageHtml: `
+          <div class="sim-node" style="border-left: 3px solid var(--accent-green);">
+            <div class="sim-node-title"><span>📂 Каталог</span> <span class="tag-pill green">2 записи</span></div>
+            <div>📄 <b>myfile.txt</b> &rarr; Inode #787622</div>
+            <div>🔗 <b>hardlink.txt</b> &rarr; Inode #787622</div>
+          </div>
+          <div class="sim-node" style="border-left: 3px solid var(--accent-purple);">
+            <div class="sim-node-title"><span>⚙️ Inode #787622</span> <span class="tag-pill green">Links: 2 ⬆️</span></div>
+            <div>Размер: 12 B | Блоки: [B01]</div>
+            <div style="color:#34d399; font-size:12px; margin-top:4px;">Оба имени указывают на одни и те же байты!</div>
+          </div>
+        `,
+        logText: "<b>Шаг 2 (ln myfile.txt hardlink.txt):</b> Создана жесткая ссылка. Новый файл на диске НЕ создан! Счетчик ссылок Inode увеличен до <code>links = 2</code>."
+      },
+      3: {
+        stageHtml: `
+          <div class="sim-node" style="border-left: 3px solid var(--accent-amber);">
+            <div class="sim-node-title"><span>📂 Каталог</span> <span class="tag-pill purple">3 записи</span></div>
+            <div>📄 myfile.txt &rarr; #787622</div>
+            <div>🔗 hardlink.txt &rarr; #787622</div>
+            <div>🏷️ <b>softlink.txt</b> &rarr; Inode #990145</div>
+          </div>
+          <div class="sim-node" style="border-left: 3px solid var(--accent-amber);">
+            <div class="sim-node-title"><span>⚙️ Inode #990145 (Symlink)</span> <span class="tag-pill blue">Links: 1</span></div>
+            <div>Целевой путь: <code>"myfile.txt"</code></div>
+            <div style="color:#94a3b8; font-size:12px; margin-top:4px;">Это отдельный ярлык со своим Inode!</div>
+          </div>
+        `,
+        logText: "<b>Шаг 3 (ln -s myfile.txt softlink.txt):</b> Создана символическая ссылка. У неё свой личный Inode #990145, внутри которого хранится текстовая строка пути."
+      },
+      4: {
+        stageHtml: `
+          <div class="sim-node" style="border-left: 3px solid var(--accent-red);">
+            <div class="sim-node-title"><span>📂 Каталог</span> <span class="tag-pill red">Удален myfile</span></div>
+            <div style="text-decoration:line-through; color:#64748b;">❌ myfile.txt</div>
+            <div>🔗 <b>hardlink.txt</b> &rarr; Inode #787622 (ЖИВ!)</div>
+            <div style="color:#f87171;">⚠️ <b>softlink.txt</b> &rarr; БИТАЯ ССЫЛКА!</div>
+          </div>
+          <div class="sim-node" style="border-left: 3px solid var(--accent-purple);">
+            <div class="sim-node-title"><span>⚙️ Inode #787622</span> <span class="tag-pill blue">Links: 1 ⬇️</span></div>
+            <div>Данные "Hello Linux!" НЕ СТЕРТЫ!</div>
+            <div style="color:#34d399; font-size:12px; margin-top:4px;">Файл доступен через hardlink.txt!</div>
+          </div>
+        `,
+        logText: "<b>Шаг 4 (rm myfile.txt):</b> Запись myfile.txt вычеркнута из каталога. Счетчик Inode стал <code>links = 1</code>. Данные целы! Но мягкая ссылка softlink.txt теперь указывает в пустоту (dangling symlink)."
+      }
+    };
+
+    function runSim(step, btn) {
+      document.querySelectorAll('.sim-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const stage = simStages[step];
+      document.getElementById('simStage').innerHTML = stage.stageHtml;
+      document.getElementById('simLog').innerHTML = stage.logText;
+    }
+
+    function checkAnswer(button, isCorrect, explanation) {
+      const parent = button.closest('.quiz-item');
+      const buttons = parent.querySelectorAll('.quiz-btn');
+      const feedback = parent.querySelector('.quiz-feedback');
+
+      buttons.forEach(btn => {
+        btn.classList.remove('correct', 'wrong');
+        btn.disabled = true;
+      });
+
+      if (isCorrect) {
+        button.classList.add('correct');
+        feedback.innerHTML = `<span style="color:#34d399; font-weight:700;">✓ Правильно!</span> ${explanation}`;
+      } else {
+        button.classList.add('wrong');
+        feedback.innerHTML = `<span style="color:#f87171; font-weight:700;">✗ Неверно.</span> ${explanation}`;
+      }
+      feedback.style.display = 'block';
+    }
+
+    // Initialize with Step 1
+    runSim(1, document.querySelector('.sim-btn'));
+  </script>
+</body>
+</html>

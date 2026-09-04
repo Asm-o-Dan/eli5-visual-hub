@@ -1,5 +1,22 @@
 [
   {
+    "id": "linux-filesystem-inodes-links",
+    "title": "Файловая система Linux: Inode и Ссылки",
+    "description": "Интерактивный путеводитель: архитектура Inode, жесткие vs мягкие ссылки, симулятор удаления и блиц-тест.",
+    "category": "Linux & Системное ПО",
+    "tags": [
+      "Linux",
+      "Filesystem",
+      "Inode",
+      "Hardlink",
+      "Symlink",
+      "ELI5",
+      "Interactive"
+    ],
+    "date": "2026-09-04",
+    "file": "artifacts/linux-filesystem-inodes-links.html"
+  },
+  {
     "id": "os-virtualization-wsl-guide",
     "title": "ОС, Виртуализация и WSL: Наглядный гид",
     "description": "Визуальный гид: архитектурные слои ОС, гипервизоры 1 и 2 типа, WSL1 vs WSL2, VDI диски, снэпшоты и блиц-тренажер.",
