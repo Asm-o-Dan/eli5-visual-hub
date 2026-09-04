@@ -1,5 +1,20 @@
 [
   {
+    "id": "prolog-interactive-handbook",
+    "title": "Prolog: Полный интерактивный учебник (8 глав)",
+    "description": "Многостраничный сборник-учебник по основам Prolog: факты, правила, термы, унификация, списки, арифметика, отсечение и графы",
+    "category": "Architecture",
+    "tags": [
+      "Prolog",
+      "Teach",
+      "Handbook",
+      "Interactive",
+      "ELI5"
+    ],
+    "date": "2026-09-04",
+    "file": "artifacts/prolog-interactive-handbook.html"
+  },
+  {
     "id": "prolog-mental-model",
     "title": "Prolog: Ментальная модель, термы и база знаний",
     "description": "Наглядное объяснение логического программирования: термы, структуры, унификация и бэктрекинг",

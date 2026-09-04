@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>ELI5: Интерактивный учебник по Prolog</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card: #131b2e;
+      --card-hover: #1a253f;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #38bdf8;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-purple: #a855f7;
+      --accent-amber: #f59e0b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --code-bg: #0b1120;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+      background: radial-gradient(circle at 50% 0%, #17223b 0%, var(--bg) 75%);
+      color: var(--text);
+      padding: 16px;
+      max-width: 860px;
+      margin: 0 auto 60px;
+      line-height: 1.5;
+    }
+    .header-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .back-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid var(--accent-purple);
+      color: var(--accent-purple);
+      padding: 3px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    h1 {
+      font-size: clamp(22px, 5.5vw, 32px);
+      font-weight: 800;
+      margin-bottom: 6px;
+      line-height: 1.25;
+      background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p.lead {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    /* Horizontal Chapter Nav */
+    .chapter-nav-wrapper {
+      overflow-x: auto;
+      margin-bottom: 20px;
+      padding-bottom: 6px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .chapter-nav {
+      display: flex;
+      gap: 8px;
+      width: max-content;
+    }
+    .ch-btn {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      color: var(--muted);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .ch-btn:hover {
+      background: var(--card-hover);
+      color: var(--text);
+    }
+    .ch-btn.active {
+      background: rgba(56, 189, 248, 0.18);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Content Cards */
+    .chapter-view {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .chapter-view.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 6px 25px rgba(0,0,0,0.25);
+    }
+    .card h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #f1f5f9;
+    }
+    .card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 14px 0 6px;
+      color: var(--accent);
+    }
+
+    .code-box {
+      background: var(--code-bg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: #e2e8f0;
+      margin: 12px 0;
+      overflow-x: auto;
+    }
+    .kw { color: #f43f5e; font-weight: bold; }
+    .atom { color: #34d399; }
+    .v { color: #fbbf24; font-weight: bold; }
+    .num { color: #38bdf8; }
+    .cm { color: #64748b; font-style: italic; }
+
+    .callout {
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin: 12px 0;
+      font-size: 13.5px;
+    }
+    .callout.tip {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: #a7f3d0;
+    }
+    .callout.warn {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      color: #fde68a;
+    }
+
+    /* Quiz Widget */
+    .quiz-wrap {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .quiz-title {
+      font-size: 14.5px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #f8fafc;
+    }
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .quiz-opt {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+    .quiz-opt:hover {
+      background: var(--card-hover);
+      border-color: var(--accent);
+    }
+    .quiz-opt.correct {
+      background: rgba(16, 185, 129, 0.18) !important;
+      border-color: var(--accent-green) !important;
+      color: #6ee7b7 !important;
+    }
+    .quiz-opt.incorrect {
+      background: rgba(239, 68, 68, 0.18) !important;
+      border-color: var(--accent-red) !important;
+      color: #fca5a5 !important;
+    }
+    .quiz-res {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      display: none;
+    }
+
+    svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      margin: 14px 0;
+      border-radius: 10px;
+    }
+
+    /* Prev / Next buttons */
+    .btn-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .nav-btn {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--accent);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover {
+      background: rgba(56, 189, 248, 0.25);
+    }
+  </style>
+</head>
+<body>
+  <div class="header-nav">
+    <a href="../index.html" class="back-link">&larr; Каталог ELI5 Hub</a>
+    <span class="badge">Master Interactive Handbook</span>
+  </div>
+
+  <h1>Prolog: Полный интерактивный учебник</h1>
+  <p class="lead">Все базовые темы декларативного и логического программирования в 8 интерактивных главах.</p>
+
+  <!-- Horizontal Chapter Switcher -->
+  <div class="chapter-nav-wrapper">
+    <div class="chapter-nav" id="chapterNav">
+      <button class="ch-btn active" onclick="switchChapter(1)">1. Факты & Атомы</button>
+      <button class="ch-btn" onclick="switchChapter(2)">2. Правила &amp; И/ИЛИ</button>
+      <button class="ch-btn" onclick="switchChapter(3)">3. Термы & Структуры</button>
+      <button class="ch-btn" onclick="switchChapter(4)">4. Унификация & Равенство</button>
+      <button class="ch-btn" onclick="switchChapter(5)">5. Списки & Рекурсия</button>
+      <button class="ch-btn" onclick="switchChapter(6)">6. Арифметика (is)</button>
+      <button class="ch-btn" onclick="switchChapter(7)">7. Отсечение (!) &amp; \+</button>
+      <button class="ch-btn" onclick="switchChapter(8)">8. Графы & Практика</button>
+    </div>
+  </div>
+
+  <!-- CHAPTER 1 -->
+  <div class="chapter-view active" id="ch1">
+    <div class="card">
+      <h2>🏛️ Глава 1: База знаний, Факты, Атомы и Переменные</h2>
+      <p style="color: var(--muted); font-size: 14px;">
+        В императивных языках мы командуем процессору: «сделай шаг 1, затем шаг 2». В Prolog мы <b>описываем мир</b> набором фактов и затем задаем вопросы.
+      </p>
+
+      <svg viewBox="0 0 720 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="720" height="180" rx="12" fill="#0c1322"/>
+        <!-- Atom Node -->
+        <rect x="30" y="40" width="280" height="100" rx="10" fill="#064e3b" stroke="#10b981" stroke-width="1.5"/>
+        <text x="170" y="70" fill="#a7f3d0" font-size="14" font-weight="700" text-anchor="middle">АТОМ (Константа)</text>
+        <text x="170" y="95" fill="#ecfdf5" font-size="12" text-anchor="middle">Начинается со строчной буквы</text>
+        <text x="170" y="120" fill="#34d399" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">moscow, ivan, juliet, 'Спб'</text>
+
+        <!-- Variable Node -->
+        <rect x="410" y="40" width="280" height="100" rx="10" fill="#451a03" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="550" y="70" fill="#fde68a" font-size="14" font-weight="700" text-anchor="middle">ПЕРЕМЕННАЯ</text>
+        <text x="550" y="95" fill="#fef3c7" font-size="12" text-anchor="middle">С ЗАГЛАВНОЙ буквы или _</text>
+        <text x="550" y="120" fill="#fbbf24" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">X, Person, City, _Result</text>
+      </svg>
+
+      <div class="code-box">
+        <span class="cm">% Факты завершаются точкой .</span><br>
+        <span class="atom">parent</span>(<span class="atom">ivan</span>, <span class="atom">masha</span>).<br>
+        <span class="atom">loves</span>(<span class="atom">romeo</span>, <span class="atom">juliet</span>).<br><br>
+        <span class="cm">% Запрос (вопрос): Кто любимая Ромео?</span><br>
+        ?- <span class="atom">loves</span>(<span class="atom">romeo</span>, <span class="v">Who</span>).<br>
+        <b style="color: #38bdf8;">Who = juliet.</b>
+      </div>
+
+      <div class="quiz-wrap" id="q1">
+        <div class="quiz-title">Вопрос: Какой из термов является константой (атомом)?</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="checkQ(this, false, 'q1', 'Слова с заглавной буквы — это переменные!')">Student</button>
+          <button class="quiz-opt" onclick="checkQ(this, true, 'q1', 'Верно! Слова со строчной буквы — атомы.')">student</button>
+          <button class="quiz-opt" onclick="checkQ(this, false, 'q1', '_ — это анонимная переменная!')">_student</button>
+        </div>
+        <div class="quiz-res" id="q1-res"></div>
+      </div>
+
+      <div class="btn-row">
+        <span></span>
+        <button class="nav-btn" onclick="switchChapter(2)">Глава 2: Правила &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAPTER 2 -->
+  <div class="chapter-view" id="ch2">
+    <div class="card">
+      <h2>🔗 Глава 2: Правила, «ЕСЛИ» (:-) и Конъюнкция</h2>
+      <p style="color: var(--muted); font-size: 14px;">
+        Правила позволяют выводить новые факты из уже известных. Конструкция <code>:-</code> читается справа налево: «Голова истинна, ЕСЛИ тело истинно».
+      </p>
+
+      <div class="code-box">
+        <span class="cm">% Правило дедушки: X дедушка Z, если X родитель Y И Y родитель Z</span><br>
+        <span class="atom">grandparent</span>(<span class="v">X</span>, <span class="v">Z</span>) <span class="kw">:-</span><br>
+        &nbsp;&nbsp;<span class="atom">parent</span>(<span class="v">X</span>, <span class="v">Y</span>), <span class="cm">% Запятая означает «И»</span><br>
+        &nbsp;&nbsp;<span class="atom">parent</span>(<span class="v">Y</span>, <span class="v">Z</span>).
+      </div>
+
+      <div class="callout tip">
+        <b>Логическое «ИЛИ»</b> обычно выражают объявлением двух правил с одним именем:
+        <br><code>happy(X) :- rich(X).</code>
+        <br><code>happy(X) :- healthy(X).</code>
+      </div>
+
+      <div class="quiz-wrap" id="q2">
+        <div class="quiz-title">Вопрос: Что означает запятая в теле правила?</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="checkQ(this, true, 'q2', 'Верно! Запятая — это логическое И.')">Логическое И (конъюнкцию)</button>
+          <button class="quiz-opt" onclick="checkQ(this, false, 'q2', 'Логическое ИЛИ — это точка с запятой (;)')">Логическое ИЛИ (дизъюнкцию)</button>
+        </div>
+        <div class="quiz-res" id="q2-res"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="nav-btn" onclick="switchChapter(1)">&larr; Глава 1</button>
+        <button class="nav-btn" onclick="switchChapter(3)">Глава 3: Термы &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAPTER 3 -->
+  <div class="chapter-view" id="ch3">
+    <div class="card">
+      <h2>🧬 Глава 3: Модель данных — «Всё есть Терм»</h2>
+      <p style="color: var(--muted); font-size: 14px;">
+        В Прологе нет классов или объектов. Единственный строительный блок — <b>Терм</b>.
+      </p>
+      
+      <div class="code-box">
+        <span class="cm">% Составной терм: функтор point с арностью 2 &rarr; point/2</span><br>
+        <span class="atom">point</span>(<span class="num">10</span>, <span class="num">20</span>)<br><br>
+        <span class="cm">% Вложенные структуры моделируют сложнейшие сущности</span><br>
+        <span class="atom">employee</span>(<br>
+        &nbsp;&nbsp;<span class="atom">name</span>(<span class="atom">'Иван'</span>, <span class="atom">'Иванов'</span>),<br>
+        &nbsp;&nbsp;<span class="atom">job</span>(<span class="atom">'Software Engineer'</span>, <span class="atom">salary</span>(<span class="num">250000</span>))<br>
+        ).
+      </div>
+
+      <div class="quiz-wrap" id="q3">
+        <div class="quiz-title">Какова арность функтора line(point(0,0), point(10,10))?</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="checkQ(this, true, 'q3', 'Верно! Внешний функтор line содержит 2 аргумента: две точки.')">Арность 2 (line/2)</button>
+          <button class="quiz-opt" onclick="checkQ(this, false, 'q3', 'Координаты внутри point не считаются в арность line.')">Арность 4</button>
+        </div>
+        <div class="quiz-res" id="q3-res"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="nav-btn" onclick="switchChapter(2)">&larr; Глава 2</button>
+        <button class="nav-btn" onclick="switchChapter(4)">Глава 4: Унификация &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAPTER 4 -->
+  <div class="chapter-view" id="ch4">
+    <div class="card">
+      <h2>⚖️ Глава 4: Унификация и 3 Вида Равенства</h2>
+      <p style="color: var(--muted); font-size: 14px;">
+        Унификация (<code>=</code>) — это не присваивание, а решение уравнения: как подобрать переменные, чтобы левая и правая часть совпали.
+      </p>
+
+      <div class="code-box">
+        ?- <span class="atom">point</span>(<span class="v">X</span>, <span class="num">10</span>) = <span class="atom">point</span>(<span class="num">20</span>, <span class="v">Y</span>).<br>
+        <b style="color: #38bdf8;">X = 20, Y = 10.</b>
+      </div>
+
+      <div class="callout warn">
+        <b>Запомните навсегда:</b>
+        <br><code>X = 2 + 2</code> &rarr; <code>X = 2 + 2</code> (структурное равенство, не вычисляет!)
+        <br><code>X is 2 + 2</code> &rarr; <code>X = 4</code> (арифметическое вычисление!)
+        <br><code>X == 2 + 2</code> &rarr; <code>false</code> (строгое тождество без связывания!)
+      </div>
+
+      <div class="quiz-wrap" id="q4">
+        <div class="quiz-title">Что выдаст запрос ?- X is 5 * 5 ?</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="checkQ(this, true, 'q4', 'Верно! Оператор is производит вычисление.')">X = 25</button>
+          <button class="quiz-opt" onclick="checkQ(this, false, 'q4', 'X = 5 * 5 получилось бы при использовании оператора =')">X = 5 * 5</button>
+        </div>
+        <div class="quiz-res" id="q4-res"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="nav-btn" onclick="switchChapter(3)">&larr; Глава 3</button>
+        <button class="nav-btn" onclick="switchChapter(5)">Глава 5: Списки &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAPTER 5 -->
+  <div class="chapter-view" id="ch5">
+    <div class="card">
+      <h2>📦 Глава 5: Списки и Рекурсия [Head | Tail]</h2>
+      <p style="color: var(--muted); font-size: 14px;">
+        В Prolog нет циклов for/while. Все списки обрабатываются рекурсивным разделением на <b>Голову</b> (первый элемент) и <b>Хвост</b> (остальной список).
+      </p>
+
+      <div class="code-box">
+        <span class="cm">% Проверка принадлежности элемента списку</span><br>
+        <span class="atom">my_member</span>(<span class="v">X</span>, [<span class="v">X</span> | <span class="v">_</span>]). <span class="cm">% База: X в голове</span><br>
+        <span class="atom">my_member</span>(<span class="v">X</span>, [<span class="v">_</span> | <span class="v">Tail</span>]) <span class="kw">:-</span><br>
+        &nbsp;&nbsp;<span class="atom">my_member</span>(<span class="v">X</span>, <span class="v">Tail</span>). <span class="cm">% Шаг: ищем в хвосте</span>
+      </div>
+
+      <div class="quiz-wrap" id="q5">
+        <div class="quiz-title">Чему равен Tail в: [H | Tail] = [99] ?</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="checkQ(this, true, 'q5', 'Верно! 99 уходит в H, а остаток — пустой список [].')">Tail = []</button>
+          <button class="quiz-opt" onclick="checkQ(this, false, 'q5', 'Хвост всегда сам является списком!')">Tail = 99</button>
+        </div>
+        <div class="quiz-res" id="q5-res"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="nav-btn" onclick="switchChapter(4)">&larr; Глава 4</button>
+        <button class="nav-btn" onclick="switchChapter(6)">Глава 6: Арифметика &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAPTER 6 -->
+  <div class="chapter-view" id="ch6">
+    <div class="card">
+      <h2>🧮 Глава 6: Арифметика и оператор `is`</h2>
+      <p style="color: var(--muted); font-size: 14px;">
+        Для вычислений используется оператор <code>is</code>. Все переменные справа должны быть известны!
+      </p>
+
+      <div class="code-box">
+        <span class="cm">% Вычисление длины списка с аккумулятором</span><br>
+        <span class="atom">my_len</span>([], <span class="num">0</span>).<br>
+        <span class="atom">my_len</span>([<span class="v">_</span> | <span class="v">Tail</span>], <span class="v">Len</span>) <span class="kw">:-</span><br>
+        &nbsp;&nbsp;<span class="atom">my_len</span>(<span class="v">Tail</span>, <span class="v">SubLen</span>),<br>
+        &nbsp;&nbsp;<span class="v">Len</span> <span class="kw">is</span> <span class="v">SubLen</span> + <span class="num">1</span>.
+      </div>
+
+      <div class="quiz-wrap" id="q6">
+        <div class="quiz-title">Как в Prolog пишется оператор «меньше или равно»?</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="checkQ(this, true, 'q6', 'Верно! Стрелка <= зарезервирована, поэтому пишется =<')">=<</button>
+          <button class="quiz-opt" onclick="checkQ(this, false, 'q6', '<= вызовет синтаксическую ошибку!')"><=</button>
+        </div>
+        <div class="quiz-res" id="q6-res"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="nav-btn" onclick="switchChapter(5)">&larr; Глава 5</button>
+        <button class="nav-btn" onclick="switchChapter(7)">Глава 7: Отсечение &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAPTER 7 -->
+  <div class="chapter-view" id="ch7">
+    <div class="card">
+      <h2>✂️ Глава 7: Отсечение (!) и Отрицание (\+)</h2>
+      <p style="color: var(--muted); font-size: 14px;">
+        Отсечение (Cut: <code>!</code>) останавливает бэктрекинг и запрещает откат назад. Отрицание <code>\+ P</code> означает «P нельзя доказать» (Closed World Assumption).
+      </p>
+
+      <div class="code-box">
+        <span class="cm">% Предикат нахождения максимума без лишних переборов</span><br>
+        <span class="atom">max</span>(<span class="v">A</span>, <span class="v">B</span>, <span class="v">A</span>) <span class="kw">:-</span> <span class="v">A</span> >= <span class="v">B</span>, <span class="kw">!</span>.<br>
+        <span class="atom">max</span>(<span class="v">_</span>, <span class="v">B</span>, <span class="v">B</span>).
+      </div>
+
+      <div class="quiz-wrap" id="q7">
+        <div class="quiz-title">Что означает \+ goal ?</div>
+        <div class="quiz-options">
+          <button class="quiz-opt" onclick="checkQ(this, true, 'q7', 'Верно! В Прологе отрицание — это недоказуемость (Negation as Failure).')">Цель goal не может быть доказана из базы</button>
+          <button class="quiz-opt" onclick="checkQ(this, false, 'q7', 'Нет, это не математическое противоречие.')">goal математически противоречива</button>
+        </div>
+        <div class="quiz-res" id="q7-res"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="nav-btn" onclick="switchChapter(6)">&larr; Глава 6</button>
+        <button class="nav-btn" onclick="switchChapter(8)">Глава 8: Практика &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAPTER 8 -->
+  <div class="chapter-view" id="ch8">
+    <div class="card">
+      <h2>🏆 Глава 8: Практика — Графы и Решение Загадок</h2>
+      <p style="color: var(--muted); font-size: 14px;">
+        Венец логического программирования: лабиринты и головоломки без явного перебора.
+      </p>
+
+      <div class="code-box">
+        <span class="cm">% Поиск пути в графе с защитой от циклов</span><br>
+        <span class="atom">path</span>(<span class="v">A</span>, <span class="v">B</span>, [<span class="v">A</span>, <span class="v">B</span>], <span class="v">_</span>) <span class="kw">:-</span> <span class="atom">edge</span>(<span class="v">A</span>, <span class="v">B</span>).<br>
+        <span class="atom">path</span>(<span class="v">A</span>, <span class="v">B</span>, [<span class="v">A</span> | <span class="v">Rest</span>], <span class="v">Visited</span>) <span class="kw">:-</span><br>
+        &nbsp;&nbsp;<span class="atom">edge</span>(<span class="v">A</span>, <span class="v">Next</span>),<br>
+        &nbsp;&nbsp;<span class="kw">\+</span> <span class="atom">member</span>(<span class="v">Next</span>, <span class="v">Visited</span>), <span class="cm">% Нет зацикливанию!</span><br>
+        &nbsp;&nbsp;<span class="atom">path</span>(<span class="v">Next</span>, <span class="v">B</span>, <span class="v">Rest</span>, [<span class="v">Next</span> | <span class="v">Visited</span>]).
+      </div>
+
+      <div class="callout tip">
+        <b>Поздравляем!</b> Вы прошли все 8 глав фундаментального курса. Теперь вы можете свободно писать экспертные системы, компиляторы и решатели комбинаторных задач на Prolog!
+      </div>
+
+      <div class="btn-row">
+        <button class="nav-btn" onclick="switchChapter(7)">&larr; Глава 7</button>
+        <button class="nav-btn" onclick="switchChapter(1)">Вернуться к началу &uarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchChapter(num) {
+      document.querySelectorAll('.chapter-view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.ch-btn').forEach(b => b.classList.remove('active'));
+      
+      const targetView = document.getElementById('ch' + num);
+      if (targetView) targetView.classList.add('active');
+      
+      const buttons = document.querySelectorAll('.ch-btn');
+      if (buttons[num - 1]) {
+        buttons[num - 1].classList.add('active');
+        buttons[num - 1].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function checkQ(btn, isCorrect, qId, msg) {
+      const container = document.getElementById(qId);
+      const res = document.getElementById(qId + '-res');
+      const buttons = container.querySelectorAll('.quiz-opt');
+
+      buttons.forEach(b => {
+        b.disabled = true;
+        b.classList.remove('correct', 'incorrect');
+      });
+
+      if (isCorrect) {
+        btn.classList.add('correct');
+        res.style.background = 'rgba(16, 185, 129, 0.15)';
+        res.style.color = '#6ee7b7';
+        res.style.border = '1px solid #10b981';
+        res.innerHTML = '<b>Отлично!</b> ' + msg;
+      } else {
+        btn.classList.add('incorrect');
+        res.style.background = 'rgba(239, 68, 68, 0.15)';
+        res.style.color = '#fca5a5';
+        res.style.border = '1px solid #ef4444';
+        res.innerHTML = '<b>Неверно.</b> ' + msg;
+      }
+      res.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
