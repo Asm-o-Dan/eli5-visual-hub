@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>АиСД: Хеширование и Хеш-таблицы — Интерактивная Лекция 1</title>
+  <title>АиСД: Хеширование и Хеш-таблицы — Полный курс (Части 1 и 2)</title>
   <style>
     :root {
       --bg: #090d16;
@@ -25,7 +25,7 @@
       background: radial-gradient(circle at 50% 0%, #151f38 0%, var(--bg) 80%);
       color: var(--text);
       padding: 16px;
-      max-width: 960px;
+      max-width: 980px;
       margin: 0 auto 60px;
       line-height: 1.55;
     }
@@ -62,15 +62,8 @@
     }
 
     /* Hero */
-    .hero {
-      margin-bottom: 28px;
-    }
-    .hero-tags {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 8px;
-    }
+    .hero { margin-bottom: 28px; }
+    .hero-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
     .hero-tag {
       font-size: 11px;
       padding: 3px 8px;
@@ -87,13 +80,9 @@
       -webkit-text-fill-color: transparent;
       margin-bottom: 10px;
     }
-    p.lead {
-      color: var(--muted);
-      font-size: 15.5px;
-      line-height: 1.5;
-    }
+    p.lead { color: var(--muted); font-size: 15.5px; line-height: 1.5; }
 
-    /* Sticky Chapter Quick Bar */
+    /* Sticky Quick Bar */
     .quick-nav {
       display: flex;
       gap: 8px;
@@ -103,7 +92,7 @@
       -webkit-overflow-scrolling: touch;
       position: sticky;
       top: 0;
-      background: rgba(9, 13, 22, 0.92);
+      background: rgba(9, 13, 22, 0.95);
       backdrop-filter: blur(10px);
       z-index: 50;
       border-bottom: 1px solid var(--card-border);
@@ -121,11 +110,7 @@
       white-space: nowrap;
       transition: all 0.2s;
     }
-    .quick-btn:hover {
-      background: var(--card-hover);
-      color: #fff;
-      border-color: var(--accent);
-    }
+    .quick-btn:hover { background: var(--card-hover); color: #fff; border-color: var(--accent); }
 
     /* Content Cards */
     .card {
@@ -160,22 +145,17 @@
       gap: 16px;
       margin: 16px 0;
     }
-    @media (max-width: 680px) {
-      .comp-grid { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 680px) { .comp-grid { grid-template-columns: 1fr; } }
     .comp-box {
       border-radius: 12px;
       padding: 16px;
       border: 1px solid var(--card-border);
     }
-    .comp-box.bad {
-      background: rgba(239, 68, 68, 0.06);
-      border-color: rgba(239, 68, 68, 0.25);
-    }
-    .comp-box.good {
-      background: rgba(16, 185, 129, 0.06);
-      border-color: rgba(16, 185, 129, 0.25);
-    }
+    .comp-box.bad { background: rgba(239, 68, 68, 0.06); border-color: rgba(239, 68, 68, 0.25); }
+    .comp-box.good { background: rgba(16, 185, 129, 0.06); border-color: rgba(16, 185, 129, 0.25); }
+    .comp-box.info { background: rgba(56, 189, 248, 0.06); border-color: rgba(56, 189, 248, 0.25); }
+    .comp-box.purple { background: rgba(168, 85, 247, 0.06); border-color: rgba(168, 85, 247, 0.25); }
+
     .comp-title {
       font-size: 14px;
       font-weight: 700;
@@ -186,30 +166,15 @@
     }
     .comp-box.bad .comp-title { color: #f87171; }
     .comp-box.good .comp-title { color: #34d399; }
-    .comp-list {
-      list-style: none;
-      font-size: 13.5px;
-      color: #cbd5e1;
-    }
-    .comp-list li {
-      margin-bottom: 6px;
-      padding-left: 18px;
-      position: relative;
-    }
-    .comp-box.bad .comp-list li::before {
-      content: "✕";
-      position: absolute;
-      left: 0;
-      color: #f87171;
-      font-weight: bold;
-    }
-    .comp-box.good .comp-list li::before {
-      content: "✓";
-      position: absolute;
-      left: 0;
-      color: #34d399;
-      font-weight: bold;
-    }
+    .comp-box.info .comp-title { color: var(--accent); }
+    .comp-box.purple .comp-title { color: var(--accent-purple); }
+
+    .comp-list { list-style: none; font-size: 13.5px; color: #cbd5e1; }
+    .comp-list li { margin-bottom: 6px; padding-left: 18px; position: relative; }
+    .comp-box.bad .comp-list li::before { content: "✕"; position: absolute; left: 0; color: #f87171; font-weight: bold; }
+    .comp-box.good .comp-list li::before { content: "✓"; position: absolute; left: 0; color: #34d399; font-weight: bold; }
+    .comp-box.info .comp-list li::before { content: "•"; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
+    .comp-box.purple .comp-list li::before { content: "•"; position: absolute; left: 0; color: var(--accent-purple); font-weight: bold; }
 
     /* Math and Callout Blocks */
     .formula-box {
@@ -229,21 +194,9 @@
       font-size: 13.5px;
       line-height: 1.5;
     }
-    .callout.tip {
-      background: rgba(16, 185, 129, 0.08);
-      border: 1px solid rgba(16, 185, 129, 0.25);
-      color: #a7f3d0;
-    }
-    .callout.warn {
-      background: rgba(245, 158, 11, 0.08);
-      border: 1px solid rgba(245, 158, 11, 0.25);
-      color: #fde68a;
-    }
-    .callout.danger {
-      background: rgba(239, 68, 68, 0.08);
-      border: 1px solid rgba(239, 68, 68, 0.25);
-      color: #fca5a5;
-    }
+    .callout.tip { background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); color: #a7f3d0; }
+    .callout.warn { background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); color: #fde68a; }
+    .callout.danger { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); color: #fca5a5; }
 
     /* Interactive Playground Styles */
     .playground {
@@ -256,24 +209,25 @@
     .pg-toolbar {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 8px;
       margin-bottom: 16px;
       align-items: center;
     }
     .pg-label {
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 700;
       color: var(--muted);
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      margin-right: 4px;
     }
     .pg-mode-btn {
       background: var(--card);
       border: 1px solid var(--card-border);
       color: var(--muted);
-      padding: 8px 14px;
+      padding: 6px 12px;
       border-radius: 8px;
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
@@ -297,7 +251,7 @@
       padding: 8px 14px;
       border-radius: 8px;
       font-size: 14px;
-      width: 130px;
+      width: 140px;
       outline: none;
     }
     .pg-input:focus { border-color: var(--accent); }
@@ -310,21 +264,11 @@
       border: none;
       transition: all 0.2s;
     }
-    .pg-btn.primary {
-      background: var(--accent);
-      color: #090d16;
-    }
+    .pg-btn.primary { background: var(--accent); color: #090d16; }
     .pg-btn.primary:hover { opacity: 0.9; transform: translateY(-1px); }
-    .pg-btn.secondary {
-      background: rgba(255, 255, 255, 0.08);
-      color: #fff;
-    }
+    .pg-btn.secondary { background: rgba(255, 255, 255, 0.08); color: #fff; }
     .pg-btn.secondary:hover { background: rgba(255, 255, 255, 0.14); }
-    .pg-btn.danger {
-      background: rgba(239, 68, 68, 0.18);
-      color: #f87171;
-      border: 1px solid rgba(239, 68, 68, 0.3);
-    }
+    .pg-btn.danger { background: rgba(239, 68, 68, 0.18); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
     .pg-btn.danger:hover { background: rgba(239, 68, 68, 0.3); }
     .pg-btn.special {
       background: linear-gradient(135deg, #a855f7 0%, #3b82f6 100%);
@@ -354,31 +298,15 @@
       font-size: 12.5px;
       color: var(--muted);
       margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
     /* Hash Table Visual Representation */
-    .table-container {
-      overflow-x: auto;
-      padding: 10px 0;
-    }
-    .ht-slots {
-      display: flex;
-      gap: 10px;
-      min-width: 720px;
-    }
-    .ht-slot-col {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-    }
-    .ht-slot-idx {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--muted);
-      font-family: monospace;
-    }
+    .table-container { overflow-x: auto; padding: 10px 0; }
+    .ht-slots { display: flex; gap: 10px; min-width: 760px; }
+    .ht-slot-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .ht-slot-idx { font-size: 12px; font-weight: 700; color: var(--muted); font-family: monospace; }
     .ht-bucket {
       width: 100%;
       min-height: 52px;
@@ -395,22 +323,9 @@
       transition: all 0.25s ease;
       position: relative;
     }
-    .ht-bucket.empty {
-      color: #475569;
-      font-size: 11px;
-      border-style: dashed;
-    }
-    .ht-bucket.occupied {
-      background: rgba(56, 189, 248, 0.12);
-      border-color: var(--accent);
-      color: #fff;
-    }
-    .ht-bucket.tombstone {
-      background: rgba(239, 68, 68, 0.12);
-      border-color: #ef4444;
-      color: #fca5a5;
-      font-size: 11px;
-    }
+    .ht-bucket.empty { color: #475569; font-size: 11px; border-style: dashed; }
+    .ht-bucket.occupied { background: rgba(56, 189, 248, 0.12); border-color: var(--accent); color: #fff; }
+    .ht-bucket.tombstone { background: rgba(239, 68, 68, 0.12); border-color: #ef4444; color: #fca5a5; font-size: 11px; }
     .ht-bucket.probing {
       background: rgba(245, 158, 11, 0.3) !important;
       border-color: #f59e0b !important;
@@ -436,11 +351,7 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
       animation: popIn 0.2s ease;
     }
-    .chain-arrow {
-      font-size: 10px;
-      color: var(--muted);
-      line-height: 1;
-    }
+    .chain-arrow { font-size: 10px; color: var(--muted); line-height: 1; }
 
     /* Console Log */
     .pg-console {
@@ -460,6 +371,41 @@
     .pg-console-line.warn { color: #fbbf24; }
     .pg-console-line.err { color: #f87171; }
 
+    /* Distribution Chart */
+    .chart-container {
+      background: #090e1c;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 16px;
+      margin: 16px 0;
+    }
+    .chart-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      height: 140px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .chart-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      justify-content: flex-end;
+    }
+    .chart-bar {
+      width: 100%;
+      background: var(--accent);
+      border-radius: 4px 4px 0 0;
+      transition: height 0.3s ease, background 0.3s;
+      min-height: 2px;
+    }
+    .chart-bar.high { background: var(--accent-red); }
+    .chart-col-label { font-size: 10px; color: var(--muted); margin-top: 4px; font-family: monospace; }
+    .chart-col-val { font-size: 9px; color: #fff; margin-bottom: 2px; }
+
     /* SVG Diagram Containers */
     .svg-diagram-card {
       background: #090e1c;
@@ -469,21 +415,11 @@
       margin: 16px 0;
       text-align: center;
     }
-    .svg-diagram-card svg {
-      max-width: 100%;
-      height: auto;
-    }
-    .diagram-caption {
-      font-size: 12.5px;
-      color: var(--muted);
-      margin-top: 10px;
-      font-style: italic;
-    }
+    .svg-diagram-card svg { max-width: 100%; height: auto; }
+    .diagram-caption { font-size: 12.5px; color: var(--muted); margin-top: 10px; font-style: italic; }
 
     /* Quiz Engine */
-    .quiz-section {
-      margin-top: 24px;
-    }
+    .quiz-section { margin-top: 24px; }
     .quiz-item {
       background: rgba(15, 23, 42, 0.6);
       border: 1px solid var(--card-border);
@@ -505,18 +441,8 @@
     .tier-2 { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
     .tier-3 { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
 
-    .quiz-q {
-      font-size: 15px;
-      font-weight: 600;
-      color: #f1f5f9;
-      margin-bottom: 12px;
-      line-height: 1.45;
-    }
-    .quiz-answers {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+    .quiz-q { font-size: 15px; font-weight: 600; color: #f1f5f9; margin-bottom: 12px; line-height: 1.45; }
+    .quiz-answers { display: flex; flex-direction: column; gap: 8px; }
     .quiz-ans {
       background: var(--card);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -528,10 +454,7 @@
       text-align: left;
       transition: all 0.2s;
     }
-    .quiz-ans:hover {
-      background: var(--card-hover);
-      border-color: var(--accent);
-    }
+    .quiz-ans:hover { background: var(--card-hover); border-color: var(--accent); }
     .quiz-ans.correct {
       background: rgba(16, 185, 129, 0.18) !important;
       border-color: #10b981 !important;
@@ -564,6 +487,8 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
     }
     .score-title { font-size: 16px; font-weight: 700; color: #fff; }
     .score-val { font-size: 24px; font-weight: 800; color: var(--accent); }
@@ -588,10 +513,21 @@
     .num { color: #c084fc; }
     .cm { color: #64748b; font-style: italic; }
 
-    @keyframes popIn {
-      from { transform: scale(0.8); opacity: 1; }
-      to { transform: scale(1); opacity: 1; }
+    /* Table Styles */
+    .styled-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 13.5px;
     }
+    .styled-table th, .styled-table td {
+      border: 1px solid var(--card-border);
+      padding: 10px 12px;
+      text-align: left;
+    }
+    .styled-table th { background: rgba(255, 255, 255, 0.04); color: #fff; }
+
+    @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   </style>
 </head>
 <body>
@@ -599,7 +535,7 @@
   <!-- Top Nav -->
   <div class="header-nav">
     <a href="../index.html" class="back-link">← ELI5 Visual Hub</a>
-    <span class="badge-course">АиСД • 3-й Курс • Лекция 1</span>
+    <span class="badge-course">АиСД • 3-й Курс • Лекция 1 (Части 1 и 2)</span>
   </div>
 
   <!-- Hero Header -->
@@ -607,72 +543,74 @@
     <div class="hero-tags">
       <span class="hero-tag">#АиСД</span>
       <span class="hero-tag">#HashTables</span>
+      <span class="hero-tag">#ЗолотоеСечение</span>
       <span class="hero-tag">#OpenAddressing</span>
       <span class="hero-tag">#Chaining</span>
-      <span class="hero-tag">#Tombstones</span>
-      <span class="hero-tag">#LoadFactor</span>
+      <span class="hero-tag">#Tombstone</span>
+      <span class="hero-tag">#InvertedIndex</span>
+      <span class="hero-tag">#Bitmap</span>
     </div>
-    <h1>Хеширование и Хеш-таблицы: Архитектура, Коллизии и Реальный Инжиниринг</h1>
-    <p class="lead">Полный интерактивный учебный модуль: от прямой адресации и принципа Дирихле до первичной кластеризации, проблемы удаления в открытой адресации, живой песочницы коллизий и 10 инженерных тестов.</p>
+    <h1>Хеширование и Хеш-таблицы: Архитектура, Алгоритмы и Стресс-Тестирование</h1>
+    <p class="lead">Полный фундаментальный учебный модуль (Части 1 и 2): таблицы с прямой адресацией, 3 метода построения хеш-функций (деление, метод умножения Кнута с золотым сечением, середина квадрата), конечный автомат Tombstone, вторичные ключи (инвертированные индексы и битовые карты), live-песочница с графиком распределения коллизий и 12 инженерных тестов.</p>
   </header>
 
   <!-- Sticky Quick Nav Bar -->
   <nav class="quick-nav">
     <a class="quick-btn" href="#direct-address">1. Прямая адресация</a>
-    <a class="quick-btn" href="#hash-concept">2. Хеш-функция и Коллизии</a>
-    <a class="quick-btn" href="#collision-methods">3. Методы коллизий</a>
-    <a class="quick-btn" href="#playground-section">4. 🧪 Live Симулятор</a>
-    <a class="quick-btn" href="#load-factor">5. Load Factor и Рехеш</a>
-    <a class="quick-btn" href="#quiz-section">6. 📝 Тестирование (10 вопросов)</a>
-    <a class="quick-btn" href="#lab-prep">7. Лаба №1 и C++</a>
+    <a class="quick-btn" href="#hash-functions">2. 3 Метода хеш-функций</a>
+    <a class="quick-btn" href="#open-addressing">3. Открытая адресация & Tombstone</a>
+    <a class="quick-btn" href="#playground-section">4. 🧪 Live Симулятор & График</a>
+    <a class="quick-btn" href="#secondary-keys">5. Вторичные ключи: Инвертированный & Bitmap</a>
+    <a class="quick-btn" href="#quiz-section">6. 📝 Тестирование (12 вопросов)</a>
+    <a class="quick-btn" href="#lab-spec">7. 🛠️ Спецификация ЛР №1</a>
   </nav>
 
   <!-- SECTION 1: Direct Addressing -->
   <section id="direct-address" class="card">
     <h2><span>1.</span> Таблицы с прямой адресацией (Direct Address Tables)</h2>
-    <p>Фундаментальная идея: если ключ является неотрицательным целым числом, мы можем использовать сам ключ как непосредственный индекс массива:</p>
+    <p>Фундаментальная идея: если ключ является неотрицательным целым числом, мы используем сам ключ как непосредственный индекс массива памяти:</p>
     <div class="formula-box">Index = Key &emsp;&implies;&emsp; T[Key] = Value</div>
 
     <div class="comp-grid">
       <div class="comp-box good">
-        <div class="comp-title"><span>⚡</span> Преимущества</div>
+        <div class="comp-title"><span>⚡</span> Плюсы прямой адресации</div>
         <ul class="comp-list">
-          <li><strong>O(1) в худшем случае:</strong> чтение, запись и удаление занимают ровно 1 машинную команду чтения памяти по смещению.</li>
-          <li>Никаких коллизий: каждый ключ гарантированно владеет уникальной ячейкой.</li>
+          <li><strong>O(1) в худшем случае:</strong> поиск, вставка, удаление и обновление выполняются ровно за 1 обращение к ячейке памяти.</li>
+          <li>Полное отсутствие коллизий: каждый ключ владеет изолированной ячейкой.</li>
         </ul>
       </div>
       <div class="comp-box bad">
         <div class="comp-title"><span>⚠️</span> Критические недостатки</div>
         <ul class="comp-list">
-          <li><strong>Катастрофическая разреженность памяти:</strong> Универсум возможных ключей U огромен по сравнению с реальным множеством K. Для 10-значных телефонных номеров нужен массив на 10¹⁰ ячеек (~80 ГБ RAM для 100 записей).</li>
-          <li><strong>Нечисловые ключи:</strong> Строки, UUID, составные структуры не могут быть прямым индексом без отображения.</li>
-          <li><strong>Вставка в упорядоченный массив:</strong> Если сжимать данные в плотный массив, вставка требует O(n) сдвигов памяти.</li>
+          <li><strong>Разреженность и взрыв памяти:</strong> Универсум возможных ключей $U$ на много порядков превышает реальный набор ключей $K$. Для телефонного справочника из 10-значных номеров требуется массив на $10^{10}$ ячеек (~80 ГБ памяти при 100 записях).</li>
+          <li><strong>Нечисловые ключи:</strong> Строки, ФИО, паспортные данные, названия товаров нельзя использовать без преобразования.</li>
+          <li><strong>Упорядоченные массивы:</strong> Если хранить ключи плотно в отсортированном массиве, вставка требует $O(n)$ сдвигов.</li>
         </ul>
       </div>
     </div>
 
     <!-- SVG Diagram: Direct Address vs Hash Compression -->
     <div class="svg-diagram-card">
-      <svg viewBox="0 0 760 210" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="20" y="20" width="320" height="170" rx="12" fill="#131d35" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4 4"/>
+      <svg viewBox="0 0 760 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="20" width="320" height="160" rx="12" fill="#131d35" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4 4"/>
         <text x="35" y="45" fill="#f87171" font-size="13" font-weight="700">Прямая адресация (Direct Address)</text>
         <rect x="40" y="65" width="280" height="24" rx="4" fill="#1e293b" stroke="#334155"/>
-        <text x="50" y="81" fill="#94a3b8" font-size="11">Индекс 0 .. 999 999 999 (Разреженный)</text>
-        <rect x="40" y="100" width="80" height="24" rx="4" fill="#3b82f6" fill-opacity="0.3" stroke="#3b82f6"/>
-        <text x="48" y="116" fill="#93c5fd" font-size="11">Key: 42</text>
-        <rect x="240" y="100" width="80" height="24" rx="4" fill="#3b82f6" fill-opacity="0.3" stroke="#3b82f6"/>
-        <text x="248" y="116" fill="#93c5fd" font-size="11">Key: 999881</text>
-        <text x="40" y="160" fill="#ef4444" font-size="12">Память U: Гигабайты пустых ячеек (O(|U|))</text>
+        <text x="50" y="81" fill="#94a3b8" font-size="11">Индексы 0 .. 9 999 999 999 (Разреженный массив)</text>
+        <rect x="40" y="98" width="80" height="22" rx="4" fill="#3b82f6" fill-opacity="0.3" stroke="#3b82f6"/>
+        <text x="48" y="113" fill="#93c5fd" font-size="11">Key: 42</text>
+        <rect x="240" y="98" width="80" height="22" rx="4" fill="#3b82f6" fill-opacity="0.3" stroke="#3b82f6"/>
+        <text x="248" y="113" fill="#93c5fd" font-size="11">Key: 999881</text>
+        <text x="40" y="150" fill="#ef4444" font-size="12">Память U: Гигабайты пустых ячеек (O(|U|))</text>
 
-        <path d="M360 105 H400" stroke="#38bdf8" stroke-width="2" marker-end="url(#arr)"/>
+        <path d="M360 100 H400" stroke="#38bdf8" stroke-width="2" marker-end="url(#arr)"/>
 
-        <rect x="420" y="20" width="320" height="170" rx="12" fill="#131d35" stroke="#10b981" stroke-width="1.5"/>
+        <rect x="420" y="20" width="320" height="160" rx="12" fill="#131d35" stroke="#10b981" stroke-width="1.5"/>
         <text x="435" y="45" fill="#34d399" font-size="13" font-weight="700">Хеш-таблица: Сжатие ключей</text>
         <rect x="440" y="65" width="280" height="24" rx="4" fill="#0f172a" stroke="#10b981"/>
         <text x="450" y="81" fill="#34d399" font-size="11">Компактный массив m = 11 ячеек</text>
-        <rect x="440" y="100" width="280" height="30" rx="4" fill="#1e293b" stroke="#38bdf8"/>
-        <text x="450" y="120" fill="#38bdf8" font-size="11">h(k) = k mod 11 &emsp;&rArr;&emsp; Индекс 0..10</text>
-        <text x="440" y="160" fill="#34d399" font-size="12">Память: O(m) пропорционально элементам</text>
+        <rect x="440" y="98" width="280" height="26" rx="4" fill="#1e293b" stroke="#38bdf8"/>
+        <text x="450" y="115" fill="#38bdf8" font-size="11">h(k) &rarr; Индекс в диапазоне 0 .. m-1</text>
+        <text x="440" y="150" fill="#34d399" font-size="12">Память: O(m) пропорционально элементам</text>
 
         <defs>
           <marker id="arr" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
@@ -680,272 +618,336 @@
           </marker>
         </defs>
       </svg>
-      <div class="diagram-caption">Рис 1. Переход от разреженного пространства универсума U к компактной таблице размера m через хеш-функцию h(k).</div>
+      <div class="diagram-caption">Рис 1. Сжатие ключей из универсума U в компактную хеш-таблицу размера m. По принципу Дирихле при |U| > m коллизии неизбежны.</div>
     </div>
   </section>
 
-  <!-- SECTION 2: Hashing Concept & Collisions -->
-  <section id="hash-concept" class="card">
-    <h2><span>2.</span> Концепция Хеширования и Принцип Дирихле</h2>
-    <p><strong>Хеш-таблица</strong> — структура данных, в которой индекс массива для сохранения записи вычисляется математической функцией:</p>
-    <div class="formula-box">h: U &rarr; {0, 1, ..., m - 1}</div>
-    <p>где U — универсум всех возможных ключей, а m — фактический размер хеш-таблицы.</p>
+  <!-- SECTION 2: 3 Hash Function Methods -->
+  <section id="hash-functions" class="card">
+    <h2><span>2.</span> 3 Классических Метода построения Хеш-функций</h2>
+    <p>На лекции подробно разобраны три фундаментальных математических подхода:</p>
 
-    <div class="callout tip">
-      <strong>Математическая неизбежность коллизий (Принцип Дирихле):</strong><br>
-      Если число возможных ключей |U| строго больше числа ячеек в таблице m (|U| > m), то <em>не существует</em> такой хеш-функции, которая гарантировала бы отсутствие коллизий для всех входных наборов. По принципу Дирихле хотя бы два ключа обязательно попадут в одну ячейку:
-      <div style="margin-top:6px; font-weight:bold; color:#fff;">h(k₁) = h(k₂) &emsp;при&emsp; k₁ &ne; k₂</div>
-    </div>
-
-    <h3>Конвертация нечисловых ключей (Полиномиальное хеширование строк)</h3>
-    <p>Для строк и составных объектов вычисляется полиномиальный хеш по основанию простого числа p (обычно p = 31 или p = 53):</p>
-    <div class="formula-box">h(s) = ( &sum; s[i] &middot; pⁱ ) mod m &emsp;&equiv;&emsp; (s[0] + s[1]&middot;p + s[2]&middot;p² + ...) mod m</div>
+    <!-- Method 1: Division -->
+    <h3>1. Метод деления (Division Method)</h3>
+    <div class="formula-box">h(k) = k mod m</div>
+    <p>Простейший в реализации способ. Однако результат критически зависит от выбора размера таблицы $m$:</p>
     <div class="callout warn">
-      <strong>Инженерный подводный камень (Integer Overflow):</strong> В C++ / Java прямое вычисление pⁱ мгновенно переполняет 64-битный тип. Хеш должен считаться по схеме Горнера с взятием остатка на каждом шаге:
-      <code>hash = (hash * p + s[i]) % m;</code>
+      <strong>Чего категорически нельзя делать:</strong>
+      <ul style="margin-left:16px; margin-top:4px;">
+        <li>Нельзя выбирать $m = 2^p$ (в этом случае $h(k)$ зависит исключительно от младших $p$ бит числа $k$, игнорируя старшие).</li>
+        <li>Нельзя выбирать $m = 10^p$ (хеш зависит только от последних десятичных цифр).</li>
+      </ul>
+      <strong>Правило:</strong> $m$ выбирается как <em>простое число</em>, максимально удаленное от степеней двойки и десятки.
     </div>
+
+    <!-- Method 2: Multiplication (Knuth) -->
+    <h3>2. Метод умножения (Multiplication Method) — КЛЮЧ К ЛАБОРАТОРНОЙ РАБОТЕ №1!</h3>
+    <div class="formula-box">h(k) = &lfloor; m &middot; ((k &middot; A) mod 1) &rfloor;</div>
+    <p>где $0 < A < 1$ — вещественная константа. Операция $(k \cdot A) \bmod 1$ означает выделение <strong>дробной части</strong> произведения:</p>
+    <div class="formula-box">(k &middot; A) mod 1 = (k &middot; A) - &lfloor; k &middot; A &rfloor;</div>
+    <p>Согласно Дональду Кнуту, идеальное распределение достигается при константе, связанной с <strong>золотым сечением</strong>:</p>
+    <div class="formula-box">A = (&radic;5 - 1) / 2 &approx; 0.618033988749895...</div>
+
+    <div class="callout danger">
+      <strong>КАТЕГОРИЧЕСКОЕ ТРЕБОВАНИЕ ЛЕКТОРА К КОДУ ЛР №1:</strong><br>
+      Запрещено писать константу вручную с округлением (например, <code>float A = 0.618f</code>)! Константа обязана вычисляться строго по формуле:
+      <div class="code-box" style="margin-top:8px;">
+<span class="kw">const double</span> <span class="var">A</span> = (<span class="fn">std::sqrt</span>(<span class="num">5.0</span>) - <span class="num">1.0</span>) / <span class="num">2.0</span>;
+<span class="kw">double</span> <span class="var">temp</span> = <span class="var">key</span> * <span class="var">A</span>;
+<span class="kw">double</span> <span class="var">frac</span> = <span class="var">temp</span> - <span class="fn">std::floor</span>(<span class="var">temp</span>);
+<span class="type">int</span> <span class="var">hashIndex</span> = <span class="kw">static_cast</span>&lt;<span class="type">int</span>&gt;(<span class="fn">std::floor</span>(<span class="var">m</span> * <span class="var">frac</span>));
+      </div>
+      <em>Преимущество метода умножения:</em> величина $m$ больше не обязана быть простым числом (может быть даже степенью двойки $m = 2^p$).
+    </div>
+
+    <!-- Method 3: Mid-Square -->
+    <h3>3. Метод середины квадрата (Mid-Square Method)</h3>
+    <p>Ключ возводится в квадрат ($k^2$), а затем из середины двоичного представления извлекаются $r$ бит, где $m = 2^r$:</p>
+    <div class="formula-box">k = 45 &emsp;&implies;&emsp; k² = 2025 &emsp;&implies;&emsp; извлечение средних бит сдвигом &rsaquo;&rsaquo; и маской &amp;</div>
+    <p>В C++ для 10-битного адреса ($m = 1024$): <code>(k * k) >> 11 & 0x3FF</code>.</p>
   </section>
 
-  <!-- SECTION 3: Collision Resolution -->
-  <section id="collision-methods" class="card">
-    <h2><span>3.</span> Методы разрешения коллизий</h2>
-    <p>Существуют две архитектурно противоположные парадигмы:</p>
+  <!-- SECTION 3: Open Addressing & Tombstones -->
+  <section id="open-addressing" class="card">
+    <h2><span>3.</span> Открытая адресация, Правила Пробирования и Маркер Tombstone</h2>
+    <p>В открытой адресации все элементы хранятся в плоском массиве. Последовательность проб при коллизии: $h(k, i)$, где $i = 0, 1, 2, \dots$</p>
 
     <div class="comp-grid">
-      <!-- Open Addressing -->
-      <div class="comp-box" style="background: rgba(56, 189, 248, 0.05); border-color: rgba(56, 189, 248, 0.25);">
-        <div class="comp-title" style="color: var(--accent);">А. Открытая адресация (Open Addressing)</div>
-        <p style="font-size: 13px;">Все элементы хранятся <strong>внутри самого плоского массива</strong>. Никаких связных списков. При коллизии ячейка ищется по правилу пробирования:</p>
-        <ul class="comp-list" style="font-size: 13px;">
-          <li><strong>Линейное:</strong> h(k, i) = (h(k) + i) mod m (шаг 1). Провоцирует первичную кластеризацию.</li>
-          <li><strong>Квадратичное:</strong> h(k, i) = (h(k) + c₁ i + c₂ i²) mod m. Устраняет первичные кластеры, но сохраняет вторичные.</li>
-          <li><strong>Двойное хеширование:</strong> h(k, i) = (h₁(k) + i &middot; h₂(k)) mod m. Лучшее рассеивание.</li>
-        </ul>
-        <div class="callout danger" style="margin-top: 10px; font-size: 12.5px;">
-          <strong>Проблема Tombstone (Удаление):</strong> Нельзя просто очистить ячейку (записать NULL)! Поиск последующих элементов, попавших в коллизию с этим ключом, остановится на пустой ячейке и вернет false. Необходим маркер <code>DELETED</code> (tombstone).
-        </div>
+      <div class="comp-box info">
+        <div class="comp-title">Линейное пробирование</div>
+        <div class="formula-box">h(k, i) = (h(k) + c &middot; i) mod m</div>
+        <p style="font-size:13px;">При $c = 1$ — шаг 1. Провоцирует <strong>первичную кластеризацию</strong>. При шаге $c > 1$ (например, $c = 3$) обязательно условие: <strong>$\gcd(c, m) = 1$</strong> (взаимная простота), иначе алгоритм зациклится, обойдя лишь часть таблицы!</p>
       </div>
 
-      <!-- Chaining -->
-      <div class="comp-box" style="background: rgba(168, 85, 247, 0.05); border-color: rgba(168, 85, 247, 0.25);">
-        <div class="comp-title" style="color: var(--accent-purple);">Б. Метод цепочек (Separate Chaining)</div>
-        <p style="font-size: 13px;">Каждая ячейка таблицы T[i] содержит указатель на связный список (или динамический вектор) записей с одинаковым хешем.</p>
-        <ul class="comp-list" style="font-size: 13px;">
-          <li><strong>Вставка:</strong> Добавление в голову списка за O(1).</li>
-          <li><strong>Удаление:</strong> Стандартное удаление узла из связного списка (O(1) при известном указателе). Никаких проблем с Tombstone.</li>
-          <li><strong>Коэффициент заполнения &alpha;:</strong> Может легко превышать 1.0 (например, &alpha; = 3.5 означает в среднем 3.5 узла на корзину).</li>
-        </ul>
-        <div class="callout warn" style="margin-top: 10px; font-size: 12.5px;">
-          <strong>Hardware-налог (Cache Locality):</strong> Узлы связного списка разбросаны в куче (heap). Каждый переход по указателю next вызывает Cache Miss в L1/L2 процессора, плюс накладные расходы на указатель (8 байт на 64-bit системе на каждый узел).
-        </div>
+      <div class="comp-box purple">
+        <div class="comp-title">Двойное хеширование</div>
+        <div class="formula-box">h(k, i) = (h₁(k) + i &middot; h₂(k)) mod m</div>
+        <p style="font-size:13px;">Вторая функция $h_2(k)$ определяет индивидуальный шаг. Требование: $h_2(k) > 0$ и $\gcd(h_2(k), m) = 1$. Практический выбор: $h_2(k) = 1 + (k \bmod (m - 1))$ при простом $m$.</p>
       </div>
     </div>
 
-    <!-- SVG Diagram: Tombstone Dilemma -->
-    <div class="svg-diagram-card">
-      <svg viewBox="0 0 760 170" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <text x="20" y="25" fill="#f8fafc" font-size="13" font-weight="700">Дилемма удаления ячейки в открытой адресации (Tombstone):</text>
-        
-        <g transform="translate(20, 45)">
-          <rect x="0" y="0" width="110" height="50" rx="8" fill="#1e293b" stroke="#38bdf8"/>
-          <text x="10" y="20" fill="#94a3b8" font-size="11">Ячейка 1</text>
-          <text x="10" y="38" fill="#38bdf8" font-size="13" font-weight="bold">Key: 89</text>
+    <h3>Конечный автомат состояния ячейки (Tombstone):</h3>
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Статус ячейки</th>
+          <th>Числовой код</th>
+          <th>Поведение при ПОИСКЕ (Search)</th>
+          <th>Поведение при ВСТАВКЕ (Insert)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong style="color:#64748b;">EMPTY</strong></td>
+          <td><code>0</code></td>
+          <td><strong>СТОП</strong>: элемент гарантированно отсутствует</td>
+          <td><strong>Вставка разрешена</strong>: пишем ключ, ставим `OCCUPIED`</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--accent);">OCCUPIED</strong></td>
+          <td><code>1</code></td>
+          <td>Сравнение ключа; при несовпадении шаг $i = i + 1$</td>
+          <td>Коллизия; переход к следующей пробе $i = i + 1$</td>
+        </tr>
+        <tr>
+          <td><strong style="color:#f87171;">DELETED (Tombstone ⚰️)</strong></td>
+          <td><code>2</code></td>
+          <td><strong>НЕЛЬЗЯ ОСТАНАВЛИВАТЬСЯ!</strong> Шаг $i = i + 1$</td>
+          <td><strong>Вставка разрешена</strong>: ячейка перезаписывается</td>
+        </tr>
+      </tbody>
+    </table>
 
-          <rect x="130" y="0" width="130" height="50" rx="8" fill="rgba(239, 68, 68, 0.15)" stroke="#ef4444" stroke-width="2"/>
-          <text x="140" y="20" fill="#fca5a5" font-size="11">Ячейка 2 (Удалена)</text>
-          <text x="140" y="38" fill="#f87171" font-size="12" font-weight="bold">DELETED [Tombstone]</text>
-
-          <rect x="280" y="0" width="110" height="50" rx="8" fill="#1e293b" stroke="#34d399"/>
-          <text x="290" y="20" fill="#94a3b8" font-size="11">Ячейка 3</text>
-          <text x="290" y="38" fill="#34d399" font-size="13" font-weight="bold">Key: 76</text>
-
-          <rect x="410" y="0" width="110" height="50" rx="8" fill="#0f172a" stroke="#475569" stroke-dasharray="3 3"/>
-          <text x="420" y="20" fill="#64748b" font-size="11">Ячейка 4</text>
-          <text x="420" y="38" fill="#64748b" font-size="12">EMPTY</text>
-        </g>
-
-        <path d="M130 120 H250" stroke="#f59e0b" stroke-width="2" marker-end="url(#arr-amber)"/>
-        <text x="20" y="135" fill="#fbbf24" font-size="12">Поиск ключа 76: h(76)&rarr;1 (занята 89) &rarr; шаг 2 (DELETED: продолжаем!) &rarr; шаг 3 (НАЙДЕН!).</text>
-        <text x="20" y="155" fill="#f87171" font-size="11.5">Если бы в ячейке 2 стоял EMPTY, поиск немедленно остановился бы и ошибочно вернул 'Элемент не найден'!</text>
-
-        <defs>
-          <marker id="arr-amber" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M 0 1 L 8 5 L 0 9 z" fill="#f59e0b" />
-          </marker>
-        </defs>
-      </svg>
-      <div class="diagram-caption">Рис 2. Без маркера DELETED разрывается поисковая цепочка для всех элементов, попавших в коллизию позже.</div>
+    <div class="callout tip">
+      <strong>Порог попыток (Limit of Probes $K$):</strong> Чтобы защитить алгоритм от бесконечного цикла при заполнении, в цикле пробирования задается лимит $K$ (например, $K = m$ или $K = 10$). При превышении $K$ инициируется динамическое рехеширование ($m \to 2m$).
     </div>
   </section>
 
-  <!-- SECTION 4: Live Interactive Playground -->
+  <!-- SECTION 4: Live Playground & Stress Test -->
   <section id="playground-section" class="card">
-    <h2><span>4.</span> 🧪 Live Симулятор Хеш-Таблицы (Interactive Playground)</h2>
-    <p>Экспериментируйте с разрешением коллизий в реальном времени. Наблюдайте шаги пробирования, возникновение первичной кластеризации и рост коэффициента заполнения.</p>
+    <h2><span>4.</span> 🧪 Live Симулятор Хеш-Таблицы и График Распределения</h2>
+    <p>Интерактивная проверка методов хеширования. Выберите хеш-функцию, метод разрешения коллизий и запустите числовой эксперимент из лекции либо генерацию стресс-теста.</p>
 
     <div class="playground">
+      <!-- Toolbar -->
       <div class="pg-toolbar">
-        <span class="pg-label">Стратегия:</span>
-        <button class="pg-mode-btn active" id="btnModeLinear" onclick="setMode('linear')">Линейное пробирование</button>
+        <span class="pg-label">Хеш-функция:</span>
+        <button class="pg-mode-btn active" id="hfDivision" onclick="setHashFunc('division')">Деление (k mod m)</button>
+        <button class="pg-mode-btn" id="hfMultiply" onclick="setHashFunc('multiply')">Умножение (Золотое сечение A)</button>
+        <button class="pg-mode-btn" id="hfMidSquare" onclick="setHashFunc('midsquare')">Середина квадрата</button>
+      </div>
+      <div class="pg-toolbar">
+        <span class="pg-label">Коллизии:</span>
+        <button class="pg-mode-btn active" id="btnModeLinear" onclick="setMode('linear')">Линейное (шаг 1)</button>
         <button class="pg-mode-btn" id="btnModeQuad" onclick="setMode('quad')">Квадратичное</button>
-        <button class="pg-mode-btn" id="btnModeChain" onclick="setMode('chain')">Метод цепочек</button>
+        <button class="pg-mode-btn" id="btnModeDouble" onclick="setMode('double')">Двойное хеширование</button>
+        <button class="pg-mode-btn" id="btnModeChain" onclick="setMode('chain')">Цепочки</button>
       </div>
 
+      <!-- Controls -->
       <div class="pg-inputs">
         <input type="text" id="inputKey" class="pg-input" placeholder="Ключ (число/текст)" value="45">
         <button class="pg-btn primary" onclick="manualInsert()">+ Вставить</button>
         <button class="pg-btn secondary" onclick="manualSearch()">🔍 Найти</button>
         <button class="pg-btn danger" onclick="manualDelete()">✕ Удалить</button>
         <button class="pg-btn secondary" onclick="resetTable()">Сброс</button>
-        <button class="pg-btn special" onclick="runLectureBenchmark()">🚀 Числовой эксперимент лекции</button>
+        <button class="pg-btn special" onclick="runLectureBenchmark()">🚀 Числовой эксперимент (7 ключей)</button>
+        <button class="pg-btn secondary" style="border: 1px solid var(--accent);" onclick="generateStressTest(50)">📊 Стресс-тест (50 ключей)</button>
       </div>
 
+      <!-- Load Factor Stats -->
       <div class="lf-stats">
-        <span>Элементов в таблице: <strong id="statCount" style="color:#fff;">0</strong> / <strong id="statSize" style="color:#fff;">11</strong></span>
-        <span>Коэффициент заполнения &alpha;: <strong id="statAlpha" style="color:var(--accent-green);">0.00</strong></span>
-        <span>Суммарно попыток пробирования: <strong id="statProbes" style="color:var(--accent);">0</strong></span>
+        <span>Элементов: <strong id="statCount" style="color:#fff;">0</strong> / <strong id="statSize" style="color:#fff;">11</strong></span>
+        <span>Коэффициент &alpha;: <strong id="statAlpha" style="color:var(--accent-green);">0.00</strong></span>
+        <span>Суммарно проб: <strong id="statProbes" style="color:var(--accent);">0</strong></span>
+        <span>Текущая хеш-функция: <strong id="statHfName" style="color:var(--accent-purple);">k mod 11</strong></span>
       </div>
       <div class="lf-bar-wrap">
         <div class="lf-bar-fill" id="lfBarFill"></div>
       </div>
       <div id="lfWarning" style="display:none; color:#f87171; font-size:12px; margin-bottom:10px; font-weight:bold;">
-        ⚠️ Внимание: &alpha; &ge; 0.65! В открытой адресации необходим рехешинг (удвоение таблицы), иначе скорость деградирует до O(n).
+        ⚠️ &alpha; &ge; 0.65! Высокая вероятность каскадных коллизий. Требуется рехешинг (удвоение таблицы).
       </div>
 
+      <!-- Visual Hash Table -->
       <div class="table-container">
-        <div class="ht-slots" id="htSlotsContainer">
-        </div>
+        <div class="ht-slots" id="htSlotsContainer"></div>
       </div>
 
+      <!-- Live Distribution Chart (Excel simulation) -->
+      <div class="chart-container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <span style="font-size:12.5px; font-weight:700; color:#fff;">📊 Гистограмма распределения по корзинам (Аналог графика в Excel)</span>
+          <span style="font-size:11px; color:var(--muted);">Идеальное распределение: ровная линия без резких пиков</span>
+        </div>
+        <div class="chart-bars" id="chartBarsContainer"></div>
+      </div>
+
+      <!-- Console Output -->
       <div class="pg-console" id="pgConsole">
-        <div class="pg-console-line">&gt; Симулятор хеш-таблицы готов (Размер m = 11, h(k) = k mod 11). Нажмите кнопку 'Числовой эксперимент лекции' для запуска теста.</div>
+        <div class="pg-console-line">&gt; Симулятор хеш-таблицы готов (Размер m = 11). Нажмите кнопку запуска эксперимента или введите ключ.</div>
       </div>
     </div>
   </section>
 
-  <!-- SECTION 5: Load Factor & Rehashing -->
-  <section id="load-factor" class="card">
-    <h2><span>5.</span> Коэффициент заполнения (Load Factor) и Рехеширование</h2>
-    <p>Эффективность любой хеш-таблицы определяется коэффициентом заполнения:</p>
-    <div class="formula-box">&alpha; = n / m</div>
-    <p>где n — фактическое число сохраненных записей, m — емкость таблицы (количество корзин).</p>
+  <!-- SECTION 5: Secondary Keys -->
+  <section id="secondary-keys" class="card">
+    <h2><span>5.</span> Организация данных для поиска по вторичным ключам</h2>
+    <p>Когда поиск требуется не по первичному ID, а по вторичным признакам (теги, слова, категории), применяются две архитектуры:</p>
 
     <div class="comp-grid">
-      <div class="comp-box" style="background:rgba(56, 189, 248, 0.05);">
-        <div class="comp-title" style="color:var(--accent);">Открытая адресация: &alpha; &le; 1.0</div>
-        <p style="font-size:13px;">Так как ячейки физически ограничены размером m, значение &alpha; принципиально не может превысить 1.0.</p>
-        <p style="font-size:13px;"><strong>Критический порог:</strong> При &alpha; &ge; 0.65 .. 0.70 среднее число проб на операцию лавинообразно растет из-за слияния первичных кластеров. Среднее время деградирует до O(n).</p>
+      <!-- Inverted Index -->
+      <div class="comp-box info">
+        <div class="comp-title">А. Инвертированный индекс (Inverted Index)</div>
+        <p style="font-size:13px;">Первичные и вторичные ключи меняются местами. Ключом выступает слово/тег, а значением — список идентификаторов документов:</p>
+        <div class="formula-box" style="font-size:12.5px;">"алгоритм" &rarr; [Doc 1, Doc 4, Doc 9]<br>"хеш" &rarr; [Doc 1, Doc 2, Doc 4]</div>
+        <ul class="comp-list" style="font-size:12.5px;">
+          <li>Поиск документов по слову занимает $O(1)$ без перебора коллекции.</li>
+          <li>Требует дополнительной памяти и фоновой переиндексации.</li>
+        </ul>
       </div>
-      <div class="comp-box" style="background:rgba(16, 185, 129, 0.05);">
-        <div class="comp-title" style="color:var(--accent-green);">Метод цепочек: &alpha; может быть &gt; 1.0</div>
-        <p style="font-size:13px;">При методе цепочек &alpha; отражает математическое ожидание длины связного списка в ячейке. Даже при &alpha; = 2.0 поиск требует в среднем 1 + &alpha; / 2 = 2 операции.</p>
+
+      <!-- Bitmap Index -->
+      <div class="comp-box purple">
+        <div class="comp-title">Б. Битовые карты (Bitmap Index)</div>
+        <p style="font-size:13px;">Двумерная бинарная матрица: строки — ключевые слова, столбцы — документы. `1` означает наличие слова, `0` — отсутствие.</p>
+        <div class="formula-box" style="font-size:12.5px;">Слово A: 1 0 1 1 0 0<br>Слово B: 0 1 1 0 1 0<br>A AND B: 0 0 1 0 0 0 &rarr; (Только Doc 3!)</div>
+        <ul class="comp-list" style="font-size:12.5px;">
+          <li>Запросы `AND`, `OR`, `NOT` выполняются за 1 такт CPU через побитовые инструкции.</li>
+          <li>Минус: разреженность при большом словаре (расход RAM на нули).</li>
+        </ul>
       </div>
     </div>
-
-    <h3>Процесс Рехеширования (Dynamic Rehashing)</h3>
-    <p>Когда порог &alpha; &ge; 0.65 превышен, хеш-таблица выполняет перестройку:</p>
-    <ol style="margin-left:20px; font-size:14px; color:#cbd5e1; line-height:1.6;">
-      <li>Выделяется новый непрерывный массив памяти размера m_new &approx; 2m (обычно выбирается ближайшее <strong>простое число</strong>, чтобы хеш-функция k mod m равномернее перемешивала биты).</li>
-      <li><strong>Нельзя просто скопировать память!</strong> Так как новое значение m_new изменилось, для каждого существующего ключа вычисляется новый индекс: h_new(k) = k mod m_new.</li>
-      <li>Все элементы заново вставляются в новую таблицу (O(n) амортизированная стоимость). Все ячейки с маркером DELETED удаляются навсегда, освобождая память.</li>
-    </ol>
   </section>
 
-  <!-- SECTION 6: Multi-Tier Quiz Engine -->
+  <!-- SECTION 6: Multi-Tier Quiz Engine (12 Questions) -->
   <section id="quiz-section" class="card">
-    <h2><span>6.</span> 📝 Инженерный тест для проверки знаний (10 вопросов)</h2>
-    <p>Тестирование разделено на 3 уровня сложности: базовые формулы, алгоритмический трейсинг и каверзные вопросы для защиты лабораторной работы.</p>
+    <h2><span>6.</span> 📝 Инженерный тест для проверки знаний (12 вопросов)</h2>
+    <p>Тестирование охватывает обе части лекции: математические основы, алгоритмический трейсинг, правила золотого сечения Кнута и требования к защите ЛР №1.</p>
 
+    <!-- Score Banner -->
     <div class="score-banner">
       <div>
         <div class="score-title">Ваш результат тестирования</div>
-        <div style="font-size:13px; color:var(--muted);" id="quizStatusText">Ответьте на вопросы ниже для оценки подготовки</div>
+        <div style="font-size:13px; color:var(--muted);" id="quizStatusText">Ответьте на все вопросы для комплексной оценки</div>
       </div>
-      <div class="score-val" id="quizScoreVal">0 / 10</div>
+      <div class="score-val" id="quizScoreVal">0 / 12</div>
     </div>
 
-    <div class="quiz-section" id="quizContainer">
-    </div>
+    <div class="quiz-section" id="quizContainer"></div>
   </section>
 
-  <!-- SECTION 7: Lab #1 Prep & C++ Architecture -->
-  <section id="lab-prep" class="card">
-    <h2><span>7.</span> 🛠️ Чек-лист и Архитектура Лабораторной работы №1</h2>
-    <p>Требования к защите лабораторной работы по хеш-таблицам (АиСД, 3-й курс):</p>
+  <!-- SECTION 7: Lab #1 Specification -->
+  <section id="lab-spec" class="card">
+    <h2><span>7.</span> 🛠️ Требования и Архитектура Лабораторной работы №1</h2>
+    
+    <div class="callout danger">
+      <strong>КАТЕГОРИЧЕСКИЙ ЗАПРЕТ:</strong> Использование стандартных контейнеров (<code>std::unordered_map</code>, <code>std::map</code>, <code>HashMap</code>, <code>Dictionary</code>) <strong>СТРОГО ЗАПРЕЩЕНО</strong>. Весь код пишется вручную!
+    </div>
+
+    <h3>Чек-лист готовности к сдаче:</h3>
+    <ul style="margin-left:20px; font-size:14px; color:#cbd5e1; line-height:1.7;">
+      <li>[x] <strong>Таблица записей:</strong> картотека с атрибутами (ФИО, адрес, прописка, телефон, паспорт).</li>
+      <li>[x] <strong>Индивидуальный вариант:</strong> определен по списку старост (Вика, Лена) — задает столбец поиска и метод открытой адресации.</li>
+      <li>[x] <strong>2 параллельные реализации:</strong> открытая адресация по варианту + метод цепочек.</li>
+      <li>[x] <strong>Хеш-функция:</strong> честный метод умножения с $A = (\sqrt{5} - 1) / 2$ без ручных округлений в коде.</li>
+      <li>[x] <strong>Строковые ключи:</strong> схема Горнера с модулем $m$ без переполнения `size_t`.</li>
+      <li>[x] <strong>Tombstone-маркер:</strong> поле статуса `0/1/2` с сохранением непрерывности поиска при удалении.</li>
+      <li>[x] <strong>Оценка качества в Excel:</strong> построена гистограмма частоты коллизий на выборке 100–1000 ключей, сделан вывод о равномерности.</li>
+    </ul>
 
     <div class="code-box">
-<span class="cm">// Архитектура элемента при открытой адресации в C++</span>
-<span class="kw">enum class</span> <span class="type">CellStatus</span> { <span class="var">EMPTY</span>, <span class="var">OCCUPIED</span>, <span class="var">DELETED</span> };
+<span class="cm">// Эталонная реализация метода умножения Кнута для Лабораторной №1</span>
+<span class="kw">#include</span> <span class="type">&lt;cmath&gt;</span>
+<span class="kw">#include</span> <span class="type">&lt;cstddef&gt;</span>
 
-<span class="kw">template</span> &lt;<span class="kw">typename</span> <span class="type">KeyType</span>, <span class="kw">typename</span> <span class="type">ValueType</span>&gt;
-<span class="kw">struct</span> <span class="type">HashCell</span> {
-    <span class="type">KeyType</span> key;
-    <span class="type">ValueType</span> value;
-    <span class="type">CellStatus</span> status = <span class="type">CellStatus</span>::<span class="var">EMPTY</span>;
-};
-
-<span class="cm">// Полиномиальный хеш для строк (схема Горнера без переполнения)</span>
-<span class="type">size_t</span> <span class="fn">polynomialStringHash</span>(<span class="kw">const</span> <span class="type">std::string</span>&amp; <span class="var">s</span>, <span class="type">size_t</span> <span class="var">m</span>) {
-    <span class="kw">const</span> <span class="type">size_t</span> <span class="var">p</span> = <span class="num">31</span>;
-    <span class="type">size_t</span> <span class="var">hash_val</span> = <span class="num">0</span>;
-    <span class="kw">for</span> (<span class="type">char</span> <span class="var">c</span> : <span class="var">s</span>) {
-        <span class="var">hash_val</span> = (<span class="var">hash_val</span> * <span class="var">p</span> + <span class="kw">static_cast</span>&lt;<span class="type">size_t</span>&gt;(<span class="var">c</span>)) % <span class="var">m</span>;
-    }
-    <span class="kw">return</span> <span class="var">hash_val</span>;
+<span class="type">size_t</span> <span class="fn">knuthMultiplicationHash</span>(<span class="type">size_t</span> <span class="var">key</span>, <span class="type">size_t</span> <span class="var">m</span>) {
+    <span class="cm">// Константа золотого сечения (√5 - 1) / 2</span>
+    <span class="kw">const double</span> <span class="var">A</span> = (<span class="fn">std::sqrt</span>(<span class="num">5.0</span>) - <span class="num">1.0</span>) / <span class="num">2.0</span>;
+    <span class="kw">double</span> <span class="var">val</span> = <span class="kw">static_cast</span>&lt;<span class="kw">double</span>&gt;(<span class="var">key</span>) * <span class="var">A</span>;
+    <span class="kw">double</span> <span class="var">fractional_part</span> = <span class="var">val</span> - <span class="fn">std::floor</span>(<span class="var">val</span>);
+    <span class="kw">return</span> <span class="kw">static_cast</span>&lt;<span class="type">size_t</span>&gt;(<span class="fn">std::floor</span>(<span class="kw">static_cast</span>&lt;<span class="kw">double</span>&gt;(<span class="var">m</span>) * <span class="var">fractional_part</span>));
 }
-    </div>
-
-    <div class="callout tip">
-      <strong>Чек-лист готовности к сдаче:</strong>
-      <ul style="margin-top:8px; margin-left:18px;">
-        <li>[x] Реализована и объяснена схема Горнера для строковых ключей.</li>
-        <li>[x] Обработан маркер <code>DELETED</code> (tombstone) при поиске и вставке.</li>
-        <li>[x] Вставка в ячейку со статусом <code>DELETED</code> разрешена (повторное использование памяти).</li>
-        <li>[x] Реализовано динамическое расширение при &alpha; &ge; 0.65 с полным пересчетом хешей.</li>
-      </ul>
     </div>
   </section>
 
-  <!-- Interactive JavaScript Logic -->
+  <!-- Interactive JavaScript -->
   <script>
     const TABLE_SIZE = 11;
-    let currentMode = 'linear'; // 'linear', 'quad', 'chain'
+    let currentMode = 'linear'; // 'linear', 'quad', 'double', 'chain'
+    let currentHashFunc = 'division'; // 'division', 'multiply', 'midsquare'
     let tableSlots = [];
     let totalProbesCount = 0;
+    const GOLDEN_A = (Math.sqrt(5) - 1) / 2;
 
     function initTable() {
       tableSlots = [];
       for (let i = 0; i < TABLE_SIZE; i++) {
         tableSlots.push({
-          status: 'EMPTY', // 'EMPTY', 'OCCUPIED', 'DELETED'
+          status: 'EMPTY',
           value: null,
           chain: []
         });
       }
       totalProbesCount = 0;
       renderTableDOM();
+      renderDistributionChart();
       updateStats();
+    }
+
+    function setHashFunc(fnType) {
+      currentHashFunc = fnType;
+      document.getElementById('hfDivision').classList.toggle('active', fnType === 'division');
+      document.getElementById('hfMultiply').classList.toggle('active', fnType === 'multiply');
+      document.getElementById('hfMidSquare').classList.toggle('active', fnType === 'midsquare');
+
+      const labels = {
+        'division': 'k mod 11',
+        'multiply': '⌊m · ((k·A) mod 1)⌋',
+        'midsquare': 'Mid-Square (биты k²)'
+      };
+      document.getElementById('statHfName').textContent = labels[fnType];
+      log(`Хеш-функция изменена на: ${labels[fnType]}`);
+      initTable();
     }
 
     function setMode(mode) {
       currentMode = mode;
       document.getElementById('btnModeLinear').classList.toggle('active', mode === 'linear');
       document.getElementById('btnModeQuad').classList.toggle('active', mode === 'quad');
+      document.getElementById('btnModeDouble').classList.toggle('active', mode === 'double');
       document.getElementById('btnModeChain').classList.toggle('active', mode === 'chain');
-      log(`Режим переключен на: ${mode === 'linear' ? 'Линейное пробирование' : mode === 'quad' ? 'Квадратичное пробирование' : 'Метод цепочек'}`);
+      log(`Режим коллизий: ${mode}`);
       initTable();
     }
 
-    function hashFunction(key, m) {
-      if (typeof key === 'number' || !isNaN(Number(key))) {
-        return Math.abs(parseInt(key, 10)) % m;
+    function computeHash(key, m) {
+      let numKey = (typeof key === 'number' || !isNaN(Number(key))) ? Math.abs(parseInt(key, 10)) : 0;
+      if (isNaN(Number(key)) || typeof key === 'string') {
+        let h = 0;
+        const p = 31;
+        for (let i = 0; i < key.length; i++) {
+          h = (h * p + key.charCodeAt(i)) % 1000003;
+        }
+        numKey = h;
       }
-      let hash = 0;
-      const p = 31;
-      for (let i = 0; i < key.length; i++) {
-        hash = (hash * p + key.charCodeAt(i)) % m;
+
+      if (currentHashFunc === 'division') {
+        return numKey % m;
+      } else if (currentHashFunc === 'multiply') {
+        const prod = numKey * GOLDEN_A;
+        const frac = prod - Math.floor(prod);
+        return Math.floor(m * frac);
+      } else if (currentHashFunc === 'midsquare') {
+        const sq = numKey * numKey;
+        return (sq >> 3) % m;
       }
-      return hash;
+      return numKey % m;
+    }
+
+    function secondHash(key, m) {
+      const numKey = (typeof key === 'number' || !isNaN(Number(key))) ? Math.abs(parseInt(key, 10)) : 1;
+      return 1 + (numKey % (m - 1));
     }
 
     function renderTableDOM() {
@@ -956,7 +958,6 @@
         const slotData = tableSlots[i];
         const col = document.createElement('div');
         col.className = 'ht-slot-col';
-        col.id = `col-${i}`;
 
         const idxSpan = document.createElement('div');
         idxSpan.className = 'ht-slot-idx';
@@ -975,13 +976,9 @@
             bucket.innerHTML = `<span style="font-size:11px; color:#94a3b8;">(${slotData.chain.length})</span>`;
           }
         } else {
-          if (slotData.status === 'EMPTY') {
-            bucket.textContent = 'EMPTY';
-          } else if (slotData.status === 'DELETED') {
-            bucket.textContent = 'DEL ⚰️';
-          } else {
-            bucket.textContent = slotData.value;
-          }
+          if (slotData.status === 'EMPTY') bucket.textContent = 'EMPTY';
+          else if (slotData.status === 'DELETED') bucket.textContent = 'DEL ⚰️';
+          else bucket.textContent = slotData.value;
         }
 
         col.appendChild(idxSpan);
@@ -999,8 +996,44 @@
             col.appendChild(node);
           });
         }
-
         container.appendChild(col);
+      }
+    }
+
+    function renderDistributionChart() {
+      const chart = document.getElementById('chartBarsContainer');
+      chart.innerHTML = '';
+
+      const counts = new Array(TABLE_SIZE).fill(0);
+      if (currentMode === 'chain') {
+        tableSlots.forEach((s, idx) => counts[idx] = s.chain.length);
+      } else {
+        tableSlots.forEach((s, idx) => counts[idx] = (s.status === 'OCCUPIED' ? 1 : 0));
+      }
+
+      const maxVal = Math.max(...counts, 4);
+
+      for (let i = 0; i < TABLE_SIZE; i++) {
+        const col = document.createElement('div');
+        col.className = 'chart-col';
+
+        const valSpan = document.createElement('div');
+        valSpan.className = 'chart-col-val';
+        valSpan.textContent = counts[i];
+
+        const bar = document.createElement('div');
+        bar.className = 'chart-bar' + (counts[i] >= 3 ? ' high' : '');
+        const heightPct = (counts[i] / maxVal) * 100;
+        bar.style.height = `${Math.max(4, heightPct)}%`;
+
+        const lbl = document.createElement('div');
+        lbl.className = 'chart-col-label';
+        lbl.textContent = i;
+
+        col.appendChild(valSpan);
+        col.appendChild(bar);
+        col.appendChild(lbl);
+        chart.appendChild(col);
       }
     }
 
@@ -1026,15 +1059,12 @@
         fillBar.style.background = 'var(--accent-red)';
         document.getElementById('statAlpha').style.color = 'var(--accent-red)';
         document.getElementById('lfWarning').style.display = currentMode !== 'chain' ? 'block' : 'none';
-      } else if (alpha >= 0.45) {
-        fillBar.style.background = 'var(--accent-amber)';
-        document.getElementById('statAlpha').style.color = 'var(--accent-amber)';
-        document.getElementById('lfWarning').style.display = 'none';
       } else {
         fillBar.style.background = 'var(--accent-green)';
         document.getElementById('statAlpha').style.color = 'var(--accent-green)';
         document.getElementById('lfWarning').style.display = 'none';
       }
+      renderDistributionChart();
     }
 
     function log(msg, type = 'normal') {
@@ -1046,7 +1076,7 @@
       c.scrollTop = c.scrollHeight;
     }
 
-    async function highlightBucket(idx, type, duration = 300) {
+    async function highlightBucket(idx, type, duration = 200) {
       const el = document.getElementById(`bucket-${idx}`);
       if (!el) return;
       el.classList.add(type);
@@ -1054,15 +1084,15 @@
       el.classList.remove(type);
     }
 
-    async function insertKey(key) {
-      const baseHash = hashFunction(key, TABLE_SIZE);
+    async function insertKey(key, isBatch = false) {
+      const baseHash = computeHash(key, TABLE_SIZE);
 
       if (currentMode === 'chain') {
         totalProbesCount += 1;
-        await highlightBucket(baseHash, 'hit', 200);
+        if (!isBatch) await highlightBucket(baseHash, 'hit', 180);
         tableSlots[baseHash].chain.push(key);
         tableSlots[baseHash].status = 'OCCUPIED';
-        log(`Ключ ${key}: h(${key}) = ${baseHash}. Добавлен в список ячейки ${baseHash} (попыток: 1)`, 'success');
+        if (!isBatch) log(`Ключ ${key} (hash=${baseHash}) добавлен в корзину ${baseHash} (1 проба)`, 'success');
         renderTableDOM();
         updateStats();
         return { success: true, probes: 1 };
@@ -1070,26 +1100,35 @@
 
       let probes = 0;
       let firstDeletedIndex = -1;
+      const h2 = (currentMode === 'double') ? secondHash(key, TABLE_SIZE) : 1;
 
       for (let i = 0; i < TABLE_SIZE; i++) {
         probes++;
-        let targetIdx = (currentMode === 'linear') ? (baseHash + i) % TABLE_SIZE : (baseHash + i + i * i) % TABLE_SIZE;
-        await highlightBucket(targetIdx, 'probing', 150);
+        let targetIdx;
+        if (currentMode === 'linear') {
+          targetIdx = (baseHash + i) % TABLE_SIZE;
+        } else if (currentMode === 'quad') {
+          targetIdx = (baseHash + i + i * i) % TABLE_SIZE;
+        } else if (currentMode === 'double') {
+          targetIdx = (baseHash + i * h2) % TABLE_SIZE;
+        }
+
+        if (!isBatch) await highlightBucket(targetIdx, 'probing', 120);
 
         if (tableSlots[targetIdx].status === 'EMPTY') {
           const insertIdx = (firstDeletedIndex !== -1) ? firstDeletedIndex : targetIdx;
           tableSlots[insertIdx].status = 'OCCUPIED';
           tableSlots[insertIdx].value = key;
           totalProbesCount += probes;
-          await highlightBucket(insertIdx, 'hit', 200);
-          log(`Ключ ${key}: h(${key})=${baseHash}. Записан в ячейку ${insertIdx} (попыток: ${probes})`, 'success');
+          if (!isBatch) await highlightBucket(insertIdx, 'hit', 180);
+          if (!isBatch) log(`Ключ ${key}: h=${baseHash}. Записан в ячейку ${insertIdx} (${probes} проб)`, 'success');
           renderTableDOM();
           updateStats();
           return { success: true, probes: probes };
         } else if (tableSlots[targetIdx].status === 'DELETED' && firstDeletedIndex === -1) {
           firstDeletedIndex = targetIdx;
         } else if (tableSlots[targetIdx].status === 'OCCUPIED' && tableSlots[targetIdx].value === key) {
-          log(`Ключ ${key} уже существует в ячейке ${targetIdx}!`, 'warn');
+          if (!isBatch) log(`Ключ ${key} уже присутствует в ячейке ${targetIdx}!`, 'warn');
           return { success: false, probes: probes };
         }
       }
@@ -1098,52 +1137,53 @@
         tableSlots[firstDeletedIndex].status = 'OCCUPIED';
         tableSlots[firstDeletedIndex].value = key;
         totalProbesCount += probes;
-        await highlightBucket(firstDeletedIndex, 'hit', 200);
-        log(`Ключ ${key}: записан на место удаленной ячейки ${firstDeletedIndex} (попыток: ${probes})`, 'success');
+        if (!isBatch) await highlightBucket(firstDeletedIndex, 'hit', 180);
+        if (!isBatch) log(`Ключ ${key}: записан на место Tombstone ${firstDeletedIndex} (${probes} проб)`, 'success');
         renderTableDOM();
         updateStats();
         return { success: true, probes: probes };
       }
 
-      log(`Ошибка: Таблица переполнена! Не удалось вставить ключ ${key}`, 'err');
+      log(`Ошибка: Таблица переполнена для ключа ${key}`, 'err');
       return { success: false, probes: probes };
     }
 
     async function searchKey(key) {
-      const baseHash = hashFunction(key, TABLE_SIZE);
-
+      const baseHash = computeHash(key, TABLE_SIZE);
       if (currentMode === 'chain') {
         await highlightBucket(baseHash, 'probing', 200);
         const list = tableSlots[baseHash].chain;
         const pos = list.indexOf(key);
         if (pos !== -1) {
           await highlightBucket(baseHash, 'hit', 300);
-          log(`Поиск ${key}: НАЙДЕН в корзине ${baseHash}, позиция в цепочке: ${pos + 1} (шагов: 1)`, 'success');
+          log(`Поиск ${key}: НАЙДЕН в корзине ${baseHash}, позиция ${pos + 1}`, 'success');
         } else {
           log(`Поиск ${key}: НЕ найден в корзине ${baseHash}`, 'err');
         }
         return;
       }
 
+      const h2 = (currentMode === 'double') ? secondHash(key, TABLE_SIZE) : 1;
       for (let i = 0; i < TABLE_SIZE; i++) {
-        let idx = (currentMode === 'linear') ? (baseHash + i) % TABLE_SIZE : (baseHash + i + i * i) % TABLE_SIZE;
+        let idx = (currentMode === 'linear') ? (baseHash + i) % TABLE_SIZE :
+                  (currentMode === 'quad') ? (baseHash + i + i * i) % TABLE_SIZE :
+                  (baseHash + i * h2) % TABLE_SIZE;
         await highlightBucket(idx, 'probing', 150);
 
         if (tableSlots[idx].status === 'EMPTY') {
-          log(`Поиск ${key}: пустая ячейка ${idx}. Ключ ОТСУТСТВУЕТ (шагов: ${i + 1})`, 'err');
+          log(`Поиск ${key}: встречен EMPTY в [${idx}]. Ключ ОТСУТСТВУЕТ (шагов: ${i + 1})`, 'err');
           return;
         } else if (tableSlots[idx].status === 'OCCUPIED' && tableSlots[idx].value == key) {
           await highlightBucket(idx, 'hit', 300);
-          log(`Поиск ${key}: НАЙДЕН в ячейке ${idx} (шагов: ${i + 1})`, 'success');
+          log(`Поиск ${key}: НАЙДЕН в ячейке [${idx}] (шагов: ${i + 1})`, 'success');
           return;
         }
       }
-      log(`Поиск ${key}: Ключ не найден во всей таблице.`, 'err');
+      log(`Поиск ${key}: Ключ не найден (проверены все доступные ячейки)`, 'err');
     }
 
     async function deleteKey(key) {
-      const baseHash = hashFunction(key, TABLE_SIZE);
-
+      const baseHash = computeHash(key, TABLE_SIZE);
       if (currentMode === 'chain') {
         const list = tableSlots[baseHash].chain;
         const pos = list.indexOf(key);
@@ -1151,7 +1191,7 @@
           list.splice(pos, 1);
           if (list.length === 0) tableSlots[baseHash].status = 'EMPTY';
           await highlightBucket(baseHash, 'hit', 200);
-          log(`Ключ ${key} удален из цепочки корзины ${baseHash}`, 'warn');
+          log(`Ключ ${key} удален из корзины ${baseHash}`, 'warn');
           renderTableDOM();
           updateStats();
         } else {
@@ -1160,17 +1200,20 @@
         return;
       }
 
+      const h2 = (currentMode === 'double') ? secondHash(key, TABLE_SIZE) : 1;
       for (let i = 0; i < TABLE_SIZE; i++) {
-        let idx = (currentMode === 'linear') ? (baseHash + i) % TABLE_SIZE : (baseHash + i + i * i) % TABLE_SIZE;
+        let idx = (currentMode === 'linear') ? (baseHash + i) % TABLE_SIZE :
+                  (currentMode === 'quad') ? (baseHash + i + i * i) % TABLE_SIZE :
+                  (baseHash + i * h2) % TABLE_SIZE;
         await highlightBucket(idx, 'probing', 150);
 
         if (tableSlots[idx].status === 'EMPTY') {
-          log(`Удаление: Ключ ${key} не найден (пустая ячейка ${idx})`, 'err');
+          log(`Удаление: Ключ ${key} отсутствует (встречен EMPTY)`, 'err');
           return;
         } else if (tableSlots[idx].status === 'OCCUPIED' && tableSlots[idx].value == key) {
           tableSlots[idx].status = 'DELETED';
           tableSlots[idx].value = null;
-          log(`Ключ ${key} в ячейке ${idx} помечен как DELETED (Tombstone)`, 'warn');
+          log(`Ключ ${key} в [${idx}] помечен как DELETED (Tombstone ⚰️)`, 'warn');
           renderTableDOM();
           updateStats();
           return;
@@ -1196,13 +1239,13 @@
     }
     function resetTable() {
       initTable();
-      log('Таблица очищена.');
+      log('Таблица полностью очищена.');
     }
 
     async function runLectureBenchmark() {
+      setHashFunc('division');
       initTable();
-      log('=== СТАРТ ЧИСЛОВОГО ЭКСПЕРИМЕНТА ИЗ ЛЕКЦИИ ===', 'warn');
-      log('Набор из 7 ключей: 54, 77, 94, 89, 14, 45, 76 (Размер m = 11)');
+      log('=== СТАРТ ЧИСЛОВОГО ЭКСПЕРИМЕНТА ИЗ ЛЕКЦИИ (7 КЛЮЧЕЙ) ===', 'warn');
       const keys = [54, 77, 94, 89, 14, 45, 76];
       let stepProbes = [];
 
@@ -1214,147 +1257,184 @@
       const total = stepProbes.reduce((a, b) => a + b, 0);
       const avg = (total / keys.length).toFixed(2);
       log(`=== ИТОГИ ЭКСПЕРИМЕНТА (${currentMode.toUpperCase()}) ===`, 'success');
-      log(`Суммарно проб: ${total} на 7 элементов (в среднем ${avg} попытки на элемент)`, 'success');
+      log(`Суммарно проб: ${total} (в среднем ${avg} на ключ)`, 'success');
       if (currentMode === 'linear') {
-        log(`В лекции: 13 проб (1.86 в среднем). Полное совпадение с лекцией!`, 'success');
+        log(`В лекции: 13 проб (1.86 в среднем). Полное соответствие теории!`, 'success');
       } else if (currentMode === 'chain') {
-        log(`В лекции: 9 проб (1.29 в среднем). Метод цепочек показал преимущество!`, 'success');
+        log(`В лекции: 9 проб (1.29 в среднем). Метод цепочек показал выигрыш!`, 'success');
       }
     }
 
+    async function generateStressTest(n = 50) {
+      setMode('chain');
+      initTable();
+      log(`=== СТРЕСС-ТЕСТИРОВАНИЕ: ГЕНЕРАЦИЯ ${n} СЛУЧАЙНЫХ КЛЮЧЕЙ ===`, 'warn');
+      for (let i = 0; i < n; i++) {
+        const rKey = Math.floor(Math.random() * 10000);
+        await insertKey(rKey, true);
+      }
+      log(`Стресс-тест завершен: ${n} ключей распределены по корзинам. Обратите внимание на график внизу!`, 'success');
+    }
+
     /* ==========================================================
-       QUIZ ENGINE DATA & LOGIC
+       QUIZ ENGINE DATA (12 COMPREHENSIVE QUESTIONS)
        ========================================================== */
     const quizData = [
       {
         tier: 1,
         tierName: "Уровень 1 • Формулы и База",
-        q: "Почему при размере универсума ключей |U| > m идеальная хеш-функция (без единой коллизии) математически невозможна?",
+        q: "Почему при размере универсума ключей |U| > m идеальная хеш-функция математически невозможна?",
         options: [
-          "Из-за принципа Дирихле (ящиков и голубей): если предметов больше, чем ящиков, в каком-то ящике окажется более одного предмета",
-          "Потому что операция взятия остатка mod m всегда теряет старшие биты",
-          "Из-за ограничений разрядности 64-битных регистров современных CPU",
+          "Из-за принципа Дирихле: если ключей больше, чем ячеек, как минимум два ключа неизбежно попадут в одну ячейку",
+          "Из-за потери старших бит при операции остатка от деления",
+          "Из-за аппаратного ограничения 64-битных регистров",
           "Потому что хеш-функция обязана работать за O(1)"
         ],
         correct: 0,
-        explain: "Принцип Дирихле гласит: при отображении множества мощности |U| в множество меньшей мощности m (|U| > m) неизбежно найдутся хотя бы два различных ключа k₁ ≠ k₂, дающих одинаковый индекс h(k₁) = h(k₂)."
+        explain: "Принцип Дирихле гласит: при отображении множества мощности |U| в множество меньшей мощности m (|U| > m) неизбежно найдутся k₁ ≠ k₂, такие что h(k₁) = h(k₂)."
       },
       {
         tier: 1,
         tierName: "Уровень 1 • Формулы и База",
-        q: "Чему равен коэффициент заполнения (Load Factor) хеш-таблицы и каков его строгий предел при открытой адресации?",
+        q: "Чему равен коэффициент заполнения (Load Factor) α и каков его предел в открытой адресации?",
         options: [
           "α = n / m, и в открытой адресации строго α ≤ 1.0",
           "α = m / n, и в открытой адресации строго α > 1.0",
-          "α = n · m, и его предел равен объему кэша L1",
-          "α = log₂(n / m), предел равен числу коллизий"
+          "α = n · m, предел равен объему кэша L1",
+          "α = log₂(n / m)"
         ],
         correct: 0,
-        explain: "Коэффициент заполнения α = n / m (число элементов, деленное на число ячеек). В открытой адресации каждый элемент хранится непосредственно в ячейке массива, поэтому элементов не может быть больше, чем ячеек (α ≤ 1)."
+        explain: "Коэффициент заполнения α = n / m. В открытой адресации все элементы хранятся внутри плоского массива, поэтому n не может превышать m (α ≤ 1)."
       },
       {
         tier: 1,
         tierName: "Уровень 1 • Формулы и База",
         q: "Какова асимптотическая сложность поиска в хеш-таблице с методом цепочек в худшем случае?",
         options: [
-          "O(n) — если хеш-функция вырождается и направляет все ключи в одну ячейку",
-          "Всегда строго O(1) благодаря связным спискам",
-          "O(log n) как в сбалансированном дереве поиска",
-          "O(m) где m — емкость таблицы"
+          "O(n) — если все ключи попадают в одну ячейку и список вырождается в линейный",
+          "Строго O(1) благодаря связным спискам",
+          "O(log n) как в красно-черном дереве",
+          "O(m)"
         ],
         correct: 0,
-        explain: "В среднем случае поиск занимает O(1), однако в худшем случае (например, при атаке коллизиями или плохой хеш-функции) все n ключей попадают в один бакет, превращаясь в линейный связный список длиной n с поиском O(n)."
+        explain: "В среднем случае поиск занимает O(1 + α), но в худшем случае (при вырождении функции) все n элементов образуют единый связный список длиной n с поиском O(n)."
       },
       {
         tier: 1,
         tierName: "Уровень 1 • Формулы и База",
-        q: "Что такое эффект первичной кластеризации (Primary Clustering) при линейном опробовании?",
+        q: "Что такое эффект первичной кластеризации при линейном опробовании?",
         options: [
-          "Образование длинных непрерывных блоков занятых ячеек, которые притягивают новые ключи и растут как снежный ком",
-          "Выделение кластеров оперативной памяти на уровне страниц виртуальной памяти ОС",
-          "Попадание всех элементов в нулевой индекс из-за четного размера таблицы",
-          "Необходимость повторного выделения памяти при заполнении первого бакета"
+          "Слипание занятых ячеек в длинные непрерывные блоки, которые перехватывают новые ключи и растут лавинообразно",
+          "Выделение страниц памяти в операционной системе",
+          "Заполнение нулевого индекса из-за четного m",
+          "Ошибка переполнения стека"
         ],
         correct: 0,
-        explain: "При линейном опробовании шаг равен 1. Чем длиннее блок занятых ячеек, тем выше вероятность, что новый ключ попадет в него и сделает этот кластер еще длиннее."
+        explain: "При линейном опробовании с шагом 1 чем длиннее непрерывный кластер, тем выше вероятность попадания нового ключа в него, что делает кластер еще длиннее."
       },
       {
         tier: 2,
-        tierName: "Уровень 2 • Расчеты и Трейсинг",
-        q: "Пусть m = 11, h(k) = k mod 11. В таблице с линейным опробованием уже заняты ячейки 10, 0, 1, 2, 3. Куда запишется ключ k = 76 и сколько проб потребуется?",
+        tierName: "Уровень 2 • Расчеты и Золотое Сечение",
+        q: "В методе умножения Кнута константа золотого сечения равна A = (√5 - 1) / 2. Чему равно её приблизительное значение и как её правильно задавать в коде ЛР №1?",
+        options: [
+          "A ≈ 0.6180339887... Задавать через точную формулу: (std::sqrt(5.0) - 1.0) / 2.0 без ручного округления",
+          "A = 0.618f, разрешено писать жестко в коде",
+          "A = 3.1415926, задавать через M_PI",
+          "A = 1.618, задавать как целое число"
+        ],
+        correct: 0,
+        explain: "Лектор строго требует не округлять константу вручную (запрещено float A = 0.618f), а вычислять её через (sqrt(5.0) - 1.0) / 2.0 для идеальной точности дробной части."
+      },
+      {
+        tier: 2,
+        tierName: "Уровень 2 • Расчеты и Золотое Сечение",
+        q: "Пусть m = 11, h(k) = k mod 11. В таблице с линейным опробованием заняты ячейки 10, 0, 1, 2, 3. Куда запишется ключ k = 76 и сколько проб потребуется?",
         options: [
           "В ячейку 4 за 6 проб (10 → 0 → 1 → 2 → 3 → 4)",
           "В ячейку 4 за 1 пробу",
           "В ячейку 10 за 2 пробы",
-          "Произойдет ошибка переполнения, так как 10 занята"
+          "Ошибка переполнения"
         ],
         correct: 0,
-        explain: "h(76) = 76 mod 11 = 10 (1-я проба: 10 занята). Следующие: 0 (занята), 1 (занята), 2 (занята), 3 (занята), 4 (свободна!). Итого 6 проб (10, 0, 1, 2, 3, 4) — яркий пример первичной кластеризации из лекции!"
+        explain: "h(76) = 76 mod 11 = 10. Ячейка 10 занята, 0 занята, 1 занята, 2 занята, 3 занята, 4 свободна! Итого 6 проб (10, 0, 1, 2, 3, 4)."
       },
       {
         tier: 2,
-        tierName: "Уровень 2 • Расчеты и Трейсинг",
-        q: "Дано m = 11, h(k) = k mod 11. Используется квадратичное опробование h(k, i) = (h(k) + i²) mod 11. Ключ k = 23 (h(23) = 1) сталкивается с занятой ячейкой 1. Каков будет индекс на 2-й и 3-й попытке (i = 1, i = 2)?",
+        tierName: "Уровень 2 • Расчеты и Золотое Сечение",
+        q: "При линейном опробовании с шагом c > 1 (например, c = 3) какое строгое математическое условие должно выполняться для c и размера таблицы m?",
         options: [
-          "i=1: индекс 2 ((1+1) mod 11); i=2: индекс 5 ((1+4) mod 11)",
-          "i=1: индекс 2; i=2: индекс 3",
-          "i=1: индекс 1; i=2: индекс 4",
-          "i=1: индекс 3; i=2: индекс 9"
+          "gcd(c, m) = 1 (числа c и m должны быть взаимно простыми), иначе алгоритм зациклится и обойдет не все ячейки",
+          "c должно быть строго четным числом",
+          "c должно делиться на m без остатка",
+          "c должно быть равно √m"
         ],
         correct: 0,
-        explain: "Для i = 1: (1 + 1²) mod 11 = 2 mod 11 = 2. Для i = 2: (1 + 2²) mod 11 = 5 mod 11 = 5. Квадратичный шаг позволяет быстро 'выпрыгнуть' из зоны плотного кластера."
+        explain: "Если gcd(c, m) > 1, шаг образует замкнутый цикл длины m / gcd(c, m), пропуская остальные ячейки. Для обхода всех m ячеек необходимо gcd(c, m) = 1."
       },
       {
         tier: 2,
-        tierName: "Уровень 2 • Расчеты и Трейсинг",
-        q: "В эксперименте из лекции (7 ключей на m = 11) метод цепочек потребовал 9 обращений, а линейная адресация — 13. Каково среднее число попыток на ключ?",
+        tierName: "Уровень 2 • Расчеты и Золотое Сечение",
+        q: "В чем фундаментальная разница между Двойным хешированием (Double Hashing) и Ре-хешированием (Rehashing)?",
         options: [
-          "Цепочки: 1.29 попытки; Линейная адресация: 1.86 попытки",
-          "Цепочки: 2.10 попытки; Линейная адресация: 3.50 попытки",
-          "Оба метода показали ровно 1.00 попытки",
-          "Цепочки: 0.90 попытки; Линейная адресация: 1.30 попытки"
+          "Двойное хеширование — это способ вычисления шага при коллизии отдельного ключа, а рехеширование — пересоздание всей таблицы с удвоением размера m → 2m",
+          "Это абсолютные синонимы",
+          "Рехеширование применяется только для строк, а двойное хеширование — для чисел",
+          "Двойное хеширование увеличивает размер таблицы в 2 раза"
         ],
         correct: 0,
-        explain: "9 / 7 ≈ 1.2857 (округляем до 1.29), а 13 / 7 ≈ 1.8571 (округляем до 1.86). Даже на миниатюрной выборке метод цепочек оказался на 30% эффективнее по числу проб."
+        explain: "Двойное хеширование: h(k, i) = (h₁ + i·h₂) mod m — локальное разрешение коллизии. Рехеширование: глобальная перестройка таблицы (m_new = 2m) при переполнении (α ≥ 0.65)."
       },
       {
         tier: 3,
         tierName: "Уровень 3 • Подводные камни Лаб и Экзамена",
-        q: "Почему при удалении элемента в открытой адресации фатально просто очищать ячейку (ставить EMPTY вместо DELETED)?",
+        q: "Почему при удалении элемента в открытой адресации недопустимо просто выставлять статус EMPTY (0) вместо DELETED (2)?",
         options: [
           "Поиск других ключей, которые попали в коллизию позже и перешагнули через эту ячейку, остановится на EMPTY и ошибочно вернет 'Не найдено'",
-          "Потому что операционная система вызовет segmentation fault при чтении пустой памяти",
-          "Потому что load factor α перестанет уменьшаться",
-          "Потому что нарушится монотонность хеш-функции"
+          "Произойдет segmentation fault",
+          "Коэффициент заполнения α перестанет уменьшаться",
+          "Нарушится монотонность хеш-функции"
         ],
         correct: 0,
-        explain: "Алгоритм поиска в открытой адресации завершает просмотр при первой встрече с пустой ячейкой (EMPTY). Если заменить удаленный ключ на EMPTY, цепочка пробирования разрывается, и все последующие элементы кластера становятся невидимыми для поиска."
+        explain: "Поиск в открытой адресации останавливается при первой встрече с ячейкой EMPTY. Замена удаленного ключа на EMPTY разрывает поисковую цепочку для всех элементов, попавших в коллизию позже."
       },
       {
         tier: 3,
         tierName: "Уровень 3 • Подводные камни Лаб и Экзамена",
-        q: "С точки зрения архитектуры современных процессоров, в чем преимущество Открытой адресации перед Методом цепочек при небольшом α ≤ 0.5?",
+        q: "Что представляет собой Инвертированный Индекс (Inverted Index) для поиска по вторичным ключам?",
         options: [
-          "Локальность данных в кэше (Cache Locality): плоский массив считывается в кэш-линию CPU (64 байта), а связный список цепочек вызывает постоянные Cache Miss при переходе по указателям в кучу",
-          "В открытой адресации хеш-функция выполняется параллельно на SIMD инструкциях",
-          "В методе цепочек невозможно хранить строки",
-          "Открытая адресация не требует вычисления операции взятия остатка"
+          "Словарь, где ключом является слово/тег, а значением — список идентификаторов документов, содержащих это слово",
+          "Массив, отсортированный в обратном порядке",
+          "Хеш-таблица с отрицательными индексами",
+          "Дерево поиска, зеркально отраженное по горизонтали"
         ],
         correct: 0,
-        explain: "Элементы массива в открытой адресации лежат последовательно в памяти. Процессор подгружает целую кэш-линию (64 байта), поэтому соседние пробы происходят мгновенно из L1-кэша. В связном списке каждый узел выделяется в куче отдельно, вызывая промахи кэша (pointer chasing) и накладные расходы по памяти (8 байт на указатель next)."
+        explain: "Инвертированный индекс меняет первичный и вторичный ключ местами: 'Слово' -> [Doc 1, Doc 4, Doc 7], обеспечивая поиск документов по атрибуту за O(1)."
       },
       {
         tier: 3,
         tierName: "Уровень 3 • Подводные камни Лаб и Экзамена",
-        q: "При достижении порога α ≥ 0.65 происходит увеличение таблицы. Почему нельзя просто сделать realloc / memcpy старого массива в новый массив размера 2m?",
+        q: "В чем главное достоинство Битовых карт (Bitmap Index) при сложных поисковых запросах ('Слово A AND Слово B NOT Слово C')?",
         options: [
-          "Потому что индекс каждой ячейки зависит от размера таблицы (k mod m_new). При изменении m меняется остаток, и все элементы должны быть перехешированы заново",
-          "Потому что функция memcpy затирает маркеры DELETED",
-          "Потому что размер таблицы обязан быть степенью двойки, а не удвоением",
-          "Потому что в C++ запрещено перемещать структуры с ключами"
+          "Запрос сводится к аппаратно ускоренным побитовым операциям процессора (AND, OR, NOT, XOR) над машинными словами",
+          "Они занимают 0 байт памяти",
+          "Они не требуют вычисления хеш-функций",
+          "Они автоматически исправляют опечатки в словах"
         ],
         correct: 0,
-        explain: "Формула индекса — h(k) = k mod m. Если m изменилось (например, с 11 до 23), то для ключа 54: 54 mod 11 = 10, но 54 mod 23 = 8! Элемент на старом месте 10 будет невозможно найти. Необходим полный пересчет (Рехеширование)."
+        explain: "Векторы присутствия слов перемножаются побитовыми командами процессора (Bitwise AND/OR/NOT), позволяя фильтровать миллионы документов за несколько тактов CPU."
+      },
+      {
+        tier: 3,
+        tierName: "Уровень 3 • Подводные камни Лаб и Экзамена",
+        q: "Каким должен быть график распределения частоты коллизий в Excel при стресс-тестировании качественной хеш-функции?",
+        options: [
+          "Ровная линия без резких пиков и провалов, свидетельствующая о равномерном заполнении корзин",
+          "График в виде экспоненты с пиком на нулевой ячейке",
+          "График с пиками на степенях двойки",
+          "График в виде синусоиды с амплитудой m"
+        ],
+        correct: 0,
+        explain: "Качественная хеш-функция дает равномерное псевдослучайное распределение. На графике частот попаданий в корзины не должно быть выраженных выбросов или пустых провалов."
       }
     ];
 
@@ -1414,11 +1494,8 @@
 
       buttons.forEach((btn, idx) => {
         btn.style.cursor = 'default';
-        if (idx === q.correct) {
-          btn.classList.add('correct');
-        } else if (idx === optIdx) {
-          btn.classList.add('incorrect');
-        }
+        if (idx === q.correct) btn.classList.add('correct');
+        else if (idx === optIdx) btn.classList.add('incorrect');
       });
 
       explainEl.style.display = 'block';
@@ -1430,23 +1507,20 @@
       const totalAnswered = Object.keys(userAnswers).length;
 
       for (let i = 0; i < quizData.length; i++) {
-        if (userAnswers[i] === quizData[i].correct) {
-          score++;
-        }
+        if (userAnswers[i] === quizData[i].correct) score++;
       }
 
       document.getElementById('quizScoreVal').textContent = `${score} / ${quizData.length}`;
-
       const status = document.getElementById('quizStatusText');
       if (totalAnswered === quizData.length) {
-        if (score >= 9) {
-          status.textContent = '🎉 Великолепно! 100% готовность к лабораторной и экзамену по АиСД.';
+        if (score >= 11) {
+          status.textContent = '🎉 Великолепно! 100% готовность к лабораторной работе и экзамену по АиСД.';
           status.style.color = '#34d399';
-        } else if (score >= 7) {
-          status.textContent = '👍 Хороший инженерный уровень. Обратите внимание на разборы ошибок.';
+        } else if (score >= 8) {
+          status.textContent = '👍 Хороший инженерный уровень. Обратите внимание на разборы решений.';
           status.style.color = '#38bdf8';
         } else {
-          status.textContent = '⚠️ Рекомендуется повторить конспект и запустить симулятор коллизий.';
+          status.textContent = '⚠️ Рекомендуется еще раз изучить конспект и формулу золотого сечения Кнута.';
           status.style.color = '#f59e0b';
         }
       } else {
