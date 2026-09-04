@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>ELI5: Операционные системы, Виртуализация и WSL</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card: #131b2e;
+      --card-hover: #1a253f;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #38bdf8;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-purple: #a855f7;
+      --accent-amber: #f59e0b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --code-bg: #0b1120;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+      background: radial-gradient(circle at 50% 0%, #17223b 0%, var(--bg) 75%);
+      color: var(--text);
+      padding: 16px;
+      max-width: 840px;
+      margin: 0 auto 60px;
+      line-height: 1.5;
+    }
+    .header-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .back-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 3px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    h1 {
+      font-size: clamp(22px, 5.5vw, 32px);
+      font-weight: 800;
+      margin-bottom: 8px;
+      line-height: 1.25;
+      background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p.lead {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    /* Comparison Grid */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    @media (min-width: 620px) {
+      .comparison-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .box {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    }
+    .box.bad {
+      border-left: 4px solid var(--accent-red);
+      background: linear-gradient(180deg, rgba(239, 68, 68, 0.06) 0%, var(--card) 100%);
+    }
+    .box.good {
+      border-left: 4px solid var(--accent-green);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, var(--card) 100%);
+    }
+    .box-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .box ul {
+      list-style: none;
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .box li {
+      margin-bottom: 8px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    /* Diagram Cards */
+    .diagram-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    }
+    .diagram-card h2 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #f1f5f9;
+    }
+    .diagram-sub {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+    svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 12px;
+    }
+
+    /* Interactive Arch Tabs */
+    .tab-nav {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+      scrollbar-width: thin;
+    }
+    .tab-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--muted);
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+    }
+    .tab-btn.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .tab-content {
+      display: none;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 16px;
+      animation: fadeIn 0.25s ease-out;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Info Grid */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    @media (min-width: 620px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+    }
+    .info-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 18px;
+    }
+    .info-card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent);
+    }
+    .info-card p, .info-card li {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .info-card ul {
+      list-style: none;
+      margin-top: 8px;
+    }
+    .info-card li {
+      margin-bottom: 6px;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    /* Code block */
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12.5px;
+      color: #38bdf8;
+      margin: 8px 0;
+      overflow-x: auto;
+    }
+
+    /* Interactive Quiz */
+    .quiz-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .quiz-item {
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .quiz-item:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+    .quiz-question {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .quiz-options {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .quiz-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quiz-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .quiz-btn.correct {
+      background: rgba(16, 185, 129, 0.2) !important;
+      border-color: var(--accent-green) !important;
+      color: #34d399 !important;
+      font-weight: 700;
+    }
+    .quiz-btn.wrong {
+      background: rgba(239, 68, 68, 0.2) !important;
+      border-color: var(--accent-red) !important;
+      color: #f87171 !important;
+    }
+    .quiz-feedback {
+      font-size: 12.5px;
+      margin-top: 8px;
+      line-height: 1.4;
+      display: none;
+    }
+
+    /* Pillars */
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    @media (min-width: 600px) {
+      .pillars-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .pillar {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+    }
+    .pillar-num {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .pillar-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .pillar-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    .tag-pill {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-right: 4px;
+    }
+    .tag-pill.blue { background: rgba(56, 189, 248, 0.2); color: #38bdf8; }
+    .tag-pill.green { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+    .tag-pill.purple { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
+    .tag-pill.red { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <div class="header-nav">
+    <a href="../index.html" class="back-link">&larr; Каталог ELI5 Hub</a>
+    <span class="badge">Инфраструктура &bull; ОС &bull; WSL</span>
+  </div>
+
+  <!-- Main Title -->
+  <h1>ОС, Виртуализация и WSL: Наглядный гид</h1>
+  <p class="lead">Ментальная модель на пальцах: как работают операционные системы, чем отличаются гипервизоры 1 и 2 типа, почему WSL2 быстрее VirtualBox и зачем нужны снэпшоты.</p>
+
+  <!-- 1. The Core Conflict -->
+  <div class="comparison-grid">
+    <div class="box bad">
+      <div class="box-title">❌ Заблуждение новичка</div>
+      <ul>
+        <li>⛔ <i>«Виртуальная машина — это просто программа в окне, как браузер или игра».</i></li>
+        <li>⛔ <i>«WSL — это полноценный эмулятор Linux или обычная виртуалка».</i></li>
+        <li>⛔ <i>«Динамический диск VDI сам сжимается обратно, когда удаляешь файлы».</i></li>
+        <li>⛔ <i>«Если отдать ВМ 90% всей памяти ПК, она будет летать быстрее».</i></li>
+      </ul>
+    </div>
+    <div class="box good">
+      <div class="box-title">✅ Инженерная реальность</div>
+      <ul>
+        <li>⚡ <b>ВМ — это аппаратная изоляция:</b> процессор сам переключает контексты гостевой ОС через Intel VT-x / AMD-V.</li>
+        <li>⚡ <b>WSL2 — это микро-виртуалка:</b> настоящее ядро Linux нативно живет под Hyper-V с динамической памятью.</li>
+        <li>⚡ <b>Диски и снэпшоты — это дельта-деревья:</b> базовый диск запечатывается на чтение, а изменения пишутся в новый файл.</li>
+        <li>⚡ <b>Баланс ресурсов:</b> удушение хоста Windows памятью убивает и саму ВМ из-за дефицита дискового кэша.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 2. Master Architecture Diagram -->
+  <div class="diagram-card">
+    <h2>📐 Архитектурные слои: От кремния до процесса</h2>
+    <p class="diagram-sub">Сравнение 4 подходов: прямое железо, гипервизор 1 типа (Bare-Metal), гипервизор 2 типа (Hosted) и подсистема WSL 2.</p>
+    
+    <svg viewBox="0 0 800 370" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Background grid -->
+      <rect width="800" height="370" rx="14" fill="#0c1322"/>
+
+      <!-- COLUMN 1: Bare Metal -->
+      <g>
+        <rect x="25" y="20" width="170" height="330" rx="10" fill="#131b2e" stroke="rgba(255,255,255,0.08)"/>
+        <text x="110" y="45" fill="#f8fafc" font-size="13" font-weight="700" text-anchor="middle">1. Реальное железо</text>
+        <text x="110" y="62" fill="#94a3b8" font-size="10" text-anchor="middle">Без виртуализации</text>
+
+        <!-- User Space -->
+        <rect x="35" y="75" width="150" height="110" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+        <text x="110" y="115" fill="#38bdf8" font-size="12" font-weight="700" text-anchor="middle">Пользовательское ПО</text>
+        <text x="110" y="135" fill="#94a3b8" font-size="10" text-anchor="middle">Браузер, игры, компилятор</text>
+        <text x="110" y="155" fill="#64748b" font-size="9" text-anchor="middle">Ring 3 (User Mode)</text>
+
+        <!-- Host OS -->
+        <rect x="35" y="195" width="150" height="75" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+        <text x="110" y="225" fill="#10b981" font-size="12" font-weight="700" text-anchor="middle">Операционная система</text>
+        <text x="110" y="243" fill="#94a3b8" font-size="10" text-anchor="middle">Ядро Linux / Windows NT</text>
+        <text x="110" y="258" fill="#64748b" font-size="9" text-anchor="middle">Ring 0 (Kernel Mode)</text>
+
+        <!-- Hardware -->
+        <rect x="35" y="280" width="150" height="55" rx="8" fill="#334155"/>
+        <text x="110" y="305" fill="#f8fafc" font-size="11" font-weight="700" text-anchor="middle">ФИЗИЧЕСКОЕ ЖЕЛЕЗО</text>
+        <text x="110" y="322" fill="#cbd5e1" font-size="9" text-anchor="middle">CPU, RAM, SSD, GPU</text>
+      </g>
+
+      <!-- COLUMN 2: Type 1 Hypervisor -->
+      <g>
+        <rect x="215" y="20" width="175" height="330" rx="10" fill="#131b2e" stroke="rgba(255,255,255,0.08)"/>
+        <text x="302" y="45" fill="#f8fafc" font-size="13" font-weight="700" text-anchor="middle">2. Гипервизор 1 (Bare)</text>
+        <text x="302" y="62" fill="#a855f7" font-size="10" text-anchor="middle">ESXi, Proxmox, Hyper-V</text>
+
+        <!-- VMs side by side -->
+        <rect x="223" y="75" width="75" height="135" rx="6" fill="#1e293b" stroke="#a855f7" stroke-width="1.2"/>
+        <text x="260" y="95" fill="#a855f7" font-size="10" font-weight="700" text-anchor="middle">ВМ #1</text>
+        <rect x="227" y="105" width="67" height="40" rx="4" fill="#0f172a"/>
+        <text x="260" y="125" fill="#e2e8f0" font-size="8" text-anchor="middle">App / Web</text>
+        <rect x="227" y="152" width="67" height="50" rx="4" fill="#0f172a" stroke="#64748b"/>
+        <text x="260" y="172" fill="#10b981" font-size="8" font-weight="600" text-anchor="middle">Гостевая ОС</text>
+        <text x="260" y="188" fill="#64748b" font-size="7" text-anchor="middle">Ubuntu Kernel</text>
+
+        <rect x="307" y="75" width="75" height="135" rx="6" fill="#1e293b" stroke="#38bdf8" stroke-width="1.2"/>
+        <text x="344" y="95" fill="#38bdf8" font-size="10" font-weight="700" text-anchor="middle">ВМ #2</text>
+        <rect x="311" y="105" width="67" height="40" rx="4" fill="#0f172a"/>
+        <text x="344" y="125" fill="#e2e8f0" font-size="8" text-anchor="middle">Database</text>
+        <rect x="311" y="152" width="67" height="50" rx="4" fill="#0f172a" stroke="#64748b"/>
+        <text x="344" y="172" fill="#10b981" font-size="8" font-weight="600" text-anchor="middle">Гостевая ОС</text>
+        <text x="344" y="188" fill="#64748b" font-size="7" text-anchor="middle">Debian Kernel</text>
+
+        <!-- Hypervisor Type 1 -->
+        <rect x="223" y="220" width="159" height="50" rx="8" fill="#3b0764" stroke="#a855f7" stroke-width="1.5"/>
+        <text x="302" y="242" fill="#f3e8ff" font-size="11" font-weight="700" text-anchor="middle">ГИПЕРВИЗОР 1 ТИПА</text>
+        <text x="302" y="258" fill="#c084fc" font-size="9" text-anchor="middle">Напрямую управляет CPU/RAM</text>
+
+        <!-- Hardware -->
+        <rect x="223" y="280" width="159" height="55" rx="8" fill="#334155"/>
+        <text x="302" y="305" fill="#f8fafc" font-size="11" font-weight="700" text-anchor="middle">ФИЗИЧЕСКОЕ ЖЕЛЕЗО</text>
+        <text x="302" y="322" fill="#cbd5e1" font-size="9" text-anchor="middle">Сервер / Data Center</text>
+      </g>
+
+      <!-- COLUMN 3: Type 2 Hypervisor -->
+      <g>
+        <rect x="410" y="20" width="175" height="330" rx="10" fill="#131b2e" stroke="rgba(255,255,255,0.08)"/>
+        <text x="497" y="45" fill="#f8fafc" font-size="13" font-weight="700" text-anchor="middle">3. Гипервизор 2 (Hosted)</text>
+        <text x="497" y="62" fill="#f59e0b" font-size="10" text-anchor="middle">VirtualBox, VMware WS</text>
+
+        <!-- Guest VM -->
+        <rect x="418" y="75" width="159" height="75" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="1.2"/>
+        <text x="497" y="93" fill="#f59e0b" font-size="10" font-weight="700" text-anchor="middle">Гостевая ОС (Ubuntu/Debian)</text>
+        <text x="497" y="112" fill="#94a3b8" font-size="9" text-anchor="middle">Эмулируемые драйверы + ядро</text>
+        <text x="497" y="130" fill="#64748b" font-size="8" text-anchor="middle">Замедление I/O из-за двойного стека</text>
+
+        <!-- VirtualBox App -->
+        <rect x="418" y="157" width="159" height="38" rx="6" fill="#451a03" stroke="#f59e0b"/>
+        <text x="497" y="175" fill="#fef3c7" font-size="10" font-weight="700" text-anchor="middle">Программа VirtualBox</text>
+        <text x="497" y="188" fill="#fcd34d" font-size="8" text-anchor="middle">Приложение в хостовой ОС</text>
+
+        <!-- Host OS -->
+        <rect x="418" y="202" width="159" height="68" rx="6" fill="#1e293b" stroke="#10b981"/>
+        <text x="497" y="224" fill="#10b981" font-size="10" font-weight="700" text-anchor="middle">Хостовая ОС (Windows 11)</text>
+        <text x="497" y="242" fill="#94a3b8" font-size="8" text-anchor="middle">Собственные службы, драйверы, GUI</text>
+
+        <!-- Hardware -->
+        <rect x="418" y="280" width="159" height="55" rx="8" fill="#334155"/>
+        <text x="497" y="305" fill="#f8fafc" font-size="11" font-weight="700" text-anchor="middle">ФИЗИЧЕСКОЕ ЖЕЛЕЗО</text>
+        <text x="497" y="322" fill="#cbd5e1" font-size="9" text-anchor="middle">ПК пользователя</text>
+      </g>
+
+      <!-- COLUMN 4: WSL 2 -->
+      <g>
+        <rect x="605" y="20" width="170" height="330" rx="10" fill="#131b2e" stroke="rgba(255,255,255,0.08)"/>
+        <text x="690" y="45" fill="#f8fafc" font-size="13" font-weight="700" text-anchor="middle">4. Подсистема WSL 2</text>
+        <text x="690" y="62" fill="#10b981" font-size="10" text-anchor="middle">Гибрид под Hyper-V</text>
+
+        <!-- Windows & Linux side by side -->
+        <rect x="613" y="75" width="72" height="115" rx="6" fill="#1e293b" stroke="#38bdf8"/>
+        <text x="649" y="93" fill="#38bdf8" font-size="9" font-weight="700" text-anchor="middle">Windows Apps</text>
+        <text x="649" y="112" fill="#94a3b8" font-size="8" text-anchor="middle">VS Code</text>
+        <text x="649" y="128" fill="#94a3b8" font-size="8" text-anchor="middle">Explorer</text>
+        <text x="649" y="155" fill="#64748b" font-size="8" text-anchor="middle">Прямой I/O</text>
+
+        <rect x="693" y="75" width="74" height="115" rx="6" fill="#1e293b" stroke="#10b981"/>
+        <text x="730" y="93" fill="#10b981" font-size="9" font-weight="700" text-anchor="middle">Linux WSL2</text>
+        <text x="730" y="112" fill="#94a3b8" font-size="8" text-anchor="middle">Bash / Docker</text>
+        <text x="730" y="128" fill="#34d399" font-size="8" text-anchor="middle">Real Kernel</text>
+        <text x="730" y="155" fill="#64748b" font-size="8" text-anchor="middle">ext4 image</text>
+
+        <!-- Micro Hyper-V & Windows Kernel -->
+        <rect x="613" y="198" width="154" height="72" rx="8" fill="#064e3b" stroke="#10b981" stroke-width="1.2"/>
+        <text x="690" y="220" fill="#a7f3d0" font-size="10" font-weight="700" text-anchor="middle">Windows NT + Hyper-V</text>
+        <text x="690" y="238" fill="#6ee7b7" font-size="8" text-anchor="middle">Динамическое разделение RAM</text>
+        <text x="690" y="254" fill="#6ee7b7" font-size="8" text-anchor="middle">Общий localhost и /mnt/c/</text>
+
+        <!-- Hardware -->
+        <rect x="613" y="280" width="154" height="55" rx="8" fill="#334155"/>
+        <text x="690" y="305" fill="#f8fafc" font-size="11" font-weight="700" text-anchor="middle">ФИЗИЧЕСКОЕ ЖЕЛЕЗО</text>
+        <text x="690" y="322" fill="#cbd5e1" font-size="9" text-anchor="middle">Быстрый старт за 1 сек</text>
+      </g>
+    </svg>
+  </div>
+
+  <!-- 3. Interactive Architecture Deep-Dive Tabs -->
+  <div class="diagram-card">
+    <h2>🕹️ Интерактивный разбор: Выберите технологию</h2>
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab('tab-bare', this)">1. Железо (Bare-Metal)</button>
+      <button class="tab-btn" onclick="switchTab('tab-type1', this)">2. Гипервизор 1 (ESXi/Proxmox)</button>
+      <button class="tab-btn" onclick="switchTab('tab-type2', this)">3. Гипервизор 2 (VirtualBox)</button>
+      <button class="tab-btn" onclick="switchTab('tab-wsl1', this)">4. WSL 1 (Трансляция)</button>
+      <button class="tab-btn" onclick="switchTab('tab-wsl2', this)">5. WSL 2 (Микро-ВМ)</button>
+    </div>
+
+    <div id="tab-bare" class="tab-content active">
+      <h3 style="color:#38bdf8; margin-bottom:8px;">Физическая установка ОС на компьютер</h3>
+      <p style="color:var(--muted); font-size:13.5px; margin-bottom:10px;">Операционная система работает непосредственно с контроллерами накопителей, памятью и графическим ядром.</p>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:13px;">
+        <div style="background:rgba(16,185,129,0.1); padding:10px; border-radius:8px; border-left:3px solid var(--accent-green);">
+          <b style="color:var(--accent-green);">Плюсы:</b>
+          <div style="color:#cbd5e1; margin-top:4px;">100% производительность CPU/GPU, минимальные задержки дискового ввода-вывода (I/O).</div>
+        </div>
+        <div style="background:rgba(239,68,68,0.1); padding:10px; border-radius:8px; border-left:3px solid var(--accent-red);">
+          <b style="color:var(--accent-red);">Минусы:</b>
+          <div style="color:#cbd5e1; margin-top:4px;">Нет изоляции, переустановка долгая, нельзя легко перенести систему на другой ПК одним файлом.</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-type1" class="tab-content">
+      <h3 style="color:#a855f7; margin-bottom:8px;">Гипервизор 1 типа (Bare-Metal)</h3>
+      <p style="color:var(--muted); font-size:13.5px; margin-bottom:10px;">Устанавливается прямо на серверное железо вместо обычной ОС. Примеры: <b>VMware ESXi, Proxmox VE, Microsoft Hyper-V Server</b>.</p>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:13px;">
+        <div style="background:rgba(16,185,129,0.1); padding:10px; border-radius:8px; border-left:3px solid var(--accent-green);">
+          <b style="color:var(--accent-green);">Плюсы:</b>
+          <div style="color:#cbd5e1; margin-top:4px;">Оверхед менее 2-3%. Максимальная надежность корпоративного класса. Прямой доступ к аппаратной виртуализации.</div>
+        </div>
+        <div style="background:rgba(239,68,68,0.1); padding:10px; border-radius:8px; border-left:3px solid var(--accent-red);">
+          <b style="color:var(--accent-red);">Минусы:</b>
+          <div style="color:#cbd5e1; margin-top:4px;">Требует отдельный выделенный сервер. Не имеет привычного рабочего стола для повседневного домашнего использования.</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-type2" class="tab-content">
+      <h3 style="color:#f59e0b; margin-bottom:8px;">Гипервизор 2 типа (Hosted)</h3>
+      <p style="color:var(--muted); font-size:13.5px; margin-bottom:10px;">Обычная программа, запускаемая внутри Windows или macOS. Примеры: <b>Oracle VirtualBox, VMware Workstation Player</b>.</p>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:13px;">
+        <div style="background:rgba(16,185,129,0.1); padding:10px; border-radius:8px; border-left:3px solid var(--accent-green);">
+          <b style="color:var(--accent-green);">Плюсы:</b>
+          <div style="color:#cbd5e1; margin-top:4px;">Идеально для учебы и песочниц. Удобный графический интерфейс, моментальные снимки, поддержка любых гостевых ОС.</div>
+        </div>
+        <div style="background:rgba(239,68,68,0.1); padding:10px; border-radius:8px; border-left:3px solid var(--accent-red);">
+          <b style="color:var(--accent-red);">Минусы:</b>
+          <div style="color:#cbd5e1; margin-top:4px;">Потери производительности до 15-20% из-за двойного стека ядер. Высокий оверхед по памяти.</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-wsl1" class="tab-content">
+      <h3 style="color:#f87171; margin-bottom:8px;">WSL 1: Программная эмуляция (LXCore)</h3>
+      <p style="color:var(--muted); font-size:13.5px; margin-bottom:10px;">В WSL 1 <b>нет настоящего ядра Linux</b>. Системные вызовы (syscalls) транслируются в вызовы ядра Windows NT на лету через мост драйверов.</p>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:13px;">
+        <div style="background:rgba(16,185,129,0.1); padding:10px; border-radius:8px; border-left:3px solid var(--accent-green);">
+          <b style="color:var(--accent-green);">Плюсы:</b>
+          <div style="color:#cbd5e1; margin-top:4px;">Мгновенная работа с файлами диска C:, нет накладных расходов на виртуализацию ядра.</div>
+        </div>
+        <div style="background:rgba(239,68,68,0.1); padding:10px; border-radius:8px; border-left:3px solid var(--accent-red);">
+          <b style="color:var(--accent-red);">Минусы:</b>
+          <div style="color:#cbd5e1; margin-top:4px;">Неполная совместимость (многие системные вызовы Linux падали с ошибкой), невозможно запустить Docker без сторонней ВМ.</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-wsl2" class="tab-content">
+      <h3 style="color:#10b981; margin-bottom:8px;">WSL 2: Нативное микроядро Hyper-V</h3>
+      <p style="color:var(--muted); font-size:13.5px; margin-bottom:10px;">Полноценное, легковесное <b>настоящее ядро Linux</b>, работающее в изолированной микро-виртуалке гипервизора Hyper-V с файловой системой ext4 в VHDX.</p>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:13px;">
+        <div style="background:rgba(16,185,129,0.1); padding:10px; border-radius:8px; border-left:3px solid var(--accent-green);">
+          <b style="color:var(--accent-green);">Плюсы:</b>
+          <div style="color:#cbd5e1; margin-top:4px;">100% совместимость с системными вызовами, нативный Docker, динамическое освобождение RAM, старт за 1 секунду.</div>
+        </div>
+        <div style="background:rgba(239,68,68,0.1); padding:10px; border-radius:8px; border-left:3px solid var(--accent-red);">
+          <b style="color:var(--accent-red);">Минусы:</b>
+          <div style="color:#cbd5e1; margin-top:4px;">Доступ к файлам диска Windows через <code>/mnt/c/</code> идет через протокол 9P и работает медленнее, чем внутри ext4.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Disks and Snapshots Anatomy -->
+  <div class="diagram-card">
+    <h2>💾 Виртуальные диски VDI и Снимки состояний (Snapshots)</h2>
+    <p class="diagram-sub">Как файлы `.vdi` обманывают гостевую ОС и как создается дельта-цепочка снимков.</p>
+
+    <svg viewBox="0 0 800 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="800" height="280" rx="14" fill="#0c1322"/>
+
+      <!-- Part A: Dynamic vs Fixed -->
+      <g>
+        <rect x="25" y="25" width="360" height="230" rx="10" fill="#131b2e" stroke="rgba(255,255,255,0.08)"/>
+        <text x="205" y="52" fill="#38bdf8" font-size="13" font-weight="700" text-anchor="middle">Динамический vs Фиксированный диск</text>
+
+        <!-- Fixed representation -->
+        <rect x="45" y="75" width="145" height="145" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-dasharray="3 3"/>
+        <rect x="45" y="75" width="145" height="145" rx="8" fill="rgba(245, 158, 11, 0.15)"/>
+        <text x="117" y="100" fill="#f59e0b" font-size="11" font-weight="700" text-anchor="middle">Фиксированный VDI</text>
+        <text x="117" y="125" fill="#f8fafc" font-size="18" font-weight="800" text-anchor="middle">50 GB</text>
+        <text x="117" y="145" fill="#94a3b8" font-size="9" text-anchor="middle">Сразу занимает 50 GB</text>
+        <text x="117" y="165" fill="#94a3b8" font-size="9" text-anchor="middle">на реальном SSD хоста</text>
+        <text x="117" y="200" fill="#34d399" font-size="10" font-weight="600" text-anchor="middle">⚡ Макс. скорость I/O</text>
+
+        <!-- Dynamic representation -->
+        <rect x="215" y="75" width="145" height="145" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-dasharray="3 3"/>
+        <rect x="215" y="160" width="145" height="60" rx="8" fill="rgba(56, 189, 248, 0.25)" stroke="#38bdf8"/>
+        <text x="287" y="100" fill="#38bdf8" font-size="11" font-weight="700" text-anchor="middle">Динамический VDI</text>
+        <text x="287" y="125" fill="#94a3b8" font-size="11" text-anchor="middle">Лимит: 50 GB</text>
+        <text x="287" y="185" fill="#38bdf8" font-size="16" font-weight="800" text-anchor="middle">Занято: 6 GB</text>
+        <text x="287" y="205" fill="#cbd5e1" font-size="9" text-anchor="middle">Растет по мере записи</text>
+      </g>
+
+      <!-- Part B: Snapshots Chain -->
+      <g>
+        <rect x="405" y="25" width="370" height="230" rx="10" fill="#131b2e" stroke="rgba(255,255,255,0.08)"/>
+        <text x="590" y="52" fill="#a855f7" font-size="13" font-weight="700" text-anchor="middle">Снимки состояний (Snapshots) — Дельта-стек</text>
+
+        <!-- Base Image -->
+        <rect x="425" y="80" width="95" height="140" rx="8" fill="#1e293b" stroke="#64748b"/>
+        <text x="472" y="105" fill="#94a3b8" font-size="10" font-weight="700" text-anchor="middle">Базовый VDI</text>
+        <text x="472" y="125" fill="#cbd5e1" font-size="9" text-anchor="middle">Чистая ОС</text>
+        <rect x="435" y="145" width="75" height="24" rx="4" fill="#334155"/>
+        <text x="472" y="161" fill="#ef4444" font-size="9" font-weight="700" text-anchor="middle">READ ONLY 🔒</text>
+        <text x="472" y="195" fill="#64748b" font-size="8" text-anchor="middle">Запечатан</text>
+
+        <!-- Arrow 1 -->
+        <path d="M525 150 H550" stroke="#a855f7" stroke-width="2"/>
+
+        <!-- Snapshot 1 -->
+        <rect x="555" y="95" width="95" height="125" rx="8" fill="#1e293b" stroke="#a855f7"/>
+        <text x="602" y="120" fill="#c084fc" font-size="10" font-weight="700" text-anchor="middle">Снимок #1</text>
+        <text x="602" y="138" fill="#94a3b8" font-size="8" text-anchor="middle">Перед обновлением</text>
+        <rect x="565" y="152" width="75" height="22" rx="4" fill="#334155"/>
+        <text x="602" y="167" fill="#ef4444" font-size="8" font-weight="700" text-anchor="middle">READ ONLY 🔒</text>
+        <text x="602" y="195" fill="#a855f7" font-size="8" text-anchor="middle">Разница (Дельта)</text>
+
+        <!-- Arrow 2 -->
+        <path d="M655 150 H670" stroke="#10b981" stroke-width="2"/>
+
+        <!-- Active Snapshot -->
+        <rect x="675" y="110" width="85" height="110" rx="8" fill="#064e3b" stroke="#10b981" stroke-width="1.5"/>
+        <text x="717" y="135" fill="#a7f3d0" font-size="10" font-weight="700" text-anchor="middle">Текущий срез</text>
+        <text x="717" y="155" fill="#34d399" font-size="8" font-weight="700" text-anchor="middle">ACTIVE WRITES</text>
+        <text x="717" y="175" fill="#cbd5e1" font-size="8" text-anchor="middle">Все новые</text>
+        <text x="717" y="188" fill="#cbd5e1" font-size="8" text-anchor="middle">файлы пишутся</text>
+        <text x="717" y="201" fill="#cbd5e1" font-size="8" text-anchor="middle">только сюда</text>
+      </g>
+    </svg>
+  </div>
+
+  <!-- 5. Knowledge Cards Grid -->
+  <div class="grid-2">
+    <!-- Card 1: Linux & LTS -->
+    <div class="info-card">
+      <h3>🐧 Дистрибутивы Linux и магия LTS</h3>
+      <p><b>Дистрибутив</b> = Ядро Linux + Утилиты GNU + Пакетный менеджер + Окружение рабочего стола.</p>
+      <ul>
+        <li><span class="tag-pill blue">Ubuntu</span> Дружелюбный, идеален для новичков, десктопов и Docker.</li>
+        <li><span class="tag-pill purple">Debian</span> «Скала стабильности»: строгий отбор пакетов для серверов.</li>
+        <li><span class="tag-pill red">RHEL</span> Корпоративный стандарт для банков и крупных предприятий.</li>
+      </ul>
+      <div style="margin-top:10px; background:rgba(255,255,255,0.03); padding:8px 10px; border-radius:8px; font-size:12.5px;">
+        <b style="color:var(--accent-amber);">Что такое LTS (Long Term Support)?</b> Релизы выходят раз в 2 года (20.04, 22.04, 24.04) и поддерживаются <b>5 лет</b>. Пакеты не ломают API — код, написанный сегодня, гарантированно запустится через 4 года.
+      </div>
+    </div>
+
+    <!-- Card 2: SSH & PuTTY -->
+    <div class="info-card">
+      <h3>🔐 Удаленный доступ: SSH и Порт 22</h3>
+      <p><b>SSH (Secure Shell)</b> — протокол удаленного защищенного администрирования. Заменяет небезопасный старый Telnet, передававший пароли открытым текстом.</p>
+      <ul>
+        <li><b>Стандартный порт:</b> <code style="color:var(--accent);">22 / TCP</code>.</li>
+        <li><b>PuTTY:</b> Графический SSH-клиент для Windows для подключения к консоли Linux.</li>
+        <li><b>Проброс портов (Port Forwarding):</b> В VirtualBox нужно пробросить хостовый порт <code>2222 &rarr; 22</code> гостя для доступа из Windows.</li>
+      </ul>
+      <div class="code-block">ssh user@127.0.0.1 -p 2222 # вход из терминала Windows</div>
+    </div>
+
+    <!-- Card 3: Resources Allocation Formula -->
+    <div class="info-card">
+      <h3>⚖️ Золотое правило ресурсов (RAM и Диск)</h3>
+      <p>Как распределять ресурсы физического компьютера:</p>
+      <ul>
+        <li><b>Ubuntu Server (CLI):</b> 1-2 GB RAM, 15-20 GB Disk.</li>
+        <li><b>Ubuntu Desktop (GUI):</b> 4-8 GB RAM, 40-50 GB Disk.</li>
+      </ul>
+      <p style="margin-top:6px; font-size:12.5px; color:#f87171;">
+        ⚠️ <b>Ловушка жадности:</b> Если на хосте всего 16 GB, а вы отдадите ВМ 14 GB — хостовая Windows начнет сбрасывать свой кэш в своп. В итоге зависнут <i>обе системы одновременно</i>!
+      </p>
+    </div>
+
+    <!-- Card 4: ISO and Setup Process -->
+    <div class="info-card">
+      <h3>💿 Образ диска (ISO): Флешка в файле</h3>
+      <p><b>ISO</b> — это посекторный снимок оптического накопителя (стандарты ISO 9660 / UDF).</p>
+      <ul>
+        <li>В ВМ он вставляется в <b>эмулируемый CD-привод</b>.</li>
+        <li>Виртуальный BIOS стартует с ISO &rarr; запускает инсталлятор &rarr; размечает виртуальный диск <code>.vdi</code> &rarr; копирует ядро и пакеты.</li>
+        <li>После установки ISO извлекается, чтобы ВМ грузилась уже с VDI.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 6. Interactive Blitz Quiz -->
+  <div class="quiz-card">
+    <h2 style="font-size:18px; font-weight:700; margin-bottom:6px; color:#f8fafc;">🎯 Экспресс-тренажер: Проверь себя перед зачетом</h2>
+    <p style="color:var(--muted); font-size:13px; margin-bottom:16px;">Нажмите на верный вариант ответа. Система мгновенно объяснит причину.</p>
+
+    <!-- Q1 -->
+    <div class="quiz-item" id="q1">
+      <div class="quiz-question">1. Какой гипервизор работает прямо на физическом железе без прослойки ОС?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn" onclick="checkAnswer(this, false, 'VirtualBox — это гипервизор 2 типа, запускаемый внутри Windows/macOS.')">VirtualBox</button>
+        <button class="quiz-btn" onclick="checkAnswer(this, true, 'Верно! VMware ESXi и Proxmox — это гипервизоры 1 типа (Bare-Metal).')">VMware ESXi / Proxmox (Тип 1)</button>
+        <button class="quiz-btn" onclick="checkAnswer(this, false, 'WSL1 вообще не использует гипервизор, это эмуляция вызовов.')">WSL 1</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="quiz-item" id="q2">
+      <div class="quiz-question">2. Почему дистрибутивы с пометкой LTS рекомендуют для серверов и обучения?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn" onclick="checkAnswer(this, false, 'LTS не всегда содержит самые свежие версии, зато они максимально оттестированы.')">Там всегда самые экспериментальные фичи</button>
+        <button class="quiz-btn" onclick="checkAnswer(this, true, 'Верно! LTS поддерживается 5 лет, API стабилен и не ломает рабочий софт.')">Долгосрочная поддержка (5 лет), стабильность и отсутствие ломающих изменений</button>
+        <button class="quiz-btn" onclick="checkAnswer(this, false, 'LTS занимает столько же места, сколько и interim релизы.')">Они занимают в 10 раз меньше места на диске</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="quiz-item" id="q3">
+      <div class="quiz-question">3. Что происходит с базовым VDI диском при создании снимка состояния (Snapshot)?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn" onclick="checkAnswer(this, false, 'Нет, базовый диск остается нетронутым.')">Он удаляется и заменяется новым</button>
+        <button class="quiz-btn" onclick="checkAnswer(this, true, 'Именно! Базовый диск переводится в Read-Only, а все новые изменения пишутся в файл-дифференциал (дельта).')">Переводится в режим «только для чтения» (Read-Only), а запись идет в дельта-файл</button>
+        <button class="quiz-btn" onclick="checkAnswer(this, false, 'Снимок не сжимает базовый диск, это функция компакт-оптимизации.')">Он автоматически сжимается в ZIP архив</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="quiz-item" id="q4">
+      <div class="quiz-question">4. Чем фундаментально отличается WSL2 от WSL1?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn" onclick="checkAnswer(this, true, 'Точно! В WSL2 есть реальное кастомное ядро Linux в легковесной ВМ, а в WSL1 была лишь таблица трансляции syscalls.')">В WSL2 работает настоящее ядро Linux на базе микро-ВМ Hyper-V</button>
+        <button class="quiz-btn" onclick="checkAnswer(this, false, 'WSL1 как раз транслировал вызовы, а WSL2 запускает реальное ядро.')">WSL2 транслирует вызовы Linux в вызовы Windows NT</button>
+        <button class="quiz-btn" onclick="checkAnswer(this, false, 'Обе версии бесплатны.')">WSL2 доступен только по платной подписке</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="quiz-item" id="q5">
+      <div class="quiz-question">5. По какому сетевому порту по умолчанию работает протокол SSH?</div>
+      <div class="quiz-options">
+        <button class="quiz-btn" onclick="checkAnswer(this, false, 'Порт 80 — это незашифрованный HTTP веб-трафик.')">Порт 80</button>
+        <button class="quiz-btn" onclick="checkAnswer(this, true, 'Правильно! 22 TCP — всемирный стандарт защищенного терминала SSH.')">Порт 22</button>
+        <button class="quiz-btn" onclick="checkAnswer(this, false, 'Порт 443 — это защищенный HTTPS.')">Порт 443</button>
+      </div>
+      <div class="quiz-feedback"></div>
+    </div>
+  </div>
+
+  <!-- 7. The 3 Key Pillars -->
+  <div class="pillars-grid">
+    <div class="pillar">
+      <div class="pillar-num">01</div>
+      <div class="pillar-title">Изоляция без страха</div>
+      <div class="pillar-desc">ВМ и WSL позволяют смело тестировать вредоносный код, компилировать проекты и ломать системные пакеты без риска для хостовой Windows.</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-num">02</div>
+      <div class="pillar-title">Дельта-магия</div>
+      <div class="pillar-desc">Снимки состояний (Snapshots) — это машина времени. Перед любым опасным действием создайте снимок и откатитесь за 2 секунды при ошибке.</div>
+    </div>
+    <div class="pillar">
+      <div class="pillar-num">03</div>
+      <div class="pillar-title">WSL2 для скорости</div>
+      <div class="pillar-desc">Используйте WSL2 для повседневной разработки (Node/Python/Docker/C++), а VirtualBox — когда нужен чистый независимый дистрибутив с изоляцией сети.</div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      
+      btn.classList.add('active');
+      const target = document.getElementById(tabId);
+      if (target) {
+        target.classList.add('active');
+      }
+    }
+
+    function checkAnswer(button, isCorrect, explanation) {
+      const parent = button.closest('.quiz-item');
+      const buttons = parent.querySelectorAll('.quiz-btn');
+      const feedback = parent.querySelector('.quiz-feedback');
+
+      buttons.forEach(btn => {
+        btn.classList.remove('correct', 'wrong');
+        btn.disabled = true;
+      });
+
+      if (isCorrect) {
+        button.classList.add('correct');
+        feedback.innerHTML = `<span style="color:#34d399; font-weight:700;">✓ Правильно!</span> ${explanation}`;
+      } else {
+        button.classList.add('wrong');
+        feedback.innerHTML = `<span style="color:#f87171; font-weight:700;">✗ Неверно.</span> ${explanation}`;
+      }
+      feedback.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

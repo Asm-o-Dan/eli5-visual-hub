@@ -1,5 +1,22 @@
 [
   {
+    "id": "os-virtualization-wsl-guide",
+    "title": "ОС, Виртуализация и WSL: Наглядный гид",
+    "description": "Визуальный гид: архитектурные слои ОС, гипервизоры 1 и 2 типа, WSL1 vs WSL2, VDI диски, снэпшоты и блиц-тренажер.",
+    "category": "Инфраструктура и ОС",
+    "tags": [
+      "OS",
+      "Virtualization",
+      "WSL",
+      "Linux",
+      "Hypervisor",
+      "ELI5",
+      "Interactive"
+    ],
+    "date": "2026-09-04",
+    "file": "artifacts/os-virtualization-wsl-guide.html"
+  },
+  {
     "id": "aisd-lec1-hashing",
     "title": "АиСД: Хеширование и Хеш-таблицы (Части 1 и 2)",
     "description": "Фундаментальный модуль: метод умножения Кнута (золотое сечение), конечный автомат Tombstone, инвертированные индексы и битовые карты, симулятор с графиком коллизий и 12 инженерных тестов.",
