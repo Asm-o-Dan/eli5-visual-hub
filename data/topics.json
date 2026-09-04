@@ -1,5 +1,19 @@
 [
   {
+    "id": "prolog-mental-model",
+    "title": "Prolog: Ментальная модель, термы и база знаний",
+    "description": "Наглядное объяснение логического программирования: термы, структуры, унификация и бэктрекинг",
+    "category": "Architecture",
+    "tags": [
+      "Prolog",
+      "Logic",
+      "Architecture",
+      "ELI5"
+    ],
+    "date": "2026-09-04",
+    "file": "artifacts/prolog-mental-model.html"
+  },
+  {
     "id": "github-standup-projects-audit",
     "title": "Standup & Аудит GitHub Репозиториев",
     "description": "Полный анализ проектов @Asm-o-Dan, статус коммитов и пошаговый план доведения до совершенства.",

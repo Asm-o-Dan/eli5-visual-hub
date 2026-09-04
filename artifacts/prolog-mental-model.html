@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>ELI5: Ментальная модель и архитектура Prolog</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card: #131b2e;
+      --card-hover: #1a253f;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #38bdf8;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-purple: #a855f7;
+      --accent-amber: #f59e0b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --code-bg: #0b1120;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+      background: radial-gradient(circle at 50% 0%, #17223b 0%, var(--bg) 75%);
+      color: var(--text);
+      padding: 16px;
+      max-width: 820px;
+      margin: 0 auto 60px;
+      line-height: 1.5;
+    }
+    .header-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .back-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid var(--accent-purple);
+      color: var(--accent-purple);
+      padding: 3px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    h1 {
+      font-size: clamp(22px, 5.5vw, 32px);
+      font-weight: 800;
+      margin-bottom: 8px;
+      line-height: 1.25;
+      background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p.lead {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .highlight { color: var(--accent); font-weight: 600; }
+
+    /* Comparison Grid */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    @media (min-width: 600px) {
+      .comparison-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .box {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    }
+    .box.bad {
+      border-left: 4px solid var(--accent-red);
+      background: linear-gradient(180deg, rgba(239, 68, 68, 0.06) 0%, var(--card) 100%);
+    }
+    .box.good {
+      border-left: 4px solid var(--accent-green);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, var(--card) 100%);
+    }
+    .box-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .box ul {
+      list-style: none;
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .box li {
+      margin-bottom: 8px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    /* Diagram Cards */
+    .diagram-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    }
+    .diagram-card h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #f1f5f9;
+    }
+    svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 12px;
+    }
+
+    /* Section Cards Grid */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    @media (min-width: 620px) {
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+    }
+    .info-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 18px;
+    }
+    .info-card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent);
+    }
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12.5px;
+      color: #38bdf8;
+      margin: 8px 0;
+      overflow-x: auto;
+    }
+    .code-comment { color: #64748b; }
+    .code-functor { color: #f43f5e; font-weight: bold; }
+    .code-var { color: #fbbf24; font-weight: bold; }
+    .code-atom { color: #34d399; }
+
+    /* Pillars */
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    @media (min-width: 600px) {
+      .pillars-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .pillar {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 14px;
+      text-align: center;
+    }
+    .pillar-num {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .pillar-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .pillar-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="header-nav">
+    <a href="../index.html" class="back-link">&larr; Каталог ELI5 Hub</a>
+    <span class="badge">Prolog &bull; Mental Model</span>
+  </div>
+
+  <h1>Ментальная модель и архитектура Prolog</h1>
+  <p class="lead">Объяснение на пальцах: почему в Prolog нет циклов и переменных в привычном смысле, как устроена База Знаний и что такое Унификация.</p>
+
+  <!-- 1. The Core Conflict -->
+  <div class="comparison-grid">
+    <div class="box bad">
+      <div class="box-title">❌ Императивное мышление (Python/JS/C++)</div>
+      <ul>
+        <li>⛔ <b>«КАК делать»:</b> мы пишем пошаговый алгоритм, циклы <code>for</code>/<code>while</code>, флаги состояния.</li>
+        <li>⛔ <b>Жесткая направленность:</b> функция <code>calc(x) &rarr; y</code> умеет считать только слева направо. Обратную задачу <code>calc(?x) = y</code> нужно писать заново.</li>
+        <li>⛔ <b>Ручной поиск:</b> программист сам пишет обход графов, бэктрекинг и стек возвратов.</li>
+      </ul>
+    </div>
+    <div class="box good">
+      <div class="box-title">✅ Логическое мышление (Prolog)</div>
+      <ul>
+        <li>⚡ <b>«ЧТО истинно»:</b> мы объявляем факты и правила о мире, а компьютер сам выводит решение.</li>
+        <li>⚡ <b>Двунаправленность:</b> один и тот же предикат проверяет истинность, ищет аргументы или генерирует все варианты!</li>
+        <li>⚡ <b>Встроенная машина вывода:</b> движок языка сам делает сопоставление (унификацию) и откат из тупиков (бэктрекинг).</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 2. The Big Picture Engine Diagram -->
+  <div class="diagram-card">
+    <h2>📐 Архитектурный конвейер Prolog: Как рождается ответ</h2>
+    <svg viewBox="0 0 760 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="760" height="300" rx="14" fill="#0c1322"/>
+      
+      <!-- Box 1: Knowledge Base -->
+      <rect x="25" y="40" width="200" height="220" rx="12" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+      <rect x="40" y="55" width="170" height="26" rx="6" fill="#334155"/>
+      <text x="125" y="72" fill="#f8fafc" font-size="13" font-weight="700" text-anchor="middle">БАЗА ЗНАНИЙ</text>
+      
+      <!-- KB items -->
+      <rect x="40" y="95" width="170" height="65" rx="8" fill="#0f172a" stroke="#38bdf8" stroke-dasharray="3 3"/>
+      <text x="50" y="115" fill="#38bdf8" font-size="11" font-weight="700">ФАКТЫ (Аксиомы):</text>
+      <text x="50" y="132" fill="#94a3b8" font-size="10.5">человек(сократ).</text>
+      <text x="50" y="148" fill="#94a3b8" font-size="10.5">человек(платон).</text>
+
+      <rect x="40" y="170" width="170" height="75" rx="8" fill="#0f172a" stroke="#a855f7" stroke-dasharray="3 3"/>
+      <text x="50" y="190" fill="#a855f7" font-size="11" font-weight="700">ПРАВИЛА (Логика):</text>
+      <text x="50" y="208" fill="#e2e8f0" font-size="10.5">смертен(X) :-</text>
+      <text x="65" y="225" fill="#cbd5e1" font-size="10">человек(X).</text>
+
+      <!-- Plus Operator -->
+      <circle cx="255" cy="150" r="16" fill="#1e293b" stroke="#64748b"/>
+      <text x="255" y="156" fill="#f8fafc" font-size="18" font-weight="700" text-anchor="middle">+</text>
+
+      <!-- Box 2: Query -->
+      <rect x="295" y="90" width="150" height="120" rx="12" fill="#172554" stroke="#38bdf8" stroke-width="1.5"/>
+      <text x="370" y="125" fill="#bae6fd" font-size="13" font-weight="700" text-anchor="middle">ЗАПРОС / ЦЕЛЬ</text>
+      <text x="370" y="145" fill="#7dd3fc" font-size="11" text-anchor="middle">?- смертен(Кто).</text>
+      <text x="370" y="175" fill="#94a3b8" font-size="9.5" text-anchor="middle">«Найди мне такое Кто»</text>
+
+      <!-- Arrow to Engine -->
+      <path d="M445 150 H480" stroke="#38bdf8" stroke-width="2.5"/>
+      <polygon points="485,150 475,144 475,156" fill="#38bdf8"/>
+
+      <!-- Box 3: Resolution Engine -->
+      <rect x="490" y="50" width="245" height="200" rx="14" fill="#064e3b" stroke="#10b981" stroke-width="2"/>
+      <text x="612" y="80" fill="#ecfdf5" font-size="14" font-weight="800" text-anchor="middle">ДВИЖОК ВЫВОДА</text>
+      <text x="612" y="98" fill="#a7f3d0" font-size="11" text-anchor="middle">(SLD-Резолюция)</text>
+
+      <!-- Engine Steps -->
+      <rect x="505" y="115" width="215" height="52" rx="8" fill="#042f2e" stroke="#10b981" stroke-width="1"/>
+      <text x="515" y="133" fill="#34d399" font-size="11" font-weight="700">1. Унификация</text>
+      <text x="515" y="152" fill="#a7f3d0" font-size="10">Кто связывается с X &rarr; сократ</text>
+
+      <rect x="505" y="177" width="215" height="55" rx="8" fill="#042f2e" stroke="#10b981" stroke-width="1"/>
+      <text x="515" y="196" fill="#f59e0b" font-size="11" font-weight="700">2. Бэктрекинг (при нажатии ';')</text>
+      <text x="515" y="215" fill="#fde68a" font-size="10">Откат назад &rarr; Кто = платон</text>
+    </svg>
+  </div>
+
+  <!-- 3. Terms: The Universal Data Model -->
+  <div class="diagram-card">
+    <h2>🧬 Модель Данных: В Prolog «Всё есть Терм»</h2>
+    <p style="color: var(--muted); font-size: 13.5px; margin-bottom: 14px;">
+      В Prolog нет классов, примитивов или отдельных форматов данных. Любое значение, выражение и даже сам код — это <b>терм</b>.
+    </p>
+    <svg viewBox="0 0 740 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="740" height="260" rx="14" fill="#0c1322"/>
+
+      <!-- Root: Term -->
+      <rect x="310" y="15" width="120" height="40" rx="8" fill="#38bdf8" stroke="#0284c7"/>
+      <text x="370" y="40" fill="#031525" font-size="14" font-weight="800" text-anchor="middle">ТЕРМ (Term)</text>
+
+      <!-- Left Fork: Simple Terms -->
+      <path d="M330 55 L180 95" stroke="#64748b" stroke-width="2"/>
+      <rect x="100" y="95" width="160" height="36" rx="8" fill="#1e293b" stroke="#475569"/>
+      <text x="180" y="118" fill="#f8fafc" font-size="12" font-weight="700" text-anchor="middle">Простые термы</text>
+
+      <!-- Right Fork: Compound Terms -->
+      <path d="M410 55 L560 95" stroke="#64748b" stroke-width="2"/>
+      <rect x="470" y="95" width="180" height="36" rx="8" fill="#3b0764" stroke="#a855f7"/>
+      <text x="560" y="118" fill="#fae8ff" font-size="12" font-weight="700" text-anchor="middle">Составные (Структуры)</text>
+
+      <!-- Leaf Nodes Left: Atoms, Numbers, Variables -->
+      <path d="M130 131 V160" stroke="#475569" stroke-width="1.5"/>
+      <rect x="25" y="160" width="130" height="85" rx="8" fill="#0f172a" stroke="#38bdf8"/>
+      <text x="90" y="180" fill="#38bdf8" font-size="11" font-weight="700" text-anchor="middle">Атомы & Числа</text>
+      <text x="90" y="200" fill="#94a3b8" font-size="10" text-anchor="middle">Константы с мал. буквы</text>
+      <text x="90" y="222" fill="#34d399" font-family="monospace" font-size="11" text-anchor="middle">moscow, 42, 'мир'</text>
+
+      <path d="M220 131 V160" stroke="#475569" stroke-width="1.5"/>
+      <rect x="170" y="160" width="135" height="85" rx="8" fill="#0f172a" stroke="#fbbf24"/>
+      <text x="237" y="180" fill="#fbbf24" font-size="11" font-weight="700" text-anchor="middle">Переменные</text>
+      <text x="237" y="200" fill="#94a3b8" font-size="10" text-anchor="middle">С заглавной буквы или _</text>
+      <text x="237" y="222" fill="#fbbf24" font-family="monospace" font-size="11" text-anchor="middle">X, City, Result, _</text>
+
+      <!-- Leaf Nodes Right: Functors and Lists -->
+      <path d="M520 131 V160" stroke="#a855f7" stroke-width="1.5"/>
+      <rect x="420" y="160" width="160" height="85" rx="8" fill="#0f172a" stroke="#a855f7"/>
+      <text x="500" y="180" fill="#e879f9" font-size="11" font-weight="700" text-anchor="middle">Структуры (Функторы)</text>
+      <text x="500" y="200" fill="#94a3b8" font-size="10" text-anchor="middle">Имя + аргументы в ()</text>
+      <text x="500" y="222" fill="#e879f9" font-family="monospace" font-size="10" text-anchor="middle">point(X, Y), book(id, 'AI')</text>
+
+      <path d="M605 131 V160" stroke="#a855f7" stroke-width="1.5"/>
+      <rect x="595" y="160" width="135" height="85" rx="8" fill="#0f172a" stroke="#10b981"/>
+      <text x="662" y="180" fill="#10b981" font-size="11" font-weight="700" text-anchor="middle">Списки (Lists)</text>
+      <text x="662" y="200" fill="#94a3b8" font-size="10" text-anchor="middle">Синтаксис [Голова|Хвост]</text>
+      <text x="662" y="222" fill="#34d399" font-family="monospace" font-size="11" text-anchor="middle">[1, 2, 3], [H | T]</text>
+    </svg>
+  </div>
+
+  <!-- 4. Clauses Anatomy Grid -->
+  <div class="grid-2">
+    <div class="info-card">
+      <h3>🏛️ 1. Утверждения (Clauses)</h3>
+      <p style="font-size: 13px; color: var(--muted); margin-bottom: 8px;">
+        Программа состоит из предложений трех видов. Все они обязательно завершаются точкой <code>.</code>
+      </p>
+      
+      <div class="code-block">
+        <span class="code-comment">% 1. ФАКТ (безусловная истина)</span><br>
+        <span class="code-functor">любит</span>(<span class="code-atom">маша</span>, <span class="code-atom">пиццу</span>).<br><br>
+        <span class="code-comment">% 2. ПРАВИЛО (истина при условиях)</span><br>
+        <span class="code-functor">счастлив</span>(<span class="code-var">X</span>) <span class="code-functor">:-</span><br>
+        &nbsp;&nbsp;<span class="code-functor">сыт</span>(<span class="code-var">X</span>), <span class="code-functor">выспался</span>(<span class="code-var">X</span>).<br><br>
+        <span class="code-comment">% 3. ЗАПРОС (вопрос к базе)</span><br>
+        <span class="code-functor">?-</span> <span class="code-functor">счастлив</span>(<span class="code-var">Кто</span>).
+      </div>
+      <p style="font-size: 12px; color: var(--muted);">
+        Символ <code>:-</code> называют «шеей» (neck). Читается как: <i>«Голова истинна, ЕСЛИ верно Тело»</i>.
+      </p>
+    </div>
+
+    <div class="info-card">
+      <h3>🔄 2. Два супердвижка Prolog</h3>
+      <div style="margin-bottom: 12px;">
+        <div style="font-size: 13.5px; font-weight: 700; color: #38bdf8;">1. Унификация (Pattern-Matching)</div>
+        <p style="font-size: 12.5px; color: var(--muted);">
+          Это не присваивание! Это двустороннее уравнение. Например:
+          <br><code>point(X, 10) = point(20, Y)</code> мгновенно связывает: <b>X = 20</b> и <b>Y = 10</b>.
+        </p>
+      </div>
+      <div>
+        <div style="font-size: 13.5px; font-weight: 700; color: #f59e0b;">2. Бэктрекинг (Поиск с возвратом)</div>
+        <p style="font-size: 12.5px; color: var(--muted);">
+          Если выбранная ветка правил зашла в тупик (fail), Prolog автоматически откатывает сделанные подстановки переменных назад и пробует следующее правило или факт.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 Pillars Footer -->
+  <div class="diagram-card" style="margin-bottom: 0;">
+    <h2>💡 3 Главных принципа для понимания Prolog</h2>
+    <div class="pillars-grid">
+      <div class="pillar">
+        <div class="pillar-num">01</div>
+        <div class="pillar-title">Декларативность</div>
+        <div class="pillar-desc">Описывайте предметную область и законы мира, а не пошаговую инструкцию для процессора.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">02</div>
+        <div class="pillar-title">Гомоиконичность</div>
+        <div class="pillar-desc">Код и данные имеют одинаковый формат (термы). Программа может легко анализировать и создавать код.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">03</div>
+        <div class="pillar-title">Реверсивность</div>
+        <div class="pillar-desc">Один предикат может проверять ответ, вычислять выход по входу или восстанавливать вход по выходу.</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
