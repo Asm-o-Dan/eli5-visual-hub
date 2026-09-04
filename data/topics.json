@@ -1,5 +1,21 @@
 [
   {
+    "id": "aisd-lec1-hashing",
+    "title": "АиСД: Хеширование и Хеш-таблицы (Лекция 1)",
+    "description": "Полный интерактивный учебный модуль: прямая адресация, коллизии, открытая адресация vs цепочки, live симулятор и 10 проверочных тестов.",
+    "category": "АиСД (3 курс)",
+    "tags": [
+      "АиСД",
+      "Algorithms",
+      "Data Structures",
+      "Hash Tables",
+      "Interactive",
+      "Quiz"
+    ],
+    "date": "2026-09-04",
+    "file": "artifacts/aisd-lec1-hashing.html"
+  },
+  {
     "id": "prolog-interactive-handbook",
     "title": "Prolog: Полный интерактивный учебник (20 глав, 100 тестов)",
     "description": "Всеобъемлющий сборник-учебник по Prolog: от базовых фактов и унификации до CLP(FD), грамматик DCG и мета-программирования. 20 глав и 100 тестов.",
