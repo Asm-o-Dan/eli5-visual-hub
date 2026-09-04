@@ -1,15 +1,16 @@
 [
   {
     "id": "prolog-interactive-handbook",
-    "title": "Prolog: Полный интерактивный учебник (8 глав)",
-    "description": "Многостраничный сборник-учебник по основам Prolog: факты, правила, термы, унификация, списки, арифметика, отсечение и графы",
+    "title": "Prolog: Полный интерактивный учебник (20 глав, 100 тестов)",
+    "description": "Всеобъемлющий сборник-учебник по Prolog: от базовых фактов и унификации до CLP(FD), грамматик DCG и мета-программирования. 20 глав и 100 тестов.",
     "category": "Architecture",
     "tags": [
       "Prolog",
       "Teach",
       "Handbook",
       "Interactive",
-      "ELI5"
+      "ELI5",
+      "Comprehensive"
     ],
     "date": "2026-09-04",
     "file": "artifacts/prolog-interactive-handbook.html"

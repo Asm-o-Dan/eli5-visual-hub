@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>ELI5: Интерактивный учебник по Prolog</title>
+  <title>ELI5: Полный интерактивный учебник по Prolog (20 глав, 100 тестов)</title>
   <style>
     :root {
       --bg: #090d16;
@@ -24,9 +24,9 @@
       background: radial-gradient(circle at 50% 0%, #17223b 0%, var(--bg) 75%);
       color: var(--text);
       padding: 16px;
-      max-width: 860px;
+      max-width: 880px;
       margin: 0 auto 60px;
-      line-height: 1.5;
+      line-height: 1.55;
     }
     .header-nav {
       display: flex;
@@ -76,7 +76,7 @@
     .chapter-nav-wrapper {
       overflow-x: auto;
       margin-bottom: 20px;
-      padding-bottom: 6px;
+      padding-bottom: 8px;
       -webkit-overflow-scrolling: touch;
     }
     .chapter-nav {
@@ -90,7 +90,7 @@
       color: var(--muted);
       padding: 8px 14px;
       border-radius: 999px;
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
@@ -104,6 +104,7 @@
       background: rgba(56, 189, 248, 0.18);
       border-color: var(--accent);
       color: var(--accent);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
     }
 
     /* Content Cards */
@@ -123,23 +124,20 @@
       background: var(--card);
       border: 1px solid var(--card-border);
       border-radius: 18px;
-      padding: 20px;
+      padding: 22px;
       margin-bottom: 20px;
       box-shadow: 0 6px 25px rgba(0,0,0,0.25);
     }
     .card h2 {
-      font-size: 18px;
+      font-size: 19px;
       font-weight: 700;
       margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
       color: #f1f5f9;
     }
     .card h3 {
       font-size: 15px;
       font-weight: 700;
-      margin: 14px 0 6px;
+      margin: 16px 0 6px;
       color: var(--accent);
     }
 
@@ -155,11 +153,11 @@
       margin: 12px 0;
       overflow-x: auto;
     }
-    .kw { color: #f43f5e; font-weight: bold; }
-    .atom { color: #34d399; }
-    .v { color: #fbbf24; font-weight: bold; }
-    .num { color: #38bdf8; }
-    .cm { color: #64748b; font-style: italic; }
+    .code-kw { color: #f43f5e; font-weight: bold; }
+    .code-atom { color: #34d399; }
+    .code-var { color: #fbbf24; font-weight: bold; }
+    .code-num { color: #38bdf8; }
+    .code-comment { color: #64748b; font-style: italic; }
 
     .callout {
       border-radius: 12px;
@@ -184,10 +182,10 @@
       border: 1px solid rgba(56, 189, 248, 0.25);
       border-radius: 14px;
       padding: 16px;
-      margin-top: 16px;
+      margin-top: 14px;
     }
     .quiz-title {
-      font-size: 14.5px;
+      font-size: 14px;
       font-weight: 700;
       margin-bottom: 10px;
       color: #f8fafc;
@@ -230,19 +228,13 @@
       display: none;
     }
 
-    svg {
-      width: 100%;
-      height: auto;
-      display: block;
-      margin: 14px 0;
-      border-radius: 10px;
-    }
-
     /* Prev / Next buttons */
     .btn-row {
       display: flex;
       justify-content: space-between;
-      margin-top: 20px;
+      margin-top: 24px;
+      padding-top: 14px;
+      border-top: 1px solid var(--card-border);
     }
     .nav-btn {
       background: rgba(56, 189, 248, 0.12);
@@ -263,302 +255,1865 @@
 <body>
   <div class="header-nav">
     <a href="../index.html" class="back-link">&larr; Каталог ELI5 Hub</a>
-    <span class="badge">Master Interactive Handbook</span>
+    <span class="badge">Master Textbook &bull; 20 тем &bull; 100 тестов</span>
   </div>
 
   <h1>Prolog: Полный интерактивный учебник</h1>
-  <p class="lead">Все базовые темы декларативного и логического программирования в 8 интерактивных главах.</p>
+  <p class="lead">Все базовые, промежуточные и продвинутые темы логического программирования в 20 главах с 100 проверочными интерактивными тестами.</p>
 
   <!-- Horizontal Chapter Switcher -->
   <div class="chapter-nav-wrapper">
     <div class="chapter-nav" id="chapterNav">
-      <button class="ch-btn active" onclick="switchChapter(1)">1. Факты & Атомы</button>
-      <button class="ch-btn" onclick="switchChapter(2)">2. Правила &amp; И/ИЛИ</button>
-      <button class="ch-btn" onclick="switchChapter(3)">3. Термы & Структуры</button>
-      <button class="ch-btn" onclick="switchChapter(4)">4. Унификация & Равенство</button>
-      <button class="ch-btn" onclick="switchChapter(5)">5. Списки & Рекурсия</button>
-      <button class="ch-btn" onclick="switchChapter(6)">6. Арифметика (is)</button>
-      <button class="ch-btn" onclick="switchChapter(7)">7. Отсечение (!) &amp; \+</button>
-      <button class="ch-btn" onclick="switchChapter(8)">8. Графы & Практика</button>
+      <button class="ch-btn active" onclick="switchChapter(1)">1. База знаний, Факты и Атомы</button>
+<button class="ch-btn " onclick="switchChapter(2)">2. Переменные и Простые Запросы</button>
+<button class="ch-btn " onclick="switchChapter(3)">3. Правила, «Шея» (</button>
+<button class="ch-btn " onclick="switchChapter(4)">4. Модель данных — Термы и Структуры</button>
+<button class="ch-btn " onclick="switchChapter(5)">5. Механизм Унификации (=)</button>
+<button class="ch-btn " onclick="switchChapter(6)">6. Три Лица Равенства (=, ==, is)</button>
+<button class="ch-btn " onclick="switchChapter(7)">7. Списки и Рекурсия [Head | Tail]</button>
+<button class="ch-btn " onclick="switchChapter(8)">8. Стандартные Предикаты Списков</button>
+<button class="ch-btn " onclick="switchChapter(9)">9. Арифметика и Вычисления</button>
+<button class="ch-btn " onclick="switchChapter(10)">10. Хвостовая Рекурсия и Аккумуляторы</button>
+<button class="ch-btn " onclick="switchChapter(11)">11. Управление перебором — Отсечение (Cut</button>
+<button class="ch-btn " onclick="switchChapter(12)">12. Отрицание как Неуспех (\+) и CWA</button>
+<button class="ch-btn " onclick="switchChapter(13)">13. Сбор Всех Решений (findall, bagof, setof)</button>
+<button class="ch-btn " onclick="switchChapter(14)">14. Динамическая База Знаний (assert, retract)</button>
+<button class="ch-btn " onclick="switchChapter(15)">15. Ввод-Вывод и Форматирование (I/O)</button>
+<button class="ch-btn " onclick="switchChapter(16)">16. Грамматики Описания Предложений (DCG</button>
+<button class="ch-btn " onclick="switchChapter(17)">17. Поиск в Пространстве Состояний и Графы</button>
+<button class="ch-btn " onclick="switchChapter(18)">18. Программирование в Ограничениях (CLP(FD))</button>
+<button class="ch-btn " onclick="switchChapter(19)">19. Метапрограммирование и Рефлексия</button>
+<button class="ch-btn " onclick="switchChapter(20)">20. Архитектура Проекта, Модули и Тесты</button>
+
     </div>
   </div>
 
-  <!-- CHAPTER 1 -->
-  <div class="chapter-view active" id="ch1">
-    <div class="card">
-      <h2>🏛️ Глава 1: База знаний, Факты, Атомы и Переменные</h2>
-      <p style="color: var(--muted); font-size: 14px;">
-        В императивных языках мы командуем процессору: «сделай шаг 1, затем шаг 2». В Prolog мы <b>описываем мир</b> набором фактов и затем задаем вопросы.
-      </p>
-
-      <svg viewBox="0 0 720 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="720" height="180" rx="12" fill="#0c1322"/>
-        <!-- Atom Node -->
-        <rect x="30" y="40" width="280" height="100" rx="10" fill="#064e3b" stroke="#10b981" stroke-width="1.5"/>
-        <text x="170" y="70" fill="#a7f3d0" font-size="14" font-weight="700" text-anchor="middle">АТОМ (Константа)</text>
-        <text x="170" y="95" fill="#ecfdf5" font-size="12" text-anchor="middle">Начинается со строчной буквы</text>
-        <text x="170" y="120" fill="#34d399" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">moscow, ivan, juliet, 'Спб'</text>
-
-        <!-- Variable Node -->
-        <rect x="410" y="40" width="280" height="100" rx="10" fill="#451a03" stroke="#f59e0b" stroke-width="1.5"/>
-        <text x="550" y="70" fill="#fde68a" font-size="14" font-weight="700" text-anchor="middle">ПЕРЕМЕННАЯ</text>
-        <text x="550" y="95" fill="#fef3c7" font-size="12" text-anchor="middle">С ЗАГЛАВНОЙ буквы или _</text>
-        <text x="550" y="120" fill="#fbbf24" font-family="monospace" font-size="12" font-weight="bold" text-anchor="middle">X, Person, City, _Result</text>
-      </svg>
-
-      <div class="code-box">
-        <span class="cm">% Факты завершаются точкой .</span><br>
-        <span class="atom">parent</span>(<span class="atom">ivan</span>, <span class="atom">masha</span>).<br>
-        <span class="atom">loves</span>(<span class="atom">romeo</span>, <span class="atom">juliet</span>).<br><br>
-        <span class="cm">% Запрос (вопрос): Кто любимая Ромео?</span><br>
-        ?- <span class="atom">loves</span>(<span class="atom">romeo</span>, <span class="v">Who</span>).<br>
-        <b style="color: #38bdf8;">Who = juliet.</b>
-      </div>
-
-      <div class="quiz-wrap" id="q1">
-        <div class="quiz-title">Вопрос: Какой из термов является константой (атомом)?</div>
-        <div class="quiz-options">
-          <button class="quiz-opt" onclick="checkQ(this, false, 'q1', 'Слова с заглавной буквы — это переменные!')">Student</button>
-          <button class="quiz-opt" onclick="checkQ(this, true, 'q1', 'Верно! Слова со строчной буквы — атомы.')">student</button>
-          <button class="quiz-opt" onclick="checkQ(this, false, 'q1', '_ — это анонимная переменная!')">_student</button>
+  <!-- Chapters Views -->
+  
+    <!-- CHAPTER 1 -->
+    <div class="chapter-view active" id="ch1">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge">Основы &bull; Глава 1 из 20</span>
+          <span style="font-size: 12px; color: var(--accent); font-weight: 700;">5 проверочных тестов</span>
         </div>
-        <div class="quiz-res" id="q1-res"></div>
-      </div>
+        <h2>Урок 1: База знаний, Факты и Атомы</h2>
+        <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 14px;">Как заложить первые аксиомы в Базу Знаний Prolog: синтаксис атомов, чисел и завершающей точки.</p>
+        
+        
+          <h3>1. База Знаний и Факты</h3>
+          <p>В Prolog программа представляет собой <b>Базу Знаний (Knowledge Base)</b>. База знаний состоит из фактов (аксиом) и правил логики. Факт декларирует отношение между объектами, которое считается безоговорочной истиной.</p>
+          <div class="code-box">
+            <span class="code-comment">% Предикат loves(romeo, juliet) — факт</span><br>
+            <span class="code-atom">loves</span>(<span class="code-atom">romeo</span>, <span class="code-atom">juliet</span>).<br>
+            <span class="code-atom">planet</span>(<span class="code-atom">mars</span>).<br>
+            <span class="code-atom">city</span>(<span class="code-atom">moscow</span>).
+          </div>
+          <h3>2. Атомы и Константы</h3>
+          <p><b>Атом</b> — это неизменяемое символьное имя. Атомы всегда начинаются со <b>строчной буквы</b> (<code>romeo</code>, <code>mars</code>) либо берутся в одинарные кавычки, если содержат пробелы или спецсимволы (<code>'Нью-Йорк'</code>). Числа (<code>42</code>, <code>3.14</code>) также являются константами.</p>
+          <div class="callout warn">
+            <b>Важнейшее правило:</b> Каждое утверждение в Prolog обязано заканчиваться <b>точкой</b> <code>.</code>. Без точки интерпретатор не выполнит строку.
+          </div>
+        
 
-      <div class="btn-row">
-        <span></span>
-        <button class="nav-btn" onclick="switchChapter(2)">Глава 2: Правила &rarr;</button>
-      </div>
-    </div>
-  </div>
+        <h3 style="margin-top: 24px;">🎯 5 проверочных интерактивных тестов к главе 1</h3>
+        
+        <div class="quiz-wrap" id="chq-1-1">
+          <div class="quiz-title">Вопрос 1: Какой из следующих идентификаторов является атомом (константой) в Prolog?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-1-1', 'Имена с заглавной буквы — это переменные!')">Student</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-1-1', 'Верно! Строчная буква определяет атом.')">student</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-1-1', 'Подчеркивание в начале определяет переменную!')">_student</button>
 
-  <!-- CHAPTER 2 -->
-  <div class="chapter-view" id="ch2">
-    <div class="card">
-      <h2>🔗 Глава 2: Правила, «ЕСЛИ» (:-) и Конъюнкция</h2>
-      <p style="color: var(--muted); font-size: 14px;">
-        Правила позволяют выводить новые факты из уже известных. Конструкция <code>:-</code> читается справа налево: «Голова истинна, ЕСЛИ тело истинно».
-      </p>
-
-      <div class="code-box">
-        <span class="cm">% Правило дедушки: X дедушка Z, если X родитель Y И Y родитель Z</span><br>
-        <span class="atom">grandparent</span>(<span class="v">X</span>, <span class="v">Z</span>) <span class="kw">:-</span><br>
-        &nbsp;&nbsp;<span class="atom">parent</span>(<span class="v">X</span>, <span class="v">Y</span>), <span class="cm">% Запятая означает «И»</span><br>
-        &nbsp;&nbsp;<span class="atom">parent</span>(<span class="v">Y</span>, <span class="v">Z</span>).
-      </div>
-
-      <div class="callout tip">
-        <b>Логическое «ИЛИ»</b> обычно выражают объявлением двух правил с одним именем:
-        <br><code>happy(X) :- rich(X).</code>
-        <br><code>happy(X) :- healthy(X).</code>
-      </div>
-
-      <div class="quiz-wrap" id="q2">
-        <div class="quiz-title">Вопрос: Что означает запятая в теле правила?</div>
-        <div class="quiz-options">
-          <button class="quiz-opt" onclick="checkQ(this, true, 'q2', 'Верно! Запятая — это логическое И.')">Логическое И (конъюнкцию)</button>
-          <button class="quiz-opt" onclick="checkQ(this, false, 'q2', 'Логическое ИЛИ — это точка с запятой (;)')">Логическое ИЛИ (дизъюнкцию)</button>
+          </div>
+          <div class="quiz-res" id="chq-1-1-res"></div>
         </div>
-        <div class="quiz-res" id="q2-res"></div>
-      </div>
+        
+        <div class="quiz-wrap" id="chq-1-2">
+          <div class="quiz-title">Вопрос 2: Каким знаком обязательно должно заканчиваться любое утверждение в Prolog?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-1-2', 'Точка с запятой означает логическое ИЛИ.')">Точкой с запятой (;)</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-1-2', 'Верно! Точка завершает факт, правило или запрос.')">Точкой (.)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-1-2', 'Двоеточие не является терминатором предложений.')">Двоеточием (:)</button>
 
-      <div class="btn-row">
-        <button class="nav-btn" onclick="switchChapter(1)">&larr; Глава 1</button>
-        <button class="nav-btn" onclick="switchChapter(3)">Глава 3: Термы &rarr;</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- CHAPTER 3 -->
-  <div class="chapter-view" id="ch3">
-    <div class="card">
-      <h2>🧬 Глава 3: Модель данных — «Всё есть Терм»</h2>
-      <p style="color: var(--muted); font-size: 14px;">
-        В Прологе нет классов или объектов. Единственный строительный блок — <b>Терм</b>.
-      </p>
-      
-      <div class="code-box">
-        <span class="cm">% Составной терм: функтор point с арностью 2 &rarr; point/2</span><br>
-        <span class="atom">point</span>(<span class="num">10</span>, <span class="num">20</span>)<br><br>
-        <span class="cm">% Вложенные структуры моделируют сложнейшие сущности</span><br>
-        <span class="atom">employee</span>(<br>
-        &nbsp;&nbsp;<span class="atom">name</span>(<span class="atom">'Иван'</span>, <span class="atom">'Иванов'</span>),<br>
-        &nbsp;&nbsp;<span class="atom">job</span>(<span class="atom">'Software Engineer'</span>, <span class="atom">salary</span>(<span class="num">250000</span>))<br>
-        ).
-      </div>
-
-      <div class="quiz-wrap" id="q3">
-        <div class="quiz-title">Какова арность функтора line(point(0,0), point(10,10))?</div>
-        <div class="quiz-options">
-          <button class="quiz-opt" onclick="checkQ(this, true, 'q3', 'Верно! Внешний функтор line содержит 2 аргумента: две точки.')">Арность 2 (line/2)</button>
-          <button class="quiz-opt" onclick="checkQ(this, false, 'q3', 'Координаты внутри point не считаются в арность line.')">Арность 4</button>
+          </div>
+          <div class="quiz-res" id="chq-1-2-res"></div>
         </div>
-        <div class="quiz-res" id="q3-res"></div>
-      </div>
+        
+        <div class="quiz-wrap" id="chq-1-3">
+          <div class="quiz-title">Вопрос 3: Как записать атом, содержащий пробелы или русские буквы с заглавной?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-1-3', 'Двойные кавычки в Prolog определяют список символов/строку.')">В двойных кавычках "..."</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-1-3', 'Именно! Одинарные кавычки \'Санкт-Петербург\' создают атом.')">В одинарных кавычках '...'</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-1-3', 'Квадратные скобки зарезервированы для списков.')">В квадратных скобках [...]</button>
 
-      <div class="btn-row">
-        <button class="nav-btn" onclick="switchChapter(2)">&larr; Глава 2</button>
-        <button class="nav-btn" onclick="switchChapter(4)">Глава 4: Унификация &rarr;</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- CHAPTER 4 -->
-  <div class="chapter-view" id="ch4">
-    <div class="card">
-      <h2>⚖️ Глава 4: Унификация и 3 Вида Равенства</h2>
-      <p style="color: var(--muted); font-size: 14px;">
-        Унификация (<code>=</code>) — это не присваивание, а решение уравнения: как подобрать переменные, чтобы левая и правая часть совпали.
-      </p>
-
-      <div class="code-box">
-        ?- <span class="atom">point</span>(<span class="v">X</span>, <span class="num">10</span>) = <span class="atom">point</span>(<span class="num">20</span>, <span class="v">Y</span>).<br>
-        <b style="color: #38bdf8;">X = 20, Y = 10.</b>
-      </div>
-
-      <div class="callout warn">
-        <b>Запомните навсегда:</b>
-        <br><code>X = 2 + 2</code> &rarr; <code>X = 2 + 2</code> (структурное равенство, не вычисляет!)
-        <br><code>X is 2 + 2</code> &rarr; <code>X = 4</code> (арифметическое вычисление!)
-        <br><code>X == 2 + 2</code> &rarr; <code>false</code> (строгое тождество без связывания!)
-      </div>
-
-      <div class="quiz-wrap" id="q4">
-        <div class="quiz-title">Что выдаст запрос ?- X is 5 * 5 ?</div>
-        <div class="quiz-options">
-          <button class="quiz-opt" onclick="checkQ(this, true, 'q4', 'Верно! Оператор is производит вычисление.')">X = 25</button>
-          <button class="quiz-opt" onclick="checkQ(this, false, 'q4', 'X = 5 * 5 получилось бы при использовании оператора =')">X = 5 * 5</button>
+          </div>
+          <div class="quiz-res" id="chq-1-3-res"></div>
         </div>
-        <div class="quiz-res" id="q4-res"></div>
-      </div>
+        
+        <div class="quiz-wrap" id="chq-1-4">
+          <div class="quiz-title">Вопрос 4: Что возвращает интерпретатор, если заданный факт отсутствует в базе знаний?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-1-4', 'Верно! То, что нельзя вывести из базы, считается ложным (CWA).')">false.</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-1-4', 'В Prolog нет типа null или undefined.')">null</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-1-4', 'Prolog вернет false (неуспех), а не ошибку компиляции.')">error: missing fact</button>
 
-      <div class="btn-row">
-        <button class="nav-btn" onclick="switchChapter(3)">&larr; Глава 3</button>
-        <button class="nav-btn" onclick="switchChapter(5)">Глава 5: Списки &rarr;</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- CHAPTER 5 -->
-  <div class="chapter-view" id="ch5">
-    <div class="card">
-      <h2>📦 Глава 5: Списки и Рекурсия [Head | Tail]</h2>
-      <p style="color: var(--muted); font-size: 14px;">
-        В Prolog нет циклов for/while. Все списки обрабатываются рекурсивным разделением на <b>Голову</b> (первый элемент) и <b>Хвост</b> (остальной список).
-      </p>
-
-      <div class="code-box">
-        <span class="cm">% Проверка принадлежности элемента списку</span><br>
-        <span class="atom">my_member</span>(<span class="v">X</span>, [<span class="v">X</span> | <span class="v">_</span>]). <span class="cm">% База: X в голове</span><br>
-        <span class="atom">my_member</span>(<span class="v">X</span>, [<span class="v">_</span> | <span class="v">Tail</span>]) <span class="kw">:-</span><br>
-        &nbsp;&nbsp;<span class="atom">my_member</span>(<span class="v">X</span>, <span class="v">Tail</span>). <span class="cm">% Шаг: ищем в хвосте</span>
-      </div>
-
-      <div class="quiz-wrap" id="q5">
-        <div class="quiz-title">Чему равен Tail в: [H | Tail] = [99] ?</div>
-        <div class="quiz-options">
-          <button class="quiz-opt" onclick="checkQ(this, true, 'q5', 'Верно! 99 уходит в H, а остаток — пустой список [].')">Tail = []</button>
-          <button class="quiz-opt" onclick="checkQ(this, false, 'q5', 'Хвост всегда сам является списком!')">Tail = 99</button>
+          </div>
+          <div class="quiz-res" id="chq-1-4-res"></div>
         </div>
-        <div class="quiz-res" id="q5-res"></div>
-      </div>
+        
+        <div class="quiz-wrap" id="chq-1-5">
+          <div class="quiz-title">Вопрос 5: Сколько аргументов может иметь факт в Prolog?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-1-5', 'Факт может иметь любое число аргументов.')">Строго два</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-1-5', 'Верно! Бывают факты без аргументов: sunny., и факты с N аргументами.')">Любое число от 0 и более</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-1-5', 'Факты могут связывать произвольное количество объектов.')">Не более одного</button>
 
-      <div class="btn-row">
-        <button class="nav-btn" onclick="switchChapter(4)">&larr; Глава 4</button>
-        <button class="nav-btn" onclick="switchChapter(6)">Глава 6: Арифметика &rarr;</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- CHAPTER 6 -->
-  <div class="chapter-view" id="ch6">
-    <div class="card">
-      <h2>🧮 Глава 6: Арифметика и оператор `is`</h2>
-      <p style="color: var(--muted); font-size: 14px;">
-        Для вычислений используется оператор <code>is</code>. Все переменные справа должны быть известны!
-      </p>
-
-      <div class="code-box">
-        <span class="cm">% Вычисление длины списка с аккумулятором</span><br>
-        <span class="atom">my_len</span>([], <span class="num">0</span>).<br>
-        <span class="atom">my_len</span>([<span class="v">_</span> | <span class="v">Tail</span>], <span class="v">Len</span>) <span class="kw">:-</span><br>
-        &nbsp;&nbsp;<span class="atom">my_len</span>(<span class="v">Tail</span>, <span class="v">SubLen</span>),<br>
-        &nbsp;&nbsp;<span class="v">Len</span> <span class="kw">is</span> <span class="v">SubLen</span> + <span class="num">1</span>.
-      </div>
-
-      <div class="quiz-wrap" id="q6">
-        <div class="quiz-title">Как в Prolog пишется оператор «меньше или равно»?</div>
-        <div class="quiz-options">
-          <button class="quiz-opt" onclick="checkQ(this, true, 'q6', 'Верно! Стрелка <= зарезервирована, поэтому пишется =<')">=<</button>
-          <button class="quiz-opt" onclick="checkQ(this, false, 'q6', '<= вызовет синтаксическую ошибку!')"><=</button>
+          </div>
+          <div class="quiz-res" id="chq-1-5-res"></div>
         </div>
-        <div class="quiz-res" id="q6-res"></div>
-      </div>
+        
 
-      <div class="btn-row">
-        <button class="nav-btn" onclick="switchChapter(5)">&larr; Глава 5</button>
-        <button class="nav-btn" onclick="switchChapter(7)">Глава 7: Отсечение &rarr;</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- CHAPTER 7 -->
-  <div class="chapter-view" id="ch7">
-    <div class="card">
-      <h2>✂️ Глава 7: Отсечение (!) и Отрицание (\+)</h2>
-      <p style="color: var(--muted); font-size: 14px;">
-        Отсечение (Cut: <code>!</code>) останавливает бэктрекинг и запрещает откат назад. Отрицание <code>\+ P</code> означает «P нельзя доказать» (Closed World Assumption).
-      </p>
-
-      <div class="code-box">
-        <span class="cm">% Предикат нахождения максимума без лишних переборов</span><br>
-        <span class="atom">max</span>(<span class="v">A</span>, <span class="v">B</span>, <span class="v">A</span>) <span class="kw">:-</span> <span class="v">A</span> >= <span class="v">B</span>, <span class="kw">!</span>.<br>
-        <span class="atom">max</span>(<span class="v">_</span>, <span class="v">B</span>, <span class="v">B</span>).
-      </div>
-
-      <div class="quiz-wrap" id="q7">
-        <div class="quiz-title">Что означает \+ goal ?</div>
-        <div class="quiz-options">
-          <button class="quiz-opt" onclick="checkQ(this, true, 'q7', 'Верно! В Прологе отрицание — это недоказуемость (Negation as Failure).')">Цель goal не может быть доказана из базы</button>
-          <button class="quiz-opt" onclick="checkQ(this, false, 'q7', 'Нет, это не математическое противоречие.')">goal математически противоречива</button>
+        <div class="btn-row">
+          <span></span>
+          <button class="nav-btn" onclick="switchChapter(2)">Глава 2 &rarr;</button>
         </div>
-        <div class="quiz-res" id="q7-res"></div>
-      </div>
-
-      <div class="btn-row">
-        <button class="nav-btn" onclick="switchChapter(6)">&larr; Глава 6</button>
-        <button class="nav-btn" onclick="switchChapter(8)">Глава 8: Практика &rarr;</button>
       </div>
     </div>
-  </div>
+    
+    <!-- CHAPTER 2 -->
+    <div class="chapter-view " id="ch2">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge">Основы &bull; Глава 2 из 20</span>
+          <span style="font-size: 12px; color: var(--accent); font-weight: 700;">5 проверочных тестов</span>
+        </div>
+        <h2>Урок 2: Переменные и Простые Запросы</h2>
+        <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 14px;">Как переменные с заглавной буквы позволяют искать неизвестные, и для чего нужна анонимная переменная _.</p>
+        
+        
+          <h3>1. Переменные — это неизвестные</h3>
+          <p>В отличие от императивных языков, переменная в Prolog — это не ячейка памяти, а <b>логическая неизвестная</b>, для которой движок ищет значение в процессе унификации.</p>
+          <p>Переменные всегда начинаются с <b>ЗАГЛАВНОЙ буквы</b> (<code>X</code>, <code>Person</code>, <code>Result</code>) или символа подчеркивания <code>_</code>.</p>
+          <h3>2. Запросы (Queries)</h3>
+          <p>Запрос — это вопрос к базе знаний. При запросе Prolog пытается доказать истинность цели:</p>
+          <div class="code-box">
+            ?- <span class="code-atom">loves</span>(<span class="code-atom">romeo</span>, <span class="code-var">Who</span>).<br>
+            <span class="code-comment">% Движок связывает Who с juliet</span><br>
+            <b style="color: #38bdf8;">Who = juliet.</b>
+          </div>
+          <h3>3. Анонимная переменная (_)</h3>
+          <p>Если нам не важно значение аргумента, мы пишем <code>_</code>. Каждое появление <code>_</code> обозначает <i>независимую</i> новую анонимную переменную.</p>
+        
 
-  <!-- CHAPTER 8 -->
-  <div class="chapter-view" id="ch8">
-    <div class="card">
-      <h2>🏆 Глава 8: Практика — Графы и Решение Загадок</h2>
-      <p style="color: var(--muted); font-size: 14px;">
-        Венец логического программирования: лабиринты и головоломки без явного перебора.
-      </p>
+        <h3 style="margin-top: 24px;">🎯 5 проверочных интерактивных тестов к главе 2</h3>
+        
+        <div class="quiz-wrap" id="chq-2-1">
+          <div class="quiz-title">Вопрос 1: С какого символа ОБЯЗАНА начинаться переменная в Prolog?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-2-1', '$ используется в PHP или bash, но не в Prolog.')">Со знака доллара ($)</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-2-1', 'Верно! Например, X, City, _Val.')">С заглавной буквы или подчеркивания</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-2-1', 'Строчные буквы определяют атомы, а не переменные.')">С любого символа латиницы</button>
 
-      <div class="code-box">
-        <span class="cm">% Поиск пути в графе с защитой от циклов</span><br>
-        <span class="atom">path</span>(<span class="v">A</span>, <span class="v">B</span>, [<span class="v">A</span>, <span class="v">B</span>], <span class="v">_</span>) <span class="kw">:-</span> <span class="atom">edge</span>(<span class="v">A</span>, <span class="v">B</span>).<br>
-        <span class="atom">path</span>(<span class="v">A</span>, <span class="v">B</span>, [<span class="v">A</span> | <span class="v">Rest</span>], <span class="v">Visited</span>) <span class="kw">:-</span><br>
-        &nbsp;&nbsp;<span class="atom">edge</span>(<span class="v">A</span>, <span class="v">Next</span>),<br>
-        &nbsp;&nbsp;<span class="kw">\+</span> <span class="atom">member</span>(<span class="v">Next</span>, <span class="v">Visited</span>), <span class="cm">% Нет зацикливанию!</span><br>
-        &nbsp;&nbsp;<span class="atom">path</span>(<span class="v">Next</span>, <span class="v">B</span>, <span class="v">Rest</span>, [<span class="v">Next</span> | <span class="v">Visited</span>]).
-      </div>
+          </div>
+          <div class="quiz-res" id="chq-2-1-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-2-2">
+          <div class="quiz-title">Вопрос 2: Что делает символ подчеркивания _ в запросе loves(romeo, _) ?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-2-2', 'Для удаления используется retract/1.')">Удаляет факт из базы данных</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-2-2', 'Верно! Это анонимная переменная (don\'t care variable).')">Обозначает 'любой объект, значение которого нас не интересует'</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-2-2', 'Анонимная переменная абсолютно легальна.')">Вызывает ошибку неполного запроса</button>
 
-      <div class="callout tip">
-        <b>Поздравляем!</b> Вы прошли все 8 глав фундаментального курса. Теперь вы можете свободно писать экспертные системы, компиляторы и решатели комбинаторных задач на Prolog!
-      </div>
+          </div>
+          <div class="quiz-res" id="chq-2-2-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-2-3">
+          <div class="quiz-title">Вопрос 3: Как в интерактивной консоли SWI-Prolog попросить следующий вариант ответа?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-2-3', 'Enter подтверждает текущий ответ и завершает запрос.')">Нажать Enter</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-2-3', 'Верно! Это инициирует бэктрекинг для поиска альтернативы.')">Нажать клавишу точки с запятой (;) или Пробел</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-2-3', 'Такой команды в консоли нет.')">Ввести команду next.</button>
 
-      <div class="btn-row">
-        <button class="nav-btn" onclick="switchChapter(7)">&larr; Глава 7</button>
-        <button class="nav-btn" onclick="switchChapter(1)">Вернуться к началу &uarr;</button>
+          </div>
+          <div class="quiz-res" id="chq-2-3-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-2-4">
+          <div class="quiz-title">Вопрос 4: Какой квантор математической логики связывает переменную в запросе ?- person(X) ?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-2-4', 'Всеобщность действует в заголовках правил.')">Квантор всеобщности (для всех X)</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-2-4', 'Верно! Вопрос означает: \'Существует ли такой X, что person(X)\'.')">Квантор существования (существует ли такой X)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-2-4', 'Логика предикатов строго квантифицирует переменные.')">Никакого квантора нет</button>
+
+          </div>
+          <div class="quiz-res" id="chq-2-4-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-2-5">
+          <div class="quiz-title">Вопрос 5: Если в выражении встречаются две анонимные переменные f(_, _), обязаны ли они быть равны?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-2-5', 'Каждое подчеркивание уникально и независимо!')">Да, они должны иметь одинаковое значение</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-2-5', 'Верно! _ не связывается с другими подчеркиваниями.')">Нет, каждое появление _ представляет независимую свободную переменную</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-2-5', 'Это стандарт ISO Prolog.')">Зависит от настроек компилятора</button>
+
+          </div>
+          <div class="quiz-res" id="chq-2-5-res"></div>
+        </div>
+        
+
+        <div class="btn-row">
+          <button class="nav-btn" onclick="switchChapter(1)">&larr; Глава 1</button>
+          <button class="nav-btn" onclick="switchChapter(3)">Глава 3 &rarr;</button>
+        </div>
       </div>
     </div>
-  </div>
+    
+    <!-- CHAPTER 3 -->
+    <div class="chapter-view " id="ch3">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge">Логика &bull; Глава 3 из 20</span>
+          <span style="font-size: 12px; color: var(--accent); font-weight: 700;">5 проверочных тестов</span>
+        </div>
+        <h2>Урок 3: Правила, «Шея» (:-) и Конъюнкция</h2>
+        <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 14px;">Вывод новых знаний из фактов: оператор «ЕСЛИ», логическое И (запятая) и логическое ИЛИ.</p>
+        
+        
+          <h3>1. Анатомия Правила (Rule)</h3>
+          <p>Правило состоит из <b>Головы (Head)</b> и <b>Тела (Body)</b>, соединенных символом <code>:-</code>:</p>
+          <div class="code-box">
+            <span class="code-functor">mortal</span>(<span class="code-var">X</span>) <span class="code-kw">:-</span> <span class="code-functor">human</span>(<span class="code-var">X</span>).<br>
+            <span class="code-comment">% Читается: X смертен, ЕСЛИ X — человек.</span>
+          </div>
+          <h3>2. Логическое И (Конъюнкция: запятая)</h3>
+          <p>Условия в теле правила, перечисленные через <b>запятую</b>, обязаны выполняться одновременно слева направо:</p>
+          <div class="code-box">
+            <span class="code-functor">grandparent</span>(<span class="code-var">X</span>, <span class="code-var">Z</span>) <span class="code-kw">:-</span><br>
+            &nbsp;&nbsp;<span class="code-atom">parent</span>(<span class="code-var">X</span>, <span class="code-var">Y</span>),<br>
+            &nbsp;&nbsp;<span class="code-atom">parent</span>(<span class="code-var">Y</span>, <span class="code-var">Z</span>).
+          </div>
+          <h3>3. Логическое ИЛИ (Дизъюнкция)</h3>
+          <p>ИЛИ выражается либо точкой с запятой <code>;</code>, либо (что гораздо идиоматичнее) определением <b>нескольких правил</b> для одного и того же предиката.</p>
+        
+
+        <h3 style="margin-top: 24px;">🎯 5 проверочных интерактивных тестов к главе 3</h3>
+        
+        <div class="quiz-wrap" id="chq-3-1">
+          <div class="quiz-title">Вопрос 1: Как читается оператор :- в заголовке правила Head :- Body ?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-3-1', 'В Prolog нет оператора присваивания.')">Head присвоить Body</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-3-1', 'Верно! Это логическая импликация, направленная справа налево.')">Head истинно, ЕСЛИ Body истинно</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-3-1', 'Это логическое отношение, а не императивный вызов.')">Head вызывает Body как подпрограмму</button>
+
+          </div>
+          <div class="quiz-res" id="chq-3-1-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-3-2">
+          <div class="quiz-title">Вопрос 2: Какой символ обозначает логическое «И» между целями в теле правила?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-3-2', 'Верно! Запятая — конъюнкция.')">Запятая (,)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-3-2', '& не используется в синтаксисе Prolog.')">Амперсанд (&)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-3-2', '; означает логическое ИЛИ.')">Точка с запятой (;)</button>
+
+          </div>
+          <div class="quiz-res" id="chq-3-2-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-3-3">
+          <div class="quiz-title">Вопрос 3: Какова область видимости переменной X в правиле?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-3-3', 'В Prolog нет глобальных переменных!')">В пределах всей программы (глобальная)</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-3-3', 'Верно! Переменная X в другом правиле — это совсем другой X.')">В пределах одного правила/предложения (локальная)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-3-3', 'Область видимости ограничена одним предложением.')">В пределах текущего модуля</button>
+
+          </div>
+          <div class="quiz-res" id="chq-3-3-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-3-4">
+          <div class="quiz-title">Вопрос 4: В каком порядке Prolog вычисляет подцели в теле правила: Goal1, Goal2, Goal3?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-3-4', 'Prolog строго детерминирован в порядке обхода.')">Параллельно в произвольном порядке</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-3-4', 'Верно! Сначала доказывается Goal1, затем Goal2, затем Goal3.')">Строго слева направо</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-3-4', 'Вычисление всегда начинается с первой подцели слева.')">Справа налево</button>
+
+          </div>
+          <div class="quiz-res" id="chq-3-4-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-3-5">
+          <div class="quiz-title">Вопрос 5: Что произойдет, если одно из условий в цепочке p(X), q(X) завершится неудачей (fail)?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-3-5', 'Неудача — естественный процесс поиска решения.')">Программа завершится с фатальной ошибкой</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-3-5', 'Верно! Движок возвращается к предыдущему выбору.')">Движок выполнит бэктрекинг назад к p(X) и попробует другое значение X</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-3-5', 'Конъюнкция требует истинности ВСЕХ подцелей.')">Prolog пропустит неудачное условие и пойдет дальше</button>
+
+          </div>
+          <div class="quiz-res" id="chq-3-5-res"></div>
+        </div>
+        
+
+        <div class="btn-row">
+          <button class="nav-btn" onclick="switchChapter(2)">&larr; Глава 2</button>
+          <button class="nav-btn" onclick="switchChapter(4)">Глава 4 &rarr;</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- CHAPTER 4 -->
+    <div class="chapter-view " id="ch4">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge">Данные &bull; Глава 4 из 20</span>
+          <span style="font-size: 12px; color: var(--accent); font-weight: 700;">5 проверочных тестов</span>
+        </div>
+        <h2>Урок 4: Модель данных — Термы и Структуры</h2>
+        <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 14px;">В Prolog «всё есть терм». Как моделировать реляционные объекты через функторы и арность.</p>
+        
+        
+          <h3>1. Что такое Терм?</h3>
+          <p>В Prolog есть ровно один базовый тип данных — <b>Терм (Term)</b>. Он делится на:</p>
+          <ul style="margin-left: 20px; color: var(--muted); line-height: 1.8;">
+            <li><b>Простые термы:</b> Атомы (<code>cat</code>), Числа (<code>10</code>), Переменные (<code>X</code>).</li>
+            <li><b>Составные термы (Структуры):</b> Функтор + Аргументы в скобках.</li>
+          </ul>
+          <h3>2. Функтор и Арность (Arity)</h3>
+          <p>Составной терм записывается как <code>функтор(арг1, арг2, ...)</code>. Количество аргументов называют <b>арностью</b>. Обозначается как <code>name/arity</code> (например, <code>point/2</code> или <code>date/3</code>).</p>
+          <div class="code-box">
+            <span class="code-atom">date</span>(<span class="code-num">4</span>, <span class="code-atom">september</span>, <span class="code-num">2026</span>)<br>
+            <span class="code-atom">rectangle</span>(<span class="code-atom">point</span>(<span class="code-num">0</span>, <span class="code-num">0</span>), <span class="code-atom">point</span>(<span class="code-num">10</span>, <span class="code-num">20</span>))
+          </div>
+        
+
+        <h3 style="margin-top: 24px;">🎯 5 проверочных интерактивных тестов к главе 4</h3>
+        
+        <div class="quiz-wrap" id="chq-4-1">
+          <div class="quiz-title">Вопрос 1: Какова арность функтора в выражении employee(name('Ivan'), salary(100), dept('IT'))?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-4-1', 'Верно! У функтора employee ровно 3 аргумента.')">3 (employee/3)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-4-1', 'Вложенные аргументы не считаются в верхний функтор.')">5</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-4-1', 'У employee три поля данных.')">1</button>
+
+          </div>
+          <div class="quiz-res" id="chq-4-1-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-4-2">
+          <div class="quiz-title">Вопрос 2: Считаются ли предикаты person/1 и person/2 одинаковыми в Prolog?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-4-2', 'В Prolog нет перегрузки методов как в OOP.')">Да, это перегрузка одного и того же метода</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-4-2', 'Верно! Предикаты различаются по паре Имя/Арность.')">Нет, это совершенно разные независимые предикаты</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-4-2', 'Prolog прекрасно сосуществует с разными арностями.')">Вызовет ошибку повторного объявления</button>
+
+          </div>
+          <div class="quiz-res" id="chq-4-2-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-4-3">
+          <div class="quiz-title">Вопрос 3: Какой встроенный предикат проверяет, является ли терм составной структурой?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-4-3', 'Такого предиката нет.')">is_object/1</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-4-3', 'Верно! compound(T) успешен для любых составных термов.')">compound/1</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-4-3', 'В Prolog используется термин compound term.')">is_struct/1</button>
+
+          </div>
+          <div class="quiz-res" id="chq-4-3-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-4-4">
+          <div class="quiz-title">Вопрос 4: Может ли составной терм содержать внутри себя другие составные термы?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-4-4', 'Верно! Это позволяет строить деревья и графы любой глубины.')">Да, уровень вложенности ничем не ограничен</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-4-4', 'Вложенность произвольна.')">Нет, глубина вложенности ограничена 2 уровнями</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-4-4', 'Любые структуры могут быть вложены.')">Только если это списки</button>
+
+          </div>
+          <div class="quiz-res" id="chq-4-4-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-4-5">
+          <div class="quiz-title">Вопрос 5: Что вернет вызов compound(42)?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-4-5', 'Число 42 — это простой терм (atomic), а не составной.')">true.</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-4-5', 'Верно! 42 — атомарный терм, предикат вернет false.')">false.</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-4-5', 'Предикат безопасно возвращает false.')">error</button>
+
+          </div>
+          <div class="quiz-res" id="chq-4-5-res"></div>
+        </div>
+        
+
+        <div class="btn-row">
+          <button class="nav-btn" onclick="switchChapter(3)">&larr; Глава 3</button>
+          <button class="nav-btn" onclick="switchChapter(5)">Глава 5 &rarr;</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- CHAPTER 5 -->
+    <div class="chapter-view " id="ch5">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge">Ядро &bull; Глава 5 из 20</span>
+          <span style="font-size: 12px; color: var(--accent); font-weight: 700;">5 проверочных тестов</span>
+        </div>
+        <h2>Урок 5: Механизм Унификации (=)</h2>
+        <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 14px;">Двустороннее решение уравнений: как Prolog сопоставляет образцы и связывает переменные.</p>
+        
+        
+          <h3>1. Что такое Унификация?</h3>
+          <p>Оператор <code>=</code> выполняет <b>унификацию</b>. Это попытка найти такие значения для переменных в левой и правой части, чтобы оба терма стали идентичными.</p>
+          <div class="code-box">
+            ?- <span class="code-atom">point</span>(<span class="code-var">X</span>, <span class="code-num">5</span>) = <span class="code-atom">point</span>(<span class="code-num">10</span>, <span class="code-var">Y</span>).<br>
+            <b style="color: #38bdf8;">X = 10,<br>Y = 5.</b>
+          </div>
+          <h3>2. Связывание двух свободных переменных</h3>
+          <p>Если унифицируются две неизвестные переменные <code>X = Y</code>, они становятся <b>ко-ссылочными</b> (aliased). Если позже <code>X</code> свяжется с числом <code>42</code>, то <code>Y</code> автоматически тоже станет равен <code>42</code>!</p>
+          <h3>3. Occurs Check</h3>
+          <p>Что будет, если написать <code>X = f(X)</code>? В теории это бесконечный терм <code>f(f(f(...)))</code>. Большинство реализаций Prolog ради скорости по умолчанию опускают проверку вхождения (occurs check).</p>
+        
+
+        <h3 style="margin-top: 24px;">🎯 5 проверочных интерактивных тестов к главе 5</h3>
+        
+        <div class="quiz-wrap" id="chq-5-1">
+          <div class="quiz-title">Вопрос 1: Чем оператор унификации (=) отличается от присваивания в C++/Python?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-5-1', 'Присваивание однонаправленно, а унификация двунаправленна.')">Ничем, это просто другое написание</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-5-1', 'Верно! Она решает уравнение тождества двух термов.')">Унификация сопоставляет термы в обе стороны и связывает переменные</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-5-1', 'Унификация работает с любыми термами.')">Унификация работает только с числами</button>
+
+          </div>
+          <div class="quiz-res" id="chq-5-1-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-5-2">
+          <div class="quiz-title">Вопрос 2: Какой результат выдаст запрос ?- person(ivan, X) = person(Y, 25) ?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-5-2', 'Функторы и арность совпадают, унификация успешна.')">false.</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-5-2', 'Верно! ivan связывается с Y, а X с 25.')">X = 25, Y = ivan.</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-5-2', 'Позиции аргументов сопоставляются строго 1-к-1.')">X = ivan, Y = 25.</button>
+
+          </div>
+          <div class="quiz-res" id="chq-5-2-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-5-3">
+          <div class="quiz-title">Вопрос 3: Что произойдет при выполнении запроса ?- X = Y, X = apple ?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-5-3', 'После X=Y переменные разделяют одно значение.')">X станет apple, а Y останется свободной переменной</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-5-3', 'Верно! Переменные алиасированы между собой.')">И X, и Y станут равны apple</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-5-3', 'Свободная переменная легко связывается со значением.')">Произойдет ошибка перезаписи переменной</button>
+
+          </div>
+          <div class="quiz-res" id="chq-5-3-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-5-4">
+          <div class="quiz-title">Вопрос 4: Что означает оператор \= в запросе Term1 \= Term2 ?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-5-4', 'Верно! Это отрицание унификации.')">Термы не могут быть унифицированы</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-5-4', 'В Prolog нет таких операторов.')">Присвоить противоположное значение</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-5-4', 'Это логический предикат не-унифицируемости.')">Проверка на равенство адресов памяти</button>
+
+          </div>
+          <div class="quiz-res" id="chq-5-4-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-5-5">
+          <div class="quiz-title">Вопрос 5: Успешна ли унификация foo(A, B) = bar(A, B)?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-5-5', 'Имена функторов foo и bar различны!')">Да, так как аргументы одинаковые</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-5-5', 'Верно! Разные функторы никогда не унифицируются.')">Нет, имена функторов должны точно совпадать</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-5-5', 'В ядре Prolog синонимов функторов нет.')">Да, если объявить их синонимами</button>
+
+          </div>
+          <div class="quiz-res" id="chq-5-5-res"></div>
+        </div>
+        
+
+        <div class="btn-row">
+          <button class="nav-btn" onclick="switchChapter(4)">&larr; Глава 4</button>
+          <button class="nav-btn" onclick="switchChapter(6)">Глава 6 &rarr;</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- CHAPTER 6 -->
+    <div class="chapter-view " id="ch6">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge">Синтаксис &bull; Глава 6 из 20</span>
+          <span style="font-size: 12px; color: var(--accent); font-weight: 700;">5 проверочных тестов</span>
+        </div>
+        <h2>Урок 6: Три Лица Равенства (=, ==, is)</h2>
+        <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 14px;">Раз и навсегда разбираемся с ловушкой трех знаков равенства в Prolog.</p>
+        
+        
+          <h3>Главная развилка языка:</h3>
+          <table style="width: 100%; border-collapse: collapse; margin: 12px 0;">
+            <tr style="background: rgba(56,189,248,0.1); color: var(--accent);">
+              <th style="padding: 8px; border: 1px solid var(--card-border);">Оператор</th>
+              <th style="padding: 8px; border: 1px solid var(--card-border);">Смысл</th>
+              <th style="padding: 8px; border: 1px solid var(--card-border);">Пример</th>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border: 1px solid var(--card-border);"><b>=</b></td>
+              <td style="padding: 8px; border: 1px solid var(--card-border);">Унификация (связывание переменных)</td>
+              <td style="padding: 8px; border: 1px solid var(--card-border);"><code>X = 5</code> &rarr; <code>X = 5</code></td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border: 1px solid var(--card-border);"><b>==</b></td>
+              <td style="padding: 8px; border: 1px solid var(--card-border);">Строгое тождество прямо сейчас</td>
+              <td style="padding: 8px; border: 1px solid var(--card-border);"><code>X == 5</code> &rarr; <code>false</code></td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; border: 1px solid var(--card-border);"><b>is</b></td>
+              <td style="padding: 8px; border: 1px solid var(--card-border);">Арифметическое вычисление правой части</td>
+              <td style="padding: 8px; border: 1px solid var(--card-border);"><code>X is 2+2</code> &rarr; <code>X = 4</code></td>
+            </tr>
+          </table>
+          <div class="callout tip">
+            Также есть <code>=:=</code> и <code>=\=</code> — они вычисляют выражения с обеих сторон и сравнивают полученные числовые значения: <code>4 =:= 2 + 2</code> дает <code>true</code>.
+          </div>
+        
+
+        <h3 style="margin-top: 24px;">🎯 5 проверочных интерактивных тестов к главе 6</h3>
+        
+        <div class="quiz-wrap" id="chq-6-1">
+          <div class="quiz-title">Вопрос 1: Что вернет запрос ?- X == 10 (где X — свободная переменная)?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-6-1', 'Связывание делает оператор =, а не ==.')">X = 10</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-6-1', 'Верно! Прямо сейчас терм X и число 10 не тождественны.')">false.</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-6-1', 'Свободная переменная не тождественна константе.')">true.</button>
+
+          </div>
+          <div class="quiz-res" id="chq-6-1-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-6-2">
+          <div class="quiz-title">Вопрос 2: Какой результат выдаст запрос ?- X = 1 + 2 ?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-6-2', 'Оператор = не выполняет арифметических действий.')">X = 3</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-6-2', 'Верно! X свяжется со структурой +(1, 2).')">X = 1 + 2</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-6-2', 'Это полностью корректный терм.')">Синтаксическая ошибка</button>
+
+          </div>
+          <div class="quiz-res" id="chq-6-2-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-6-3">
+          <div class="quiz-title">Вопрос 3: Какой оператор нужно использовать, чтобы вычислить результат выражения: X ... 10 * 5 ?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-6-3', 'Верно! X is 10 * 5 свяжет X с числом 50.')">is</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-6-3', 'Оператор = создаст структуру *(10, 5).')">=</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-6-3', 'Оператор == лишь проверит тождество.')">==</button>
+
+          </div>
+          <div class="quiz-res" id="chq-6-3-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-6-4">
+          <div class="quiz-title">Вопрос 4: Что вернет запрос ?- 2 + 2 =:= 1 + 3 ?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-6-4', 'Верно! =:= вычисляет обе стороны (4 и 4) и сравнивает значения.')">true.</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-6-4', 'Значения 4 и 4 численно равны.')">false.</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-6-4', '=:= работает с числами, а не со структурой термов.')">Ошибка несовпадения термов</button>
+
+          </div>
+          <div class="quiz-res" id="chq-6-4-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-6-5">
+          <div class="quiz-title">Вопрос 5: Успешен ли запрос ?- 2 + 2 == 4 ?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-6-5', '== сравнивает структуры! +(2,2) не является числом 4.')">Да, потому что 2+2 это 4</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-6-5', 'Верно! Строгое тождество термов нарушено.')">Нет, так как терм +(2, 2) структурно отличен от атомарного числа 4</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-6-5', 'Это базовый стандарт ISO.')">Зависит от компилятора</button>
+
+          </div>
+          <div class="quiz-res" id="chq-6-5-res"></div>
+        </div>
+        
+
+        <div class="btn-row">
+          <button class="nav-btn" onclick="switchChapter(5)">&larr; Глава 5</button>
+          <button class="nav-btn" onclick="switchChapter(7)">Глава 7 &rarr;</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- CHAPTER 7 -->
+    <div class="chapter-view " id="ch7">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge">Списки &bull; Глава 7 из 20</span>
+          <span style="font-size: 12px; color: var(--accent); font-weight: 700;">5 проверочных тестов</span>
+        </div>
+        <h2>Урок 7: Списки и Рекурсия [Head | Tail]</h2>
+        <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 14px;">Анатомия списков в Prolog: как работает разделение на голову и хвост без циклов for и while.</p>
+        
+        
+          <h3>1. Структура списка</h3>
+          <p>Список в Prolog — это упорядоченная последовательность термов. Под капотом список — это дерево пар, заканчивающееся пустым списком <code>[]</code>.</p>
+          <div class="code-box">
+            <span class="code-comment">% [1, 2, 3] под капотом: .(1, .(2, .(3, [])))</span><br>
+            ?- [<span class="code-var">Head</span> | <span class="code-var">Tail</span>] = [<span class="code-num">10</span>, <span class="code-num">20</span>, <span class="code-num">30</span>].<br>
+            <b style="color: #38bdf8;">Head = 10,<br>Tail = [20, 30].</b>
+          </div>
+          <h3>2. Правило золотого стандарта: Хвост ВСЕГДА список!</h3>
+          <p>Если в списке всего один элемент <code>[42]</code>, то голова — это число <code>42</code>, а хвост — пустой список <code>[]</code>.</p>
+        
+
+        <h3 style="margin-top: 24px;">🎯 5 проверочных интерактивных тестов к главе 7</h3>
+        
+        <div class="quiz-wrap" id="chq-7-1">
+          <div class="quiz-title">Вопрос 1: Что будет в переменных H и T после [H | T] = ['apple'] ?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-7-1', 'Верно! Хвост списка из одного элемента — пустой список [].')">H = 'apple', T = []</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-7-1', 'Элемент извлекается в голову, хвост пуст.')">H = 'apple', T = 'apple'</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-7-1', 'В Prolog пустой список обозначается [].')">H = 'apple', T = nil</button>
+
+          </div>
+          <div class="quiz-res" id="chq-7-1-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-7-2">
+          <div class="quiz-title">Вопрос 2: Что будет результатом унификации [A, B | Rest] = [1, 2, 3, 4, 5] ?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-7-2', 'Верно! Первые два элемента уходят в A и B, а остаток в Rest.')">A = 1, B = 2, Rest = [3, 4, 5]</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-7-2', 'Rest забирает ВСЕ оставшиеся элементы в виде списка.')">A = 1, B = 2, Rest = 3</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-7-2', 'Конструкция [A, B | Rest] абсолютно валидна.')">Ошибка синтаксиса</button>
+
+          </div>
+          <div class="quiz-res" id="chq-7-2-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-7-3">
+          <div class="quiz-title">Вопрос 3: Является ли выражение [a | b] правильным (proper) списком в Prolog?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-7-3', 'Правильный список обязан заканчиваться пустым списком [].')">Да, это обычный список</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-7-3', 'Верно! Это точечная пара (pair).')">Нет, это точечная пара (improper list), так как хвост b не является списком</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-7-3', 'Это разрешено, но такой терм не является правильным списком.')">В Prolog вообще запрещено писать [a | b]</button>
+
+          </div>
+          <div class="quiz-res" id="chq-7-3-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-7-4">
+          <div class="quiz-title">Вопрос 4: Как в рекурсивном предикате для списков записывается базовый случай окончания обхода?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-7-4', 'Это неэффективно и неидиоматично.')">Через условие length(L) == 0</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-7-4', 'Верно! Сопоставление с [] завершает рекурсию.')">Паттерном пустого списка: predicate([], ...).</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-7-4', 'В Prolog нет оператора break.')">Ключевым словом break</button>
+
+          </div>
+          <div class="quiz-res" id="chq-7-4-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-7-5">
+          <div class="quiz-title">Вопрос 5: Чему равен результат унификации [] = [H | T] ?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-7-5', 'Пустой список не имеет головы и хвоста!')">H = [], T = []</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-7-5', 'Верно! Пустой список не может быть унифицирован с непустым [H|T].')">false.</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-7-5', 'Это разные термы.')">true.</button>
+
+          </div>
+          <div class="quiz-res" id="chq-7-5-res"></div>
+        </div>
+        
+
+        <div class="btn-row">
+          <button class="nav-btn" onclick="switchChapter(6)">&larr; Глава 6</button>
+          <button class="nav-btn" onclick="switchChapter(8)">Глава 8 &rarr;</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- CHAPTER 8 -->
+    <div class="chapter-view " id="ch8">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge">Списки &bull; Глава 8 из 20</span>
+          <span style="font-size: 12px; color: var(--accent); font-weight: 700;">5 проверочных тестов</span>
+        </div>
+        <h2>Урок 8: Стандартные Предикаты Списков</h2>
+        <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 14px;">Магия встроенных предикатов: member/2, append/3, length/2, reverse/2 и их двунаправленность.</p>
+        
+        
+          <h3>1. member(?Elem, ?List)</h3>
+          <p>Проверяет принадлежность или <b>генерирует все элементы</b> списка при бэктрекинге:</p>
+          <div class="code-box">
+            ?- <span class="code-atom">member</span>(<span class="code-var">X</span>, [<span class="code-atom">a</span>, <span class="code-atom">b</span>, <span class="code-atom">c</span>]).<br>
+            X = a ; X = b ; X = c.
+          </div>
+          <h3>2. append(?List1, ?List2, ?List3)</h3>
+          <p>Склеивает списки или <b>разбивает список на все возможные пары частей</b>:</p>
+          <div class="code-box">
+            ?- <span class="code-atom">append</span>(<span class="code-var">L1</span>, <span class="code-var">L2</span>, [<span class="code-num">1</span>, <span class="code-num">2</span>]).<br>
+            L1 = [], L2 = [1, 2] ;<br>
+            L1 = [1], L2 = [2] ;<br>
+            L1 = [1, 2], L2 = [].
+          </div>
+        
+
+        <h3 style="margin-top: 24px;">🎯 5 проверочных интерактивных тестов к главе 8</h3>
+        
+        <div class="quiz-wrap" id="chq-8-1">
+          <div class="quiz-title">Вопрос 1: Как с помощью append/3 легко найти последний элемент списка List?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-8-1', 'Верно! \'Префикс + одноэлементный список с Last = исходный List\'.')">append(_, [Last], List)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-8-1', 'Второй аргумент должен быть списком.')">append(List, Last, _)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-8-1', 'append — предикат отношений, а не функция.')">Last is append(List)</button>
+
+          </div>
+          <div class="quiz-res" id="chq-8-1-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-8-2">
+          <div class="quiz-title">Вопрос 2: Что сделает запрос ?- length(L, 3) со свободной переменной L?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-8-2', 'length/2 умеет генерировать списки!')">Вернет false</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-8-2', 'Верно! Двунаправленность в действии.')">Сгенерирует список из 3 свободных переменных L = [_A, _B, _C]</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-8-2', 'Предикат length работает в обе стороны.')">Вызовет ошибку инстанцирования</button>
+
+          </div>
+          <div class="quiz-res" id="chq-8-2-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-8-3">
+          <div class="quiz-title">Вопрос 3: Какова алгоритмическая сложность предиката append(L1, L2, L3) по времени?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-8-3', 'Верно! Предикат обходит только первый список L1.')">O(length(L1))</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-8-3', 'Второй список не копируется, а подвешивается в хвост.')">O(length(L1) + length(L2))</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-8-3', 'Требуется рекурсивно развернуть L1.')">O(1)</button>
+
+          </div>
+          <div class="quiz-res" id="chq-8-3-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-8-4">
+          <div class="quiz-title">Вопрос 4: Какой предикат удаляет элемент X из списка List, возвращая остаток Rest?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-8-4', 'В стандартной библиотеке предикат называется select/3.')">delete_one/3</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-8-4', 'Верно! select/3 извлекает элемент с бэктрекингом по всем позициям.')">select(X, List, Rest)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-8-4', 'Предиката remove в стандарте нет.')">remove/3</button>
+
+          </div>
+          <div class="quiz-res" id="chq-8-4-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-8-5">
+          <div class="quiz-title">Вопрос 5: Что вернет запрос ?- member(apple, [banana, orange]) ?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-8-5', 'Верно! apple не входит в список.')">false.</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-8-5', 'Элемента нет в списке.')">true.</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-8-5', 'В Prolog нет null.')">null</button>
+
+          </div>
+          <div class="quiz-res" id="chq-8-5-res"></div>
+        </div>
+        
+
+        <div class="btn-row">
+          <button class="nav-btn" onclick="switchChapter(7)">&larr; Глава 7</button>
+          <button class="nav-btn" onclick="switchChapter(9)">Глава 9 &rarr;</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- CHAPTER 9 -->
+    <div class="chapter-view " id="ch9">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge">Арифметика &bull; Глава 9 из 20</span>
+          <span style="font-size: 12px; color: var(--accent); font-weight: 700;">5 проверочных тестов</span>
+        </div>
+        <h2>Урок 9: Арифметика и Вычисления</h2>
+        <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 14px;">Работа с числами, оператором is, функциями mod, div, abs и правильными знаками сравнения.</p>
+        
+        
+          <h3>1. Особенности вычислений через `is`</h3>
+          <p>Оператор <code>is</code> берет математическое дерево справа, обходит его, считает значение и унифицирует с левой частью:</p>
+          <div class="code-box">
+            ?- <span class="code-var">X</span> <span class="code-kw">is</span> <span class="code-atom">abs</span>(-<span class="code-num">10</span>) + <span class="code-num">2</span>^<span class="code-num">3</span>.<br>
+            <b style="color: #38bdf8;">X = 18.</b>
+          </div>
+          <h3>2. Ловушка «меньше или равно»</h3>
+          <p>Во всех языках пишут <code><=</code>. Но в Prolog стрелка <code><=</code> зарезервирована! Поэтому «меньше или равно» пишется строго как <b><code>=<</code></b>.</p>
+        
+
+        <h3 style="margin-top: 24px;">🎯 5 проверочных интерактивных тестов к главе 9</h3>
+        
+        <div class="quiz-wrap" id="chq-9-1">
+          <div class="quiz-title">Вопрос 1: Как в Prolog записывается оператор сравнения «меньше или равно»?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-9-1', 'Верно! Именно =<, а не <=.')">=<</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-9-1', '<= вызовет синтаксическую ошибку.')"><=</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-9-1', 'Текстовых алиасов нет.')">le</button>
+
+          </div>
+          <div class="quiz-res" id="chq-9-1-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-9-2">
+          <div class="quiz-title">Вопрос 2: Что произойдет при запросе ?- X is Y + 1 (где Y не связана)?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-9-2', 'Интерпретатор не ждет ввода.')">Prolog будет ждать ввода Y</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-9-2', 'Верно! Правая часть is обязана быть полностью известна.')">Instantiation Error (Ошибка инстанцирования)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-9-2', 'Для связывания в терм нужен оператор =.')">X свяжется с термом Y + 1</button>
+
+          </div>
+          <div class="quiz-res" id="chq-9-2-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-9-3">
+          <div class="quiz-title">Вопрос 3: Какая функция вычисляет остаток от целочисленного деления?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-9-3', '% в Prolog начинает комментарий!')">%</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-9-3', 'Верно! X is 10 mod 3 дает X = 1.')">mod</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-9-3', 'Используется mod или rem.')">rem_div</button>
+
+          </div>
+          <div class="quiz-res" id="chq-9-3-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-9-4">
+          <div class="quiz-title">Вопрос 4: Как проверить, что численное значение выражения Expr1 НЕ равно Expr2?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-9-4', 'Оператора != в Prolog не существует.')">Expr1 != Expr2</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-9-4', 'Верно! =\= означает арифметическое неравенство.')">Expr1 =\= Expr2</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-9-4', '<> не поддерживается в стандартном Prolog.')">Expr1 <> Expr2</button>
+
+          </div>
+          <div class="quiz-res" id="chq-9-4-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-9-5">
+          <div class="quiz-title">Вопрос 5: Что вернет запрос ?- 5.0 =:= 5 ?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-9-5', 'Верно! =:= сравнивает математические значения, игнорируя тип float/integer.')">true.</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-9-5', 'По числовому значению они равны.')">false.</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-9-5', 'Числа приводятся автоматически.')">Type Error</button>
+
+          </div>
+          <div class="quiz-res" id="chq-9-5-res"></div>
+        </div>
+        
+
+        <div class="btn-row">
+          <button class="nav-btn" onclick="switchChapter(8)">&larr; Глава 8</button>
+          <button class="nav-btn" onclick="switchChapter(10)">Глава 10 &rarr;</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- CHAPTER 10 -->
+    <div class="chapter-view " id="ch10">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge">Оптимизация &bull; Глава 10 из 20</span>
+          <span style="font-size: 12px; color: var(--accent); font-weight: 700;">5 проверочных тестов</span>
+        </div>
+        <h2>Урок 10: Хвостовая Рекурсия и Аккумуляторы</h2>
+        <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 14px;">Как писать рекурсивные предикаты, работающие за O(1) по памяти благодаря Last Call Optimization.</p>
+        
+        
+          <h3>1. Проблема обычной рекурсии</h3>
+          <p>Если после рекурсивного вызова остаются незавершенные операции (например, умножение), интерпретатор вынужден хранить фрейм стека в памяти. На миллионе итераций это вызовет переполнение стека.</p>
+          <h3>2. Паттерн Аккумулятора (Хвостовая рекурсия)</h3>
+          <p>В хвостовой рекурсии рекурсивный вызов является <b>последней подцелью</b> правила. Промежуточный результат накапливается в специальном аргументе — аккумуляторе (Acc):</p>
+          <div class="code-box">
+            <span class="code-comment">% Обертка</span><br>
+            <span class="code-functor">sum_list</span>(<span class="code-var">List</span>, <span class="code-var">Total</span>) <span class="code-kw">:-</span> <span class="code-functor">sum_acc</span>(<span class="code-var">List</span>, <span class="code-num">0</span>, <span class="code-var">Total</span>).<br><br>
+            <span class="code-comment">% Базовый случай: отдаем накопленный Acc в Total</span><br>
+            <span class="code-functor">sum_acc</span>([], <span class="code-var">Acc</span>, <span class="code-var">Acc</span>).<br><br>
+            <span class="code-comment">% Хвостовой шаг: считаем ДО рекурсивного вызова!</span><br>
+            <span class="code-functor">sum_acc</span>([<span class="code-var">H</span> | <span class="code-var">T</span>], <span class="code-var">Acc</span>, <span class="code-var">Total</span>) <span class="code-kw">:-</span><br>
+            &nbsp;&nbsp;<span class="code-var">NewAcc</span> <span class="code-kw">is</span> <span class="code-var">Acc</span> + <span class="code-var">H</span>,<br>
+            &nbsp;&nbsp;<span class="code-functor">sum_acc</span>(<span class="code-var">T</span>, <span class="code-var">NewAcc</span>, <span class="code-var">Total</span>).
+          </div>
+        
+
+        <h3 style="margin-top: 24px;">🎯 5 проверочных интерактивных тестов к главе 10</h3>
+        
+        <div class="quiz-wrap" id="chq-10-1">
+          <div class="quiz-title">Вопрос 1: В чем главное преимущество хвостовой рекурсии (Tail Call Optimization)?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-10-1', 'Верно! Программа не падает по стеку даже на миллиардах шагов.')">Она позволяет компилятору переиспользовать текущий фрейм стека (память O(1))</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-10-1', 'К сортировке это отношения не имеет.')">Она автоматически сортирует список</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-10-1', 'Унификация продолжает работать.')">Она отключает унификацию</button>
+
+          </div>
+          <div class="quiz-res" id="chq-10-1-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-10-2">
+          <div class="quiz-title">Вопрос 2: Где в теле правила должен располагаться хвостовой рекурсивный вызов?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-10-2', 'Верно! После него не должно оставаться никаких действий.')">В самом конце тела правила (последней подцелью)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-10-2', 'Это приведет к бесконечной левой рекурсии.')">В самом начале тела правила</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-10-2', 'В заголовке вызовов нет.')">В заголовке правила</button>
+
+          </div>
+          <div class="quiz-res" id="chq-10-2-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-10-3">
+          <div class="quiz-title">Вопрос 3: Зачем в хвостовой рекурсии передается аргумент-аккумулятор (Acc)?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-10-3', 'Верно! Это избавляет от необходимости вычислений на подъеме из рекурсии.')">Чтобы накапливать промежуточный результат на каждом шаге 'на спуске'</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-10-3', 'Аккумулятор хранит данные задачи.')">Для подсчета количества запущенных потоков</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-10-3', 'Это архитектурный паттерн.')">Это требование стандарта для всех предикатов</button>
+
+          </div>
+          <div class="quiz-res" id="chq-10-3-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-10-4">
+          <div class="quiz-title">Вопрос 4: Является ли предикат fact(N, R) :- N > 0, N1 is N-1, fact(N1, R1), R is N * R1 хвосто-рекурсивным?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-10-4', 'После fact(...) еще выполняется умножение R is N * R1!')">Да, он же вызывает сам себя</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-10-4', 'Верно! Умножение откладывается на стек.')">Нет, так как последняя операция — R is N * R1, а не рекурсивный вызов</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-10-4', 'Структура правила не хвостовая.')">Зависит от значения N</button>
+
+          </div>
+          <div class="quiz-res" id="chq-10-4-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-10-5">
+          <div class="quiz-title">Вопрос 5: Что происходит с памятью стека при идеальной хвостовой рекурсии без точек ветвления?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-10-5', 'При TCO стек не растет.')">Растет пропорционально O(N)</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-10-5', 'Верно! Это важнейшая оптимизация WAM.')">Остается константной O(1), превращаясь в эквивалент цикла while</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-10-5', 'Размер стека ограничен снизу.')">Уменьшается до отрицательных величин</button>
+
+          </div>
+          <div class="quiz-res" id="chq-10-5-res"></div>
+        </div>
+        
+
+        <div class="btn-row">
+          <button class="nav-btn" onclick="switchChapter(9)">&larr; Глава 9</button>
+          <button class="nav-btn" onclick="switchChapter(11)">Глава 11 &rarr;</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- CHAPTER 11 -->
+    <div class="chapter-view " id="ch11">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge">Управление &bull; Глава 11 из 20</span>
+          <span style="font-size: 12px; color: var(--accent); font-weight: 700;">5 проверочных тестов</span>
+        </div>
+        <h2>Урок 11: Управление перебором — Отсечение (Cut: !)</h2>
+        <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 14px;">Фиксация дерева решений: оператор отсечения, зеленый cut (скорость) и красный cut (опасность).</p>
+        
+        
+          <h3>1. Что делает оператор Cut (!)?</h3>
+          <p>Знак восклицания <code>!</code> фиксирует сделанный выбор. Он говорит движку:</p>
+          <ul style="margin-left: 20px; color: var(--muted); line-height: 1.8;">
+            <li>Не пытайся пробовать другие правила для этого предиката.</li>
+            <li>Не пытайся бэктрекать по подцелям, стоящим слева от <code>!</code>.</li>
+          </ul>
+          <h3>2. Зеленый vs Красный Cut</h3>
+          <p><b style="color: #34d399;">Зеленый Cut:</b> Служит ТОЛЬКО для ускорения. Если убрать <code>!</code>, набор решений программы останется абсолютно тем же.</p>
+          <p><b style="color: #f43f5e;">Красный Cut:</b> Изменяет саму логику программы. Без него программа начинает выдавать ложные результаты. Использовать крайне осторожно!</p>
+        
+
+        <h3 style="margin-top: 24px;">🎯 5 проверочных интерактивных тестов к главе 11</h3>
+        
+        <div class="quiz-wrap" id="chq-11-1">
+          <div class="quiz-title">Вопрос 1: Что происходит при прохождении через оператор отсечения (!) слева направо?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-11-1', 'Cut всегда успешно выполняется при прямом проходе.')">Он всегда возвращает false</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-11-1', 'Верно! Все альтернативы сжигаются.')">Он фиксирует выбор и отсекает альтернативные ветви при бэктрекинге</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-11-1', 'К компиляции это не относится.')">Он перезагружает файл программы</button>
+
+          </div>
+          <div class="quiz-res" id="chq-11-1-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-11-2">
+          <div class="quiz-title">Вопрос 2: В чем главное отличие зеленого отсечения от красного?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-11-2', 'Верно! Удаление зеленого cut безопасно для корректности.')">Зеленый повышает скорость без изменения логики; красный меняет логику программы</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-11-2', 'Цвет — это концептуальное свойство логики.')">Зеленый пишется в начале, а красный в конце</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-11-2', 'Это теоретические термины.')">Зеленый cut поддерживается только в Linux</button>
+
+          </div>
+          <div class="quiz-res" id="chq-11-2-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-11-3">
+          <div class="quiz-title">Вопрос 3: Какой встроенный предикат вычисляет цель Goal ровно один раз, отсекая все ее альтернативы?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-11-3', 'Верно! once(G) эквивалентен (G, !).')">once(Goal)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-11-3', 'Такого предиката нет.')">single(Goal)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-11-3', 'limit есть в библиотеке, но классический примитив — once/1.')">limit(1, Goal)</button>
+
+          </div>
+          <div class="quiz-res" id="chq-11-3-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-11-4">
+          <div class="quiz-title">Вопрос 4: Что делает комбинация (!, fail)?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-11-4', 'Завершает программу halt/0.')">Немедленно завершает всю программу</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-11-4', 'Верно! Это классический способ запретить действие.')">Паттерн 'отсечь и провалить': гарантирует, что цель ложна и альтернатив нет</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-11-4', 'fail завершает ветку неуспехом.')">Создает бесконечный цикл</button>
+
+          </div>
+          <div class="quiz-res" id="chq-11-4-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-11-5">
+          <div class="quiz-title">Вопрос 5: Можно ли отменить эффект отсечения, если родительская цель завершилась?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-11-5', 'В рамках одной цели отсечение необратимо.')">Да, при следующем запросе</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-11-5', 'Верно! Выбор зафиксирован навсегда для этого доказательства.')">Нет, отсечение безвозвратно удаляет точки выбора из дерева поиска</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-11-5', 'Это правило машины резолюции.')">Зависит от оперативной памяти</button>
+
+          </div>
+          <div class="quiz-res" id="chq-11-5-res"></div>
+        </div>
+        
+
+        <div class="btn-row">
+          <button class="nav-btn" onclick="switchChapter(10)">&larr; Глава 10</button>
+          <button class="nav-btn" onclick="switchChapter(12)">Глава 12 &rarr;</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- CHAPTER 12 -->
+    <div class="chapter-view " id="ch12">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge">Логика &bull; Глава 12 из 20</span>
+          <span style="font-size: 12px; color: var(--accent); font-weight: 700;">5 проверочных тестов</span>
+        </div>
+        <h2>Урок 12: Отрицание как Неуспех (\+) и CWA</h2>
+        <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 14px;">Гипотеза замкнутого мира: почему в Prolog «не доказано» означает «ложно», и скрытые риски оператора \+.</p>
+        
+        
+          <h3>1. Negation as Failure (\+)</h3>
+          <p>В Prolog отрицание обозначается как <code>\+ Goal</code>. Оно истинно тогда и только тогда, когда попытка доказать <code>Goal</code> завершается <b>неуспехом (fail)</b>.</p>
+          <div class="code-box">
+            <span class="code-comment">% Реализация \+ под капотом:</span><br>
+            <span class="code-functor">not</span>(<span class="code-var">Goal</span>) <span class="code-kw">:-</span> <span class="code-atom">call</span>(<span class="code-var">Goal</span>), <span class="code-kw">!</span>, <span class="code-atom">fail</span>.<br>
+            <span class="code-functor">not</span>(<span class="code-var">_</span>).
+          </div>
+          <h3>2. Смертельная ловушка: \+ со свободными переменными!</h3>
+          <p>Никогда не вызывайте <code>\+ p(X)</code> со свободной переменной <code>X</code>! Если существует ХОТЯ БЫ ОДИН объект, удовлетворяющий <code>p(X)</code>, отрицание даст <code>false</code> и заблокирует поиск остальных. Сначала свяжите переменную, а затем проверяйте отрицание:</p>
+          <div class="code-box">
+            <span class="code-comment">% ПРАВИЛЬНО: сначала связываем Student, затем проверяем \+</span><br>
+            <span class="code-functor">scholarship</span>(<span class="code-var">S</span>) <span class="code-kw">:-</span> <span class="code-atom">student</span>(<span class="code-var">S</span>), <span class="code-kw">\+</span> <span class="code-atom">has_debt</span>(<span class="code-var">S</span>).
+          </div>
+        
+
+        <h3 style="margin-top: 24px;">🎯 5 проверочных интерактивных тестов к главе 12</h3>
+        
+        <div class="quiz-wrap" id="chq-12-1">
+          <div class="quiz-title">Вопрос 1: Что в точности означает истинность выражения \+ P в Prolog?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-12-1', 'Prolog не доказывает теоремы противоречия.')">P логически противоречиво</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-12-1', 'Верно! Это Negation as Failure.')">Цель P не удалось доказать из имеющейся базы знаний</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-12-1', 'В Prolog вывод основан на поиске доказательства.')">P имеет значение false в таблице истинности</button>
+
+          </div>
+          <div class="quiz-res" id="chq-12-1-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-12-2">
+          <div class="quiz-title">Вопрос 2: Что такое Closed World Assumption (Гипотеза замкнутого мира)?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-12-2', 'Верно! База знаний считается полной моделью вселенной.')">Предположение, что все не упомянутые в базе факты являются ложными</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-12-2', 'Это логический термин, а не сетевой.')">Запрет на использование интернета в программе</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-12-2', 'К ресурсам ОС отношения не имеет.')">Ограничение на размер оперативной памяти</button>
+
+          </div>
+          <div class="quiz-res" id="chq-12-2-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-12-3">
+          <div class="quiz-title">Вопрос 3: Связывает ли оператор \+ Goal свободные переменные внутри Goal?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-12-3', 'Отрицание НИКОГДА не экспортирует подстановки переменных!')">Да, сохраняет найденные значения</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-12-3', 'Верно! Отрицание никогда не связывает переменные наружу.')">Нет, если \+ успешен, все внутренние переменные остаются свободными</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-12-3', 'Никакие переменные не связываются.')">Только первую переменную</button>
+
+          </div>
+          <div class="quiz-res" id="chq-12-3-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-12-4">
+          <div class="quiz-title">Вопрос 4: Почему запрос ?- \+ food(X), X = apple может завершиться false, даже если яблоко не еда?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-12-4', 'Верно! Именно поэтому переменную X нужно связывать ДО отрицания.')">Потому что food(X) найдет ЛЮБУЮ еду (например, pizza), станет true, и \+ вернет false</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-12-4', 'Это строгое следование логике SLD.')">Это ошибка в интерпретаторе</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-12-4', 'apple — обычный атом.')">Потому что apple — зарезервированное слово</button>
+
+          </div>
+          <div class="quiz-res" id="chq-12-4-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-12-5">
+          <div class="quiz-title">Вопрос 5: Как правильно переписать безопасный запрос: 'найти человека X, у которого нет машины'?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-12-5', 'Свободный X в отрицании приведет к ложному результату.')">?- \+ has_car(X), person(X).</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-12-5', 'Верно! Сначала порождаем кандидата X, затем фильтруем отрицанием.')">?- person(X), \+ has_car(X).</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-12-5', 'Это означает \'не существует человека с машиной\'.')">?- \+ (person(X), has_car(X)).</button>
+
+          </div>
+          <div class="quiz-res" id="chq-12-5-res"></div>
+        </div>
+        
+
+        <div class="btn-row">
+          <button class="nav-btn" onclick="switchChapter(11)">&larr; Глава 11</button>
+          <button class="nav-btn" onclick="switchChapter(13)">Глава 13 &rarr;</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- CHAPTER 13 -->
+    <div class="chapter-view " id="ch13">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge">Продвинутое &bull; Глава 13 из 20</span>
+          <span style="font-size: 12px; color: var(--accent); font-weight: 700;">5 проверочных тестов</span>
+        </div>
+        <h2>Урок 13: Сбор Всех Решений (findall, bagof, setof)</h2>
+        <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 14px;">Как собрать все ответы логического поиска в единый список без ручных циклов и нажатия точки с запятой.</p>
+        
+        
+          <h3>1. findall(+Template, :Goal, -List)</h3>
+          <p>Собирает значения <code>Template</code> для всех успешных решений цели <code>Goal</code> в список <code>List</code>. Если решений нет — возвращает пустой список <code>[]</code>.</p>
+          <div class="code-box">
+            ?- <span class="code-atom">findall</span>(<span class="code-var">Child</span>, <span class="code-atom">parent</span>(<span class="code-atom">ivan</span>, <span class="code-var">Child</span>), <span class="code-var">Kids</span>).<br>
+            <b style="color: #38bdf8;">Kids = [masha, alex, dmitry].</b>
+          </div>
+          <h3>2. bagof vs setof</h3>
+          <p><b>bagof/3</b>: Сохраняет дубликаты и группирует по свободным переменным. Если решений нет — выдает <code>false</code>.</p>
+          <p><b>setof/3</b>: Автоматически <b>удаляет дубликаты</b> и <b>сортирует</b> результат по возрастанию (математическое множество).</p>
+        
+
+        <h3 style="margin-top: 24px;">🎯 5 проверочных интерактивных тестов к главе 13</h3>
+        
+        <div class="quiz-wrap" id="chq-13-1">
+          <div class="quiz-title">Вопрос 1: Что вернет findall(X, fail, List), если для цели нет ни одного решения?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-13-1', 'findall НИКОГДА не завершается неуспехом (fail)!')">false.</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-13-1', 'Верно! findall при отсутствии решений всегда возвращает пустой список.')">List = []</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-13-1', 'Это нормальное поведение.')">Ошибка выполнения</button>
+
+          </div>
+          <div class="quiz-res" id="chq-13-1-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-13-2">
+          <div class="quiz-title">Вопрос 2: Чем setof/3 принципиально отличается от findall/3?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-13-2', 'Верно! Результат setof — строгое множество.')">setof сортирует список и удаляет все дубликаты</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-13-2', 'Разница лишь в сортировке.')">setof работает медленнее в 100 раз</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-13-2', 'setof работает с любыми термами.')">setof работает только с числами</button>
+
+          </div>
+          <div class="quiz-res" id="chq-13-2-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-13-3">
+          <div class="quiz-title">Вопрос 3: Что делает bagof/3, если цель не нашла ни одного решения?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-13-3', 'Пустой список возвращает findall, но не bagof!')">Возвращает пустой список []</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-13-3', 'Верно! В отличие от findall, bagof и setof при 0 решений дают fail.')">Завершается неуспехом (false)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-13-3', 'Ошибки нет, просто false.')">Выбрасывает исключение</button>
+
+          </div>
+          <div class="quiz-res" id="chq-13-3-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-13-4">
+          <div class="quiz-title">Вопрос 4: Что означает синтаксис Var^Goal во втором аргументе bagof/setof?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-13-4', 'Здесь крышка — это экзистенциальный квантор.')">Возведение переменной в степень</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-13-4', 'Верно! Var^Goal говорит игнорировать разбиение на группы по Var.')">Экзистенциальное связывание: не группировать результаты по переменной Var</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-13-4', 'Переменная участвует в поиске.')">Удаление переменной Var</button>
+
+          </div>
+          <div class="quiz-res" id="chq-13-4-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-13-5">
+          <div class="quiz-title">Вопрос 5: Может ли Template в findall(Template, Goal, List) быть сложной структурой, например point(X, Y)?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-13-5', 'Верно! Например, findall(pair(A,B), edge(A,B), Edges).')">Да, шаблон может быть произвольным составным термом</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-13-5', 'Шаблон конструирует объекты любой формы.')">Нет, шаблоном может быть только одна простая переменная</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-13-5', 'Форма шаблона произвольна.')">Только если это число</button>
+
+          </div>
+          <div class="quiz-res" id="chq-13-5-res"></div>
+        </div>
+        
+
+        <div class="btn-row">
+          <button class="nav-btn" onclick="switchChapter(12)">&larr; Глава 12</button>
+          <button class="nav-btn" onclick="switchChapter(14)">Глава 14 &rarr;</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- CHAPTER 14 -->
+    <div class="chapter-view " id="ch14">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge">Инженерия &bull; Глава 14 из 20</span>
+          <span style="font-size: 12px; color: var(--accent); font-weight: 700;">5 проверочных тестов</span>
+        </div>
+        <h2>Урок 14: Динамическая База Знаний (assert, retract)</h2>
+        <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 14px;">Изменение программы на лету: добавление фактов через assertz/asserta и удаление через retract.</p>
+        
+        
+          <h3>1. Директива dynamic</h3>
+          <p>По умолчанию предикаты в Prolog статичны и скомпилированы. Чтобы модифицировать предикат во время выполнения, его нужно объявить динамическим:</p>
+          <div class="code-box">
+            <span class="code-kw">:- dynamic</span> <span class="code-atom">score</span>/<span class="code-num">2</span>.
+          </div>
+          <h3>2. Добавление и удаление фактов</h3>
+          <ul style="margin-left: 20px; color: var(--muted); line-height: 1.8;">
+            <li><code>asserta(Fact)</code>: добавляет факт в САМОЕ НАЧАЛО базы (будет проверяться первым).</li>
+            <li><code>assertz(Fact)</code>: добавляет факт в САМЫЙ КОНЕЦ базы (будет проверяться последним).</li>
+            <li><code>retract(Fact)</code>: находит и удаляет первый подходящий факт по унификации.</li>
+            <li><code>retractall(Head)</code>: удаляет ВСЕ факты, сопоставимые с Head.</li>
+          </ul>
+        
+
+        <h3 style="margin-top: 24px;">🎯 5 проверочных интерактивных тестов к главе 14</h3>
+        
+        <div class="quiz-wrap" id="chq-14-1">
+          <div class="quiz-title">Вопрос 1: Какая директива обязательна перед изменением предиката my_fact/1 в рантайме?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-14-1', 'Верно! Без нее assert вызовет Permission Error.')">:- dynamic my_fact/1.</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-14-1', 'В стандарте Prolog ключевое слово — dynamic.')">:- mutable my_fact/1.</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-14-1', 'export относится к модулям.')">:- export my_fact/1.</button>
+
+          </div>
+          <div class="quiz-res" id="chq-14-1-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-14-2">
+          <div class="quiz-title">Вопрос 2: В чем разница между asserta/1 и assertz/1?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-14-2', 'Верно! \'a\' = alpha (начало), \'z\' = omega (конец).')">asserta вставляет факт в начало базы, а assertz — в конец базы</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-14-2', 'Разница лишь в позиции вставки.')">asserta работает быстрее в 2 раза</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-14-2', 'Никакого шифрования нет.')">assertz шифрует данные</button>
+
+          </div>
+          <div class="quiz-res" id="chq-14-2-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-14-3">
+          <div class="quiz-title">Вопрос 3: Откатываются ли изменения assert/retract назад при обычном бэктрекинге?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-14-3', 'Assert и retract — это ПОБОЧНЫЕ ЭФФЕКТЫ, они не откатываются бэктрекингом!')">Да, база знаний возвращается в исходное состояние</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-14-3', 'Верно! Это императивные побочные эффекты вне SLD-дерева.')">Нет, изменения базы знаний персистентны и не откатываются бэктрекингом</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-14-3', 'Ни один из них не откатывается.')">Только предикат retract откатывается</button>
+
+          </div>
+          <div class="quiz-res" id="chq-14-3-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-14-4">
+          <div class="quiz-title">Вопрос 4: Что произойдет при вызове retractall(user_session(_, _))?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-14-4', 'Верно! retractall стирает все совпадающие предложения.')">Удалятся абсолютно ВСЕ факты предиката user_session/2</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-14-4', 'Один факт удаляет retract/1.')">Удалится только первый факт</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-14-4', 'retractall всегда успешен, даже если удалять нечего.')">Вызов завершится ошибкой</button>
+
+          </div>
+          <div class="quiz-res" id="chq-14-4-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-14-5">
+          <div class="quiz-title">Вопрос 5: Рекомендуется ли использовать assert/retract вместо передачи аргументов через параметры?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-14-5', 'Злоупотребление assert превращает код в клубок глобальных переменных.')">Да, это лучший способ передачи состояния</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-14-5', 'Верно! Динамическая база нужна для кэша, сессий и правил обучения.')">Нет, чистый код в Prolog передает состояние через аргументы и аккумуляторы</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-14-5', 'Вся логика строится на рекурсии и термах.')">Это единственный способ работы с памятью</button>
+
+          </div>
+          <div class="quiz-res" id="chq-14-5-res"></div>
+        </div>
+        
+
+        <div class="btn-row">
+          <button class="nav-btn" onclick="switchChapter(13)">&larr; Глава 13</button>
+          <button class="nav-btn" onclick="switchChapter(15)">Глава 15 &rarr;</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- CHAPTER 15 -->
+    <div class="chapter-view " id="ch15">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge">Инженерия &bull; Глава 15 из 20</span>
+          <span style="font-size: 12px; color: var(--accent); font-weight: 700;">5 проверочных тестов</span>
+        </div>
+        <h2>Урок 15: Ввод-Вывод и Форматирование (I/O)</h2>
+        <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 14px;">Взаимодействие с пользователем: потоки, read/1, write/1, format/2 и форматированный вывод строк.</p>
+        
+        
+          <h3>1. Базовый вывод: write/1, writeln/1 и nl/0</h3>
+          <div class="code-box">
+            <span class="code-atom">write</span>(<span class="code-atom">'Привет, '</span>), <span class="code-atom">write</span>(<span class="code-var">Name</span>), <span class="code-atom">nl</span>.
+          </div>
+          <h3>2. Форматированный вывод: format/2</h3>
+          <p>Аналог printf: первый аргумент — шаблон со спецификаторами, второй — список значений:</p>
+          <ul style="margin-left: 20px; color: var(--muted); line-height: 1.8;">
+            <li><code>~w</code>: печатает терм в стандартном виде.</li>
+            <li><code>~d</code>: целое число.</li>
+            <li><code>~s</code>: строка / список символов.</li>
+            <li><code>~n</code>: перевод строки.</li>
+          </ul>
+          <div class="code-box">
+            ?- <span class="code-atom">format</span>(<span class="code-atom">'Пользователь: ~w, Очки: ~d~n'</span>, [<span class="code-atom">'Алиса'</span>, <span class="code-num">1500</span>]).
+          </div>
+        
+
+        <h3 style="margin-top: 24px;">🎯 5 проверочных интерактивных тестов к главе 15</h3>
+        
+        <div class="quiz-wrap" id="chq-15-1">
+          <div class="quiz-title">Вопрос 1: Каким символом обязательно должен завершаться ввод терма пользователем при вызове read(X)?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-15-1', 'read/1 ждет синтаксическую точку!')">Символом переноса строки Enter</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-15-1', 'Верно! read/1 парсит терм Prolog, требующий точки.')">Точкой (.) и затем клавишей Enter</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-15-1', 'Точка с запятой вызовет ожидание точки.')">Точкой с запятой (;)</button>
+
+          </div>
+          <div class="quiz-res" id="chq-15-1-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-15-2">
+          <div class="quiz-title">Вопрос 2: Какой спецификатор в format/2 выполняет перевод строки (~newline)?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-15-2', 'В format Prolog спецификаторы начинаются с тильды ~.')">\n</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-15-2', 'Верно! ~n — платформо-независимый перевод строки.')">~n</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-15-2', 'Такого спецификатора нет.')">~eol</button>
+
+          </div>
+          <div class="quiz-res" id="chq-15-2-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-15-3">
+          <div class="quiz-title">Вопрос 3: Чем writeq/1 отличается от стандартного write/1?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-15-3', 'Верно! \'q\' означает quoted (в кавычках при необходимости).')">writeq выводит атомы с кавычками, чтобы терм можно было прочитать обратно через read/1</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-15-3', 'Оба пишут в текущий поток.')">writeq выводит данные в файл</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-15-3', 'Разница лишь в экранировании кавычек.')">writeq быстрее в 10 раз</button>
+
+          </div>
+          <div class="quiz-res" id="chq-15-3-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-15-4">
+          <div class="quiz-title">Вопрос 4: Какой встроенный предикат закрывает открытый ранее файловый поток Stream?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-15-4', 'Верно! close/1 освобождает файловый дескриптор.')">close(Stream)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-15-4', 'В стандарте используется close/1.')">stop(Stream)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-15-4', 'Такого предиката нет.')">free(Stream)</button>
+
+          </div>
+          <div class="quiz-res" id="chq-15-4-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-15-5">
+          <div class="quiz-title">Вопрос 5: Что произойдет, если пользователь введет в read(X) некорректный синтаксис?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-15-5', 'Будет выброшено Syntax Error исключение.')">Prolog молча проигнорирует ошибку</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-15-5', 'Верно! Исключение можно поймать через catch/3.')">Выбросится исключение syntax_error</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-15-5', 'В стандарте генерируется полноценный эксепшн.')">read вернет atom('error')</button>
+
+          </div>
+          <div class="quiz-res" id="chq-15-5-res"></div>
+        </div>
+        
+
+        <div class="btn-row">
+          <button class="nav-btn" onclick="switchChapter(14)">&larr; Глава 14</button>
+          <button class="nav-btn" onclick="switchChapter(16)">Глава 16 &rarr;</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- CHAPTER 16 -->
+    <div class="chapter-view " id="ch16">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge">Продвинутое &bull; Глава 16 из 20</span>
+          <span style="font-size: 12px; color: var(--accent); font-weight: 700;">5 проверочных тестов</span>
+        </div>
+        <h2>Урок 16: Грамматики Описания Предложений (DCG: -->)</h2>
+        <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 14px;">Встроенный парсер: обработка естественного языка и грамматический разбор со стрелкой -->.</p>
+        
+        
+          <h3>1. Что такое DCG (Definite Clause Grammars)?</h3>
+          <p>Исторически Prolog создавался для лингвистики. В язык встроен синтаксический сахар <code>--></code>, который автоматически компилируется в эффективные <b>разностные списки (difference lists)</b>.</p>
+          <div class="code-box">
+            <span class="code-comment">% Грамматика простого предложения</span><br>
+            <span class="code-functor">sentence</span> <span class="code-kw">--></span> <span class="code-functor">noun_phrase</span>, <span class="code-functor">verb_phrase</span>.<br>
+            <span class="code-functor">noun_phrase</span> <span class="code-kw">--></span> <span class="code-functor">determiner</span>, <span class="code-functor">noun</span>.<br>
+            <span class="code-functor">determiner</span> <span class="code-kw">--></span> [<span class="code-atom">the</span>].<br>
+            <span class="code-functor">noun</span> <span class="code-kw">--></span> [<span class="code-atom">cat</span>] ; [<span class="code-atom">dog</span>].<br>
+            <span class="code-functor">verb_phrase</span> <span class="code-kw">--></span> [<span class="code-atom">sleeps</span>].
+          </div>
+          <h3>2. Запуск через phrase/2</h3>
+          <div class="code-box">
+            ?- <span class="code-atom">phrase</span>(<span class="code-atom">sentence</span>, [<span class="code-atom">the</span>, <span class="code-atom">cat</span>, <span class="code-atom">sleeps</span>]).<br>
+            <b style="color: #38bdf8;">true.</b>
+          </div>
+        
+
+        <h3 style="margin-top: 24px;">🎯 5 проверочных интерактивных тестов к главе 16</h3>
+        
+        <div class="quiz-wrap" id="chq-16-1">
+          <div class="quiz-title">Вопрос 1: Какой специальный оператор используется в синтаксисе грамматик DCG вместо :- ?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-16-1', 'Верно! Стрелка --> обозначает DCG правило.')">--></button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-16-1', '=> используется для правил перезаписи в некоторых диалектах.')">=></button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-16-1', 'Такого оператора нет.')">~~></button>
+
+          </div>
+          <div class="quiz-res" id="chq-16-1-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-16-2">
+          <div class="quiz-title">Вопрос 2: Как в теле DCG-правила обозначаются терминальные символы (конкретные слова)?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-16-2', 'Верно! Квадратные скобки определяют терминалы.')">В квадратных скобках [word1, word2]</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-16-2', 'Круглые скобки означают вызов нетерминала.')">В круглых скобках (word)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-16-2', 'Такого синтаксиса нет.')">В двойных решетках #word#</button>
+
+          </div>
+          <div class="quiz-res" id="chq-16-2-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-16-3">
+          <div class="quiz-title">Вопрос 3: Что делает вставка чистого Prolog-кода в фигурных скобках { Code } внутри DCG?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-16-3', 'Верно! Фигурные скобки экранируют произвольный логический код от транслятора грамматик.')">Выполняет обычный Prolog-предикат без разбора списков</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-16-3', 'Это встроенный синтаксический шлюз к ядру Prolog.')">Создает JSON объект</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-16-3', 'Комментарии начинаются с %.')">Объявляет блок комментариев</button>
+
+          </div>
+          <div class="quiz-res" id="chq-16-3-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-16-4">
+          <div class="quiz-title">Вопрос 4: Какой предикат стандартной библиотеки запускает разбор грамматики DCG на списке?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-16-4', 'Используется phrase/2 или phrase/3.')">parse/2</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-16-4', 'Верно! phrase(Rule, Tokens) — стандартный интерфейс DCG.')">phrase(Rule, List)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-16-4', 'Такого предиката нет.')">run_grammar/2</button>
+
+          </div>
+          <div class="quiz-res" id="chq-16-4-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-16-5">
+          <div class="quiz-title">Вопрос 5: Во что компилятор Prolog транслирует DCG-правило rule --> a, b под капотом?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-16-5', 'Верно! DCG — это чистый синтаксический сахар для difference lists.')">В правило со скрытыми аргументами разностного списка: rule(S0, S) :- a(S0, S1), b(S1, S).</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-16-5', 'DCG мощнее регулярных выражений (порождает КС-грамматики).')">В регулярное выражение</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-16-5', 'Трансляция идет в чистый Prolog код.')">В байткод flex/bison</button>
+
+          </div>
+          <div class="quiz-res" id="chq-16-5-res"></div>
+        </div>
+        
+
+        <div class="btn-row">
+          <button class="nav-btn" onclick="switchChapter(15)">&larr; Глава 15</button>
+          <button class="nav-btn" onclick="switchChapter(17)">Глава 17 &rarr;</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- CHAPTER 17 -->
+    <div class="chapter-view " id="ch17">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge">Практика &bull; Глава 17 из 20</span>
+          <span style="font-size: 12px; color: var(--accent); font-weight: 700;">5 проверочных тестов</span>
+        </div>
+        <h2>Урок 17: Поиск в Пространстве Состояний и Графы</h2>
+        <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 14px;">Поиск путей в лабиринтах, BFS, DFS, поиск кратчайшего пути и алгоритмы предотвращения циклов.</p>
+        
+        
+          <h3>1. Встроенный DFS с поиском с возвратом</h3>
+          <p>Поскольку механизм SLD-резолюции в Prolog по своей природе является <b>поиском в глубину (Depth-First Search)</b>, алгоритм обхода графа пишется в 4 строки кода!</p>
+          <div class="code-box">
+            <span class="code-functor">path</span>(<span class="code-var">From</span>, <span class="code-var">To</span>, [<span class="code-var">From</span>, <span class="code-var">To</span>], <span class="code-var">_</span>) <span class="code-kw">:-</span><br>
+            &nbsp;&nbsp;<span class="code-atom">edge</span>(<span class="code-var">From</span>, <span class="code-var">To</span>).<br><br>
+            <span class="code-functor">path</span>(<span class="code-var">From</span>, <span class="code-var">To</span>, [<span class="code-var">From</span> | <span class="code-var">Rest</span>], <span class="code-var">Visited</span>) <span class="code-kw">:-</span><br>
+            &nbsp;&nbsp;<span class="code-atom">edge</span>(<span class="code-var">From</span>, <span class="code-var">Next</span>),<br>
+            &nbsp;&nbsp;<span class="code-var">Next</span> \= <span class="code-var">To</span>,<br>
+            &nbsp;&nbsp;<span class="code-kw">\+</span> <span class="code-atom">member</span>(<span class="code-var">Next</span>, <span class="code-var">Visited</span>), <span class="code-comment">% Защита от циклов!</span><br>
+            &nbsp;&nbsp;<span class="code-functor">path</span>(<span class="code-var">Next</span>, <span class="code-var">To</span>, <span class="code-var">Rest</span>, [<span class="code-var">Next</span> | <span class="code-var">Visited</span>]).
+          </div>
+        
+
+        <h3 style="margin-top: 24px;">🎯 5 проверочных интерактивных тестов к главе 17</h3>
+        
+        <div class="quiz-wrap" id="chq-17-1">
+          <div class="quiz-title">Вопрос 1: Какой алгоритм обхода графа нативно заложен в саму виртуальную машину Prolog?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-17-1', 'Верно! Prolog идет по первой ветке до упора (в глубину).')">Поиск в глубину (DFS)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-17-1', 'BFS требует явного управления очередью состояний.')">Поиск в ширину (BFS)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-17-1', 'Взвешенные графы требуют специализированных предикатов.')">Алгоритм Дейкстры</button>
+
+          </div>
+          <div class="quiz-res" id="chq-17-1-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-17-2">
+          <div class="quiz-title">Вопрос 2: Что произойдет при поиске пути в неориентированном графе без списка Visited?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-17-2', 'Верно! Бэктрекинг будет вечно метаться в петле.')">Программа зависнет в бесконечной рекурсии между двумя вершинами (A-B-A-B...)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-17-2', 'Без предикатов проверки цикл не обнаруживается.')">Prolog автоматически определит цикл и остановится</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-17-2', 'Такого встроенного механизма нет.')">Выведется сообщение 'Graph is looped'</button>
+
+          </div>
+          <div class="quiz-res" id="chq-17-2-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-17-3">
+          <div class="quiz-title">Вопрос 3: Как в Prolog обычно реализуется поиск в ширину (BFS)?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-17-3', 'Верно! Очередь путей обеспечивает поиск кратчайшего по шагам пути.')">Через список путей-кандидатов (очередь FIFO), где новые пути добавляются в конец</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-17-3', 'Такого флага в ядре Prolog нет.')">Автоматически с помощью флага :- set_prolog_flag(bfs, true)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-17-3', 'BFS моделируется структурой данных.')">Через многопоточность</button>
+
+          </div>
+          <div class="quiz-res" id="chq-17-3-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-17-4">
+          <div class="quiz-title">Вопрос 4: Как найти путь с МИНИМАЛЬНОЙ стоимостью среди всех найденных путей?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-17-4', 'Верно! Агрегация всех решений с последующим нахождением минимума.')">Собрать все пары path(Cost, P) через findall/3 и применить min_member/2</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-17-4', 'min вычисляет числа, а не пути.')">Использовать оператор min</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-17-4', 'Это классическая задача логического программирования.')">Это невозможно в Prolog</button>
+
+          </div>
+          <div class="quiz-res" id="chq-17-4-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-17-5">
+          <div class="quiz-title">Вопрос 5: Какая структура данных используется в роли аккумулятора Visited?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-17-5', 'Верно! На каждом шаге мы добавляем текущую вершину в голову [Next | Visited].')">Обычный список вершин [Node1, Node2, ...]</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-17-5', 'В коде используется стандартный список Prolog.')">Хэш-таблица на C</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-17-5', 'Список в аргументе полностью потокобезопасен и чист.')">Глобальная база данных</button>
+
+          </div>
+          <div class="quiz-res" id="chq-17-5-res"></div>
+        </div>
+        
+
+        <div class="btn-row">
+          <button class="nav-btn" onclick="switchChapter(16)">&larr; Глава 16</button>
+          <button class="nav-btn" onclick="switchChapter(18)">Глава 18 &rarr;</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- CHAPTER 18 -->
+    <div class="chapter-view " id="ch18">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge">Ограничения &bull; Глава 18 из 20</span>
+          <span style="font-size: 12px; color: var(--accent); font-weight: 700;">5 проверочных тестов</span>
+        </div>
+        <h2>Урок 18: Программирование в Ограничениях (CLP(FD))</h2>
+        <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 14px;">Сверхбыстрое решение судоку, расписаний и криптарифмики с библиотекой library(clpfd).</p>
+        
+        
+          <h3>1. В чем революция CLP(FD)?</h3>
+          <p>В обычной арифметике <code>X is Y + 1</code> падает, если Y неизвестен. В <b>Constraint Logic Programming over Finite Domains</b> мы объявляем математические ограничения над переменными <i>до того, как их значения станут известны</i>!</p>
+          <div class="code-box">
+            <span class="code-kw">:- use_module</span>(<span class="code-atom">library</span>(<span class="code-atom">clpfd</span>)).<br><br>
+            <span class="code-functor">solve</span>(<span class="code-var">X</span>, <span class="code-var">Y</span>) <span class="code-kw">:-</span><br>
+            &nbsp;&nbsp;[<span class="code-var">X</span>, <span class="code-var">Y</span>] <span class="code-atom">ins</span> <span class="code-num">1</span>..<span class="code-num">10</span>,      <span class="code-comment">% Домен значений</span><br>
+            &nbsp;&nbsp;<span class="code-var">X</span> #+ <span class="code-var">Y</span> #= <span class="code-num">15</span>,         <span class="code-comment">% Сумма 15</span><br>
+            &nbsp;&nbsp;<span class="code-var">X</span> #> <span class="code-var">Y</span>,                <span class="code-comment">% X строго больше Y</span><br>
+            &nbsp;&nbsp;<span class="code-atom">label</span>([<span class="code-var">X</span>, <span class="code-var">Y</span>]).        <span class="code-comment">% Поиск решения</span>
+          </div>
+          <p>Специальные операторы CLP(FD) начинаются со знака решетки: <code>#=</code>, <code>#\=</code>, <code>#></code>, <code>#<</code>, <code>#>=</code>, <code>#=<</code>.</p>
+        
+
+        <h3 style="margin-top: 24px;">🎯 5 проверочных интерактивных тестов к главе 18</h3>
+        
+        <div class="quiz-wrap" id="chq-18-1">
+          <div class="quiz-title">Вопрос 1: Что означает аббревиатура FD в библиотеке CLP(FD)?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-18-1', 'Верно! Целочисленные конечные интервалы значений.')">Finite Domains (Конечные домены)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-18-1', 'Это термин теории ограничений.')">Fast Deduction (Быстрая дедукция)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-18-1', 'FD означает конечные числовые диапазоны.')">Full Database (Полная база данных)</button>
+
+          </div>
+          <div class="quiz-res" id="chq-18-1-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-18-2">
+          <div class="quiz-title">Вопрос 2: С какого символа начинаются операторы ограничений в библиотеке clpfd?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-18-2', 'Верно! Например: #=, #>, #\=, #*.')">Со знака решетки (#)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-18-2', '$ используется в некоторых других решателях.')">Со знака доллара ($)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-18-2', 'Символ @ используется для стандартного порядка термов.')">Со знака собаки (@)</button>
+
+          </div>
+          <div class="quiz-res" id="chq-18-2-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-18-3">
+          <div class="quiz-title">Вопрос 3: Что делает предикат all_distinct(List) в CLP(FD)?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-18-3', 'Верно! Это мощнейшее ограничение (ключ к решению Судоку и N ферзей).')">Требует, чтобы ВСЕ переменные в списке приняли попарно различные значения</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-18-3', 'all_distinct — это ограничение, а не функция фильтрации.')">Удаляет дубликаты из списка</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-18-3', 'Для длины есть length/2.')">Проверяет длину списка</button>
+
+          </div>
+          <div class="quiz-res" id="chq-18-3-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-18-4">
+          <div class="quiz-title">Вопрос 4: Зачем в конце формулировки ограничений вызывается предикат label/1 или labeling/2?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-18-4', 'Верно! До label система хранит лишь диапазоны ограничений.')">Чтобы запустить поиск конкретных числовых значений для переменных</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-18-4', 'Печатает write/format.')">Чтобы напечатать ответ на экран</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-18-4', 'label выполняет инстанцирование.')">Чтобы очистить память</button>
+
+          </div>
+          <div class="quiz-res" id="chq-18-4-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-18-5">
+          <div class="quiz-title">Вопрос 5: Упадет ли запрос ?- X #> 5, X #< 10 с ошибкой 'instantiation error'?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, false, 'chq-18-5', 'В этом и магия CLP(FD): переменные не обязаны быть связаны сразу!')">Да, X ведь еще неизвестен</button>
+<button class="quiz-opt" onclick="checkQ(this, true, 'chq-18-5', 'Верно! CLP(FD) сужает домены на лету (constraint propagation).')">Нет, система сузит домен X до интервала 6..9</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-18-5', 'Ограничения непротиворечивы.')">Завершится с false</button>
+
+          </div>
+          <div class="quiz-res" id="chq-18-5-res"></div>
+        </div>
+        
+
+        <div class="btn-row">
+          <button class="nav-btn" onclick="switchChapter(17)">&larr; Глава 17</button>
+          <button class="nav-btn" onclick="switchChapter(19)">Глава 19 &rarr;</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- CHAPTER 19 -->
+    <div class="chapter-view " id="ch19">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge">Продвинутое &bull; Глава 19 из 20</span>
+          <span style="font-size: 12px; color: var(--accent); font-weight: 700;">5 проверочных тестов</span>
+        </div>
+        <h2>Урок 19: Метапрограммирование и Рефлексия</h2>
+        <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 14px;">Гомоиконичность: код как данные. Предикаты call/1, functor/3, arg/3 и оператор «унив» (=..).</p>
+        
+        
+          <h3>1. Гомоиконичность</h3>
+          <p>В Prolog код программы записывается теми же термами, что и данные. Правило <code>p(X) :- q(X)</code> — это терм <code>:-(p(X), q(X))</code>! Это позволяет программам легко анализировать, трансформировать и исполнять другой код.</p>
+          <h3>2. Вызов терма как цели: call/1</h3>
+          <div class="code-box">
+            ?- <span class="code-var">Goal</span> = <span class="code-atom">member</span>(<span class="code-atom">apple</span>, [<span class="code-atom">apple</span>, <span class="code-atom">banana</span>]), <span class="code-atom">call</span>(<span class="code-var">Goal</span>).<br>
+            <b style="color: #38bdf8;">true.</b>
+          </div>
+          <h3>3. Оператор Унив (=..)</h3>
+          <p>Превращает любой терм в список (где голова — функтор, хвост — аргументы) и обратно:</p>
+          <div class="code-box">
+            ?- <span class="code-atom">point</span>(<span class="code-num">10</span>, <span class="code-num">20</span>) <span class="code-kw">=..</span> <span class="code-var">List</span>.<br>
+            <b style="color: #38bdf8;">List = [point, 10, 20].</b><br><br>
+            ?- <span class="code-var">Term</span> <span class="code-kw">=..</span> [<span class="code-atom">person</span>, <span class="code-atom">ivan</span>, <span class="code-num">30</span>].<br>
+            <b style="color: #38bdf8;">Term = person(ivan, 30).</b>
+          </div>
+        
+
+        <h3 style="margin-top: 24px;">🎯 5 проверочных интерактивных тестов к главе 19</h3>
+        
+        <div class="quiz-wrap" id="chq-19-1">
+          <div class="quiz-title">Вопрос 1: Что делает оператор =.. (унив) в выражении Term =.. [f, 1, 2] ?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-19-1', 'Верно! Первый элемент списка становится функтором, а остальные — аргументами.')">Конструирует составной терм Term = f(1, 2)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-19-1', 'Унив — это мост между термами и списками.')">Сравнивает длину списка с термом</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-19-1', 'Унив не удаляет объекты.')">Удаляет терм из памяти</button>
+
+          </div>
+          <div class="quiz-res" id="chq-19-1-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-19-2">
+          <div class="quiz-title">Вопрос 2: Какой предикат извлекает N-й аргумент составного терма: arg(N, Term, Value)?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-19-2', 'Верно! arg(2, point(10, 20), Y) даст Y = 20.')">arg/3</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-19-2', 'В стандарте предикат называется arg/3.')">get_arg/3</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-19-2', 'element относится к спискам или массивам в других языках.')">element/3</button>
+
+          </div>
+          <div class="quiz-res" id="chq-19-2-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-19-3">
+          <div class="quiz-title">Вопрос 3: Что делает вызов copy_term(Term1, Term2)?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-19-3', 'Верно! Переменные в копии не связаны с исходными переменными.')">Создает точную копию Term1 с новыми свежими свободными переменными</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-19-3', 'Для записи в файл есть потоки I/O.')">Записывает терм на жесткий диск</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-19-3', 'Это глубокое клонирование терма.')">Создает указатель на ту же область памяти</button>
+
+          </div>
+          <div class="quiz-res" id="chq-19-3-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-19-4">
+          <div class="quiz-title">Вопрос 4: Что делает предикат clause(Head, Body)?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-19-4', 'Верно! Это фундамент для написания мета-интерпретаторов.')">Инспектирует базу знаний и возвращает тело правила для заданной головы</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-19-4', 'clause только читает предложения.')">Удаляет предложение из файла</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-19-4', 'Это предикат рефлексии.')">Компилирует новый модуль</button>
+
+          </div>
+          <div class="quiz-res" id="chq-19-4-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-19-5">
+          <div class="quiz-title">Вопрос 5: Что означает термин 'гомоиконичность' в контексте Prolog?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-19-5', 'Верно! Как и в Lisp, код — это данные.')">Код программы и структуры данных представляются в одном и том же формате (термах)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-19-5', 'В Prolog динамическая типизация.')">Все переменные должны иметь одинаковый тип</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-19-5', 'Это фундаментальный термин теории языков.')">Интерфейс программы оптимизирован под иконки</button>
+
+          </div>
+          <div class="quiz-res" id="chq-19-5-res"></div>
+        </div>
+        
+
+        <div class="btn-row">
+          <button class="nav-btn" onclick="switchChapter(18)">&larr; Глава 18</button>
+          <button class="nav-btn" onclick="switchChapter(20)">Глава 20 &rarr;</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- CHAPTER 20 -->
+    <div class="chapter-view " id="ch20">
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="badge">Инженерия &bull; Глава 20 из 20</span>
+          <span style="font-size: 12px; color: var(--accent); font-weight: 700;">5 проверочных тестов</span>
+        </div>
+        <h2>Урок 20: Архитектура Проекта, Модули и Тесты</h2>
+        <p style="color: var(--muted); font-size: 14.5px; margin-bottom: 14px;">Продакшн-разработка: организация модулей (module/2), юнит-тесты с plunit и сборка бинарников.</p>
+        
+        
+          <h3>1. Модульная система</h3>
+          <p>В реальных проектах код разбивается на модули. Каждый модуль экспортирует только публичные предикаты, скрывая приватные хелперы:</p>
+          <div class="code-box">
+            <span class="code-kw">:- module</span>(<span class="code-atom">math_utils</span>, [<br>
+            &nbsp;&nbsp;<span class="code-atom">factorial</span>/<span class="code-num">2</span>,<br>
+            &nbsp;&nbsp;<span class="code-atom">fibonacci</span>/<span class="code-num">2</span><br>
+            ]).<br><br>
+            <span class="code-comment">% В другом файле импорт:</span><br>
+            <span class="code-kw">:- use_module</span>(<span class="code-atom">math_utils</span>).
+          </div>
+          <h3>2. Встроенные юнит-тесты (PL-Unit)</h3>
+          <p>SWI-Prolog включает мощный тестовый фреймворк:</p>
+          <div class="code-box">
+            <span class="code-kw">:- begin_tests</span>(<span class="code-atom">math_tests</span>).<br><br>
+            <span class="code-functor">test</span>(<span class="code-atom">fact_zero</span>) <span class="code-kw">:-</span><br>
+            &nbsp;&nbsp;<span class="code-atom">factorial</span>(<span class="code-num">0</span>, <span class="code-num">1</span>).<br><br>
+            <span class="code-kw">:- end_tests</span>(<span class="code-atom">math_tests</span>).<br>
+            <span class="code-comment">% Запуск тестов: ?- run_tests.</span>
+          </div>
+          <h3>3. Сборка автономного исполняемого файла</h3>
+          <p>С помощью <code>qsave_program/2</code> проект компилируется в единый бинарный файл, запускаемый без установленного интерпретатора.</p>
+        
+
+        <h3 style="margin-top: 24px;">🎯 5 проверочных интерактивных тестов к главе 20</h3>
+        
+        <div class="quiz-wrap" id="chq-20-1">
+          <div class="quiz-title">Вопрос 1: Какая директива объявляет модуль и список его публично доступных предикатов?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-20-1', 'Верно! Первая строка в модульном файле.')">:- module(Name, [ExportList]).</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-20-1', 'В Prolog используется термин module.')">:- package(Name).</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-20-1', 'Namespace — термин C++, но не Prolog.')">:- namespace(Name).</button>
+
+          </div>
+          <div class="quiz-res" id="chq-20-1-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-20-2">
+          <div class="quiz-title">Вопрос 2: Какая директива используется для импорта предикатов из другого модуля?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-20-2', 'Верно! use_module импортирует модуль.')">:- use_module(FileName).</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-20-2', 'В стандарте Prolog используется use_module.')">:- import(FileName).</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-20-2', 'include просто вставляет сырой текст без инкапсуляции модулей.')">:- include(FileName).</button>
+
+          </div>
+          <div class="quiz-res" id="chq-20-2-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-20-3">
+          <div class="quiz-title">Вопрос 3: Как запустить юнит-тесты фреймворка PL-Unit в консоли SWI-Prolog?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-20-3', 'Верно! Предикат run_tests запускает все блоки begin_tests.')">?- run_tests.</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-20-3', 'Такого предиката нет.')">?- test_all.</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-20-3', 'pytest — это инструмент Python.')">?- pytest.</button>
+
+          </div>
+          <div class="quiz-res" id="chq-20-3-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-20-4">
+          <div class="quiz-title">Вопрос 4: Какой предикат SWI-Prolog упаковывает проект в автономный бинарный .exe файл?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-20-4', 'Верно! qsave_program создает автономный бинарник.')">qsave_program(OutputExe, [goal(main), stand_alone(true)])</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-20-4', 'qsave_program сохраняет предкомпилированное состояние WAM.')">compile_to_c/2</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-20-4', 'Такого предиката нет.')">build_binary/1</button>
+
+          </div>
+          <div class="quiz-res" id="chq-20-4-res"></div>
+        </div>
+        
+        <div class="quiz-wrap" id="chq-20-5">
+          <div class="quiz-title">Вопрос 5: Как вызвать предикат internal_helper/1 модуля my_mod, если он НЕ был экспортирован?</div>
+          <div class="quiz-options">
+            <button class="quiz-opt" onclick="checkQ(this, true, 'chq-20-5', 'Верно! Двоеточие module:goal позволяет вызывать приватные предикаты.')">Через явное квалифицированное имя: my_mod:internal_helper(X)</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-20-5', 'В Prolog модули предназначены для организации пространства имен, а не жесткой защиты памяти.')">Приватные предикаты невозможно вызвать ни при каких условиях</button>
+<button class="quiz-opt" onclick="checkQ(this, false, 'chq-20-5', 'Синтаксис module:pred работает в обычном коде.')">Только через дебаггер</button>
+
+          </div>
+          <div class="quiz-res" id="chq-20-5-res"></div>
+        </div>
+        
+
+        <div class="btn-row">
+          <button class="nav-btn" onclick="switchChapter(19)">&larr; Глава 19</button>
+          <button class="nav-btn" onclick="switchChapter(1)">В начало &uarr;</button>
+        </div>
+      </div>
+    </div>
+    
 
   <script>
     function switchChapter(num) {
@@ -594,6 +2149,12 @@
         res.innerHTML = '<b>Отлично!</b> ' + msg;
       } else {
         btn.classList.add('incorrect');
+        // Highlight correct
+        buttons.forEach(b => {
+          if (b.getAttribute('onclick').includes('true')) {
+            b.classList.add('correct');
+          }
+        });
         res.style.background = 'rgba(239, 68, 68, 0.15)';
         res.style.color = '#fca5a5';
         res.style.border = '1px solid #ef4444';
