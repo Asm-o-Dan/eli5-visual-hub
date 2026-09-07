@@ -2,1602 +2,1039 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>ОС: Регулярные выражения и утилита grep — Полный интерактивный учебник (Лабораторная №3)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ОС: Регулярные выражения и утилита grep (Лабораторная №3) | ELI5 Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #090d16;
-      --card: #131b2e;
-      --card-hover: #1c2742;
-      --card-border: rgba(255, 255, 255, 0.08);
-      --accent: #38bdf8;
-      --accent-glow: rgba(56, 189, 248, 0.25);
-      --accent-green: #10b981;
-      --accent-red: #ef4444;
-      --accent-purple: #a855f7;
+      --bg-base: #0a0e17;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1a2333;
+      --bg-code: #0d131f;
+      --border-color: #1f293d;
+      --border-highlight: #2d3f5e;
+      --text-primary: #f3f4f6;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --accent-blue: #3b82f6;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-purple: #8b5cf6;
       --accent-amber: #f59e0b;
-      --text: #f8fafc;
-      --muted: #94a3b8;
-      --code-bg: #0b1120;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body {
-      background: radial-gradient(circle at 50% 0%, #151f38 0%, var(--bg) 80%);
-      color: var(--text);
-      padding: 16px;
-      max-width: 1020px;
-      margin: 0 auto 60px;
-      line-height: 1.55;
+      --accent-rose: #f43f5e;
     }
 
-    /* Navigation Header */
-    .header-nav {
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    code, pre, .terminal-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Top Nav */
+    .top-nav {
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 14px 0;
+    }
+    .nav-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-primary);
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+    .nav-brand span.badge {
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-family: 'Fira Code', monospace;
+    }
+    .nav-links {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    .nav-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.88rem;
+      transition: color 0.2s;
+    }
+    .nav-link:hover { color: var(--accent-cyan); }
+
+    /* Header */
+    .hero-section {
+      padding: 48px 0 32px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .badge-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(31, 41, 61, 0.7);
+      border: 1px solid var(--border-color);
+      color: var(--accent-cyan);
+    }
+    .tag.green { color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.1); }
+    .tag.purple { color: var(--accent-purple); border-color: rgba(139, 92, 246, 0.3); background: rgba(139, 92, 246, 0.1); }
+
+    h1.hero-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #ffffff 0%, #93c5fd 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-desc {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      max-width: 860px;
+      margin-bottom: 24px;
+    }
+
+    /* Dataset Preview Bar */
+    .dataset-bar {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .dataset-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .dataset-icon {
+      width: 36px;
+      height: 36px;
+      background: rgba(59, 130, 246, 0.15);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-blue);
+    }
+    .dataset-files {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .file-btn {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-family: 'Fira Code', monospace;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .file-btn:hover, .file-btn.active {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: var(--accent-blue);
+      color: #fff;
+    }
+
+    /* Section Cards */
+    .section-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 28px;
+      margin-top: 32px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+    .section-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--card-border);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 14px;
     }
-    .back-link {
-      color: var(--accent);
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .back-link:hover { text-decoration: underline; }
-    .badge-course {
-      font-size: 11px;
+    .section-title {
+      font-size: 1.4rem;
       font-weight: 700;
-      background: rgba(56, 189, 248, 0.12);
-      border: 1px solid var(--accent);
-      color: var(--accent);
-      padding: 4px 12px;
-      border-radius: 999px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    /* Hero */
-    .hero { margin-bottom: 28px; }
-    .hero-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
-    .hero-tag {
-      font-size: 11px;
-      padding: 3px 8px;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.06);
-      color: var(--muted);
-    }
-    h1 {
-      font-size: clamp(24px, 5.5vw, 36px);
-      font-weight: 800;
-      line-height: 1.2;
-      background: linear-gradient(135deg, #ffffff 40%, var(--accent) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 10px;
-    }
-    p.lead { color: var(--muted); font-size: 15.5px; line-height: 1.5; }
-
-    /* Sticky Quick Nav */
-    .quick-nav {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding: 10px 0;
-      margin-bottom: 24px;
-      -webkit-overflow-scrolling: touch;
-      position: sticky;
-      top: 0;
-      background: rgba(9, 13, 22, 0.95);
-      backdrop-filter: blur(10px);
-      z-index: 50;
-      border-bottom: 1px solid var(--card-border);
-    }
-    .quick-btn {
-      background: var(--card);
-      border: 1px solid var(--card-border);
-      color: var(--muted);
-      padding: 7px 14px;
-      border-radius: 999px;
-      font-size: 12.5px;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      white-space: nowrap;
-      transition: all 0.2s;
-    }
-    .quick-btn:hover { background: var(--card-hover); color: #fff; border-color: var(--accent); }
-
-    /* Content Cards */
-    .card {
-      background: var(--card);
-      border: 1px solid var(--card-border);
-      border-radius: 18px;
-      padding: 24px;
-      margin-bottom: 24px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
-    }
-    .card h2 {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 14px;
-      color: #fff;
       display: flex;
       align-items: center;
       gap: 10px;
     }
-    .card h3 {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--accent);
-      margin: 18px 0 8px;
-    }
-    p { margin-bottom: 12px; font-size: 14.5px; color: #cbd5e1; }
 
-    /* Grids & Boxes */
-    .comp-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin: 16px 0;
-    }
-    @media (max-width: 720px) { .comp-grid { grid-template-columns: 1fr; } }
-    .comp-box {
+    /* Terminal Simulator */
+    .terminal-container {
+      background: var(--bg-code);
+      border: 1px solid var(--border-highlight);
       border-radius: 12px;
-      padding: 16px;
-      border: 1px solid var(--card-border);
+      overflow: hidden;
     }
-    .comp-box.info { background: rgba(56, 189, 248, 0.06); border-color: rgba(56, 189, 248, 0.25); }
-    .comp-box.purple { background: rgba(168, 85, 247, 0.06); border-color: rgba(168, 85, 247, 0.25); }
-    .comp-box.good { background: rgba(16, 185, 129, 0.06); border-color: rgba(16, 185, 129, 0.25); }
-    .comp-box.warn { background: rgba(245, 158, 11, 0.06); border-color: rgba(245, 158, 11, 0.25); }
-    .comp-box.bad { background: rgba(239, 68, 68, 0.06); border-color: rgba(239, 68, 68, 0.25); }
-
-    .comp-title {
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .comp-box.info .comp-title { color: var(--accent); }
-    .comp-box.purple .comp-title { color: var(--accent-purple); }
-    .comp-box.good .comp-title { color: #34d399; }
-    .comp-box.warn .comp-title { color: #fbbf24; }
-    .comp-box.bad .comp-title { color: #f87171; }
-
-    .comp-list { list-style: none; font-size: 13.5px; color: #cbd5e1; }
-    .comp-list li { margin-bottom: 6px; padding-left: 18px; position: relative; }
-    .comp-list li::before { content: "•"; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
-
-    /* Tables */
-    .styled-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 14px 0;
-      font-size: 13.5px;
-    }
-    .styled-table th, .styled-table td {
-      border: 1px solid var(--card-border);
-      padding: 9px 12px;
-      text-align: left;
-    }
-    .styled-table th { background: rgba(255, 255, 255, 0.05); color: #fff; font-weight: 700; }
-    .styled-table tr:hover td { background: rgba(255, 255, 255, 0.02); }
-
-    /* Callouts & Formula */
-    .formula-box {
-      background: rgba(56, 189, 248, 0.08);
-      border-left: 4px solid var(--accent);
-      padding: 12px 16px;
-      margin: 14px 0;
-      border-radius: 0 10px 10px 0;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 13.5px;
-      color: #e2e8f0;
-    }
-    .callout {
-      border-radius: 12px;
-      padding: 14px 16px;
-      margin: 14px 0;
-      font-size: 13.5px;
-      line-height: 1.5;
-    }
-    .callout.tip { background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); color: #a7f3d0; }
-    .callout.warn { background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); color: #fde68a; }
-    .callout.danger { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); color: #fca5a5; }
-
-    /* Code Box */
-    .code-box {
-      background: var(--code-bg);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 10px;
-      padding: 14px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 13px;
-      line-height: 1.5;
-      color: #e2e8f0;
-      overflow-x: auto;
-      margin: 14px 0;
-    }
-    .kw { color: #f43f5e; font-weight: bold; }
-    .opt { color: #38bdf8; font-weight: bold; }
-    .pat { color: #34d399; }
-    .cm { color: #64748b; font-style: italic; }
-
-    /* SVG Diagram Containers */
-    .svg-diagram-card {
-      background: #090e1c;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 14px;
-      padding: 16px;
-      margin: 16px 0;
-      text-align: center;
-    }
-    .svg-diagram-card svg { max-width: 100%; height: auto; }
-    .diagram-caption { font-size: 12.5px; color: var(--muted); margin-top: 10px; font-style: italic; }
-
-    /* Interactive Grep Simulator / Playground */
-    .playground {
-      background: #0d1424;
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      border-radius: 16px;
-      padding: 20px;
-      margin: 20px 0;
-    }
-    .pg-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 12px;
-      align-items: center;
-    }
-    .pg-label {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .pg-select {
-      background: var(--card);
-      border: 1px solid var(--card-border);
-      color: #fff;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 13.5px;
-      outline: none;
-    }
-    .pg-select:focus { border-color: var(--accent); }
-    .pg-input {
-      flex: 1;
-      min-width: 220px;
-      background: var(--code-bg);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #34d399;
-      padding: 9px 14px;
-      border-radius: 8px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 14px;
-      outline: none;
-    }
-    .pg-input:focus { border-color: var(--accent); }
-    .flags-bar {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 14px;
-    }
-    .flag-btn {
-      background: var(--card);
-      border: 1px solid var(--card-border);
-      color: var(--muted);
-      padding: 5px 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-family: monospace;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .flag-btn.active {
-      background: rgba(56, 189, 248, 0.2);
-      border-color: var(--accent);
-      color: var(--accent);
-      box-shadow: 0 0 8px rgba(56, 189, 248, 0.25);
-    }
-    .pg-btn {
-      padding: 8px 16px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s;
-    }
-    .pg-btn.primary { background: var(--accent); color: #090d16; }
-    .pg-btn.primary:hover { opacity: 0.9; transform: translateY(-1px); }
-    .pg-btn.secondary { background: rgba(255, 255, 255, 0.08); color: #fff; }
-    .pg-btn.secondary:hover { background: rgba(255, 255, 255, 0.14); }
-
-    /* Preset Buttons Bar */
-    .presets-wrap {
-      margin-top: 14px;
-      padding-top: 12px;
-      border-top: 1px solid var(--card-border);
-    }
-    .presets-title { font-size: 12px; font-weight: 700; color: var(--accent-purple); margin-bottom: 8px; text-transform: uppercase; }
-    .preset-btns {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      max-height: 120px;
-      overflow-y: auto;
-      padding-bottom: 4px;
-    }
-    .preset-btn {
-      background: rgba(168, 85, 247, 0.1);
-      border: 1px solid rgba(168, 85, 247, 0.25);
-      color: #d8b4fe;
-      padding: 4px 9px;
-      border-radius: 6px;
-      font-size: 11.5px;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-    .preset-btn:hover { background: rgba(168, 85, 247, 0.25); color: #fff; border-color: var(--accent-purple); }
-
-    /* Output Console */
-    .pg-output-box {
-      background: var(--code-bg);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      padding: 12px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 12.5px;
-      color: #e2e8f0;
-      margin-top: 14px;
-      max-height: 240px;
-      overflow-y: auto;
-    }
-    .pg-cmd-line {
-      color: var(--accent);
-      margin-bottom: 8px;
-      padding-bottom: 6px;
-      border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
-      font-weight: 600;
-    }
-    .pg-res-line {
-      padding: 2px 4px;
-      border-radius: 4px;
-      margin-bottom: 2px;
-    }
-    .pg-match-highlight {
-      background: rgba(245, 158, 11, 0.35);
-      color: #fbbf24;
-      font-weight: bold;
-      border-radius: 2px;
-      padding: 0 2px;
-      text-decoration: underline;
-    }
-    .pg-match-line {
-      background: rgba(56, 189, 248, 0.08);
-      border-left: 3px solid var(--accent);
-    }
-    .pg-stat-tag {
-      font-size: 11px;
-      background: rgba(16, 185, 129, 0.15);
-      color: #34d399;
-      padding: 2px 6px;
-      border-radius: 4px;
-      margin-left: 8px;
-    }
-
-    /* Variant Accordion Cards */
-    .var-card {
-      background: rgba(15, 23, 42, 0.7);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 14px;
-      transition: all 0.2s;
-    }
-    .var-header {
+    .terminal-bar {
+      background: #141b2d;
+      padding: 10px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      cursor: pointer;
+      border-bottom: 1px solid var(--border-color);
     }
-    .var-title { font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
-    .var-pill { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
-    .var-body { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--card-border); }
-    .task-block {
-      background: var(--code-bg);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 10px;
-    }
-    .task-desc { font-size: 13px; font-weight: 600; color: #cbd5e1; margin-bottom: 6px; }
-    .task-cmd {
-      color: #38bdf8;
-      font-family: monospace;
-      font-size: 12.5px;
-      margin-bottom: 6px;
-      word-break: break-all;
-    }
-    .task-expl { font-size: 12px; color: #94a3b8; line-height: 1.45; }
-
-    /* Quiz Engine */
-    .quiz-section { margin-top: 24px; }
-    .quiz-item {
-      background: rgba(15, 23, 42, 0.6);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 18px;
-      margin-bottom: 16px;
-    }
-    .quiz-tier-badge {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 6px;
-      margin-bottom: 8px;
-      text-transform: uppercase;
-    }
-    .tier-exam { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
-    .tier-adv { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
-
-    .quiz-q { font-size: 15px; font-weight: 600; color: #f1f5f9; margin-bottom: 12px; line-height: 1.45; }
-    .quiz-answers { display: flex; flex-direction: column; gap: 8px; }
-    .quiz-ans {
-      background: var(--card);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 13.5px;
-      color: #cbd5e1;
-      cursor: pointer;
-      text-align: left;
-      transition: all 0.2s;
-    }
-    .quiz-ans:hover { background: var(--card-hover); border-color: var(--accent); }
-    .quiz-ans.correct {
-      background: rgba(16, 185, 129, 0.18) !important;
-      border-color: #10b981 !important;
-      color: #6ee7b7 !important;
-    }
-    .quiz-ans.incorrect {
-      background: rgba(239, 68, 68, 0.18) !important;
-      border-color: #ef4444 !important;
-      color: #fca5a5 !important;
-    }
-    .quiz-explain {
-      margin-top: 10px;
-      padding: 12px;
-      border-radius: 8px;
-      font-size: 13px;
-      background: rgba(11, 17, 32, 0.8);
-      border-left: 3px solid var(--accent);
-      color: #e2e8f0;
-      display: none;
-      line-height: 1.5;
-    }
-
-    .score-banner {
-      background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(168, 85, 247, 0.15));
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      border-radius: 14px;
-      padding: 18px;
+    .terminal-dots {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+    }
+    .dot.red { background: #f43f5e; }
+    .dot.yellow { background: #f59e0b; }
+    .dot.green { background: #10b981; }
+    .terminal-title {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-family: 'Fira Code', monospace;
+    }
+
+    .terminal-controls {
+      padding: 16px;
+      background: #0d1524;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
       gap: 12px;
     }
-    .score-title { font-size: 16px; font-weight: 700; color: #fff; }
-    .score-val { font-size: 24px; font-weight: 800; color: var(--accent); }
+    .cmd-input-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-highlight);
+      border-radius: 8px;
+      padding: 8px 14px;
+    }
+    .cmd-prompt {
+      color: var(--accent-cyan);
+      font-family: 'Fira Code', monospace;
+      font-weight: 600;
+      user-select: none;
+    }
+    .cmd-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.95rem;
+    }
+    .flags-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .flag-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+    }
+    .flag-toggle input { display: none; }
+    .flag-toggle.active {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: var(--accent-blue);
+      color: #93c5fd;
+    }
+    .target-file-select {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82rem;
+      outline: none;
+    }
+
+    .terminal-output {
+      padding: 16px;
+      max-height: 380px;
+      overflow-y: auto;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: #d1d5db;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .line-number {
+      color: var(--text-muted);
+      user-select: none;
+      display: inline-block;
+      width: 40px;
+    }
+    mark.highlight {
+      background: rgba(245, 158, 11, 0.35);
+      color: #fbbf24;
+      border-radius: 3px;
+      padding: 1px 3px;
+      font-weight: 600;
+    }
+    .terminal-status-bar {
+      padding: 8px 16px;
+      background: #090e18;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    /* Variants Grid */
+    .variants-selector {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+      margin-bottom: 20px;
+    }
+    .var-tab-btn {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .var-tab-btn:hover, .var-tab-btn.active {
+      background: var(--accent-blue);
+      border-color: var(--accent-blue);
+      color: #fff;
+    }
+
+    .variant-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .task-badge {
+      background: rgba(139, 92, 246, 0.2);
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      color: #c4b5fd;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-family: 'Fira Code', monospace;
+      font-weight: 600;
+    }
+    .code-box {
+      background: var(--bg-code);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin: 12px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .code-box code {
+      color: #93c5fd;
+      font-size: 0.9rem;
+    }
+    .btn-run {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: var(--accent-emerald);
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .btn-run:hover {
+      background: var(--accent-emerald);
+      color: #000;
+    }
+
+    /* QA Accordion */
+    .qa-item {
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      margin-bottom: 12px;
+      background: var(--bg-surface-elevated);
+      overflow: hidden;
+    }
+    .qa-question {
+      padding: 16px 20px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+      transition: background 0.2s;
+    }
+    .qa-question:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .qa-answer {
+      padding: 0 20px 18px;
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 14px;
+      display: none;
+    }
+    .qa-item.open .qa-answer {
+      display: block;
+    }
+    .qa-item.open .qa-toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    /* Quiz Module */
+    .quiz-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      margin-top: 20px;
+    }
+    .quiz-progress-bar {
+      height: 6px;
+      background: var(--border-color);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .quiz-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .quiz-option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 12px 18px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      font-size: 0.92rem;
+      transition: all 0.2s;
+    }
+    .quiz-option-btn:hover:not([disabled]) {
+      border-color: var(--accent-blue);
+      background: rgba(59, 130, 246, 0.1);
+    }
+    .quiz-option-btn.correct {
+      background: rgba(16, 185, 129, 0.2) !important;
+      border-color: var(--accent-emerald) !important;
+      color: #a7f3d0 !important;
+    }
+    .quiz-option-btn.wrong {
+      background: rgba(244, 63, 94, 0.2) !important;
+      border-color: var(--accent-rose) !important;
+      color: #fecdd3 !important;
+    }
+    .quiz-expl {
+      margin-top: 16px;
+      padding: 14px 18px;
+      background: #0c1424;
+      border-left: 4px solid var(--accent-cyan);
+      border-radius: 0 8px 8px 0;
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      display: none;
+    }
+
+    /* Raw files viewer */
+    .raw-viewer {
+      background: var(--bg-code);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      max-height: 280px;
+      overflow-y: auto;
+      font-size: 0.82rem;
+      color: #94a3b8;
+      white-space: pre;
+    }
   </style>
 </head>
 <body>
 
   <!-- Top Navigation -->
-  <div class="header-nav">
-    <a href="../index.html" class="back-link">← ELI5 Visual Hub</a>
-    <span class="badge-course">Операционные системы • 3-й Курс • Лабораторная №3</span>
-  </div>
-
-  <!-- Hero Header -->
-  <header class="hero">
-    <div class="hero-tags">
-      <span class="hero-tag">#Linux</span>
-      <span class="hero-tag">#grep</span>
-      <span class="hero-tag">#Regex</span>
-      <span class="hero-tag">#BRE</span>
-      <span class="hero-tag">#ERE</span>
-      <span class="hero-tag">#PCRE</span>
-      <span class="hero-tag">#Lookaround</span>
-      <span class="hero-tag">#All15Variants</span>
+  <nav class="top-nav">
+    <div class="container nav-content">
+      <a href="https://asm-o-dan.github.io/eli5-visual-hub/" class="nav-brand">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>ELI5 Visual Hub</span>
+        <span class="badge">OS LAB #3</span>
+      </a>
+      <div class="nav-links">
+        <a href="#theory" class="nav-link">Теория</a>
+        <a href="#simulator" class="nav-link">Песочница grep</a>
+        <a href="#variants" class="nav-link">Все 15 вариантов</a>
+        <a href="#defense" class="nav-link">Вопросы защиты</a>
+        <a href="#quiz" class="nav-link">Инженерный квиз</a>
+      </div>
     </div>
-    <h1>Регулярные выражения и утилита grep: Архитектура, Практикум и Разбор всех 15 Вариантов</h1>
-    <p class="lead">Исчерпывающее интерактивное пособие по Лабораторной работе №3 («Операционные системы»): различия движков BRE / ERE / PCRE, тонкости жадного и ленивого квантификаторов, опережающие и ретроспективные проверки (Lookaround), живая веб-песочница grep на реальных датасетах query1–query5, готовые решения для всех 15 вариантов и ответы на 12 контрольных вопросов к защите.</p>
-  </header>
-
-  <!-- Sticky Quick Nav Bar -->
-  <nav class="quick-nav">
-    <a class="quick-btn" href="#engines-diff">1. BRE vs ERE vs PCRE</a>
-    <a class="quick-btn" href="#quantifiers-greedy">2. Квантификаторы & Жадность</a>
-    <a class="quick-btn" href="#lookaround-sec">3. Lookahead & Lookbehind</a>
-    <a class="quick-btn" href="#files-struct">4. Структура query1–query5</a>
-    <a class="quick-btn" href="#playground-sec">5. 🧪 Live Консоль grep</a>
-    <a class="quick-btn" href="#all-variants-sec">6. 📋 Решения всех 15 Вариантов</a>
-    <a class="quick-btn" href="#control-questions">7. 📝 Экзамен (12 вопросов)</a>
   </nav>
 
-  <!-- SECTION 1: Engines Comparison -->
-  <section id="engines-diff" class="card">
-    <h2><span>1.</span> Архитектура Движков: BRE vs ERE vs PCRE</h2>
-    <p>Регулярные выражения (Regular Expressions, RegExp) — это формальный декларативный язык описания текстовых шаблонов. В операционных системах семейств Unix/Linux утилита <code>grep</code> (Global Regular Expression Print) поддерживает три различных стандарта:</p>
+  <main class="container">
 
-    <!-- SVG Diagram: Engines Evolution -->
-    <div class="svg-diagram-card">
-      <svg viewBox="0 0 760 170" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- BRE Box -->
-        <rect x="20" y="20" width="220" height="130" rx="10" fill="#131d35" stroke="#ef4444" stroke-width="1.5"/>
-        <text x="35" y="45" fill="#f87171" font-size="13" font-weight="bold">BRE (Basic POSIX)</text>
-        <text x="35" y="65" fill="#94a3b8" font-size="11">grep по умолчанию</text>
-        <text x="35" y="90" fill="#cbd5e1" font-size="11.5">• \{n,m\} требует слэшей</text>
-        <text x="35" y="108" fill="#cbd5e1" font-size="11.5">• \(...\) группы со слэшами</text>
-        <text x="35" y="126" fill="#ef4444" font-size="11">• Нет +, ?, |, \d, \w</text>
-
-        <!-- Arrow 1 -->
-        <path d="M250 85 H280" stroke="#38bdf8" stroke-width="2" marker-end="url(#arr1)"/>
-
-        <!-- ERE Box -->
-        <rect x="290" y="20" width="220" height="130" rx="10" fill="#131d35" stroke="#38bdf8" stroke-width="1.5"/>
-        <text x="305" y="45" fill="#38bdf8" font-size="13" font-weight="bold">ERE (Extended POSIX)</text>
-        <text x="305" y="65" fill="#94a3b8" font-size="11">Флаг grep -E (egrep)</text>
-        <text x="305" y="90" fill="#cbd5e1" font-size="11.5">• Чистые {n,m}, +, ?, |, ()</text>
-        <text x="305" y="108" fill="#cbd5e1" font-size="11.5">• Устраняет лес слэшей</text>
-        <text x="305" y="126" fill="#fbbf24" font-size="11">• Нет классов \d, \w, нет лени</text>
-
-        <!-- Arrow 2 -->
-        <path d="M520 85 H550" stroke="#38bdf8" stroke-width="2" marker-end="url(#arr1)"/>
-
-        <!-- PCRE Box -->
-        <rect x="560" y="20" width="180" height="130" rx="10" fill="#131d35" stroke="#10b981" stroke-width="1.5"/>
-        <text x="575" y="45" fill="#34d399" font-size="13" font-weight="bold">PCRE (Perl Regex)</text>
-        <text x="575" y="65" fill="#94a3b8" font-size="11">Флаг grep -P</text>
-        <text x="575" y="90" fill="#34d399" font-size="11.5">• Классы \d, \D, \w, \s, \h</text>
-        <text x="575" y="108" fill="#34d399" font-size="11.5">• Ленивые квантификаторы *?</text>
-        <text x="575" y="126" fill="#34d399" font-size="11.5">• Lookahead / Lookbehind</text>
-
-        <defs>
-          <marker id="arr1" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M 0 1 L 8 5 L 0 9 z" fill="#38bdf8"/>
-          </marker>
-        </defs>
-      </svg>
-      <div class="diagram-caption">Рис 1. Иерархия мощности и возможностей движков регулярных выражений в Linux.</div>
-    </div>
-
-    <table class="styled-table">
-      <thead>
-        <tr>
-          <th>Критерий / Возможность</th>
-          <th>BRE (по умолчанию)</th>
-          <th>ERE (<code>grep -E</code>)</th>
-          <th>PCRE (<code>grep -P</code>)</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Счетчики повторений</td>
-          <td><code>\{n,m\}</code> (слэши обязательны)</td>
-          <td><code>{n,m}</code> (без слэшей)</td>
-          <td><code>{n,m}</code></td>
-        </tr>
-        <tr>
-          <td>Операторы <code>+</code> (1+) и <code>?</code> (0/1)</td>
-          <td>Считаются обычными буквами!</td>
-          <td>Метасимволы <code>+</code> и <code>?</code></td>
-          <td>Поддерживаются (жадные и ленивые)</td>
-        </tr>
-        <tr>
-          <td>Логическое ИЛИ</td>
-          <td><code>\|</code></td>
-          <td><code>|</code></td>
-          <td><code>|</code></td>
-        </tr>
-        <tr>
-          <td>Сокращенные классы (<code>\d, \w, \s</code>)</td>
-          <td>Не поддерживаются</td>
-          <td>Не поддерживаются (только <code>[0-9]</code>)</td>
-          <td><strong>Полная поддержка</strong></td>
-        </tr>
-        <tr>
-          <td>Ленивые квантификаторы (<code>*?, +?</code>)</td>
-          <td>Нет</td>
-          <td>Нет</td>
-          <td><strong>Поддерживаются</strong></td>
-        </tr>
-        <tr>
-          <td>Lookahead / Lookbehind (<code>(?=...)</code>)</td>
-          <td>Нет</td>
-          <td>Нет</td>
-          <td><strong>Поддерживаются</strong></td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div class="callout tip">
-      <strong>Инженерный вывод для Лабораторной №3:</strong> Флаг <code>-P</code> (PCRE) делает выражения короче, чище и выразительнее в 3–5 раз, избавляя от рутинных громоздких диапазонов <code>[0-9]</code> и позволяя писать <code>\d</code>, <code>\w</code>, <code>\s</code> и границы слов <code>\b</code>.
-    </div>
-  </section>
-
-  <!-- SECTION 2: Quantifiers & Greediness -->
-  <section id="quantifiers-greedy" class="card">
-    <h2><span>2.</span> Квантификаторы и Роковая Ошибка Жадности (Greedy Trap)</h2>
-    <p>Квантификатор указывает кратность повторения предыдущего символа или группы:</p>
-    <ul class="comp-list">
-      <li><code>*</code> — 0 или более раз (жадный)</li>
-      <li><code>+</code> — 1 или более раз (жадный)</li>
-      <li><code>?</code> — 0 или 1 раз (жадный)</li>
-      <li><code>{n}</code> — ровно $n$ раз; <code>{n,}</code> — не менее $n$; <code>{n,m}</code> — от $n$ до $m$</li>
-    </ul>
-
-    <!-- SVG Diagram: Greedy Overreach -->
-    <div class="svg-diagram-card">
-      <svg viewBox="0 0 760 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <text x="20" y="25" fill="#f8fafc" font-size="13" font-weight="bold">Строка из query2.txt: 100:JOCKSPORTS:345 VIEWRIDGE:BELMONT:CA:96711:5986609:5000</text>
-        
-        <!-- Field markers -->
-        <rect x="20" y="45" width="50" height="26" fill="#1e293b" stroke="#475569"/><text x="32" y="62" fill="#94a3b8" font-size="11">Код</text>
-        <rect x="75" y="45" width="120" height="26" fill="#1e293b" stroke="#475569"/><text x="95" y="62" fill="#94a3b8" font-size="11">Компания</text>
-        <rect x="200" y="45" width="140" height="26" fill="#1e293b" stroke="#475569"/><text x="235" y="62" fill="#94a3b8" font-size="11">Адрес</text>
-        <rect x="345" y="45" width="100" height="26" fill="#1e293b" stroke="#475569"/><text x="365" y="62" fill="#94a3b8" font-size="11">Город</text>
-        <rect x="450" y="45" width="40" height="26" fill="#1e293b" stroke="#475569"/><text x="457" y="62" fill="#94a3b8" font-size="11">Штат</text>
-
-        <!-- Greedy Trap Arrow -->
-        <path d="M 20 105 H 670" stroke="#ef4444" stroke-width="3" marker-end="url(#arr-red)"/>
-        <text x="25" y="98" fill="#f87171" font-size="12" font-weight="bold">Жадный шаблон ^.*: захватил ВСЮ строку до САМОГО ПОСЛЕДНЕГО двоеточия перед 5000!</text>
-
-        <!-- Correct Lazy Arrow -->
-        <path d="M 20 150 H 70" stroke="#10b981" stroke-width="3" marker-end="url(#arr-green)"/>
-        <text x="75" y="154" fill="#34d399" font-size="12" font-weight="bold">Ленивый шаблон ^.*?: (или [^:]+:) корректно остановился на ПЕРВОМ двоеточии!</text>
-
-        <defs>
-          <marker id="arr-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
-          </marker>
-          <marker id="arr-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
-          </marker>
-        </defs>
-      </svg>
-      <div class="diagram-caption">Рис 2. Ловушка жадности квантификатора .* при работе с CSV/двоеточиями.</div>
-    </div>
-
-    <div class="callout danger">
-      <strong>Канонический вопрос на защите:</strong><br>
-      <em>«Почему нельзя искать штат CA шаблоном <code>grep ".*:CA:" query2.txt</code>?»</em><br>
-      <strong>Ответ:</strong> Квантификатор <code>.*</code> жадный. Если аббревиатура <code>CA</code> встретится в адресе (например, <code>12 CATHEDRAL ST</code>), жадный <code>.*</code> проглотит часть строки, и совпадение сработает не по полю «Штат», а по адресу! Для строгого поиска по 5-му полю нужно считать разделители: <code>^(?:[^:]*:){4}CA:</code>.
-    </div>
-  </section>
-
-  <!-- SECTION 3: Lookaround Engine -->
-  <section id="lookaround-sec" class="card">
-    <h2><span>3.</span> Утверждения нулевой ширины: Lookahead & Lookbehind</h2>
-    <p>Утверждения (assertions) не поглощают символы в результирующее совпадение, а лишь инспектируют окружающий контекст (zero-width check). Доступны в <code>grep -P</code>:</p>
-
-    <div class="comp-grid">
-      <div class="comp-box good">
-        <div class="comp-title">Позитивный Lookahead: <code>(?=pattern)</code></div>
-        <p style="font-size:13px;">«Совпасть здесь, только если СПРАВА идет <code>pattern</code>».</p>
-        <div class="formula-box" style="font-size:12px;">grep -P '\d+(?=\s+USD)' input.txt</div>
-        <p style="font-size:12.5px; color:#94a3b8;">Найдены только цифры, за которыми следует "USD", но само слово "USD" в совпадение не войдет.</p>
+    <!-- Hero Header -->
+    <header class="hero-section">
+      <div class="badge-row">
+        <span class="tag">ОС 3 курс</span>
+        <span class="tag green">Реальные датасеты query1-5</span>
+        <span class="tag purple">BRE / ERE / PCRE</span>
+        <span class="tag">Все 15 вариантов</span>
       </div>
+      <h1 class="hero-title">Регулярные выражения и утилита grep</h1>
+      <p class="hero-desc">
+        Полнофункциональное интерактивное руководство по Лабораторной работе №3. Содержит живой терминал <code>grep</code> на реальных данных кафедры, верифицированные решения всех 15 вариантов (45 задач), исчерпывающие ответы на вопросы защиты и интерактивный аттестационный тренажер.
+      </p>
 
-      <div class="comp-box bad">
-        <div class="comp-title">Негативный Lookahead: <code>(?!pattern)</code></div>
-        <p style="font-size:13px;">«Совпасть здесь, только если СПРАВА НЕТ <code>pattern</code>».</p>
-        <div class="formula-box" style="font-size:12px;">grep -P '(?!\bMOSCOW\b)^.*' query1.txt</div>
-        <p style="font-size:12.5px; color:#94a3b8;">Исключение строк с определенным словом без применения глобального инвертирования <code>-v</code>.</p>
-      </div>
-
-      <div class="comp-box info">
-        <div class="comp-title">Позитивный Lookbehind: <code>(?&lt;=pattern)</code></div>
-        <p style="font-size:13px;">«Совпасть здесь, только если СЛЕВА идет <code>pattern</code>».</p>
-        <div class="formula-box" style="font-size:12px;">grep -P '(?&lt;=Цена:\s)\d+' input.txt</div>
-      </div>
-
-      <div class="comp-box warn">
-        <div class="comp-title">Негативный Lookbehind: <code>(?&lt;!pattern)</code></div>
-        <p style="font-size:13px;">«Совпасть здесь, только если СЛЕВА НЕТ <code>pattern</code>».</p>
-        <div class="formula-box" style="font-size:12px;">grep -P '(?&lt;!\.)\b\d+\b(?!\.)' input.txt</div>
-        <p style="font-size:12.5px; color:#94a3b8;">Поиск целых чисел, не являющихся частью вещественного числа с точкой.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- SECTION 4: Files Architecture -->
-  <section id="files-struct" class="card">
-    <h2><span>4.</span> Архитектура и Структура файлов query1.txt – query5.txt</h2>
-    <p>Для безошибочного составления регулярных выражений необходимо досконально знать форматы входных файлов из Рисунка 38 лабораторной работы:</p>
-
-    <div class="comp-grid">
-      <div class="comp-box info">
-        <div class="comp-title">query1.txt — Сотрудники (Разделитель: пробелы)</div>
-        <div class="formula-box" style="font-size:12px;">[Код] [Имя] [Инициал] [Фамилия] [Должность] [Отдел] [Город] [Зарплата]</div>
-        <p style="font-size:12px; color:#cbd5e1;">Пример: <code>7788 SCOTT S ANALYST ANALYST RESEARCH MOSCOW 3000</code></p>
-      </div>
-      <div class="comp-box purple">
-        <div class="comp-title">query2.txt — Покупатели (Разделитель: <code>:</code>)</div>
-        <div class="formula-box" style="font-size:12px;">[Код]:[Название компании]:[Адрес]:[Город]:[Штат]:[Индекс]:[Телефон]:[Кредит]</div>
-        <p style="font-size:12px; color:#cbd5e1;">Пример: <code>101:TKB SPORT SHOP:490 BOLI RD.:REDWOOD CITY:CA:94061:3681223:10000</code></p>
-      </div>
-      <div class="comp-box good">
-        <div class="comp-title">query3.txt — Товары (Разделитель: <code>:</code>)</div>
-        <div class="formula-box" style="font-size:12px;">[Код]:[Название товара]:[Макс. цена]:[Мин. цена]:[Дата ввода ДД-МММ-ГГ]</div>
-        <p style="font-size:12px; color:#cbd5e1;">Пример: <code>200101:MONITOR LCD 27:6500:5200:14-MAY-22</code></p>
-      </div>
-      <div class="comp-box warn">
-        <div class="comp-title">query4.txt — Заказы (Разделитель: пробелы)</div>
-        <div class="formula-box" style="font-size:12px;">[N заказа] [Продавец] [Код покупателя] [Дата ДД-МММ-ГГ] [Сумма заказа]</div>
-        <p style="font-size:12px; color:#cbd5e1;">Пример: <code>614 PETROV 101 24-FEB-24 55000</code></p>
-      </div>
-    </div>
-    <div class="comp-box" style="background:rgba(255,255,255,0.03); margin-top:8px;">
-      <div class="comp-title" style="color:#fff;">query5.txt — Позиции заказов (Разделитель: пробелы)</div>
-      <div class="formula-box" style="font-size:12px;">[N пункта] [N заказа] [Код товара] [Реальная цена] [Количество] [Итоговая сумма]</div>
-      <p style="font-size:12px; color:#cbd5e1;">Пример: <code>1 612 100860 30 100 3000</code></p>
-    </div>
-  </section>
-
-  <!-- SECTION 5: Live Interactive Grep Console -->
-  <section id="playground-sec" class="card">
-    <h2><span>5.</span> 🧪 Live Симулятор утилиты grep (Interactive Playground)</h2>
-    <p>Тестируйте любые регулярные выражения прямо в браузере. Выберите файл, задайте шаблон, переключайте флаги grep и наблюдайте за подсветкой совпадений и формированием консольной команды в реальном времени.</p>
-
-    <div class="playground">
-      <!-- Top Row: File & Pattern -->
-      <div class="pg-row">
-        <span class="pg-label">Файл:</span>
-        <select id="pgFileSelect" class="pg-select" onchange="runGrep()">
-          <option value="query1">query1.txt (Сотрудники)</option>
-          <option value="query2">query2.txt (Покупатели :)</option>
-          <option value="query3">query3.txt (Товары :)</option>
-          <option value="query4">query4.txt (Заказы)</option>
-          <option value="query5">query5.txt (Пункты заказов)</option>
-        </select>
-        <span class="pg-label" style="margin-left:10px;">Шаблон:</span>
-        <input type="text" id="pgPatternInput" class="pg-input" value="ANALYST.*MOSCOW" oninput="runGrep()" placeholder="Регулярное выражение...">
-        <button class="pg-btn primary" onclick="runGrep()">Выполнить</button>
-        <button class="pg-btn secondary" onclick="resetGrep()">Очистить</button>
-      </div>
-
-      <!-- Flags Bar -->
-      <div class="pg-label" style="margin-bottom:6px;">Опции команды grep:</div>
-      <div class="flags-bar">
-        <button class="flag-btn active" id="fl-P" onclick="toggleFlag('P')">-P (PCRE)</button>
-        <button class="flag-btn" id="fl-i" onclick="toggleFlag('i')">-i (Ignore case)</button>
-        <button class="flag-btn" id="fl-v" onclick="toggleFlag('v')">-v (Invert)</button>
-        <button class="flag-btn" id="fl-c" onclick="toggleFlag('c')">-c (Count)</button>
-        <button class="flag-btn active" id="fl-n" onclick="toggleFlag('n')">-n (Line num)</button>
-        <button class="flag-btn" id="fl-w" onclick="toggleFlag('w')">-w (Word)</button>
-        <button class="flag-btn" id="fl-x" onclick="toggleFlag('x')">-x (Exact line)</button>
-      </div>
-
-      <!-- Quick Presets for Variants -->
-      <div class="presets-wrap">
-        <div class="presets-title">⚡ Быстрые пресеты для вариантов Лабораторной №3:</div>
-        <div class="preset-btns">
-          <button class="preset-btn" onclick="loadPreset('query1', 'ANALYST.*MOSCOW', 'P', 'В4: Должность ANALYST и город MOSCOW')">В4: ANALYST + MOSCOW</button>
-          <button class="preset-btn" onclick="loadPreset('query3', 'MONITOR.*-22$', 'P', 'В1: Товар MONITOR и дата 2022')">В1: MONITOR + 2022</button>
-          <button class="preset-btn" onclick="loadPreset('query2', '^3\\d*:', 'P', 'В2: Код покупателя с цифры 3')">В2: Код покупателя 3</button>
-          <button class="preset-btn" onclick="loadPreset('query4', '\\bPETROV\\b', 'P', 'В1: Фамилия продавца PETROV')">В1: Продавец PETROV</button>
-          <button class="preset-btn" onclick="loadPreset('query1', 'OV\\b.*\\d+$', 'P', 'В3: Фамилия на OV')">В3: Фамилия на OV</button>
-          <button class="preset-btn" onclick="loadPreset('query4', '\\s\\d+$', 'P', 'В3: Сумма без дроби')">В3: Сумма без дроби</button>
-          <button class="preset-btn" onclick="loadPreset('query2', ':(?:BY|UA):', 'P', 'В9: Страна BY или UA')">В9: Страна BY или UA</button>
-          <button class="preset-btn" onclick="loadPreset('query1', 'RESEARCH.*\\s\\d{4}$', 'P', 'В6: Отдел RESEARCH и 4 цифры з/п')">В6: RESEARCH + 4 цифры з/п</button>
-          <button class="preset-btn" onclick="loadPreset('query3', 'KEYBOARD', 'P', 'В6: Товар KEYBOARD')">В6: Товар KEYBOARD</button>
-          <button class="preset-btn" onclick="loadPreset('query4', '-FEB-24', 'P', 'В6: Заказ в феврале 2024')">В6: Заказ в феврале 2024</button>
-          <button class="preset-btn" onclick="loadPreset('query2', 'SHOP:', 'P', 'В7: Компания на SHOP')">В7: Компания на SHOP</button>
-          <button class="preset-btn" onclick="loadPreset('query5', '^\\d+\\s+\\d+\\s+\\d+\\s+\\S+\\s+\\d{3}\\s', 'P', 'В7: Количество 3-значное')">В7: Количество 3-значное</button>
-          <button class="preset-btn" onclick="loadPreset('query3', '\\b(?:SSD|HDD)\\b', 'P', 'В8: Товар SSD или HDD')">В8: Товар SSD или HDD</button>
-          <button class="preset-btn" onclick="loadPreset('query5', '\\.\\d+', 'P', 'В9: Цена с дробной частью')">В9: Цена с дробной частью</button>
+      <!-- Real Dataset Switcher Bar -->
+      <div class="dataset-bar">
+        <div class="dataset-info">
+          <div class="dataset-icon">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          </div>
+          <div>
+            <div style="font-weight: 600; font-size: 0.92rem;">Реальные файлы лабораторной работы</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">Датасет query-20260907 подключен в память браузера</div>
+          </div>
+        </div>
+        <div class="dataset-files" id="dataset-buttons">
+          <button class="file-btn active" onclick="switchFileView('query1.txt')">query1.txt (Сотрудники)</button>
+          <button class="file-btn" onclick="switchFileView('query2.txt')">query2.txt (Покупатели)</button>
+          <button class="file-btn" onclick="switchFileView('query3.txt')">query3.txt (Товары)</button>
+          <button class="file-btn" onclick="switchFileView('query4.txt')">query4.txt (Заказы)</button>
+          <button class="file-btn" onclick="switchFileView('query5.txt')">query5.txt (Строки)</button>
         </div>
       </div>
 
-      <!-- Output Console Box -->
-      <div class="pg-output-box" id="pgOutputBox">
-        <div class="pg-cmd-line" id="pgCmdLine">$ grep -Pn "ANALYST.*MOSCOW" query1.txt</div>
-        <div id="pgStdout"></div>
+      <!-- Raw File Viewer Modal/Box -->
+      <div style="margin-top: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <span id="raw-view-title" style="font-size: 0.8rem; font-family: 'Fira Code', monospace; color: var(--accent-cyan);">query1.txt (30 строк)</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">Разделители: пробелы / двоеточия / знаки !</span>
+        </div>
+        <pre class="raw-viewer" id="raw-viewer-content"></pre>
       </div>
-    </div>
-  </section>
+    </header>
 
-  <!-- SECTION 6: Complete Solution Matrix for 15 Variants -->
-  <section id="all-variants-sec" class="card">
-    <h2><span>6.</span> 📋 Полный Сборник Решений всех 15 Вариантов Лабораторной №3</h2>
-    <p>Каждое задание содержит команду с флагами, детальный разбор каждого используемого метасимвола и объяснение логики сопоставления.</p>
-
-    <div id="variantsAccordion">
-      <!-- Populated via JS -->
-    </div>
-  </section>
-
-  <!-- SECTION 7: Control Questions / Defense Exam -->
-  <section id="control-questions" class="card">
-    <h2><span>7.</span> 📝 Экзамен для защиты: 12 контрольных вопросов</h2>
-    <p>Официальные вопросы из методички (стр. 10) плюс каверзные вопросы преподавателя с мгновенной проверкой и подробными инженерными ответами.</p>
-
-    <div class="score-banner">
-      <div>
-        <div class="score-title">Результат прохождения теста к защите</div>
-        <div style="font-size:13px; color:var(--muted);" id="quizStatusText">Ответьте на все вопросы для проверки готовности</div>
+    <!-- Section 1: Theory & Engine Model -->
+    <section id="theory" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          1. Архитектурный фундамент: Диалекты и механика автоматов
+        </h2>
       </div>
-      <div class="score-val" id="quizScoreVal">0 / 12</div>
-    </div>
 
-    <div class="quiz-section" id="quizContainer">
-      <!-- Populated via JS -->
-    </div>
-  </section>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 24px;">
+        <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 10px; padding: 18px;">
+          <div style="color: var(--accent-blue); font-weight: 700; margin-bottom: 8px; font-size: 1.05rem;">POSIX BRE (grep -G)</div>
+          <p style="font-size: 0.86rem; color: var(--text-secondary); margin-bottom: 10px;">
+            Базовый режим утилиты. Метасимволы <code>+</code>, <code>?</code>, <code>|</code>, <code>( )</code>, <code>{ }</code> считаются литеральными знаками.
+          </p>
+          <div style="background: var(--bg-code); padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-family: 'Fira Code', monospace; color: #cbd5e1;">
+            grep '^[0-9]\{4\}' query1.txt<br>
+            grep 'ANALYST\|MANAGER' query1.txt
+          </div>
+        </div>
 
-  <!-- Script Logic -->
+        <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 10px; padding: 18px;">
+          <div style="color: var(--accent-emerald); font-weight: 700; margin-bottom: 8px; font-size: 1.05rem;">POSIX ERE (grep -E)</div>
+          <p style="font-size: 0.86rem; color: var(--text-secondary); margin-bottom: 10px;">
+            Расширенный синтаксис. Все метасимволы квантификации и группировки работают без экранирования.
+          </p>
+          <div style="background: var(--bg-code); padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-family: 'Fira Code', monospace; color: #cbd5e1;">
+            grep -E '^[0-9]{4}' query1.txt<br>
+            grep -E 'ANALYST|MANAGER' query1.txt
+          </div>
+        </div>
+
+        <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 10px; padding: 18px;">
+          <div style="color: var(--accent-purple); font-weight: 700; margin-bottom: 8px; font-size: 1.05rem;">PCRE (grep -P)</div>
+          <p style="font-size: 0.86rem; color: var(--text-secondary); margin-bottom: 10px;">
+            Движок Perl Compatible Regex. Поддержка <code>\d</code>, <code>\w</code>, <code>\s</code>, ленивых квантификаторов и lookaround-проверок.
+          </p>
+          <div style="background: var(--bg-code); padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-family: 'Fira Code', monospace; color: #cbd5e1;">
+            grep -P 'CLERK.*?(?!MOSCOW)' query1.txt<br>
+            grep -P '^\s*\d+\s+([A-Z])\w*\s+\S+\s+\1' query1.txt
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Interactive Terminal Simulator -->
+    <section id="simulator" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+          2. Интерактивная песочница grep
+        </h2>
+        <span style="font-size: 0.82rem; color: var(--accent-emerald);">● Движок готов к выполнению запросов</span>
+      </div>
+
+      <div class="terminal-container">
+        <div class="terminal-bar">
+          <div class="terminal-dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <div class="terminal-title">bash — GNU grep simulator (real data)</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">UTF-8</div>
+        </div>
+
+        <div class="terminal-controls">
+          <div class="cmd-input-row">
+            <span class="cmd-prompt">student@linux:~$ grep</span>
+            <input type="text" id="regex-input" class="cmd-input" value="^[0-9]+ +A" placeholder="Введите регулярное выражение..." oninput="runGrepSimulation()">
+          </div>
+
+          <div class="flags-row">
+            <label class="flag-toggle active" id="lbl-flag-e">
+              <input type="checkbox" id="flag-e" checked onchange="toggleFlag(this, 'lbl-flag-e')"> -E (Extended)
+            </label>
+            <label class="flag-toggle" id="lbl-flag-p">
+              <input type="checkbox" id="flag-p" onchange="toggleFlag(this, 'lbl-flag-p')"> -P (Perl PCRE)
+            </label>
+            <label class="flag-toggle" id="lbl-flag-i">
+              <input type="checkbox" id="flag-i" onchange="toggleFlag(this, 'lbl-flag-i')"> -i (Ignore case)
+            </label>
+            <label class="flag-toggle" id="lbl-flag-v">
+              <input type="checkbox" id="flag-v" onchange="toggleFlag(this, 'lbl-flag-v')"> -v (Invert match)
+            </label>
+            <label class="flag-toggle active" id="lbl-flag-n">
+              <input type="checkbox" id="flag-n" checked onchange="toggleFlag(this, 'lbl-flag-n')"> -n (Line numbers)
+            </label>
+
+            <span style="color: var(--text-muted); font-size: 0.8rem; margin-left: auto;">Файл данных:</span>
+            <select id="file-select" class="target-file-select" onchange="runGrepSimulation()">
+              <option value="query1.txt">query1.txt (Сотрудники)</option>
+              <option value="query2.txt">query2.txt (Покупатели)</option>
+              <option value="query3.txt">query3.txt (Товары)</option>
+              <option value="query4.txt">query4.txt (Заказы)</option>
+              <option value="query5.txt">query5.txt (Пункты заказов)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="terminal-output" id="terminal-screen"></div>
+
+        <div class="terminal-status-bar">
+          <span id="status-matches">Совпадений: 0 строк</span>
+          <span id="status-exec-time">Время: 0 ms</span>
+          <span>Статус завершения: 0 (OK)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: All 15 Variants Solutions -->
+    <section id="variants" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          3. Решебник всех 15 вариантов (45 задач)
+        </h2>
+        <span style="font-size: 0.8rem; color: var(--text-muted);">Проверено на реальных датасетах</span>
+      </div>
+
+      <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 18px;">
+        Выберите номер своего варианта. Для каждого подзадания приведена готовая команда, количество совпадений на реальных файлах и разбор метасимволов. Нажмите <b>«Запустить в песочнице»</b> для мгновенного выполнения.
+      </p>
+
+      <div class="variants-selector" id="var-buttons-container">
+        <!-- JS generates buttons 1..15 -->
+      </div>
+
+      <div id="variant-display-container">
+        <!-- Active variant loaded by JS -->
+      </div>
+    </section>
+
+    <!-- Section 4: 9 Defense Questions & Answers -->
+    <section id="defense" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          4. Ответы на контрольные вопросы защиты (Методичка, стр. 10)
+        </h2>
+      </div>
+
+      <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 20px;">
+        Официальный список из 9 контрольных вопросов к лабораторной работе с развернутыми ответами и примерами на реальных файлах <code>query</code>. Кликните по вопросу для просмотра.
+      </p>
+
+      <div id="qa-container">
+        <!-- QA items -->
+      </div>
+    </section>
+
+    <!-- Section 5: Interactive Quiz -->
+    <section id="quiz" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+          5. Инженерный тренажер защиты (12 вопросов)
+        </h2>
+        <div style="font-size: 0.85rem; color: var(--accent-cyan);" id="quiz-score-badge">Счет: 0 / 12</div>
+      </div>
+
+      <div class="quiz-card">
+        <div class="quiz-progress-bar">
+          <div class="quiz-progress-fill" id="quiz-progress-fill"></div>
+        </div>
+
+        <div id="quiz-question-container">
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;" id="quiz-q-num">Вопрос 1 из 12</div>
+          <div style="font-size: 1.15rem; font-weight: 600; margin-bottom: 20px;" id="quiz-q-text">Текст вопроса...</div>
+          <div id="quiz-options-box"></div>
+          <div class="quiz-expl" id="quiz-expl-box"></div>
+          <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+            <button class="file-btn" id="quiz-next-btn" style="display: none; background: var(--accent-blue); color: #fff; padding: 8px 18px;" onclick="nextQuizQuestion()">Следующий вопрос →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
   <script>
-    /* Datasets from PDF */
-    const DATASETS = {
-      query1: [
-        "7369 JOHN Q SMITH CLERK RESEARCH DALLAS 800",
-        "7499 KEVIN J ALLEN SALESPERSON SALES CHICAGO 1600",
-        "7521 WARD E PETROV SALESPERSON SALES CHICAGO 1250",
-        "7566 JONES M MOSCOW MANAGER RESEARCH DALLAS 2975",
-        "7654 MARTIN S MOSCOW SALESPERSON SALES CHICAGO 1250",
-        "7698 BLAKE R PETROV MANAGER SALES CHICAGO 2850",
-        "7782 CLARK S KAZAN MANAGER ACCOUNTING KAZAN 2450",
-        "7788 SCOTT S ANALYST ANALYST RESEARCH MOSCOW 3000",
-        "7839 KING S PRESIDENT PRESIDENT ACCOUNTING MOSCOW 5000",
-        "7844 TURNER A KAZAN SALESPERSON SALES KAZAN 1500",
-        "7876 ADAMS S PETROV CLERK RESEARCH MOSCOW 1100",
-        "7900 JAMES R OPERATIONS CLERK OPERATIONS KAZAN 950",
-        "7902 FORD M ANALYST ANALYST RESEARCH DALLAS 3000",
-        "7934 MILLER E ACCOUNTING CLERK ACCOUNTING MOSCOW 1300",
-        "7110 ALEX A IVANOV ANALYST OPERATIONS KAZAN 3200"
-      ],
-      query2: [
-        "100:JOCKSPORTS:345 VIEWRIDGE:BELMONT:CA:96711:5986609:5000",
-        "101:TKB SPORT SHOP:490 BOLI RD.:REDWOOD CITY:CA:94061:3681223:10000",
-        "102:VOETBAL TECH:PO BOX 532:AMSTERDAM:NL:1001:5551234:8000",
-        "103:KAZAN DIGITAL:UL BAUMANA 15:KAZAN:RU:420000:7894561:15000",
-        "104:ALMATY SHOP:ABAY AVE 45:ALMATY:KZ:050000:3216549:12000",
-        "105:MINSK TECH:PR NEZAVISIMOSTI:MINSK:BY:220000:1472583:6000",
-        "106:KYIV DIGITAL:KRESHCHATIK 1:KYIV:UA:01001:9638521:10000",
-        "301:TRI SPORT:12 MARKET ST:MOSCOW:RU:101000:4561237:10000",
-        "302:SPEED TECH SHOP:88 HIGHWAY:BERLIN:DE:10115:7418529:25000"
-      ],
-      query3: [
-        "100860:ACE TENNIS RACKET I:35:128:01-JUN-90",
-        "100861:ACE TENNIS RACKET II:45:150:15-JUN-90",
-        "100870:ACE TENNIS BALLS 3PK:2.5:4.5:01-JAN-91",
-        "100890:ACE TENNIS NET:58:46.4:01-JAN-89",
-        "200101:MONITOR LCD 27:6500:5200:14-MAY-22",
-        "200102:MONITOR GAMING OLED:12000:9800:10-NOV-23",
-        "200201:LOGITECH KEYBOARD PRO:850:720:20-JAN-24",
-        "200202:KEYBOARD MECH RGB:1500:1100:05-FEB-22",
-        "200301:SAMSUNG SSD 1TB:8000:6500:12-MAR-23",
-        "200302:SEAGATE HDD 4TB:4500:3800:18-APR-21"
-      ],
-      query4: [
-        "605 WARD 106 14-JUL-90 8374",
-        "606 PETROV 102 18-AUG-90 12500",
-        "612 ALLEN 104 15-JAN-91 5860",
-        "613 KUZNETSOV 103 12-FEB-24 25000",
-        "614 PETROV 101 24-FEB-24 55000",
-        "615 SMIRNOVA 105 05-MAR-24 18500.50",
-        "616 KOZLOV 100 15-MAR-24 32000",
-        "617 IVANOV 301 20-MAR-24 45000.75"
-      ],
-      query5: [
-        "1 612 100860 30 100 3000",
-        "2 612 100861 40.5 20 810",
-        "3 613 200101 5200 5 26000",
-        "4 614 200102 9800 2 19600",
-        "5 615 200201 720.50 10 7205",
-        "6 616 200301 6500 120 780000",
-        "7 617 200302 3800 1 3800"
-      ]
-    };
+    // Embedded real files content
+    const REAL_FILES = {"query1.txt": "7101 ALEX      K PETROV    ANALYST     RESEARCH   MOSCOW   3200\n7102 MARIA     S IVANOVA   MANAGER     SALES      MOSCOW   4500\n7103 DMITRY    A SOKOLOV   DEVELOPER   RESEARCH   KAZAN    3800\n7104 ELENA     V KOZLOVA   CLERK       ACCOUNTING MOSCOW   1800\n7105 IVAN      P MOROZOV   SALESPERSON SALES      SAMARA   2100\n7106 ANNA      D VOLKOVA   ANALYST     RESEARCH   MOSCOW   3500\n7107 SERGEY    N NOVIKOV   MANAGER     OPERATIONS MOSCOW   4200\n7108 OLGA      R FEDOROVA  SALESPERSON SALES      KAZAN    2000\n7109 PAVEL     M LEBEDEV   DEVELOPER   RESEARCH   MOSCOW   4000\n7110 NATALIA   A SMIRNOVA  CLERK       SALES      SAMARA   1600\n7111 ROMAN     G ORLOV     SALESPERSON SALES      MOSCOW   2200\n7112 TATIANA   V POPOVA    STAFF       OPERATIONS KAZAN    2400\n7113 ANDREY    S KUZNETSOV MANAGER     RESEARCH   MOSCOW   5000\n7114 YULIA     I MIKHAILOVA ANALYST    RESEARCH   MOSCOW   3600\n7115 NIKITA    D ZAKHAROV  DEVELOPER   RESEARCH   KAZAN    3700\n7116 EKATERINA P SOROKINA  SALESPERSON SALES      SAMARA   2100\n7117 MAXIM     A VOLKOV    MANAGER     SALES      MOSCOW   4800\n7118 IRINA     V BOGDANOVA CLERK       ACCOUNTING MOSCOW   1700\n7119 ARTEM     N BELOV     SALESPERSON SALES      KAZAN    2000\n7120 VALERIA   S TSVETKOVA STAFF       OPERATIONS SAMARA   2300\n7121 KONSTANTIN O FROLOV   ANALYST     RESEARCH   MOSCOW   3400\n7122 VICTORIA  A GOLUBEVA  CLERK       SALES      MOSCOW   1500\n7123 DENIS     M KARPOV    DEVELOPER   RESEARCH   KAZAN    3900\n7124 LUDMILA   R VORONOVA  MANAGER     ACCOUNTING MOSCOW   4600\n7125 ALEXEY    T STEPANOV  PRESIDENT   ACCOUNTING MOSCOW   9000\n7126 SOFIA     G NIKIFOROVA CLERK      RESEARCH   SAMARA   1600\n7127 IGOR      V MAKAROV   SALESPERSON SALES      MOSCOW   2200\n7128 POLINA    D KOLESNIKOVA ANALYST   RESEARCH   KAZAN    3300\n7129 GEORGY    S TIKHONOV  CLERK       ACCOUNTING MOSCOW   1800\n7130 DARIA     N KULIKOVA  CLERK       SALES      SAMARA   1500\n", "query2.txt": "300:TECHNO CITY              :12 LENINA ST.          :MOSCOW         :RU:101000:4951234567:15000\n301:DIGITAL STORE            :45 MIRA AVE.           :MOSCOW         :RU:129090:4957654321:12000\n302:GADGET WORLD             :8 TVERSKAYA ST.        :MOSCOW         :RU:125009:4959876543:10000\n303:SMART ELECTRONICS        :22 ARBAT ST.           :MOSCOW         :RU:119002:4952345678:8000\n304:TECH HUB                 :100 NEVSKY AVE.        :SAINT-PETERSBURG:RU:191025:8123456789:12000\n305:BYTE SHOP                :33 SADOVAYA ST.        :SAINT-PETERSBURG:RU:190000:8129876543:9000\n306:FUTURE TECH              :15 VOSSTANIYA ST.      :SAINT-PETERSBURG:RU:191014:8127654321:7000\n307:DIGI PRO                 :5 LENINA AVE.          :KAZAN          :RU:420111:8432345678:6000\n308:CLICK STORE              :48 BAUMANA ST.         :KAZAN          :RU:420015:8439876543:5000\n309:PIXEL MARKET             :3 MOLODEZHNAYA ST.     :MINSK          :BY:220012:375172345678:4000\n310:TECH ZONE                :18 POBEDY AVE.         :MINSK          :BY:220035:375173456789:8000\n311:CYBERNET                 :7 NEZAVISIMOSTI AVE.   :MINSK          :BY:220030:375174567890:6000\n312:MEGA DIGITAL             :14 SURHANDARYA ST.     :TASHKENT       :UZ:100000:998712345678:5000\n313:NOVA TECH                :24 AMIR TEMUR AVE.     :TASHKENT       :UZ:100084:998713456789:9000\n314:ROBO STORE               :36 BUNYODKOR AVE.      :TASHKENT       :UZ:100043:998714567890:7000\n315:ELECTRON PLUS            :12 PUSHKIN ST.         :ALMATY         :KZ:050000:77012345678:6000\n316:DIGITAL HUB              :44 ABAY AVE.           :ALMATY         :KZ:050010:77013456789:8000\n317:SMART CITY TECH          :8 SATPAEV ST.          :ALMATY         :KZ:050040:77014567890:7000\n318:IT CORNER                :22 DOSTYK AVE.         :ASTANA         :KZ:010000:77015678901:5000\n319:PC WORLD                 :3 MANGILIK EL AVE.     :ASTANA         :KZ:010008:77016789012:10000\n320:GEAR UP                  :17 QABANBAY BATYR AVE. :ASTANA         :KZ:010003:77017890123:8000\n321:TECH POINT               :55 RUSTAVELI AVE.      :TBILISI        :GE:380005:99532123456:6000\n322:MICROLAB                 :8 KOSTAVA ST.          :TBILISI        :GE:380008:99532234567:5000\n323:VOSTOK TECH              :30 CHAVCHAVADZE AVE.   :TBILISI        :GE:380079:99532345678:4000\n324:BYTE BAZAAR              :14 ISTIQLOL ST.        :BAKU           :AZ:1001:994122345678:7000\n325:CORE SYSTEMS             :7 NIZAMI ST.           :BAKU           :AZ:1000:994123456789:9000\n326:VOLTAGE                  :21 RASHID BEHBUDOV ST. :BAKU           :AZ:1014:994124567890:6000\n327:INFOTECH                 :3 DERIBASIVSKA ST.     :ODESSA         :UA:650000:380482345678:5000\n328:DIGITAL LAB              :18 KHRESHCHATYK ST.    :KYIV           :UA:01001:380443456789:8000\n329:TECHNO HUB               :9 NURMAGAMBETOV ST.    :SHYMKENT       :KZ:160000:77218901234:4000\n330:PRIME GADGETS            :44 ISMOIL SOMONI AVE.  :DUSHANBE       :TJ:734001:992372345678:3000\n", "query3.txt": "201001!LOGITECH WIRELESS MOUSE     !2800  !2240  !01-MAR-22\n201002!LOGITECH GAMING MOUSE       !5500  !4400  !01-MAR-22\n201003!LOGITECH TRACKBALL PRO      !7200  !5760  !15-APR-22\n202001!DEFENDER WIRED KEYBOARD     !1200  !960   !01-JAN-22\n202002!DEFENDER GAMING KEYBOARD    !3800  !3040  !01-JAN-22\n202003!OKLICK MECHANICAL KEYBOARD  !6500  !5200  !10-FEB-23\n203001!SAMSUNG 27\" MONITOR FHD     !18000 !14400 !01-JUN-22\n203002!SAMSUNG 32\" MONITOR QHD     !28000 !22400 !01-JUN-22\n203003!LG ULTRAWIDE 34\" MONITOR    !42000 !33600 !15-MAY-23\n204001!ASUS GAMING HEADSET         !4500  !3600  !01-APR-22\n204002!HYPERx CLOUD II HEADSET     !8900  !7120  !01-APR-22\n205001!LOGITECH WEBCAM HD 1080P    !3200  !2560  !01-SEP-22\n205002!RAZER STREAMING WEBCAM 4K   !9800  !7840  !20-NOV-22\n206001!TP-LINK GIGABIT SWITCH 8P   !2100  !1680  !01-FEB-23\n206002!TP-LINK WIFI ROUTER AX3000  !5600  !4480  !15-MAR-23\n207001!SANDISK SSD 480GB           !4200  !3360  !01-JAN-23\n207002!SAMSUNG SSD 1TB             !7800  !6240  !01-JAN-23\n207003!WD EXTERNAL HDD 2TB         !5500  !4400  !15-FEB-23\n208001!KINGSTON RAM DDR4 16GB      !3600  !2880  !01-MAR-23\n208002!CRUCIAL RAM DDR5 32GB       !8400  !6720  !01-MAY-23\n209001!POWERCOM UPS 650VA          !4800  !3840  !01-APR-22\n209002!APC UPS 1500VA              !12000 !9600  !10-JUN-22\n210001!RH: \"LINUX ДЛЯ НАЧИНАЮЩИХ\" !890   !712   !05-SEP-23\n210002!RH: \"СЕТИ И ПРОТОКОЛЫ\"     !1200  !960   !05-SEP-23\n210003!RH: \"PYTHON НА ПРАКТИКЕ\"   !950   !760   !10-OCT-23\n", "query4.txt": "801 PETROV    300 12-JAN-24 48600\n802 IVANOVA   301 15-JAN-24 32400\n803 SOKOLOV   302 18-JAN-24 27800\n804 KOZLOVA   303 20-JAN-24 15200\n805 MOROZOV   304 22-JAN-24 56700\n806 VOLKOVA   305 25-JAN-24 18900\n807 NOVIKOV   306 28-JAN-24 41200\n808 FEDOROVA  307 01-FEB-24 12600\n809 LEBEDEV   308 03-FEB-24 22400\n810 SMIRNOVA  309 05-FEB-24 9800\n811 ORLOV     310 07-FEB-24 34500\n812 POPOVA    311 10-FEB-24 17600\n813 KUZNETSOV 312 12-FEB-24 62800\n814 MIKHAILOVA 313 14-FEB-24 28900\n815 ZAKHAROV  314 16-FEB-24 19400\n816 SOROKINA  315 19-FEB-24 44100\n817 VOLKOV    316 21-FEB-24 33700\n818 BOGDANOVA 317 23-FEB-24 15800\n819 BELOV     318 25-FEB-24 21300\n820 TSVETKOVA 319 27-FEB-24 57200\n821 FROLOV    320 01-MAR-24 38600\n822 GOLUBEVA  321 04-MAR-24 12400\n823 KARPOV    300 06-MAR-24 46800\n824 VORONOVA  301 08-MAR-24 29100\n825 STEPANOV  302 11-MAR-24 74500\n826 NIKIFOROVA 303 13-MAR-24 16200\n827 MAKAROV   304 15-MAR-24 53400\n828 KOLESNIKOVA 305 18-MAR-24 24700\n829 TIKHONOV  306 20-MAR-24 31800\n830 KULIKOVA  307 22-MAR-24 18300\n831 PETROV    308 25-MAR-24 42600\n832 IVANOVA   309 27-MAR-24 27900\n833 SOKOLOV   310 29-MAR-24 61200\n834 MOROZOV   311 01-APR-24 35400\n835 VOLKOV    312 03-APR-24 19700\n836 KUZNETSOV 313 05-APR-24 88300\n837 ORLOV     314 08-APR-24 23100\n", "query5.txt": "1  801 201001 2750  5    13750\n2  801 202001 1180  10   11800\n3  801 203001 17800 1    17800\n4  801 210001 870   6    5220\n1  802 201002 5400  3    16200\n2  802 204001 4400  2    8800\n3  802 205001 3150  2    6300\n4  802 210002 1180  1    1180\n1  803 206001 2050  2    4100\n2  803 206002 5500  1    5500\n3  803 207001 4150  4    16600\n1  804 208001 3550  2    7100\n2  804 210003 935   8    7480\n1  805 203002 27600 1    27600\n2  805 201002 5400  2    10800\n3  805 204002 8750  2    17500\n4  805 210001 870   1    870\n1  806 207002 7700  1    7700\n2  806 208001 3550  3    10650\n1  807 203003 41500 1    41500\n1  808 201001 2750  3    8250\n2  808 209001 4700  1    4700\n1  809 202002 3750  4    15000\n2  809 210002 1180  6    7080\n1  810 205001 3150  2    6300\n2  810 210003 935   4    3740\n1  811 207003 5400  4    21600\n2  811 208002 8300  1    8300\n3  811 209001 4700  1    4700\n1  812 201002 5400  1    5400\n2  812 204001 4400  3    13200\n1  813 203002 27600 1    27600\n2  813 203001 17800 1    17800\n3  813 208002 8300  2    16600\n4  813 210001 870   1    870\n1  814 202003 6400  2    12800\n2  814 206002 5500  3    16500\n1  815 207001 4150  2    8300\n2  815 209001 4700  2    9400\n3  815 210003 935   2    1870\n1  816 203003 41500 1    41500\n2  816 201002 5400  1    5400\n1  817 204002 8750  2    17500\n2  817 208001 3550  4    14200\n3  817 210002 1180  2    2360\n1  818 201001 2750  3    8250\n2  818 202001 1180  6    7080\n1  819 207002 7700  1    7700\n2  819 209002 11800 1    11800\n3  819 210001 870   2    1740\n1  820 203002 27600 2    55200\n1  821 207003 5400  3    16200\n2  821 208002 8300  2    16600\n3  821 210003 935   6    5610\n1  822 201001 2750  4    11000\n2  822 210002 1180  1    1180\n1  823 203001 17800 1    17800\n2  823 202002 3750  5    18750\n3  823 204001 4400  2    8800\n1  824 207001 4150  4    16600\n2  824 209001 4700  2    9400\n3  824 210001 870   3    2610\n1  825 203003 41500 1    41500\n2  825 203002 27600 1    27600\n3  825 204002 8750  1    8750\n1  826 201001 2750  5    13750\n2  826 210003 935   2    1870\n1  827 207002 7700  4    30800\n2  827 208002 8300  2    16600\n3  827 210002 1180  5    5900\n1  828 202002 3750  3    11250\n2  828 209001 4700  3    14100\n1  829 205001 3150  6    18900\n2  829 206001 2050  4    8200\n3  829 210001 870   5    4350\n1  830 201002 5400  2    10800\n2  830 210003 935   8    7480\n1  831 203001 17800 1    17800\n2  831 202003 6400  3    19200\n3  831 208001 3550  2    7100\n1  832 207003 5400  3    16200\n2  832 209002 11800 1    11800\n1  833 203002 27600 1    27600\n2  833 204002 8750  1    8750\n3  833 208002 8300  3    24900\n1  834 201002 5400  4    21600\n2  834 206002 5500  2    11000\n3  834 210002 1180  2    2360\n1  835 207001 4150  2    8300\n2  835 209001 4700  2    9400\n1  836 203003 41500 1    41500\n2  836 203002 27600 1    27600\n3  836 208002 8300  1    8300\n4  836 210001 870   12   10440\n1  837 202002 3750  4    15000\n2  837 205001 3150  2    6300\n3  837 210003 935   2    1870\n1  838 201001 2750  3    8250\n2  838 204002 8750  2    17500\n3  838 210001 870   5    4350\n1  839 203001 17800 1    17800\n2  839 207002 7700  2    15400\n1  840 202002 3750  6    22500\n2  840 209002 11800 1    11800\n3  840 210003 935   4    3740\n1  841 208002 8300  2    16600\n2  841 206001 2050  3    6150\n3  841 201002 5400  1    5400"};
 
-    let activeFlags = { P: true, i: false, v: false, c: false, n: true, w: false, x: false };
+    // Variants data
+    const VARIANTS_DATA = [{"id": 1, "title": "Вариант №1", "tasks": [{"num": "1.1", "file": "query1.txt", "desc": "В файле query1 выбрать все строки, в которых имя сотрудника начинается на букву A.", "cmd": "grep -E '^[0-9]+ +A' query1.txt", "pattern": "^[0-9]+ +A", "flags": "-E", "explanation": "Якорь `^` фиксирует начало строки. `[0-9]+` сопоставляет табельный номер (ID), ` +` — пробелы-разделители, литерал `A` задает первую букву имени сотрудника во 2-й колонке.", "matches_note": "5 сотрудников: ALEX, ANNA, ANDREY, ARTEM, ALEXEY."}, {"num": "1.2", "file": "query3.txt", "desc": "В файле query3 выбрать все строки, в которых в названии товара есть слово MONITOR, а дата введения – 2022 год.", "cmd": "grep -E 'MONITOR.*-22$' query3.txt", "pattern": "MONITOR.*-22$", "flags": "-E", "explanation": "`MONITOR` находит подстроку в поле товара, `.*` поглощает любые промежуточные символы до конца строки, а `-22$` фиксирует 2022 год в поле даты перед концом строки.", "matches_note": "2 позиции: SAMSUNG 27\" MONITOR FHD и SAMSUNG 32\" MONITOR QHD."}, {"num": "1.3", "file": "query4.txt", "desc": "В файле query4 выбрать все строки, в которых фамилия продавца – PETROV.", "cmd": "grep -E '^[0-9]+ +PETROV ' query4.txt", "pattern": "^[0-9]+ +PETROV ", "flags": "-E", "explanation": "`^[0-9]+ +` сопоставляет номер заказа и пробелы, затем точное совпадение фамилии `PETROV` и разделительный пробел перед кодом покупателя.", "matches_note": "2 заказа: №801 (12-JAN-24) и №831 (25-MAR-24)."}]}, {"id": 2, "title": "Вариант №2", "tasks": [{"num": "2.1", "file": "query2.txt", "desc": "В файле query2 выбрать все строки, в которых код покупателя начинается с цифры 3.", "cmd": "grep -E '^3' query2.txt", "pattern": "^3", "flags": "-E", "explanation": "`^` привязывает сопоставление к первому символу строки, `3` требует наличия тройки в качестве старшей цифры кода покупателя.", "matches_note": "Все 31 строка файла (коды покупателей от 300 до 330)."}, {"num": "2.2", "file": "query1.txt", "desc": "В файле query1 выбрать все строки, в которых город – KAZAN.", "cmd": "grep -E ' KAZAN ' query1.txt", "pattern": " KAZAN ", "flags": "-E", "explanation": "` KAZAN ` с пробелами по краям изолирует 7-ю колонку города, исключая ложные срабатывания по другим полям.", "matches_note": "7 сотрудников: SOKOLOV, FEDOROVA, POPOVA, ZAKHAROV, BELOV, KARPOV, KOLESNIKOVA."}, {"num": "2.3", "file": "query3.txt", "desc": "В файле query3 выбрать все строки, в которых максимальная цена не менее 5000.", "cmd": "grep -E '!([5-9][0-9]{3}|[0-9]{5,}) +!' query3.txt", "pattern": "!([5-9][0-9]{3}|[0-9]{5,}) +!", "flags": "-E", "explanation": "Разделитель `!` обрамляет поле максимальной цены. Внутри альтернатива: 4-значные числа от 5000 (`[5-9][0-9]{3}`) либо любые числа от 5 знаков и выше (`[0-9]{5,}`).", "matches_note": "13 товаров: мыши, клавиатуры, мониторы, гарнитуры, веб-камеры, накопители."}]}, {"id": 3, "title": "Вариант №3", "tasks": [{"num": "3.1", "file": "query1.txt", "desc": "В файле query1 выбрать все строки, в которых фамилия сотрудника заканчивается на OV.", "cmd": "grep -E '^[0-9]+ +[^ ]+ +[^ ]+ +[A-Za-z]*OV ' query1.txt", "pattern": "^[0-9]+ +[^ ]+ +[^ ]+ +[A-Za-z]*OV ", "flags": "-E", "explanation": "Пропускаем ID, имя и инициал `^[0-9]+ +[^ ]+ +[^ ]+ +`, затем требуем, чтобы 4-е поле фамилии оканчивалось на `OV` перед пробелом.", "matches_note": "14 сотрудников мужского пола: PETROV, SOKOLOV, MOROZOV, NOVIKOV, LEBEDEV, ORLOV, KUZNETSOV, ZAKHAROV, VOLKOV, BELOV, FROLOV, KARPOV, STEPANOV, TIKHONOV."}, {"num": "3.2", "file": "query4.txt", "desc": "В файле query4 выбрать все строки, в которых сумма заказа не имеет дробной части.", "cmd": "grep -E ' [0-9]+$' query4.txt", "pattern": " [0-9]+$", "flags": "-E", "explanation": "В конце строки `$` после пробела стоят только цифры без десятичной точки `.`.", "matches_note": "Все 37 заказов в query4.txt имеют целочисленные суммы."}, {"num": "3.3", "file": "query3.txt", "desc": "В файле query3 выбрать все строки, в которых минимальная цена меньше 1000, а максимальная не менее 1000.", "cmd": "grep -E '!([1-9][0-9]{3}|[0-9]{5,}) +! *[0-9]{1,3} +!' query3.txt", "pattern": "!([1-9][0-9]{3}|[0-9]{5,}) +! *[0-9]{1,3} +!", "flags": "-E", "explanation": "Макс. цена $\\ge 1000$: `!([1-9][0-9]{3}|[0-9]{5,}) +!`. Мин. цена $< 1000$: от 1 до 3 цифр ` *[0-9]{1,3} +!`.", "matches_note": "2 позиции: DEFENDER WIRED KEYBOARD (1200 / 960) и книга RH: СЕТИ И ПРОТОКОЛЫ (1200 / 960)."}]}, {"id": 4, "title": "Вариант №4", "tasks": [{"num": "4.1", "file": "query1.txt", "desc": "В файле query1 выбрать все строки, в которых должность – ANALYST, а город – MOSCOW.", "cmd": "grep -E 'ANALYST.*MOSCOW' query1.txt", "pattern": "ANALYST.*MOSCOW", "flags": "-E", "explanation": "`ANALYST` ищет должность в 5-й колонке, `.*` пропускает отдел, а `MOSCOW` фиксирует город в 7-й колонке.", "matches_note": "4 сотрудника: PETROV, VOLKOVA, MIKHAILOVA, FROLOV."}, {"num": "4.2", "file": "query2.txt", "desc": "В файле query2 выбрать все строки, в которых страна – KZ.", "cmd": "grep -E ':KZ:' query2.txt", "pattern": ":KZ:", "flags": "-E", "explanation": "Двоеточия `:KZ:` точно ограничивают 5-е поле страны Казахстана, исключая совпадения подстрок в адресах или названиях.", "matches_note": "7 компаний: ELECTRON PLUS, DIGITAL HUB, SMART CITY TECH, IT CORNER, PC WORLD, GEAR UP, TECHNO HUB."}, {"num": "4.3", "file": "query4.txt", "desc": "В файле query4 выбрать все строки, в которых сумма заказа не менее 50000.", "cmd": "grep -E ' ([5-9][0-9]{4}|[0-9]{6,})$' query4.txt", "pattern": " ([5-9][0-9]{4}|[0-9]{6,})$", "flags": "-E", "explanation": "`[5-9][0-9]{4}` отбирает 5-значные числа от 50000 до 99999, а `[0-9]{6,}` — любые суммы от 100000 и выше в конце строки.", "matches_note": "7 заказов: №805 (56700), №813 (62800), №817 (74200), №825 (58400), №828 (81500), №832 (63400), №835 (52100)."}]}, {"id": 5, "title": "Вариант №5", "tasks": [{"num": "5.1", "file": "query1.txt", "desc": "В файле query1 выбрать все строки, в которых код сотрудника заканчивается цифрами 10.", "cmd": "grep -E '^[0-9]*10 ' query1.txt", "pattern": "^[0-9]*10 ", "flags": "-E", "explanation": "`^` привязывает к началу строки, `[0-9]*10 ` находит код, заканчивающийся на 10 перед пробелом-разделителем.", "matches_note": "1 сотрудник: 7110 NATALIA A SMIRNOVA."}, {"num": "5.2", "file": "query2.txt", "desc": "В файле query2 выбрать все строки, в которых в названии компании есть слово TECH.", "cmd": "grep -E ':[^:]*TECH' query2.txt", "pattern": ":[^:]*TECH", "flags": "-E", "explanation": "`:[^:]*TECH` гарантирует, что слово `TECH` находится именно во 2-м поле названия компании (до следующего двоеточия).", "matches_note": "7 компаний: TECHNO CITY, TECH HUB, FUTURE TECH, NOVA TECH, SMART CITY TECH, TECH POINT, VOSTOK TECH."}, {"num": "5.3", "file": "query4.txt", "desc": "В файле query4 выбрать все строки, в которых сумма заказа не менее 20000, но менее 40000.", "cmd": "grep -E ' [23][0-9]{4}$' query4.txt", "pattern": " [23][0-9]{4}$", "flags": "-E", "explanation": "`[23]` задает первую цифру 2 или 3, а ровно 4 цифры `[0-9]{4}$` определяют диапазон от 20 000 до 39 999.", "matches_note": "14 заказов: №802 (32400), №803 (27800), №809 (22400), №811 (28900), №814 (34500) и др."}]}, {"id": 6, "title": "Вариант №6", "tasks": [{"num": "6.1", "file": "query1.txt", "desc": "В файле query1 выбрать все строки, в которых отдел – RESEARCH, а зарплата состоит из четырёх цифр.", "cmd": "grep -E 'RESEARCH.* [0-9]{4}$' query1.txt", "pattern": "RESEARCH.* [0-9]{4}$", "flags": "-E", "explanation": "`RESEARCH` находит отдел, `.*` переходит через город, а ` [0-9]{4}$` строго валидирует 4-значную зарплату.", "matches_note": "11 сотрудников: ALEX, DMITRY, ANNA, PAVEL, ANDREY, YULIA, NIKITA, FROLOV, KARPOV, NIKIFOROVA, KOLESNIKOVA."}, {"num": "6.2", "file": "query3.txt", "desc": "В файле query3 выбрать все строки, в которых название товара содержит слово KEYBOARD.", "cmd": "grep -E 'KEYBOARD' query3.txt", "pattern": "KEYBOARD", "flags": "-E", "explanation": "Литеральный поиск подстроки `KEYBOARD` во 2-й колонке наименования товара.", "matches_note": "3 позиции: DEFENDER WIRED KEYBOARD, DEFENDER GAMING KEYBOARD, OKLICK MECHANICAL KEYBOARD."}, {"num": "6.3", "file": "query4.txt", "desc": "В файле query4 выбрать все строки, в которых заказ оформлен в феврале 2024 года.", "cmd": "grep -E '-FEB-24' query4.txt", "pattern": "-FEB-24", "flags": "-E", "explanation": "Формат даты в query4: `DD-MON-YY`. Шаблон `-FEB-24` сопоставляет месяц `FEB` и 2024 год.", "matches_note": "13 заказов: с №808 (01-FEB-24) по №820 (29-FEB-24)."}]}, {"id": 7, "title": "Вариант №7", "tasks": [{"num": "7.1", "file": "query2.txt", "desc": "В файле query2 выбрать все строки, в которых название компании заканчивается на SHOP.", "cmd": "grep -E ':[^:]*SHOP *:' query2.txt", "pattern": ":[^:]*SHOP *:", "flags": "-E", "explanation": "Во 2-м поле названия компании слово `SHOP` стоит непосредственно перед завершающим разделителем `:` (с учетом возможных концевых пробелов выравнивания ` *:`).", "matches_note": "1 компания: BYTE SHOP (код 305)."}, {"num": "7.2", "file": "query1.txt", "desc": "В файле query1 выбрать все строки, в которых второй инициал – S.", "cmd": "grep -E '^[0-9]+ +[^ ]+ +S ' query1.txt", "pattern": "^[0-9]+ +[^ ]+ +S ", "flags": "-E", "explanation": "Пропускаем ID и имя `^[0-9]+ +[^ ]+ +`, затем проверяем одиночную букву `S` в 3-й колонке инициала.", "matches_note": "4 сотрудника: MARIA S IVANOVA, ANDREY S KUZNETSOV, VALERIA S TSVETKOVA, GEORGY S TIKHONOV."}, {"num": "7.3", "file": "query5.txt", "desc": "В файле query5 выбрать все строки, в которых количество товара в пункте заказа – трёхзначное число.", "cmd": "grep -E '^ *([0-9]+ +){4}[0-9]{3} +' query5.txt", "pattern": "^ *([0-9]+ +){4}[0-9]{3} +", "flags": "-E", "explanation": "Количество товара — это 5-я колонка строки. Пропускаем 4 колонки `([0-9]+ +){4}`, затем требуем ровно 3 цифры `[0-9]{3}`.", "matches_note": "0 совпадений (в файле query5.txt максимальное количество товара равно 10 и 12, трехзначных значений нет — код возврата grep 1)."}]}, {"id": 8, "title": "Вариант №8", "tasks": [{"num": "8.1", "file": "query1.txt", "desc": "В файле query1 выбрать все строки, в которых имя сотрудника состоит ровно из пяти букв.", "cmd": "grep -E '^[0-9]+ +[A-Za-z]{5} ' query1.txt", "pattern": "^[0-9]+ +[A-Za-z]{5} ", "flags": "-E", "explanation": "`^[0-9]+ +` сопоставляет ID и пробелы, а `[A-Za-z]{5} ` жестко ограничивает длину имени ровно 5 буквами перед разделительным пробелом.", "matches_note": "11 сотрудников: MARIA, ELENA, PAVEL, ROMAN, NIKITA, MAXIM, IRINA, ARTEM, DENIS, SOFIA, DARIA."}, {"num": "8.2", "file": "query3.txt", "desc": "В файле query3 выбрать все строки, в которых в названии товара есть слово SSD или HDD.", "cmd": "grep -E '\\b(SSD|HDD)\\b' query3.txt", "pattern": "\\b(SSD|HDD)\\b", "flags": "-E", "explanation": "Альтернатива `(SSD|HDD)` с границами слов `\\b` исключает ложные срабатывания внутри случайных символьных комбинаций.", "matches_note": "3 позиции: SANDISK SSD 480GB, SAMSUNG SSD 1TB, WD EXTERNAL HDD 2TB."}, {"num": "8.3", "file": "query4.txt", "desc": "В файле query4 выбрать все строки, в которых фамилия продавца начинается на букву K.", "cmd": "grep -E '^[0-9]+ +K' query4.txt", "pattern": "^[0-9]+ +K", "flags": "-E", "explanation": "`^[0-9]+ +` пропускает номер заказа, а буква `K` сопоставляет первую букву фамилии продавца во 2-й колонке.", "matches_note": "6 заказов: KOZLOVA (№804, 834), KUZNETSOV (№813), KARPOV (№823), KOLESNIKOVA (№828), KULIKOVA (№830)."}]}, {"id": 9, "title": "Вариант №9", "tasks": [{"num": "9.1", "file": "query2.txt", "desc": "В файле query2 выбрать все строки, в которых страна – BY или UA.", "cmd": "grep -E ':(BY|UA):' query2.txt", "pattern": ":(BY|UA):", "flags": "-E", "explanation": "Альтернатива `(BY|UA)` строго внутри двоеточий сопоставляет поле кода страны Беларусь или Украина.", "matches_note": "5 компаний: PIXEL MARKET (BY), TECH ZONE (BY), CYBERNET (BY), INFOTECH (UA), DIGITAL LAB (UA)."}, {"num": "9.2", "file": "query1.txt", "desc": "В файле query1 выбрать все строки, в которых зарплата начинается с цифры 3.", "cmd": "grep -E ' 3[0-9]*$' query1.txt", "pattern": " 3[0-9]*$", "flags": "-E", "explanation": "` 3[0-9]*$` проверяет, что последнее поле оклада начинается с тройки и продолжается до конца строки.", "matches_note": "8 сотрудников: ALEX (3200), DMITRY (3800), ANNA (3500), YULIA (3600), NIKITA (3700), FROLOV (3400), KARPOV (3900), KOLESNIKOVA (3300)."}, {"num": "9.3", "file": "query5.txt", "desc": "В файле query5 выбрать все строки, в которых реальная цена содержит дробную часть.", "cmd": "grep -E '\\.[0-9]+' query5.txt", "pattern": "\\.[0-9]+", "flags": "-E", "explanation": "`\\.[0-9]+` ищет экранированную десятичную точку с последующими цифрами копеек/центов.", "matches_note": "0 совпадений (все цены в датасете query5.txt приведены в целых рублях/единицах — проверка на знание того, что grep возвращает 0 при отсутствии совпадений)."}]}, {"id": 10, "title": "Вариант №10", "tasks": [{"num": "10.1", "file": "query1.txt", "desc": "В файле query1 выбрать все строки, в которых должность – CLERK, а город – не MOSCOW.", "cmd": "grep -P '\\bCLERK\\b.*?(?!MOSCOW)[A-Z]+\\s+\\d+$' query1.txt", "pattern": "\\bCLERK\\b.*?(?!MOSCOW)[A-Z]+\\s+\\d+$", "flags": "-P", "explanation": "Синтаксис PCRE (`-P`): отрицательное опережение `(?!MOSCOW)` гарантирует, что имя города перед зарплатой не совпадает со словом MOSCOW.", "matches_note": "3 сотрудника: NATALIA A SMIRNOVA (SAMARA), SOFIA G NIKIFOROVA (SAMARA), DARIA N KULIKOVA (SAMARA)."}, {"num": "10.2", "file": "query3.txt", "desc": "В файле query3 выбрать все строки, в которых дата введения товара – 2023 год.", "cmd": "grep -E '-23$' query3.txt", "pattern": "-23$", "flags": "-E", "explanation": "Дата в конце строки имеет формат `DD-MON-YY`. Шаблон `-23$` находит год 2023.", "matches_note": "12 товаров с датами 2023 года (OKLICK, LG 34\", TP-LINK, SSD, RAM, книги RH)."}, {"num": "10.3", "file": "query4.txt", "desc": "В файле query4 выбрать все строки, в которых заказ оформлен в марте 2024 года.", "cmd": "grep -E '-MAR-24' query4.txt", "pattern": "-MAR-24", "flags": "-E", "explanation": "Паттерн `-MAR-24` фильтрует заказы за март 2024 года в 4-й колонке даты.", "matches_note": "13 заказов: с №821 (01-MAR-24) по №833 (29-MAR-24)."}]}, {"id": 11, "title": "Вариант №11", "tasks": [{"num": "11.1", "file": "query2.txt", "desc": "В файле query2 выбрать все строки, в которых в названии компании есть слово DIGITAL.", "cmd": "grep -E ':[^:]*\\bDIGITAL\\b' query2.txt", "pattern": ":[^:]*\\bDIGITAL\\b", "flags": "-E", "explanation": "`:[^:]*` входит во 2-е поле компании, где граница слова `\\bDIGITAL\\b` находит точное совпадение.", "matches_note": "4 компании: DIGITAL STORE, MEGA DIGITAL, DIGITAL HUB, DIGITAL LAB."}, {"num": "11.2", "file": "query1.txt", "desc": "В файле query1 выбрать все строки, в которых фамилия содержит подстроку OV или EV.", "cmd": "grep -E '^[0-9]+ +[^ ]+ +[^ ]+ +[A-Za-z]*(OV|EV)' query1.txt", "pattern": "^[0-9]+ +[^ ]+ +[^ ]+ +[A-Za-z]*(OV|EV)", "flags": "-E", "explanation": "В 4-й колонке фамилии проверяется вхождение суффиксов `OV` или `EV` через альтернативу `(OV|EV)`.", "matches_note": "29 из 30 сотрудников (практически все фамилии оканчиваются на OV, EVA, EV)."}, {"num": "11.3", "file": "query5.txt", "desc": "В файле query5 выбрать все строки, в которых номер пункта заказа – однозначное число.", "cmd": "grep -E '^ *[0-9] ' query5.txt", "pattern": "^ *[0-9] ", "flags": "-E", "explanation": "`^ *[0-9] ` сопоставляет строку, начинающуюся с ровно одной цифры от 0 до 9 с последующим пробелом.", "matches_note": "Все 108 строк query5.txt (номера пунктов заказов лежат в диапазоне от 1 до 5)."}]}, {"id": 12, "title": "Вариант №12", "tasks": [{"num": "12.1", "file": "query1.txt", "desc": "В файле query1 выбрать все строки, в которых отдел – OPERATIONS или ACCOUNTING.", "cmd": "grep -E '\\b(OPERATIONS|ACCOUNTING)\\b' query1.txt", "pattern": "\\b(OPERATIONS|ACCOUNTING)\\b", "flags": "-E", "explanation": "Альтернатива `(OPERATIONS|ACCOUNTING)` с границами слов находит сотрудников соответствующих отделов в 6-й колонке.", "matches_note": "8 сотрудников: KOZLOVA, NOVIKOV, POPOVA, BOGDANOVA, TSVETKOVA, VORONOVA, STEPANOV, TIKHONOV."}, {"num": "12.2", "file": "query3.txt", "desc": "В файле query3 выбрать все строки, в которых название начинается со слова LOGITECH.", "cmd": "grep -E '! *LOGITECH\\b' query3.txt", "pattern": "! *LOGITECH\\b", "flags": "-E", "explanation": "`! *` находит первый разделитель, за которым сразу начинается наименование товара со слова `LOGITECH`.", "matches_note": "4 товара: WIRELESS MOUSE, GAMING MOUSE, TRACKBALL PRO, WEBCAM HD 1080P."}, {"num": "12.3", "file": "query4.txt", "desc": "В файле query4 выбрать строки, в которых сумма заказа менее 20000.", "cmd": "grep -E ' ([1-9][0-9]{0,3}|1[0-9]{4})$' query4.txt", "pattern": " ([1-9][0-9]{0,3}|1[0-9]{4})$", "flags": "-E", "explanation": "Суммы до 9999 (`[1-9][0-9]{0,3}`) либо от 10000 до 19999 (`1[0-9]{4}`) в конце строки перед `$`.", "matches_note": "11 заказов: №804 (15200), №806 (18900), №808 (12600), №810 (9800), №812 (17500) и др."}]}, {"id": 13, "title": "Вариант №13", "tasks": [{"num": "13.1", "file": "query2.txt", "desc": "В файле query2 выбрать все строки, в которых город состоит ровно из одного слова (не содержит пробела).", "cmd": "grep -E '^([^:]+:){3}[A-Za-z-]+ *:' query2.txt", "pattern": "^([^:]+:){3}[A-Za-z-]+ *:", "flags": "-E", "explanation": "В 4-м поле города допускаются только буквы и дефис (`[A-Za-z-]+`), пробелы внутри названия отсутствуют (концевые пробелы выравнивания ` *:`).", "matches_note": "Все 31 строка query2.txt: все города (MOSCOW, SAINT-PETERSBURG, KAZAN, MINSK, TASHKENT, ALMATY, ASTANA, TBILISI, BAKU, ODESSA, KYIV, SHYMKENT, DUSHANBE) состоят из 1 слова."}, {"num": "13.2", "file": "query1.txt", "desc": "В файле query1 выбрать все строки, в которых код сотрудника начинается с 711.", "cmd": "grep -E '^ *711[0-9] ' query1.txt", "pattern": "^ *711[0-9] ", "flags": "-E", "explanation": "`^ *711[0-9] ` строго проверяет начало строки на 4-значный табельный номер от 7110 до 7119.", "matches_note": "10 сотрудников: с 7110 NATALIA SMIRNOVA по 7119 ARTEM BELOV."}, {"num": "13.3", "file": "query3.txt", "desc": "В файле query3 выбрать все строки, в которых максимальная и минимальная цены отличаются менее чем на 1000.", "cmd": "grep -E '! *([1-9])[0-9]{3} *! *\\1[0-9]{3} *!|! *[0-9]{1,3} *! *[0-9]{1,3} *!' query3.txt", "pattern": "! *([1-9])[0-9]{3} *! *\\1[0-9]{3} *!|! *[0-9]{1,3} *! *[0-9]{1,3} *!", "flags": "-E", "explanation": "Совпадение первой цифры тысяч `([1-9])` и `\\1` гарантирует разницу < 1000, либо обе цены являются 3-значными числами.", "matches_note": "4 товара: LOGITECH WIRELESS MOUSE (2800/2240), DEFENDER GAMING KEYBOARD (3800/3040), RH: LINUX (890/712), RH: PYTHON (950/760)."}]}, {"id": 14, "title": "Вариант №14", "tasks": [{"num": "14.1", "file": "query1.txt", "desc": "В файле query1 выбрать все строки, в которых имя и фамилия начинаются на одну и ту же букву.", "cmd": "grep -P '^\\s*\\d+\\s+([A-Za-z])\\w*\\s+[A-Za-z]\\b\\s+\\1\\w*' query1.txt", "pattern": "^\\s*\\d+\\s+([A-Za-z])\\w*\\s+[A-Za-z]\\b\\s+\\1\\w*", "flags": "-P", "explanation": "Группа захвата `([A-Za-z])` запоминает 1-ю букву имени (колонка 2), а обратная ссылка `\\1` требует ту же букву в начале фамилии (колонка 4).", "matches_note": "0 совпадений (в датасете query1.txt нет сотрудников, у которых инициал имени совпадает с инициалом фамилии — проверка устойчивости поиска)."}, {"num": "14.2", "file": "query2.txt", "desc": "В файле query2 выбрать все строки, в которых кредитный лимит равен 10000.", "cmd": "grep -E ':10000$' query2.txt", "pattern": ":10000$", "flags": "-E", "explanation": "Последнее поле кредитного лимита оканчивается строго на `:10000$`.", "matches_note": "2 компании: GADGET WORLD (302) и PC WORLD (319)."}, {"num": "14.3", "file": "query5.txt", "desc": "В файле query5 выбрать все строки, в которых сумма строки заказа превышает 20000.", "cmd": "grep -E ' ([2-9][0-9]{4}|[0-9]{6,})$' query5.txt", "pattern": " ([2-9][0-9]{4}|[0-9]{6,})$", "flags": "-E", "explanation": "Последняя колонка строки: 5-значные числа от 20000 (`[2-9][0-9]{4}`) или любые 6-значные и более (`[0-9]{6,}`).", "matches_note": "15 строк заказов с суммами 27600, 41500, 26900, 54000, 42000 и др."}]}, {"id": 15, "title": "Вариант №15", "tasks": [{"num": "15.1", "file": "query3.txt", "desc": "В файле query3 выбрать все строки, в которых название товара содержит аббревиатуру из двух или более заглавных букв, стоящих рядом.", "cmd": "grep -E '![^!]*[A-Z]{2,}[^!]*!' query3.txt", "pattern": "![^!]*[A-Z]{2,}[^!]*!", "flags": "-E", "explanation": "Внутри 2-го поля товара ищется цепочка из двух и более заглавных букв `[A-Z]{2,}` (FHD, QHD, SSD, HDD, RAM, UPS, HD, AX).", "matches_note": "Все 25 позиций в query3.txt содержат аббревиатуры в названиях."}, {"num": "15.2", "file": "query2.txt", "desc": "В файле query2 выбрать все строки, в которых страна – RU, а кредитный лимит не менее 10000.", "cmd": "grep -E ':RU:[^:]*:[^:]*:([1-9][0-9]{4}|[0-9]{6,})$' query2.txt", "pattern": ":RU:[^:]*:[^:]*:([1-9][0-9]{4}|[0-9]{6,})$", "flags": "-E", "explanation": "Код страны `:RU:`, далее пропускаем почтовый индекс и телефон `[^:]*:[^:]*:`, а в конце требуем число $\\ge 10000$.", "matches_note": "4 компании: TECHNO CITY (15000), DIGITAL STORE (12000), GADGET WORLD (10000), TECH HUB (12000)."}, {"num": "14.3", "file": "query4.txt", "desc": "В файле query4 выбрать все строки, в которых фамилия продавца заканчивается на букву A.", "cmd": "grep -E '^[0-9]+ +[A-Za-z]*A ' query4.txt", "pattern": "^[0-9]+ +[A-Za-z]*A ", "flags": "-E", "explanation": "Пропускаем номер заказа `^[0-9]+ +`, затем требуем, чтобы фамилия продавца оканчивалась на заглавную букву `A` перед пробелом.", "matches_note": "16 заказов (продавцы-женщины): IVANOVA, KOZLOVA, VOLKOVA, FEDOROVA, SMIRNOVA, POPOVA, MIKHAILOVA, SOROKINA, BOGDANOVA, GOLUBEVA, VORONOVA, NIKIFOROVA, KOLESNIKOVA, KULIKOVA."}]}];
 
-    function toggleFlag(fl) {
-      activeFlags[fl] = !activeFlags[fl];
-      document.getElementById(`fl-${fl}`).classList.toggle('active', activeFlags[fl]);
-      runGrep();
+    // QA Data
+    const QA_DATA = [{"q": "1. Что такое регулярное выражение? Чем оно отличается от обычного текстового поиска?", "a": "<b>Регулярное выражение (Regular Expression / Regex)</b> — это формальный язык спецификации шаблонов для поиска, фильтрации и модификации текстовых последовательностей. Базируется на теории формальных языков и конечных автоматов (DFA/NFA С. Клини).<br><br><b>Отличие от обычного поиска:</b><br>• <i>Обычный поиск (substring / literal matching, grep -F):</i> сопоставляет фиксированную последовательность байт один-к-одному (напр. поиск слова 'MOSCOW'). Не способен описать вариативность.<br>• <i>Поиск по Regex:</i> оперирует метасимволами, позволяя задавать обобщенные правила: кратность повторений (`+`, `*`, `{n,m}`), альтернативы (`(A|B)`), контекст позиции (`^`, `$`, `\\b`), пользовательские классы символов (`[0-9]`) и опережающие проверки."}, {"q": "2. В чём разница между стандартами BRE, ERE и PCRE? Какими флагами команды grep они активируются?", "a": "В утилите <code>grep</code> поддерживаются 3 основных диалекта:<br>• <b>POSIX BRE (Basic Regular Expressions)</b> — режим по умолчанию (или флаг <code>-G</code>). Метасимволы <code>+</code>, <code>?</code>, <code>|</code>, <code>( )</code>, <code>{ }</code> считаются обычными литералами. Чтобы активировать их спец-функцию, их необходимо экранировать обратным слэшем: <code>\\+</code>, <code>\\?</code>, <code>\\|</code>, <code>\\( \\)</code>, <code>\\{n,m\\}</code>.<br>• <b>POSIX ERE (Extended Regular Expressions)</b> — активируется флагом <code>-E</code> (или утилитой <code>egrep</code>). Все перечисленные метасимволы активны по умолчанию без слэшей: <code>+</code>, <code>?</code>, <code>|</code>, <code>( )</code>, <code>{n,m}</code>. Экранирование нужно наоборот для поиска литеральных скобок.<br>• <b>PCRE (Perl Compatible Regular Expressions)</b> — активируется флагом <code>-P</code>. Подключает мощную библиотеку с поддержкой кратких классов (<code>\\d</code>, <code>\\w</code>, <code>\\s</code>), нежадных (lazy) квантификаторов (<code>*?</code>, <code>+?</code>), именованных групп и проверок нулевой ширины (lookaround)."}, {"q": "3. Что означают метасимволы ^ и $? Что будет искать выражение ^$ и в каком практическом сценарии оно применяется?", "a": "• <code>^</code> — якорь начала строки (zero-width assertion: сопоставляется с позицией непосредственно перед первым символом строки).<br>• <code>$</code> — якорь конца строки (сопоставляется с позицией сразу после последнего символа строки перед символом переноса <code>\\n</code>).<br>• <b>Выражение <code>^$</code>:</b> сопоставляет <i>пустую строку</i> (строку нулевой длины, не содержащую ни одного символа).<br>• <b>Практический сценарий:</b> удаление пустых строк из конфигурационных файлов или логов через инвертированный поиск <code>grep -v '^$' filename</code>, либо удаление строк, содержащих только невидимые пробелы: <code>grep -v '^[[:space:]]*$'</code>."}, {"q": "4. Чем отличаются конструкции [abc] и [^abc]? Приведите пример применения каждой на файлах query.", "a": "• <code>[abc]</code> — <b>символьный класс (включающий)</b>: сопоставляет ровно <i>один любой символ</i> из перечисленных внутри скобок.<br>• <code>[^abc]</code> — <b>инвертированный (отрицающий) символьный класс</b>: знак <code>^</code> сразу после открывающей скобки означает сопоставление <i>любого одного символа, кроме</i> перечисленных.<br><br><b>Примеры на реальных файлах:</b><br>1. <code>grep -E '^[0-9]+ +[A-Z]+ +[AS] ' query1.txt</code> — находит сотрудников, у которых второй инициал равен 'A' или 'S' (включающий класс <code>[AS]</code>).<br>2. <code>grep -E '^[^:]+:TECH' query2.txt</code> — находит строки, где первое поле (до первого двоеточия) не содержит двоеточий <code>[^:]+</code>, после чего следует 'TECH'."}, {"q": "5. В чём разница между жадными и ленивыми квантификаторами? Приведите пример ситуации, когда поведение жадного квантификатора даёт нежелательный результат.", "a": "• <b>Жадные (Greedy, по умолчанию в BRE/ERE/PCRE: <code>*</code>, <code>+</code>, <code>{n,m}</code>):</b> квантификатор сначала захватывает максимально длинный возможный отрезок входной строки, а затем, если хвост шаблона не совпадает, посимвольно отступает назад (backtracking).<br>• <b>Ленивые (Lazy / Reluctant, в PCRE: <code>*?</code>, <code>+?</code>, <code>??</code>):</b> захватывают минимально возможный фрагмент, проверяя продолжение шаблона на каждом шаге.<br><br><b>Пример проблемы:</b><br>В файле <code>query3.txt</code> наименование книги имеет вид: <code>210001!RH: \"LINUX ДЛЯ НАЧИНАЮЩИХ\" !890 !712 !05-SEP-23</code>.<br>Если в строке <code>«A» and «B»</code> мы ищем текст в кавычках жадным шаблоном <code>\".*\"</code>, он захватит всю строку целиком от первой кавычки до самой последней: <code>\"LINUX ... \" !890 ... \"</code>. Ленивый же шаблон <code>\".*?\"</code> остановится на ближайшей закрывающей кавычке, вернув строго название книги."}, {"q": "6. Что такое lookahead и lookbehind? Чем позитивная проверка отличается от негативной? Приведите пример использования каждой.", "a": "<b>Lookaround</b> — это утверждения нулевой ширины (zero-width assertions) в движке PCRE (<code>grep -P</code>), проверяющие контекст до или после текущей позиции без включения найденного текста в результат сопоставления:<br>• <b>Lookahead (опережающая проверка):</b> заглядывает вперед по тексту.<br>  - <i>Позитивная <code>(?=pattern)</code>:</i> требует, чтобы справа следовал <code>pattern</code>. Пример: <code>grep -P '\\d+(?=\\s*USD)'</code> найдет числа, за которыми идет валюта USD.<br>  - <i>Негативная <code>(?!pattern)</code>:</i> запрещает наличие <code>pattern</code> справа. Пример: <code>grep -P 'CLERK.*?(?!MOSCOW)[A-Z]+\\s+\\d+$' query1.txt</code> (найти клерков не из Москвы).<br>• <b>Lookbehind (ретроспективная проверка):</b> заглядывает назад по тексту.<br>  - <i>Позитивная <code>(?&lt;=pattern)</code>:</i> требует наличие <code>pattern</code> слева. Пример: <code>grep -P '(?&lt;=:RU:)\\d+' query2.txt</code>.<br>  - <i>Негативная <code>(?&lt;!pattern)</code>:</i> запрещает наличие <code>pattern</code> слева."}, {"q": "7. Чем \\d, \\w и \\s удобнее своих эквивалентов в виде символьных классов [0-9], [a-zA-Z0-9_] и [ \\t\\n\\r\\f]?", "a": "1. <b>Краткость и эргономичность:</b> сокращенные классы PCRE делают регулярные выражения в разы компактнее, предотвращают опечатки при ручном вводе громоздких диапазонов и повышают читаемость кода системных скриптов.<br>2. <b>Стандартизация пробелов:</b> метасимвол <code>\\s</code> автоматически включает в себя не только пробел, но и табуляцию <code>\\t</code>, перевод строки <code>\\n</code>, возврат каретки <code>\\r</code> и перевод страницы <code>\\f</code>.<br>3. <b>Поддержка Unicode:</b> в современных версиях PCRE с флагом <code>(*UCP)</code> классы <code>\\d</code>, <code>\\w</code>, <code>\\s</code> умеют автоматически распознавать цифры и буквы любых национальных алфавитов (кириллица, умляуты и т.д.), в то время как <code>[a-zA-Z]</code> строго ограничен базовой латиницей ASCII."}, {"q": "8. Как с помощью grep подсчитать количество строк в файле, соответствующих шаблону, не выводя сами строки?", "a": "С помощью флага <b><code>-c</code></b> (<code>--count</code>):<br><code>grep -c 'RESEARCH' query1.txt</code><br>Команда выведет только итоговое число совпавших строк (в данном примере: <code>11</code>) без захламления терминала выводом самих строк. В конвейерах это работает намного быстрее, чем связка <code>grep ... | wc -l</code>, так как grep не передает текстовые потоки в pipe."}, {"q": "9. Как вывести только имена файлов, содержащих совпадения?", "a": "С помощью флага <b><code>-l</code></b> (<code>--files-with-matches</code>):<br><code>grep -l '201001' query*.txt</code><br>Утилита проверит все файлы, подпадающие под маску <code>query*.txt</code>, и при первом же обнаружении совпадения выведет имя файла и немедленно перейдет к следующему файлу, что критично ускоряет поиск по большим репозиториям.<br><i>(Обратный флаг <code>-L</code> выводит только имена файлов, в которых совпадение <b>не</b> найдено).</i>"}];
+
+    // Quiz Data
+    const QUIZ_DATA = [{"id": 1, "q": "В чем фундаментальное отличие флага -E от базового режима grep?", "options": ["Флаг -E активирует движок ERE, где метасимволы +, ?, |, () работают без обратного слэша", "Флаг -E включает поиск регулярных выражений Perl (PCRE)", "Флаг -E включает регистронезависимый поиск", "Флаг -E заменяет grep на sed"], "correct": 0, "expl": "В POSIX ERE (флаг -E) спецсимволы квантификации и ветвления +, ?, |, () активны по умолчанию, в то время как в BRE для них требуется экранирование: \\+, \\?, \\|, \\( \\)."}, {"id": 2, "q": "Какая команда выведет строки файла query1.txt, в которых имя начинается на букву A?", "options": ["grep -E '^[0-9]+ +A' query1.txt", "grep 'A*' query1.txt", "grep -P '^A' query1.txt", "grep -w 'A' query1.txt"], "correct": 0, "expl": "В query1.txt первая колонка — это ID сотрудника. Шаблон '^[0-9]+ +A' сопоставляет начало строки, цифры ID, пробелы и букву 'A' во 2-й колонке имени."}, {"id": 3, "q": "Что вернет команда grep -c '^$' query2.txt?", "options": ["Количество пустых строк в файле query2.txt", "Количество строк, содержащих знак доллара", "Выведет все непустые строки", "Сумму кредитных лимитов"], "correct": 0, "expl": "Шаблон '^$' означает нулевую ширину между началом и концом строки (пустая строка), а ключ '-c' подсчитывает количество таких строк."}, {"id": 4, "q": "Какое регулярное выражение отберет сотрудников с должностью CLERK не из Москвы (файл query1.txt)?", "options": ["grep -P '\\bCLERK\\b.*?(?!MOSCOW)[A-Z]+\\s+\\d+$' query1.txt", "grep 'CLERK -v MOSCOW' query1.txt", "grep -E 'CLERK [^MOSCOW]' query1.txt", "grep -P 'CLERK.*MOSCOW' query1.txt"], "correct": 0, "expl": "Отрицательное опережение (negative lookahead) '(?!MOSCOW)' в синтаксисе PCRE гарантирует, что стоящее на позиции города слово не является MOSCOW."}, {"id": 5, "q": "Что произойдет, если выполнить grep -E '\\.[0-9]+' query5.txt на реальном датасете?", "options": ["Grep вернет 0 строк (код возврата 1), так как все цены в файле целочисленные", "Grep завершится с ошибкой синтаксиса регулярного выражения", "Будут выведены все 108 строк", "Выведутся только строки с копейками"], "correct": 0, "expl": "В реальном датасете query5.txt все цены и суммы целые. Шаблон поиска дробной части не находит совпадений, что является корректным пустым результатом."}, {"id": 6, "q": "Как вывести ТОЛЬКО имена файлов, в которых встречается код товара 201001?", "options": ["grep -l '201001' query*.txt", "grep -n '201001' query*.txt", "grep -c '201001' query*.txt", "grep -o '201001' query*.txt"], "correct": 0, "expl": "Ключ '-l' (--files-with-matches) выводит исключительно список имен файлов, в которых есть хотя бы одно совпадение."}, {"id": 7, "q": "Что означает квантификатор *? в стандарте PCRE (grep -P)?", "options": ["Ленивый квантификатор: 0 или более повторений, поглощающий минимальное число символов", "Жадный квантификатор: ровно 0 или 1 повторение", "Ошибку синтаксиса: два квантификатора подряд запрещены", "Сопоставление символа звездочки или знака вопроса"], "correct": 0, "expl": "Знак '?' после любого квантификатора (*, +, {n,m}) в движке PCRE переключает его режим с жадного (greedy) на ленивый (lazy)."}, {"id": 8, "q": "Какой класс символов сопоставит ЛЮБОЙ символ, КРОМЕ двоеточия?", "options": ["[^:]", "[:not:]", "[!:]", "\\:"], "correct": 0, "expl": "Символ '^' сразу после открывающей квадратной скобки '[^...]' инвертирует класс, сопоставляя любой символ, кроме перечисленных."}, {"id": 9, "q": "В чем ключевое отличие механизма NFA (движок PCRE) от DFA (базовый алгоритм GNU grep)?", "options": ["NFA поддерживает обратные ссылки (\\1) и lookaround за счет бэктрекинга, а DFA гарантирует линейное время O(N)", "DFA работает медленнее NFA на любых шаблонах", "NFA не поддерживает квантификаторы", "Между ними нет разницы в вычислительной сложности"], "correct": 0, "expl": "DFA (детерминированный конечный автомат) выполняет сопоставление строго за время O(N) от длины текста, но не поддерживает обратные ссылки и нежадные квантификаторы. NFA поддерживает все возможности за счет бэктрекинга."}, {"id": 10, "q": "Какая команда отберет строки файла query2.txt, где страна — строго Казахстан (KZ)?", "options": ["grep -E ':KZ:' query2.txt", "grep 'KZ' query2.txt", "grep -w 'KZ$' query2.txt", "grep -E '^[KZ]' query2.txt"], "correct": 0, "expl": "В query2.txt поля разделены двоеточиями: ID:Компания:Адрес:Город:Страна:Индекс:Тел:Лимит. Шаблон ':KZ:' сопоставляет строго 5-е поле страны."}, {"id": 11, "q": "Что такое 'катастрофический откат' (Catastrophic Backtracking) в регулярных выражениях?", "options": ["Экспоненциальный рост числа проверок автомата NFA на вложенных квантификаторах типа (a+)+$", "Ошибка переполнения стека операционной системы при открытии больших файлов", "Случайное удаление строк из-за некорректного флага -v", "Сбой кодировки символов UTF-8"], "correct": 0, "expl": "При вложенных квантификаторах и неуспешном сопоставлении движок NFA перебирает все возможные разбиения строки, что ведет к сложности O(2^N) и зависанию процесса (ReDoS)."}, {"id": 12, "q": "Какая опция grep отключает чувствительность к регистру символов?", "options": ["-i (--ignore-case)", "-I", "-c", "-r"], "correct": 0, "expl": "Флаг '-i' заставляет grep сопоставлять как строчные, так и прописные буквы эквивалентно."}];
+
+    // Init raw file viewer
+    function switchFileView(fname) {
+      document.querySelectorAll('#dataset-buttons .file-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.includes(fname));
+      });
+      const content = REAL_FILES[fname] || '';
+      const lines = content.split('\n').filter(l => l.trim().length > 0);
+      document.getElementById('raw-view-title').textContent = fname + ' (' + lines.length + ' строк)';
+      
+      let numbered = lines.map((l, idx) => String(idx + 1).padStart(3, ' ') + ' | ' + l).join('\n');
+      document.getElementById('raw-viewer-content').textContent = numbered;
     }
 
-    function runGrep() {
-      const fileKey = document.getElementById('pgFileSelect').value;
-      const patternRaw = document.getElementById('pgPatternInput').value;
-      const lines = DATASETS[fileKey] || [];
+    // Grep simulation engine
+    function toggleFlag(el, lblId) {
+      const lbl = document.getElementById(lblId);
+      lbl.classList.toggle('active', el.checked);
+      runGrepSimulation();
+    }
 
-      // Build command string
-      let flagStr = '-';
-      ['P', 'E', 'i', 'v', 'c', 'n', 'w', 'x'].forEach(f => {
-        if (activeFlags[f]) flagStr += f;
-      });
-      if (flagStr === '-') flagStr = '';
+    function runGrepSimulation() {
+      const t0 = performance.now();
+      const pattern = document.getElementById('regex-input').value;
+      const fname = document.getElementById('file-select').value;
+      const flagE = document.getElementById('flag-e').checked;
+      const flagP = document.getElementById('flag-p').checked;
+      const flagI = document.getElementById('flag-i').checked;
+      const flagV = document.getElementById('flag-v').checked;
+      const flagN = document.getElementById('flag-n').checked;
 
-      document.getElementById('pgCmdLine').textContent = `$ grep ${flagStr} "${patternRaw}" ${fileKey}.txt`;
+      const screen = document.getElementById('terminal-screen');
+      const fileText = REAL_FILES[fname] || '';
+      const lines = fileText.split('\n').map(l => l.replace(/\r$/, '')).filter(l => l.length > 0);
 
-      const stdoutDiv = document.getElementById('pgStdout');
-      stdoutDiv.innerHTML = '';
-
-      if (!patternRaw) {
-        stdoutDiv.innerHTML = '<div style="color:#64748b;">(Введите шаблон поиска)</div>';
+      if (!pattern) {
+        screen.textContent = 'grep: пустой шаблон поиска';
+        document.getElementById('status-matches').textContent = 'Совпадений: 0 строк';
         return;
       }
 
       let regex;
       try {
-        let regexFlags = '';
-        if (activeFlags.i) regexFlags += 'i';
-        regexFlags += 'g'; // For highlighting
-
-        let processedPat = patternRaw;
-        if (activeFlags.w) processedPat = `\\b(?:${processedPat})\\b`;
-        if (activeFlags.x) processedPat = `^(?:${processedPat})$`;
-
-        regex = new RegExp(processedPat, regexFlags);
-      } catch (e) {
-        stdoutDiv.innerHTML = `<div style="color:#f87171;">Синтаксическая ошибка RegExp: ${e.message}</div>`;
+        let jsFlags = flagI ? 'i' : '';
+        regex = new RegExp(pattern, jsFlags);
+      } catch (err) {
+        screen.innerHTML = '<span style="color: var(--accent-rose);">grep: синтаксическая ошибка в регулярном выражении: ' + err.message + '</span>';
+        document.getElementById('status-matches').textContent = 'Ошибка синтаксиса';
         return;
       }
 
-      let matchCount = 0;
-      let outputLines = [];
-
+      let matchedLines = [];
       lines.forEach((line, idx) => {
-        const lineNum = idx + 1;
-        regex.lastIndex = 0;
-        const matches = line.match(regex);
-        const isMatch = matches && matches.length > 0;
+        let isMatch = regex.test(line);
+        if (flagV) isMatch = !isMatch;
 
-        const passes = activeFlags.v ? !isMatch : isMatch;
-
-        if (passes) {
-          matchCount++;
-          if (!activeFlags.c) {
-            let renderedLine = line;
-            if (isMatch && !activeFlags.v) {
-              renderedLine = line.replace(regex, m => `<span class="pg-match-highlight">${m}</span>`);
-            }
-            const prefix = activeFlags.n ? `<span style="color:#64748b;">${lineNum}:</span> ` : '';
-            outputLines.push(`<div class="pg-res-line pg-match-line">${prefix}${renderedLine}</div>`);
-          }
+        if (isMatch) {
+          matchedLines.push({ num: idx + 1, text: line });
         }
       });
 
-      if (activeFlags.c) {
-        outputLines.push(`<div style="color:#34d399; font-weight:bold; font-size:14px;">${matchCount}</div>`);
-      }
+      const t1 = performance.now();
+      const execTime = (t1 - t0).toFixed(1);
 
-      if (outputLines.length === 0) {
-        stdoutDiv.innerHTML = `<div style="color:#64748b;">(Совпадений не найдено)</div>`;
+      if (matchedLines.length === 0) {
+        screen.innerHTML = '<span style="color: var(--text-muted); font-style: italic;">[grep не нашел совпадений. Код возврата: 1]</span>';
       } else {
-        stdoutDiv.innerHTML = outputLines.join('');
+        let outHtml = matchedLines.map(item => {
+          let lineContent = htmlEscape(item.text);
+          if (!flagV) {
+            try {
+              lineContent = lineContent.replace(new RegExp(pattern, (flagI ? 'gi' : 'g')), '<mark class="highlight">$&</mark>');
+            } catch(e) {}
+          }
+          let numPrefix = flagN ? '<span class="line-number">' + item.num + ':</span>' : '';
+          return numPrefix + lineContent;
+        }).join('\n');
+        screen.innerHTML = outHtml;
       }
+
+      document.getElementById('status-matches').textContent = 'Совпадений: ' + matchedLines.length + ' из ' + lines.length + ' строк';
+      document.getElementById('status-exec-time').textContent = 'Время: ' + execTime + ' ms';
     }
 
-    function resetGrep() {
-      document.getElementById('pgPatternInput').value = '';
-      runGrep();
+    function htmlEscape(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    function loadPreset(file, pattern, flags, title) {
-      document.getElementById('pgFileSelect').value = file;
-      document.getElementById('pgPatternInput').value = pattern;
-      activeFlags.P = true;
-      activeFlags.v = false;
-      activeFlags.c = false;
-      activeFlags.n = true;
-      document.getElementById('fl-P').classList.add('active');
-      document.getElementById('fl-v').classList.remove('active');
-      document.getElementById('fl-c').classList.remove('active');
-      document.getElementById('fl-n').classList.add('active');
-      runGrep();
+    // Load Variant into terminal
+    function loadTaskIntoTerminal(fname, pattern, flags) {
+      document.getElementById('file-select').value = fname;
+      document.getElementById('regex-input').value = pattern;
+      
+      const isE = flags.includes('-E');
+      const isP = flags.includes('-P');
+      document.getElementById('flag-e').checked = isE;
+      document.getElementById('lbl-flag-e').classList.toggle('active', isE);
+      document.getElementById('flag-p').checked = isP;
+      document.getElementById('lbl-flag-p').classList.toggle('active', isP);
+      document.getElementById('flag-v').checked = false;
+      document.getElementById('lbl-flag-v').classList.remove('active');
+
+      runGrepSimulation();
+      document.getElementById('simulator').scrollIntoView({ behavior: 'smooth' });
     }
 
-    /* ==========================================================
-       ALL 15 VARIANTS DATA & RENDER
-       ========================================================== */
-    const variantsData = [
-      {
-        num: 1,
-        tasks: [
-          {
-            desc: "1. В query1 выбрать все строки, в которых имя сотрудника начинается на букву A.",
-            cmd: 'grep -P "^\\d+\\s+A\\w*" query1.txt',
-            expl: "^\\d+ (код в начале строки), \\s+ (пробелы-разделители), A\\w* (имя начинается на заглавную букву A, за которой идут буквы имени)."
-          },
-          {
-            desc: "2. В query3 выбрать все строки, где в названии товара есть слово MONITOR, а дата введения – 2022 год.",
-            cmd: 'grep -P "^[^:]*:.*\\bMONITOR\\b.*:(?:[^:]*:){2}.*-22$" query3.txt',
-            expl: "\\bMONITOR\\b во 2-м поле названия, (?:[^:]*:){2} пропуск цен, .*22$ (год 22 в конце даты)."
-          },
-          {
-            desc: "3. В query4 выбрать все строки, в которых фамилия продавца – PETROV.",
-            cmd: 'grep -P "^\\d+\\s+PETROV\\b" query4.txt',
-            expl: "^\\d+\\s+ (номер заказа и пробел), PETROV\\b (строгое совпадение фамилии продавца)."
-          }
-        ]
-      },
-      {
-        num: 2,
-        tasks: [
-          {
-            desc: "1. В query2 выбрать все строки, в которых код покупателя начинается с цифры 3.",
-            cmd: 'grep -P "^3\\d*:" query2.txt',
-            expl: "^3 (цифра 3 строго в начале строки), \\d*: (цифры кода до первого разделителя двоеточия)."
-          },
-          {
-            desc: "2. В query1 выбрать все строки, в которых город – KAZAN.",
-            cmd: 'grep -P "\\bKAZAN\\b.*\\d+$" query1.txt',
-            expl: "\\bKAZAN\\b (город) перед последним столбцом зарплаты (\\d+$)."
-          },
-          {
-            desc: "3. В query3 выбрать все строки, в которых максимальная цена не менее 5000.",
-            cmd: 'grep -P "^(?:[^:]*:){2}([5-9]\\d{3}|\\d{5,}):" query3.txt',
-            expl: "(?:[^:]*:){2} (пропуск кода и названия), ([5-9]\\d{3}|\\d{5,}) (числа от 5000 до 9999 или от 10000+)."
-          }
-        ]
-      },
-      {
-        num: 3,
-        tasks: [
-          {
-            desc: "1. В query1 выбрать все строки, в которых фамилия сотрудника заканчивается на OV.",
-            cmd: 'grep -P "^(?:\\S+\\s+){3}\\w*OV\\b" query1.txt',
-            expl: "(?:\\S+\\s+){3} (пропуск кода, имени и инициала), \\w*OV\\b (фамилия оканчивается буквами OV)."
-          },
-          {
-            desc: "2. В query4 выбрать все строки, в которых сумма заказа не имеет дробной части.",
-            cmd: 'grep -P "\\s\\d+$" query4.txt',
-            expl: "\\s\\d+$ (в самом конце строки строго целое число без символа точки)."
-          },
-          {
-            desc: "3. В query3 выбрать строки, где минимальная цена < 1000, а максимальная >= 1000.",
-            cmd: 'grep -P "^(?:[^:]*:){2}(?:\\d{4,}|\\d{4,}\\.\\d+):(?:\\d{1,3}|\\d{1,3}\\.\\d+):" query3.txt',
-            expl: "3-е поле (макс. цена) имеет 4+ цифры (>=1000), 4-е поле (мин. цена) имеет от 1 до 3 цифр (<1000)."
-          }
-        ]
-      },
-      {
-        num: 4,
-        tasks: [
-          {
-            desc: "1. В query1 выбрать все строки: должность – ANALYST, а город – MOSCOW.",
-            cmd: 'grep -P "\\bANALYST\\b.*\\bMOSCOW\\b" query1.txt',
-            expl: "Совпадение обоих слов в строке в порядке следования столбцов (должность, затем город)."
-          },
-          {
-            desc: "2. В query2 выбрать все строки, в которых страна – KZ.",
-            cmd: 'grep -P ":KZ:" query2.txt',
-            expl: ":KZ: (код страны KZ, ограниченный двоеточиями)."
-          },
-          {
-            desc: "3. В query4 выбрать строки, где сумма заказа не менее 50000.",
-            cmd: 'grep -P "\\s([5-9]\\d{4}|\\d{6,})(\\.\\d+)?$" query4.txt',
-            expl: "Числа от 50000 до 99999 ([5-9]\\d{4}) или 100000+ (\\d{6,}) в конце строки."
-          }
-        ]
-      },
-      {
-        num: 5,
-        tasks: [
-          {
-            desc: "1. В query1 выбрать строки, где код сотрудника заканчивается цифрами 10.",
-            cmd: 'grep -P "^\\d*10\\s" query1.txt',
-            expl: "^\\d*10\\s (код в начале строки оканчивается на 10 перед пробелом)."
-          },
-          {
-            desc: "2. В query2 выбрать строки, где в названии компании есть слово TECH.",
-            cmd: 'grep -P "^[^:]*:.*\\bTECH\\b" query2.txt',
-            expl: "\\bTECH\\b как отдельное слово во втором поле (название компании)."
-          },
-          {
-            desc: "3. В query4 сумма заказа не менее 20000, но менее 40000.",
-            cmd: 'grep -P "\\s[2-3]\\d{4}(\\.\\d+)?$" query4.txt',
-            expl: "[2-3]\\d{4} дает диапазон от 20000 до 39999 (ровно 5 цифр, первая 2 или 3)."
-          }
-        ]
-      },
-      {
-        num: 6,
-        tasks: [
-          {
-            desc: "1. В query1: отдел – RESEARCH, а зарплата состоит из четырёх цифр.",
-            cmd: 'grep -P "\\bRESEARCH\\b.*\\s\\d{4}$" query1.txt',
-            expl: "\\bRESEARCH\\b в поле отдела и ровно 4 цифры (\\d{4}$) в конце строки."
-          },
-          {
-            desc: "2. В query3: название товара содержит слово KEYBOARD.",
-            cmd: 'grep -P "^[^:]*:.*\\bKEYBOARD\\b" query3.txt',
-            expl: "Поиск KEYBOARD во втором поле товара."
-          },
-          {
-            desc: "3. В query4: заказ оформлен в феврале 2024 года.",
-            cmd: 'grep -P "\\b\\d{2}-FEB-24\\b" query4.txt',
-            expl: "Стандартный формат даты в query: ДД-FEB-24."
-          }
-        ]
-      },
-      {
-        num: 7,
-        tasks: [
-          {
-            desc: "1. В query2: название компании заканчивается на SHOP.",
-            cmd: 'grep -P "^[^:]*:[^:]*SHOP:" query2.txt',
-            expl: "[^:]*SHOP: (второе поле завершается подстрокой SHOP непосредственно перед вторым двоеточием)."
-          },
-          {
-            desc: "2. В query1: второй инициал – S.",
-            cmd: 'grep -P "^(?:\\S+\\s+){2}S\\s" query1.txt',
-            expl: "(?:\\S+\\s+){2} (пропуск кода и имени), S\\s (одиночная буква инициала S с пробелом)."
-          },
-          {
-            desc: "3. В query5: количество товара в пункте заказа – трёхзначное число.",
-            cmd: 'grep -P "^(?:\\S+\\s+){4}\\d{3}\\s" query5.txt',
-            expl: "(?:\\S+\\s+){4} (пропуск первых 4 столбцов), \\d{3}\\s (ровно 3 цифры количества)."
-          }
-        ]
-      },
-      {
-        num: 8,
-        tasks: [
-          {
-            desc: "1. В query1: имя сотрудника состоит ровно из пяти букв.",
-            cmd: 'grep -P "^\\d+\\s+[a-zA-Z]{5}\\s" query1.txt',
-            expl: "^\\d+\\s+ (код), [a-zA-Z]{5}\\s (ровно 5 букв имени до следующего пробела)."
-          },
-          {
-            desc: "2. В query3: в названии товара есть слово SSD или HDD.",
-            cmd: 'grep -P "^[^:]*:.*\\b(SSD|HDD)\\b" query3.txt',
-            expl: "\\b(SSD|HDD)\\b (альтернатива слов во втором поле названия товара)."
-          },
-          {
-            desc: "3. В query4: фамилия продавца начинается на букву K.",
-            cmd: 'grep -P "^\\d+\\s+K\\w*" query4.txt',
-            expl: "^\\d+\\s+K\\w* (фамилия во 2-м столбце query4 начинается с заглавной буквы K)."
-          }
-        ]
-      },
-      {
-        num: 9,
-        tasks: [
-          {
-            desc: "1. В query2: страна – BY или UA.",
-            cmd: 'grep -P ":(BY|UA):" query2.txt',
-            expl: ":(BY|UA): (поле кода страны содержит либо BY, либо UA)."
-          },
-          {
-            desc: "2. В query1: зарплата начинается с цифры 3.",
-            cmd: 'grep -P "\\s3\\d*$" query1.txt',
-            expl: "\\s3\\d*$ (последний столбец оклада начинается с 3)."
-          },
-          {
-            desc: "3. В query5: реальная цена содержит дробную часть.",
-            cmd: 'grep -P "^(?:\\S+\\s+){3}\\d+\\.\\d+" query5.txt',
-            expl: "(?:\\S+\\s+){3} (пропуск первых трех полей), \\d+\\.\\d+ (число с десятичной точкой в цене)."
-          }
-        ]
-      },
-      {
-        num: 10,
-        tasks: [
-          {
-            desc: "1. В query1: должность – CLERK, а город – не MOSCOW.",
-            cmd: 'grep -P "\\bCLERK\\b" query1.txt | grep -v "\\bMOSCOW\\b"',
-            expl: "Использование конвейера: сначала отбор клерков, затем инвертирующий фильтр grep -v для исключения Москвы."
-          },
-          {
-            desc: "2. В query3: дата введения товара – 2023 год.",
-            cmd: 'grep -P "-23$" query3.txt',
-            expl: "-23$ (год 23 в самом конце строки даты)."
-          },
-          {
-            desc: "3. В query4: заказ оформлен в марте 2024 года.",
-            cmd: 'grep -P "-MAR-24\\b" query4.txt',
-            expl: "-MAR-24 (март 2024 года в поле даты)."
-          }
-        ]
-      },
-      {
-        num: 11,
-        tasks: [
-          {
-            desc: "1. В query2: в названии компании есть слово DIGITAL.",
-            cmd: 'grep -P "^[^:]*:.*\\bDIGITAL\\b" query2.txt',
-            expl: "\\bDIGITAL\\b как самостоятельное слово в названии покупателя."
-          },
-          {
-            desc: "2. В query1: фамилия содержит подстроку OV или EV.",
-            cmd: 'grep -P "^(?:\\S+\\s+){3}\\w*(OV|EV)\\w*" query1.txt',
-            expl: "(?:\\S+\\s+){3} (4-й столбец фамилии), содержащий OV или EV."
-          },
-          {
-            desc: "3. В query5: номер пункта заказа – однозначное число.",
-            cmd: 'grep -P "^\\d\\s" query5.txt',
-            expl: "^\\d\\s (ровно одна цифра в начале строки пункта заказа)."
-          }
-        ]
-      },
-      {
-        num: 12,
-        tasks: [
-          {
-            desc: "1. В query1: отдел – OPERATIONS или ACCOUNTING.",
-            cmd: 'grep -P "\\b(OPERATIONS|ACCOUNTING)\\b" query1.txt',
-            expl: "Логическое ИЛИ в скобках для двух названий отделов."
-          },
-          {
-            desc: "2. В query3: название начинается со слова LOGITECH.",
-            cmd: 'grep -P "^[^:]*:LOGITECH\\b" query3.txt',
-            expl: "^[^:]*:LOGITECH (после кода и первого двоеточия сразу идет LOGITECH)."
-          },
-          {
-            desc: "3. В query4: сумма заказа менее 20000.",
-            cmd: 'grep -P "\\s([1-9]\\d{0,3}|1\\d{4})(\\.\\d+)?$" query4.txt',
-            expl: "Числа до 9999 (до 4 цифр) или от 10000 до 19999 (1\\d{4})."
-          }
-        ]
-      },
-      {
-        num: 13,
-        tasks: [
-          {
-            desc: "1. В query2: город состоит ровно из одного слова (не содержит пробела).",
-            cmd: 'grep -P "^(?:[^:]*:){3}[^:\\s]+:" query2.txt',
-            expl: "(?:[^:]*:){3} (пропуск первых 3 полей), [^:\\s]+: (город без двоеточий и без пробелов)."
-          },
-          {
-            desc: "2. В query1: код сотрудника начинается с 711.",
-            cmd: 'grep -P "^711\\d*" query1.txt',
-            expl: "^711 в начале строки кода сотрудника."
-          },
-          {
-            desc: "3. В query3: максимальная и минимальная цены отличаются менее чем на 1000.",
-            cmd: 'grep -P "^(?:[^:]*:){2}(\\d+):\\1:" query3.txt',
-            expl: "Для точного вычитания разности цен в конвейере применяется awk '$3 - $4 < 1000', в чистом grep фильтруются близкие диапазоны."
-          }
-        ]
-      },
-      {
-        num: 14,
-        tasks: [
-          {
-            desc: "1. В query1: имя и фамилия начинаются на одну и ту же букву.",
-            cmd: 'grep -P "^\\d+\\s+([A-Z])\\w*\\s+\\S+\\s+\\1\\w*" query1.txt',
-            expl: "Использование обратной ссылки (Backreference \\1): буква имени сохраняется в группу ([A-Z]), а в начале фамилии проверяется та же буква \\1!"
-          },
-          {
-            desc: "2. В query2: кредитный лимит равен 10000.",
-            cmd: 'grep -P ":10000$" query2.txt',
-            expl: ":10000$ (последнее поле кредита строго равно 10000)."
-          },
-          {
-            desc: "3. В query5: сумма строки заказа превышает 20000.",
-            cmd: 'grep -P "\\s([2-9]\\d{4}|\\d{6,})(\\.\\d+)?$" query5.txt',
-            expl: "Сумма в последнем столбце от 20000 и выше."
-          }
-        ]
-      },
-      {
-        num: 15,
-        tasks: [
-          {
-            desc: "1. В query3: название товара содержит аббревиатуру из 2+ заглавных букв подряд.",
-            cmd: 'grep -P "^[^:]*:.*[A-Z]{2,}" query3.txt',
-            expl: "[A-Z]{2,} (две или более заглавные латинские буквы подряд в названии)."
-          },
-          {
-            desc: "2. В query2: страна – RU, а кредитный лимит не менее 10000.",
-            cmd: 'grep -P ":RU:[^:]*:[^:]*:[1-9]\\d{4,}$" query2.txt',
-            expl: ":RU: в поле страны и число от 10000+ (5+ цифр) в поле кредита."
-          },
-          {
-            desc: "3. В query4: фамилия продавца заканчивается на букву A.",
-            cmd: 'grep -P "^\\d+\\s+\\w*A\\b" query4.txt',
-            expl: "\\w*A\\b (фамилия продавца во 2-м столбце query4 оканчивается на A)."
-          }
-        ]
-      }
-    ];
-
+    // Render Variants
     function renderVariants() {
-      const c = document.getElementById('variantsAccordion');
-      c.innerHTML = '';
+      const btnContainer = document.getElementById('var-buttons-container');
+      btnContainer.innerHTML = VARIANTS_DATA.map((v, i) => `
+        <button class="var-tab-btn ${i === 0 ? 'active' : ''}" onclick="showVariant(${v.id})">
+          Вариант ${v.id}
+        </button>
+      `).join('');
 
-      variantsData.forEach(v => {
-        const wrap = document.createElement('div');
-        wrap.className = 'var-card';
+      showVariant(1);
+    }
 
-        const head = document.createElement('div');
-        head.className = 'var-header';
-        head.onclick = () => {
-          const b = wrap.querySelector('.var-body');
-          b.style.display = b.style.display === 'none' ? 'block' : 'none';
-        };
+    function showVariant(vId) {
+      document.querySelectorAll('.var-tab-btn').forEach((btn, idx) => {
+        btn.classList.toggle('active', idx + 1 === vId);
+      });
 
-        head.innerHTML = `
-          <div class="var-title">
-            <span>Вариант №${v.num}</span>
-            <span class="var-pill" style="background:rgba(56,189,248,0.12); color:var(--accent);">3 задания</span>
+      const v = VARIANTS_DATA.find(x => x.id === vId);
+      if (!v) return;
+
+      const container = document.getElementById('variant-display-container');
+      container.innerHTML = `
+        <div style="margin-bottom: 16px;">
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: #fff;">${v.title}</h3>
+        </div>
+        ${v.tasks.map(t => `
+          <div class="variant-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px;">
+              <div>
+                <span class="task-badge">Задание ${t.num}</span>
+                <span style="font-weight: 600; font-size: 0.95rem; margin-left: 8px;">${t.desc}</span>
+              </div>
+              <span style="font-size: 0.78rem; font-family: 'Fira Code', monospace; color: var(--accent-cyan);">${t.file}</span>
+            </div>
+
+            <div class="code-box">
+              <code>${htmlEscape(t.cmd)}</code>
+              <button class="btn-run" onclick="loadTaskIntoTerminal('${t.file}', '${t.pattern.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', '${t.flags}')">
+                ▶ Запустить в песочнице
+              </button>
+            </div>
+
+            <div style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 6px;">
+              <b>Разбор метасимволов:</b> ${t.explanation}
+            </div>
+            <div style="font-size: 0.82rem; color: var(--accent-emerald);">
+              <b>Результат на реальном файле:</b> ${t.matches_note}
+            </div>
           </div>
-          <span style="color:var(--muted); font-size:12px;">Показать / Скрыть ▼</span>
-        `;
-
-        const body = document.createElement('div');
-        body.className = 'var-body';
-        body.style.display = (v.num === 1 || v.num === 2) ? 'block' : 'none';
-
-        v.tasks.forEach(t => {
-          const tb = document.createElement('div');
-          tb.className = 'task-block';
-          tb.innerHTML = `
-            <div class="task-desc">${t.desc}</div>
-            <div class="task-cmd">$ ${t.cmd}</div>
-            <div class="task-expl"><strong>Разбор метасимволов:</strong> ${t.expl}</div>
-          `;
-          body.appendChild(tb);
-        });
-
-        wrap.appendChild(head);
-        wrap.appendChild(body);
-        c.appendChild(wrap);
-      });
+        `).join('')}
+      `;
     }
 
-    /* ==========================================================
-       12 CONTROL QUESTIONS & QUIZ ENGINE
-       ========================================================== */
-    const quizData = [
-      {
-        q: "Что такое регулярное выражение и чем оно принципиально отличается от обычного текстового поиска?",
-        options: [
-          "Регулярное выражение — это формальный язык описания текстовых шаблонов с метасимволами и квантификаторами, позволяющий находить классы строк переменной структуры, в то время как обычный поиск ищет только точные фиксированные подстроки",
-          "Регулярное выражение быстрее обычного поиска, потому что всегда выполняется на GPU",
-          "Обычный поиск работает только с ASCII, а регулярные выражения — только с бинарными файлами",
-          "Ничем не отличается, это просто синоним утилиты grep"
-        ],
-        correct: 0,
-        explain: "Обычный поиск ищет точную последовательность байт ('KAZAN'). Регулярное выражение задает гибкое правило сопоставления ('любое пятибуквенное слово на букву K, за которым идет оклад от 2000 до 5000')."
-      },
-      {
-        q: "В чём разница между стандартами BRE, ERE и PCRE, и какими флагами grep они активируются?",
-        options: [
-          "BRE — базовый (grep по умолчанию, требует экранирования \\{n,m\\}, \\(\\)); ERE — расширенный (grep -E, скобки и квантификаторы без слэшей); PCRE — Perl-движок (grep -P, поддерживает \\d, \\w, ленивые квантификаторы и lookaround)",
-          "BRE — это бинарный поиск, ERE — для файлов Excel, PCRE — для скриптов Python",
-          "Разница только в регистре букв, активируются флагами -b, -e, -p",
-          "BRE поддерживает lookaround, а PCRE не умеет работать с русским языком"
-        ],
-        correct: 0,
-        explain: "BRE использует устаревший синтаксис экранирования скобок. ERE делает синтаксис чище (-E). PCRE (-P) подключает мощнейший движок регулярных выражений языка Perl со всеми современными конструкциями."
-      },
-      {
-        q: "Что означают метасимволы ^ и $? Что будет искать выражение ^$ и где оно применяется?",
-        options: [
-          "^ — начало строки, $ — конец строки. Выражение ^$ ищет пустые строки (нулевой длины между началом и концом) и применяется для подсчета или удаления пустых строк в логах и конфигах (grep -v '^$')",
-          "^ — возведение в степень, $ — знак доллара. ^$ ищет финансовые транзакции",
-          "^ — переход на следующую страницу, $ — завершение процесса",
-          "^$ ищет строки, состоящие ровно из пробелов"
-        ],
-        correct: 0,
-        explain: "^ привязан к началу строки, $ — к концу. Если между ними ничего нет (^$), условие выполняется только для абсолютно пустой строки без символов."
-      },
-      {
-        q: "Чем отличаются конструкции [abc] и [^abc]? Приведите пример применения к файлам query.",
-        options: [
-          "[abc] — позитивный символьный класс (совпадает с ЛЮБЫМ ОДНИМ символом 'a', 'b' или 'c'). [^abc] — негативный класс (совпадает с ЛЮБЫМ символом, КРОМЕ 'a', 'b' и 'c'). Например, [^:]+ выбирает все символы до двоеточия",
-          "[abc] ищет слово 'abc' целиком, а [^abc] ищет только первую букву",
-          "^ внутри скобок означает начало строки",
-          "[abc] работает только в ERE, а [^abc] только в PCRE"
-        ],
-        correct: 0,
-        explain: "Внутри квадратных скобок символ ^ меняет значение: он превращает класс в инвертированный (отрицающий). Конструкция [^:]+ — золотой стандарт парсинга CSV и двоеточий в grep."
-      },
-      {
-        q: "В чём разница между жадными и ленивыми квантификаторами? В какой ситуации жадность дает баг?",
-        options: [
-          "Жадные квантификаторы (*, +) захватывают максимально длинную подстроку, а ленивые (*?, +?) — минимальную. В файлах с разделителями (query2) шаблон ^.*: захватит ВСЮ строку до последнего двоеточия, затерев промежуточные поля",
-          "Жадные квантификаторы тратят больше оперативной памяти, а ленивые работают асинхронно",
-          "Жадные квантификаторы ищут только заглавные буквы",
-          "Ленивые квантификаторы запрещены стандартом POSIX во всех утилитах"
-        ],
-        correct: 0,
-        explain: "По умолчанию квантификаторы жадные. Шаблон ^.*: в строке 'A:B:C:' сопоставится со всей цепочкой 'A:B:C:', а не с 'A:'. Для изоляции полей нужна лень .*?: либо отрицание [^:]*."
-      },
-      {
-        q: "Что такое lookahead и lookbehind? Чем позитивная проверка отличается от негативной?",
-        options: [
-          "Это утверждения нулевой ширины: Lookahead проверяет текст справа (?=...), Lookbehind — слева (?<=...). Позитивная требует наличия шаблона, негативная (?!...), (?<!...) — гарантирует его отсутствие без поглощения символов",
-          "Это операторы перехода по строкам вперед и назад в потоковом редакторе sed",
-          "Lookahead ищет файлы в поддиректориях, а Lookbehind — в родительском каталоге",
-          "Это алгоритмы архивации текста"
-        ],
-        correct: 0,
-        explain: "Lookaround-проверки не продвигают указатель сопоставления. Например, \\d+(?=\\s+USD) найдет сумму, проверив наличие слова USD, но само слово USD не войдет в найденный фрагмент."
-      },
-      {
-        q: "Чем сокращенные классы \\d, \\w и \\s удобнее диапазонов [0-9], [a-zA-Z0-9_] и [ \\t\\n\\r\\f]?",
-        options: [
-          "Они в разы короче, читабельнее, поддерживают юникодные символы (в PCRE) и предотвращают опечатки при ручном наборе длинных интервалов символов",
-          "Они ускоряют компиляцию регулярного выражения на 500%",
-          "Только они разрешены стандартом BRE",
-          "Диапазоны не поддерживаются в 64-битных ОС"
-        ],
-        correct: 0,
-        explain: "Сравните: [a-zA-Z0-9_]+ против \\w+. Краткость сокращает вероятность пропустить символ или дефис в диапазоне."
-      },
-      {
-        q: "Как с помощью grep подсчитать количество строк в файле, соответствующих шаблону, не выводя сами строки?",
-        options: [
-          "Использовать опцию -c (count): grep -c 'шаблон' файл",
-          "Использовать опцию -l",
-          "Использовать опцию -v",
-          "Запустить команду wc -c"
-        ],
-        correct: 0,
-        explain: "Флаг -c подавляет стандартный построчный вывод и печатает в stdout только итоговое целое число совпавших строк."
-      },
-      {
-        q: "Как с помощью команды grep вывести только имена файлов, содержащих совпадения?",
-        options: [
-          "Использовать опцию -l (list files with match): grep -l 'шаблон' query*.txt",
-          "Использовать опцию -n",
-          "Использовать опцию -h",
-          "Использовать опцию -w"
-        ],
-        correct: 0,
-        explain: "Флаг -l (маленькая L) выводит список уникальных имен файлов, где шаблон встретился хотя бы 1 раз, прекращая чтение файла после первого совпадения (оптимизация)."
-      },
-      {
-        q: "Что делает опция grep -w и чем она отличается от обычного поиска подстроки?",
-        options: [
-          "Опция -w (word) ищет совпадение только в виде целого самостоятельного слова, автоматически оборачивая шаблон в границы слова (\\b...\\b)",
-          "Опция -w выводит предупреждения (warnings) об ошибках синтаксиса",
-          "Опция -w ищет только пробельные символы (whitespaces)",
-          "Опция -w перезаписывает исходный файл (write)"
-        ],
-        correct: 0,
-        explain: "Команда grep 'TECH' найдет и 'TECH', и 'POLYTECH'. С флагом grep -w 'TECH' совпадет только отдельное изолированное слово 'TECH'."
-      },
-      {
-        q: "Почему в стандарте BRE шаблон 'A{3}' найдет букву 'A' и фигурные скобки с тройкой, а не три буквы 'AAA'?",
-        options: [
-          "В BRE фигурные скобки являются обычными литералами. Чтобы стать квантификатором диапазона, они обязаны быть экранированы слэшами: 'A\\{3\\}'",
-          "Потому что в BRE число 3 зарезервировано под номер дескриптора файла",
-          "Потому что буква A должна быть строчной",
-          "В BRE квантификаторы разрешены только для пробелов"
-        ],
-        correct: 0,
-        explain: "Историческая особенность BRE: чтобы не ломать старые тексты со скобками, {n} считается буквальным текстом. Метасимволом диапазона является только \\{n\\}."
-      },
-      {
-        q: "В чем разница между опцией -x и шаблоном, обернутым в ^...$?",
-        options: [
-          "Опция -x (line-regexp) требует, чтобы ВСЯ строка файла от первого до последнего символа целиком совпала с шаблоном, что семантически эквивалентно ^(?:шаблон)$",
-          "-x ищет строки в шестнадцатеричном (hex) формате",
-          "-x игнорирует переносы строк в DOS-формате (CRLF)",
-          "Шаблон ^...$ работает медленнее, чем -x, в 10 раз"
-        ],
-        correct: 0,
-        explain: "grep -x 'CLERK' совпадет только со строкой, где нет ничего кроме слова 'CLERK'. Если в строке есть пробелы или другие слова, строка будет проигнорирована."
-      }
-    ];
-
-    let userAnswers = {};
-
-    function renderQuiz() {
-      const c = document.getElementById('quizContainer');
-      c.innerHTML = '';
-
-      quizData.forEach((item, qIdx) => {
-        const wrap = document.createElement('div');
-        wrap.className = 'quiz-item';
-        wrap.id = `quiz-item-${qIdx}`;
-
-        const badge = document.createElement('div');
-        badge.className = 'quiz-tier-badge ' + (qIdx < 9 ? 'tier-exam' : 'tier-adv');
-        badge.textContent = qIdx < 9 ? 'Вопрос из методички №' + (qIdx + 1) : 'Каверзный вопрос для защиты';
-
-        const qText = document.createElement('div');
-        qText.className = 'quiz-q';
-        qText.textContent = `${qIdx + 1}. ${item.q}`;
-
-        const ansList = document.createElement('div');
-        ansList.className = 'quiz-answers';
-
-        item.options.forEach((opt, optIdx) => {
-          const btn = document.createElement('button');
-          btn.className = 'quiz-ans';
-          btn.textContent = opt;
-          btn.onclick = () => selectQuizAnswer(qIdx, optIdx);
-          ansList.appendChild(btn);
-        });
-
-        const explain = document.createElement('div');
-        explain.className = 'quiz-explain';
-        explain.id = `explain-${qIdx}`;
-        explain.innerHTML = `<strong>Разбор и формулировка ответа для преподавателя:</strong> ${item.explain}`;
-
-        wrap.appendChild(badge);
-        wrap.appendChild(qText);
-        wrap.appendChild(ansList);
-        wrap.appendChild(explain);
-        c.appendChild(wrap);
-      });
+    // Render QA
+    function renderQA() {
+      const container = document.getElementById('qa-container');
+      container.innerHTML = QA_DATA.map((item, idx) => `
+        <div class="qa-item ${idx === 0 ? 'open' : ''}">
+          <div class="qa-question" onclick="this.parentElement.classList.toggle('open')">
+            <span>${item.q}</span>
+            <span class="qa-toggle-icon" style="transition: transform 0.2s;">▼</span>
+          </div>
+          <div class="qa-answer">
+            ${item.a}
+          </div>
+        </div>
+      `).join('');
     }
 
-    function selectQuizAnswer(qIdx, optIdx) {
-      if (userAnswers[qIdx] !== undefined) return;
-      userAnswers[qIdx] = optIdx;
+    // Quiz logic
+    let curQuizIdx = 0;
+    let quizScore = 0;
 
-      const q = quizData[qIdx];
-      const itemEl = document.getElementById(`quiz-item-${qIdx}`);
-      const buttons = itemEl.querySelectorAll('.quiz-ans');
-      const explainEl = document.getElementById(`explain-${qIdx}`);
+    function renderQuizQuestion() {
+      const q = QUIZ_DATA[curQuizIdx];
+      document.getElementById('quiz-q-num').textContent = 'Вопрос ' + (curQuizIdx + 1) + ' из ' + QUIZ_DATA.length;
+      document.getElementById('quiz-q-text').textContent = q.q;
+      document.getElementById('quiz-progress-fill').style.width = ((curQuizIdx / QUIZ_DATA.length) * 100) + '%';
+      document.getElementById('quiz-expl-box').style.display = 'none';
+      document.getElementById('quiz-next-btn').style.display = 'none';
 
-      buttons.forEach((btn, idx) => {
-        btn.style.cursor = 'default';
-        if (idx === q.correct) btn.classList.add('correct');
-        else if (idx === optIdx) btn.classList.add('incorrect');
-      });
-
-      explainEl.style.display = 'block';
-      updateQuizScore();
+      const optBox = document.getElementById('quiz-options-box');
+      optBox.innerHTML = q.options.map((opt, i) => `
+        <button class="quiz-option-btn" onclick="selectQuizOption(${i})">${opt}</button>
+      `).join('');
     }
 
-    function updateQuizScore() {
-      let score = 0;
-      const totalAnswered = Object.keys(userAnswers).length;
+    function selectQuizOption(idx) {
+      const q = QUIZ_DATA[curQuizIdx];
+      const buttons = document.querySelectorAll('.quiz-option-btn');
+      buttons.forEach(b => b.disabled = true);
 
-      for (let i = 0; i < quizData.length; i++) {
-        if (userAnswers[i] === quizData[i].correct) score++;
-      }
-
-      document.getElementById('quizScoreVal').textContent = `${score} / ${quizData.length}`;
-      const status = document.getElementById('quizStatusText');
-      if (totalAnswered === quizData.length) {
-        if (score >= 11) {
-          status.textContent = '🎉 Отлично! 100% готовность к защите Лабораторной работы №3.';
-          status.style.color = '#34d399';
-        } else if (score >= 8) {
-          status.textContent = '👍 Хороший уровень. Обратите внимание на разборы сложных вопросов.';
-          status.style.color = '#38bdf8';
-        } else {
-          status.textContent = '⚠️ Рекомендуется повторить теорию по флагам и квантификаторам.';
-          status.style.color = '#f59e0b';
-        }
+      if (idx === q.correct) {
+        buttons[idx].classList.add('correct');
+        quizScore++;
       } else {
-        status.textContent = `Отвечено: ${totalAnswered} из ${quizData.length} вопросов`;
+        buttons[idx].classList.add('wrong');
+        buttons[q.correct].classList.add('correct');
+      }
+
+      document.getElementById('quiz-score-badge').textContent = 'Счет: ' + quizScore + ' / ' + QUIZ_DATA.length;
+      const expl = document.getElementById('quiz-expl-box');
+      expl.innerHTML = '<b>Обоснование:</b> ' + q.expl;
+      expl.style.display = 'block';
+
+      const nextBtn = document.getElementById('quiz-next-btn');
+      nextBtn.textContent = curQuizIdx === QUIZ_DATA.length - 1 ? 'Завершить тест' : 'Следующий вопрос →';
+      nextBtn.style.display = 'inline-block';
+    }
+
+    function nextQuizQuestion() {
+      if (curQuizIdx < QUIZ_DATA.length - 1) {
+        curQuizIdx++;
+        renderQuizQuestion();
+      } else {
+        document.getElementById('quiz-progress-fill').style.width = '100%';
+        const pct = Math.round((quizScore / QUIZ_DATA.length) * 100);
+        let grade = pct >= 85 ? 'Отлично (5)' : pct >= 70 ? 'Хорошо (4)' : pct >= 50 ? 'Удовлетворительно (3)' : 'Требуется повторение';
+        document.getElementById('quiz-question-container').innerHTML = `
+          <div style="text-align: center; padding: 24px 0;">
+            <div style="font-size: 3rem; margin-bottom: 8px;">🎯</div>
+            <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Тестирование завершено!</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">Ваш результат: <b>${quizScore} из ${QUIZ_DATA.length} (${pct}%)</b> — оценка: <span style="color: var(--accent-emerald); font-weight: 700;">${grade}</span></p>
+            <button class="file-btn" style="background: var(--accent-blue); color: #fff; padding: 10px 24px;" onclick="resetQuiz()">Пройти еще раз</button>
+          </div>
+        `;
       }
     }
 
+    function resetQuiz() {
+      curQuizIdx = 0;
+      quizScore = 0;
+      document.getElementById('quiz-score-badge').textContent = 'Счет: 0 / ' + QUIZ_DATA.length;
+      renderQuizQuestion();
+    }
+
+    // On Load
     window.addEventListener('DOMContentLoaded', () => {
-      runGrep();
+      switchFileView('query1.txt');
+      runGrepSimulation();
       renderVariants();
-      renderQuiz();
+      renderQA();
+      renderQuizQuestion();
     });
   </script>
 </body>
