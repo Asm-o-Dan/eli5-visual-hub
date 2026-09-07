@@ -594,20 +594,23 @@
       </div>
     </header>
 
-    <!-- Section 1: Theory & Engine Model -->
+
+    <!-- Section 1: Theory & Engine Model (EXPANDED) -->
     <section id="theory" class="section-card">
       <div class="section-header">
         <h2 class="section-title">
-          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-          1. Архитектурный фундамент: Диалекты и механика автоматов
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          1. Архитектурный фундамент: Диалекты, PCRE-синтаксис и теория автоматов
         </h2>
+        <span style="font-size: 0.8rem; color: var(--accent-cyan);">Теоретический базис 3-го курса CS</span>
       </div>
 
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 24px;">
+      <!-- Existing 3 Core Cards (BRE, ERE, PCRE) -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 28px;">
         <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 10px; padding: 18px;">
           <div style="color: var(--accent-blue); font-weight: 700; margin-bottom: 8px; font-size: 1.05rem;">POSIX BRE (grep -G)</div>
           <p style="font-size: 0.86rem; color: var(--text-secondary); margin-bottom: 10px;">
-            Базовый режим утилиты. Метасимволы <code>+</code>, <code>?</code>, <code>|</code>, <code>( )</code>, <code>{ }</code> считаются литеральными знаками.
+            Базовый режим утилиты (по умолчанию). Метасимволы <code>+</code>, <code>?</code>, <code>|</code>, <code>( )</code>, <code>{ }</code> считаются литеральными знаками.
           </p>
           <div style="background: var(--bg-code); padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-family: 'Fira Code', monospace; color: #cbd5e1;">
             grep '^[0-9]\{4\}' query1.txt<br>
@@ -618,7 +621,7 @@
         <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 10px; padding: 18px;">
           <div style="color: var(--accent-emerald); font-weight: 700; margin-bottom: 8px; font-size: 1.05rem;">POSIX ERE (grep -E)</div>
           <p style="font-size: 0.86rem; color: var(--text-secondary); margin-bottom: 10px;">
-            Расширенный синтаксис. Все метасимволы квантификации и группировки работают без экранирования.
+            Расширенный синтаксис (egrep). Все метасимволы квантификации и группировки работают напрямую без обратных слэшей.
           </p>
           <div style="background: var(--bg-code); padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-family: 'Fira Code', monospace; color: #cbd5e1;">
             grep -E '^[0-9]{4}' query1.txt<br>
@@ -627,9 +630,9 @@
         </div>
 
         <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 10px; padding: 18px;">
-          <div style="color: var(--accent-purple); font-weight: 700; margin-bottom: 8px; font-size: 1.05rem;">PCRE (grep -P)</div>
+          <div style="color: var(--accent-purple); font-weight: 700; margin-bottom: 8px; font-size: 1.05rem;">PCRE / PCRE2 (grep -P)</div>
           <p style="font-size: 0.86rem; color: var(--text-secondary); margin-bottom: 10px;">
-            Движок Perl Compatible Regex. Поддержка <code>\d</code>, <code>\w</code>, <code>\s</code>, ленивых квантификаторов и lookaround-проверок.
+            Движок Perl Compatible Regex. Поддержка всех типов скобочных групп, <code>\d, \w, \s</code>, нежадных квантификаторов и lookaround.
           </p>
           <div style="background: var(--bg-code); padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-family: 'Fira Code', monospace; color: #cbd5e1;">
             grep -P 'CLERK.*?(?!MOSCOW)' query1.txt<br>
@@ -637,7 +640,382 @@
           </div>
         </div>
       </div>
+
+      <!-- 1.1 Сравнительная матрица метасимволов -->
+      <div style="margin-bottom: 32px;">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: #fff;">
+          <span style="color: var(--accent-cyan);">1.1</span> Сравнительная таблица метасимволов (BRE vs ERE vs PCRE)
+        </h3>
+        <div style="overflow-x: auto; border: 1px solid var(--border-color); border-radius: 8px;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left;">
+            <thead>
+              <tr style="background: var(--bg-surface-elevated); border-bottom: 1px solid var(--border-color);">
+                <th style="padding: 10px 14px; color: var(--accent-cyan);">Функция</th>
+                <th style="padding: 10px 14px; color: var(--accent-blue);">POSIX BRE (grep)</th>
+                <th style="padding: 10px 14px; color: var(--accent-emerald);">POSIX ERE (grep -E)</th>
+                <th style="padding: 10px 14px; color: var(--accent-purple);">PCRE (grep -P)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding: 8px 14px; font-weight: 600;">Один любой символ</td>
+                <td style="padding: 8px 14px;"><code>.</code></td>
+                <td style="padding: 8px 14px;"><code>.</code></td>
+                <td style="padding: 8px 14px;"><code>.</code></td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01);">
+                <td style="padding: 8px 14px; font-weight: 600;">Квантификатор 0 или более</td>
+                <td style="padding: 8px 14px;"><code>*</code></td>
+                <td style="padding: 8px 14px;"><code>*</code></td>
+                <td style="padding: 8px 14px;"><code>*</code></td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding: 8px 14px; font-weight: 600;">Квантификатор 1 или более</td>
+                <td style="padding: 8px 14px;"><code style="color: #f87171;">\+</code> (в GNU BRE)</td>
+                <td style="padding: 8px 14px;"><code style="color: #34d399;">+</code></td>
+                <td style="padding: 8px 14px;"><code style="color: #c084fc;">+</code></td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01);">
+                <td style="padding: 8px 14px; font-weight: 600;">Опциональность (0 или 1)</td>
+                <td style="padding: 8px 14px;"><code style="color: #f87171;">\?</code> (в GNU BRE)</td>
+                <td style="padding: 8px 14px;"><code style="color: #34d399;">?</code></td>
+                <td style="padding: 8px 14px;"><code style="color: #c084fc;">?</code></td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding: 8px 14px; font-weight: 600;">Диапазон кратности [n, m]</td>
+                <td style="padding: 8px 14px;"><code style="color: #f87171;">\{n,m\}</code></td>
+                <td style="padding: 8px 14px;"><code style="color: #34d399;">{n,m}</code></td>
+                <td style="padding: 8px 14px;"><code style="color: #c084fc;">{n,m}</code></td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01);">
+                <td style="padding: 8px 14px; font-weight: 600;">Группировка приоритета / захват</td>
+                <td style="padding: 8px 14px;"><code style="color: #f87171;">\( ... \)</code></td>
+                <td style="padding: 8px 14px;"><code style="color: #34d399;">( ... )</code></td>
+                <td style="padding: 8px 14px;"><code style="color: #c084fc;">( ... )</code></td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding: 8px 14px; font-weight: 600;">Альтернатива («ИЛИ»)</td>
+                <td style="padding: 8px 14px;"><code style="color: #f87171;">\|</code> (в GNU BRE)</td>
+                <td style="padding: 8px 14px;"><code style="color: #34d399;">|</code></td>
+                <td style="padding: 8px 14px;"><code style="color: #c084fc;">|</code></td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01);">
+                <td style="padding: 8px 14px; font-weight: 600;">Незахватывающие группы</td>
+                <td style="padding: 8px 14px; color: var(--text-muted);">—</td>
+                <td style="padding: 8px 14px; color: var(--text-muted);">—</td>
+                <td style="padding: 8px 14px;"><code style="color: #c084fc;">(?:pattern)</code></td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding: 8px 14px; font-weight: 600;">Именованные группы</td>
+                <td style="padding: 8px 14px; color: var(--text-muted);">—</td>
+                <td style="padding: 8px 14px; color: var(--text-muted);">—</td>
+                <td style="padding: 8px 14px;"><code style="color: #c084fc;">(?P&lt;name&gt;...)</code></td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01);">
+                <td style="padding: 8px 14px; font-weight: 600;">Lookaround (нулевая ширина)</td>
+                <td style="padding: 8px 14px; color: var(--text-muted);">—</td>
+                <td style="padding: 8px 14px; color: var(--text-muted);">—</td>
+                <td style="padding: 8px 14px;"><code style="color: #c084fc;">(?= ), (?! ), (?&lt;= ), (?&lt;! )</code></td>
+              </tr>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="padding: 8px 14px; font-weight: 600;">Ленивые квантификаторы</td>
+                <td style="padding: 8px 14px; color: var(--text-muted);">—</td>
+                <td style="padding: 8px 14px; color: var(--text-muted);">—</td>
+                <td style="padding: 8px 14px;"><code style="color: #c084fc;">*?, +?, ??, {n,m}?</code></td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 14px; font-weight: 600;">Притяжательные квантификаторы</td>
+                <td style="padding: 8px 14px; color: var(--text-muted);">—</td>
+                <td style="padding: 8px 14px; color: var(--text-muted);">—</td>
+                <td style="padding: 8px 14px;"><code style="color: #c084fc;">*+, ++, ?+, {n,m}+</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 1.2 Полный синтаксис групп PCRE (-P) -->
+      <div style="margin-bottom: 32px;">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: #fff;">
+          <span style="color: var(--accent-purple);">1.2</span> Полная анатомия групп в синтаксисе PCRE (grep -P)
+        </h3>
+        <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px;">
+          Скобочные конструкции в PCRE выполняют не только группировку для квантификации, но и управляют выделением памяти, обратными ссылками и отсечением нежелательных ветвей автомата:
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+          <!-- Group 1: Capturing -->
+          <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <code style="color: #60a5fa; font-size: 0.95rem; font-weight: 700;">(pattern)</code>
+              <span style="font-size: 0.72rem; background: rgba(59,130,246,0.15); color: #93c5fd; padding: 2px 6px; border-radius: 4px;">Capturing</span>
+            </div>
+            <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 4px;">Захватывающая группа</div>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px;">
+              Сохраняет сопоставленный текст в нумерованный слот памяти. Доступ по обратным ссылкам <code>\1</code>, <code>\2</code> ... <code>\9</code>.
+            </p>
+            <div style="background: var(--bg-code); padding: 6px 10px; border-radius: 6px; font-size: 0.76rem; font-family: 'Fira Code', monospace; color: #cbd5e1;">
+              grep -P '([A-Z])\w+\s+\1\w+' query1.txt
+            </div>
+          </div>
+
+          <!-- Group 2: Non-capturing -->
+          <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <code style="color: #34d399; font-size: 0.95rem; font-weight: 700;">(?:pattern)</code>
+              <span style="font-size: 0.72rem; background: rgba(16,185,129,0.15); color: #6ee7b7; padding: 2px 6px; border-radius: 4px;">Non-Capturing</span>
+            </div>
+            <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 4px;">Незахватывающая группа</div>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px;">
+              Группирует токены для квантификаторов <code>(?:AB)+</code> без накладных расходов памяти и без сдвига номеров <code>\1</code>.
+            </p>
+            <div style="background: var(--bg-code); padding: 6px 10px; border-radius: 6px; font-size: 0.76rem; font-family: 'Fira Code', monospace; color: #cbd5e1;">
+              grep -P '^(?:[^:]+:){3}[^:]*burg:' query2.txt
+            </div>
+          </div>
+
+          <!-- Group 3: Named Capturing -->
+          <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <code style="color: #c084fc; font-size: 0.95rem; font-weight: 700;">(?P&lt;name&gt;pattern)</code>
+              <span style="font-size: 0.72rem; background: rgba(139,92,246,0.15); color: #d8b4fe; padding: 2px 6px; border-radius: 4px;">Named Group</span>
+            </div>
+            <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 4px;">Именованная группа</div>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px;">
+              Присваивает группе символьное имя. В PCRE ссылка осуществляется через <code>(?P=name)</code> или <code>\k&lt;name&gt;</code>.
+            </p>
+            <div style="background: var(--bg-code); padding: 6px 10px; border-radius: 6px; font-size: 0.76rem; font-family: 'Fira Code', monospace; color: #cbd5e1;">
+              grep -P '(?P&lt;city&gt;MOSCOW).*?(?P=city)'
+            </div>
+          </div>
+
+          <!-- Group 4: Atomic Group -->
+          <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <code style="color: #fbbf24; font-size: 0.95rem; font-weight: 700;">(?&gt;pattern)</code>
+              <span style="font-size: 0.72rem; background: rgba(245,158,11,0.15); color: #fde68a; padding: 2px 6px; border-radius: 4px;">Atomic</span>
+            </div>
+            <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 4px;">Атомарная группа (Cut / No Backtrack)</div>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px;">
+              Как только подвыражение совпало, движок блокирует откат (backtracking) внутри группы. Предотвращает зависания ReDoS.
+            </p>
+            <div style="background: var(--bg-code); padding: 6px 10px; border-radius: 6px; font-size: 0.76rem; font-family: 'Fira Code', monospace; color: #cbd5e1;">
+              grep -P '^(?&gt;[0-9]+)\s+PETROV' query4.txt
+            </div>
+          </div>
+
+          <!-- Group 5: Conditional Group -->
+          <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <code style="color: #38bdf8; font-size: 0.95rem; font-weight: 700;">(?(cond)yes|no)</code>
+              <span style="font-size: 0.72rem; background: rgba(56,189,248,0.15); color: #bae6fd; padding: 2px 6px; border-radius: 4px;">Conditional</span>
+            </div>
+            <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 4px;">Условная группа (if-then-else)</div>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px;">
+              Если условие <code>cond</code> (номер группы или lookaround) истинно, проверяется ветвь <code>yes</code>, иначе — альтернатива <code>no</code>.
+            </p>
+            <div style="background: var(--bg-code); padding: 6px 10px; border-radius: 6px; font-size: 0.76rem; font-family: 'Fira Code', monospace; color: #cbd5e1;">
+              grep -P '(\()?[0-9]{3}(?(1)\))-[0-9]{4}'
+            </div>
+          </div>
+
+          <!-- Group 6: Inline Modifiers & Comments -->
+          <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <code style="color: #f472b6; font-size: 0.95rem; font-weight: 700;">(?imsx) &amp; (?#...)</code>
+              <span style="font-size: 0.72rem; background: rgba(244,114,182,0.15); color: #fbcfe8; padding: 2px 6px; border-radius: 4px;">Modifiers</span>
+            </div>
+            <div style="font-weight: 600; font-size: 0.85rem; margin-bottom: 4px;">Локальные флаги и комментарии</div>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px;">
+              Включение флагов прямо в теле шаблона: <code>(?i)</code> (ignore case), <code>(?m)</code> (multiline). Комментарии: <code>(?#текст)</code>.
+            </p>
+            <div style="background: var(--bg-code); padding: 6px 10px; border-radius: 6px; font-size: 0.76rem; font-family: 'Fira Code', monospace; color: #cbd5e1;">
+              grep -P '(?i)manager(?#-поиск без учета регистра)'
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1.3 Утверждения нулевой ширины (Lookaround) и метасимвол \K -->
+      <div style="margin-bottom: 32px;">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: #fff;">
+          <span style="color: var(--accent-emerald);">1.3</span> Утверждения нулевой ширины (Lookaround) и оператор сброса \K
+        </h3>
+        <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 14px;">
+          <b>Lookaround (проверки нулевой ширины)</b> не поглощают символы из входного потока (zero-width), а лишь валидируют контекст слева или справа от текущей позиции указателя автомата:
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 14px; margin-bottom: 16px;">
+          <div style="background: var(--bg-surface-elevated); border-left: 4px solid var(--accent-blue); padding: 12px 16px; border-radius: 0 8px 8px 0;">
+            <div style="font-family: 'Fira Code', monospace; color: #93c5fd; font-weight: 700; margin-bottom: 4px;">(?=pattern) Positive Lookahead</div>
+            <div style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 6px;">Положительное опережение: «после совпадения ОБЯЗАН следовать pattern».</div>
+            <code style="font-size: 0.78rem; color: #cbd5e1;">\d+(?=\s*USD)</code>
+          </div>
+
+          <div style="background: var(--bg-surface-elevated); border-left: 4px solid var(--accent-rose); padding: 12px 16px; border-radius: 0 8px 8px 0;">
+            <div style="font-family: 'Fira Code', monospace; color: #fda4af; font-weight: 700; margin-bottom: 4px;">(?!pattern) Negative Lookahead</div>
+            <div style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 6px;">Отрицательное опережение: «после совпадения НЕ ДОЛЖНО быть pattern».</div>
+            <code style="font-size: 0.78rem; color: #cbd5e1;">CLERK.*?(?!MOSCOW)[A-Z]+\s+\d+$</code>
+          </div>
+
+          <div style="background: var(--bg-surface-elevated); border-left: 4px solid var(--accent-emerald); padding: 12px 16px; border-radius: 0 8px 8px 0;">
+            <div style="font-family: 'Fira Code', monospace; color: #86efac; font-weight: 700; margin-bottom: 4px;">(?&lt;=pattern) Positive Lookbehind</div>
+            <div style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 6px;">Положительная ретроспекция: «перед совпадением ОБЯЗАН быть pattern фиксированной длины».</div>
+            <code style="font-size: 0.78rem; color: #cbd5e1;">(?&lt;=:RU:)\d{{6}}</code>
+          </div>
+
+          <div style="background: var(--bg-surface-elevated); border-left: 4px solid var(--accent-amber); padding: 12px 16px; border-radius: 0 8px 8px 0;">
+            <div style="font-family: 'Fira Code', monospace; color: #fde68a; font-weight: 700; margin-bottom: 4px;">(?&lt;!pattern) Negative Lookbehind</div>
+            <div style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 6px;">Отрицательная ретроспекция: «перед текущей позицией НЕ ДОЛЖНО быть pattern».</div>
+            <code style="font-size: 0.78rem; color: #cbd5e1;">(?&lt;!300:)[A-Z\s]+:[0-9]+$</code>
+          </div>
+        </div>
+
+        <!-- Special PCRE \K -->
+        <div style="background: rgba(6,182,212,0.08); border: 1px solid rgba(6,182,212,0.3); border-radius: 8px; padding: 14px 18px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+            <span style="background: var(--accent-cyan); color: #000; font-weight: 800; font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; font-family: 'Fira Code', monospace;">PRO TIP</span>
+            <span style="font-weight: 700; font-size: 0.9rem; color: #fff;">Метасимвол \K (Keep Out / Match Reset)</span>
+          </div>
+          <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 8px;">
+            В PCRE ретроспективные проверки <code>(?&lt;=...)</code> ограничены фиксированной длиной шаблона. Метасимвол <code>\K</code> позволяет обойти это ограничение: всё, что совпало <i>до</i> <code>\K</code>, сбрасывается и не включается в итоговый вывод <code>grep -oP</code>!
+          </p>
+          <div style="background: var(--bg-code); padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-family: 'Fira Code', monospace; color: var(--accent-cyan);">
+            # Извлечь только зарплату сотрудника без префикса MOSCOW:<br>
+            grep -oP 'MOSCOW\s+\K\d+' query1.txt
+          </div>
+        </div>
+      </div>
+
+      <!-- 1.4 Спецклассы символов и граничные якоря PCRE -->
+      <div style="margin-bottom: 32px;">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: #fff;">
+          <span style="color: var(--accent-amber);">1.4</span> Сокращённые классы символов и граничные якоря
+        </h3>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
+          <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px;">
+            <div style="font-weight: 700; font-size: 0.88rem; color: #93c5fd; margin-bottom: 8px;">Классы символов (Шорткаты)</div>
+            <ul style="list-style: none; font-size: 0.8rem; line-height: 1.7; color: var(--text-secondary);">
+              <li><code>\d</code> — Цифра: <code>[0-9]</code></li>
+              <li><code>\D</code> — Не цифра: <code>[^0-9]</code></li>
+              <li><code>\w</code> — Словарный символ: <code>[a-zA-Z0-9_]</code></li>
+              <li><code>\W</code> — Не словарный символ: <code>[^a-zA-Z0-9_]</code></li>
+              <li><code>\s</code> — Любой пробел: <code>[ \t\n\r\f]</code></li>
+              <li><code>\S</code> — Любой непробел: <code>[^ \t\n\r\f]</code></li>
+            </ul>
+          </div>
+
+          <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px;">
+            <div style="font-weight: 700; font-size: 0.88rem; color: #34d399; margin-bottom: 8px;">Пространственные классы PCRE</div>
+            <ul style="list-style: none; font-size: 0.8rem; line-height: 1.7; color: var(--text-secondary);">
+              <li><code>\h</code> — Горизонтальный пробел (пробел и таб <code>[ \t]</code>)</li>
+              <li><code>\H</code> — Не горизонтальный пробел</li>
+              <li><code>\v</code> — Вертикальный пробел (перевод строки <code>[\n\r\f]</code>)</li>
+              <li><code>\V</code> — Не вертикальный пробел</li>
+              <li><code>\R</code> — Универсальный перенос строки: <code>(\r\n|\n|\r)</code></li>
+            </ul>
+          </div>
+
+          <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px;">
+            <div style="font-weight: 700; font-size: 0.88rem; color: #f472b6; margin-bottom: 8px;">Контекстные якоря позиций</div>
+            <ul style="list-style: none; font-size: 0.8rem; line-height: 1.7; color: var(--text-secondary);">
+              <li><code>\b</code> — Граница слова (переход между <code>\w</code> и <code>\W</code>)</li>
+              <li><code>\B</code> — Не граница слова (внутри слова или между пробелами)</li>
+              <li><code>\A</code> — Абсолютное начало входного буфера (не зависит от multiline)</li>
+              <li><code>\Z</code> — Конец буфера или позиция перед последним <code>\n</code></li>
+              <li><code>\z</code> — Абсолютный конец входного буфера</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1.5 Квантификаторы: Жадные, Ленивые и Сверхжадные (Possessive) -->
+      <div style="margin-bottom: 32px;">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: #fff;">
+          <span style="color: var(--accent-rose);">1.5</span> Жадные, Ленивые и Притяжательные квантификаторы
+        </h3>
+        <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 14px;">
+          Поведение автомата при выборе длины совпадения определяет скорость работы и корректность парсинга:
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-bottom: 16px;">
+          <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px;">
+            <div style="font-weight: 700; color: #fbbf24; font-size: 0.95rem; margin-bottom: 6px;">Жадные (Greedy): <code>*</code>, <code>+</code>, <code>{n,m}</code></div>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px;">
+              По умолчанию. Захватывают максимальную строку до упора вправо, затем посимвольно отступают назад (backtrack), проверяя хвост шаблона.
+            </p>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">
+              Строка: <code>"A" and "B"</code><br>
+              Шаблон: <code>".*"</code> -> результат: <code>"A" and "B"</code> (вся строка целиком!)
+            </div>
+          </div>
+
+          <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px;">
+            <div style="font-weight: 700; color: #34d399; font-size: 0.95rem; margin-bottom: 6px;">Ленивые (Lazy): <code>*?</code>, <code>+?</code>, <code>{n,m}?</code></div>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px;">
+              Символ <code>?</code> после квантификатора. Захватывают минимально возможный фрагмент, проверяя продолжение на каждом шаге.
+            </p>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">
+              Строка: <code>"A" and "B"</code><br>
+              Шаблон: <code>".*?"</code> -> результат: два совпадения <code>"A"</code> и <code>"B"</code>
+            </div>
+          </div>
+
+          <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px; padding: 16px;">
+            <div style="font-weight: 700; color: #c084fc; font-size: 0.95rem; margin-bottom: 6px;">Притяжательные (Possessive): <code>*+</code>, <code>++</code></div>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px;">
+              Символ <code>+</code> после квантификатора (синтаксис PCRE). Захватывают всё возможное и <b>никогда не возвращают символы назад</b>.
+            </p>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">
+              Строка: <code>"A" and "B"</code><br>
+              Шаблон: <code>".*+"</code> -> не совпадет, так как <code>.*+</code> съест закрывающую кавычку и не отдаст её.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1.6 Теория автоматов: DFA vs NFA и Катастрофический откат (Catastrophic Backtracking / ReDoS) -->
+      <div>
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; color: #fff;">
+          <span style="color: var(--accent-rose);">1.6</span> Теория автоматов: DFA vs NFA и Катастрофический откат (ReDoS)
+        </h3>
+        <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 8px; padding: 18px;">
+          <p style="font-size: 0.86rem; color: var(--text-secondary); margin-bottom: 12px;">
+            Скорость работы и архитектура поисковых утилит Unix опираются на фундаментальную разницу между двумя типами конечных автоматов:
+          </p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 14px;">
+            <div style="background: var(--bg-code); border: 1px solid rgba(59,130,246,0.3); border-radius: 6px; padding: 14px;">
+              <div style="color: var(--accent-blue); font-weight: 700; font-size: 0.9rem; margin-bottom: 6px;">DFA (Детерминированный конечный автомат)</div>
+              <ul style="font-size: 0.8rem; line-height: 1.6; color: var(--text-secondary); margin-left: 18px;">
+                <li>Используется в классическом <code>GNU grep</code> и <code>egrep</code>.</li>
+                <li>Каждый символ входного потока обрабатывается ровно 1 раз.</li>
+                <li>Гарантированное линейное время выполнения: <b>O(N)</b>, где N — длина текста.</li>
+                <li><b>Ограничение:</b> не может реализовать обратные ссылки (<code>\1</code>) и нежадные квантификаторы.</li>
+              </ul>
+            </div>
+
+            <div style="background: var(--bg-code); border: 1px solid rgba(244,63,94,0.3); border-radius: 6px; padding: 14px;">
+              <div style="color: var(--accent-rose); font-weight: 700; font-size: 0.9rem; margin-bottom: 6px;">NFA с бэктрекингом (PCRE / Perl engine)</div>
+              <ul style="font-size: 0.8rem; line-height: 1.6; color: var(--text-secondary); margin-left: 18px;">
+                <li>Поддерживает полный спектр фич: lookaround, backreferences, lazy matching.</li>
+                <li>Движется по графу состояний, запоминая точки ветвления в стеке.</li>
+                <li>При неуспехе сопоставления откатывается назад (backtracking).</li>
+                <li><b>Риск:</b> в худшем случае временная сложность составляет <b>O(2<sup>N</sup>)</b>!</li>
+              </ul>
+            </div>
+          </div>
+
+          <div style="background: rgba(244,63,94,0.1); border: 1px solid rgba(244,63,94,0.3); border-radius: 6px; padding: 12px 16px;">
+            <div style="color: #fca5a5; font-weight: 700; font-size: 0.85rem; margin-bottom: 4px;">Анатомия уязвимости Catastrophic Backtracking (ReDoS):</div>
+            <div style="font-size: 0.8rem; color: #fecdd3; line-height: 1.5;">
+              Если задать вложенные квантификаторы вида <code>(a+)+$</code> и передать строку из 30 символов 'a' с восклицательным знаком на конце (<code>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!</code>), движок NFA перед тем как дать отказ, проверит <b>2<sup>30</sup> = 1 073 741 824 комбинаций</b> разбиения строки между квантификаторами, что загрузит процессор на 100% на несколько минут! В утилите grep для предотвращения этого применяются атомарные группы <code>(?&gt;(a+)+)$</code> либо притяжательные квантификаторы <code>(a++)+$</code>.
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
+
 
     <!-- Section 2: Interactive Terminal Simulator -->
     <section id="simulator" class="section-card">
