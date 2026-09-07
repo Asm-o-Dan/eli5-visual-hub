@@ -1,0 +1,1604 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>ОС: Регулярные выражения и утилита grep — Полный интерактивный учебник (Лабораторная №3)</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card: #131b2e;
+      --card-hover: #1c2742;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-purple: #a855f7;
+      --accent-amber: #f59e0b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --code-bg: #0b1120;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+      background: radial-gradient(circle at 50% 0%, #151f38 0%, var(--bg) 80%);
+      color: var(--text);
+      padding: 16px;
+      max-width: 1020px;
+      margin: 0 auto 60px;
+      line-height: 1.55;
+    }
+
+    /* Navigation Header */
+    .header-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .back-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .badge-course {
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 4px 12px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Hero */
+    .hero { margin-bottom: 28px; }
+    .hero-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+    .hero-tag {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--muted);
+    }
+    h1 {
+      font-size: clamp(24px, 5.5vw, 36px);
+      font-weight: 800;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #ffffff 40%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+    p.lead { color: var(--muted); font-size: 15.5px; line-height: 1.5; }
+
+    /* Sticky Quick Nav */
+    .quick-nav {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 10px 0;
+      margin-bottom: 24px;
+      -webkit-overflow-scrolling: touch;
+      position: sticky;
+      top: 0;
+      background: rgba(9, 13, 22, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 50;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .quick-btn {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      color: var(--muted);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .quick-btn:hover { background: var(--card-hover); color: #fff; border-color: var(--accent); }
+
+    /* Content Cards */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    }
+    .card h2 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--accent);
+      margin: 18px 0 8px;
+    }
+    p { margin-bottom: 12px; font-size: 14.5px; color: #cbd5e1; }
+
+    /* Grids & Boxes */
+    .comp-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+    @media (max-width: 720px) { .comp-grid { grid-template-columns: 1fr; } }
+    .comp-box {
+      border-radius: 12px;
+      padding: 16px;
+      border: 1px solid var(--card-border);
+    }
+    .comp-box.info { background: rgba(56, 189, 248, 0.06); border-color: rgba(56, 189, 248, 0.25); }
+    .comp-box.purple { background: rgba(168, 85, 247, 0.06); border-color: rgba(168, 85, 247, 0.25); }
+    .comp-box.good { background: rgba(16, 185, 129, 0.06); border-color: rgba(16, 185, 129, 0.25); }
+    .comp-box.warn { background: rgba(245, 158, 11, 0.06); border-color: rgba(245, 158, 11, 0.25); }
+    .comp-box.bad { background: rgba(239, 68, 68, 0.06); border-color: rgba(239, 68, 68, 0.25); }
+
+    .comp-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .comp-box.info .comp-title { color: var(--accent); }
+    .comp-box.purple .comp-title { color: var(--accent-purple); }
+    .comp-box.good .comp-title { color: #34d399; }
+    .comp-box.warn .comp-title { color: #fbbf24; }
+    .comp-box.bad .comp-title { color: #f87171; }
+
+    .comp-list { list-style: none; font-size: 13.5px; color: #cbd5e1; }
+    .comp-list li { margin-bottom: 6px; padding-left: 18px; position: relative; }
+    .comp-list li::before { content: "•"; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
+
+    /* Tables */
+    .styled-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 13.5px;
+    }
+    .styled-table th, .styled-table td {
+      border: 1px solid var(--card-border);
+      padding: 9px 12px;
+      text-align: left;
+    }
+    .styled-table th { background: rgba(255, 255, 255, 0.05); color: #fff; font-weight: 700; }
+    .styled-table tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+    /* Callouts & Formula */
+    .formula-box {
+      background: rgba(56, 189, 248, 0.08);
+      border-left: 4px solid var(--accent);
+      padding: 12px 16px;
+      margin: 14px 0;
+      border-radius: 0 10px 10px 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13.5px;
+      color: #e2e8f0;
+    }
+    .callout {
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin: 14px 0;
+      font-size: 13.5px;
+      line-height: 1.5;
+    }
+    .callout.tip { background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); color: #a7f3d0; }
+    .callout.warn { background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); color: #fde68a; }
+    .callout.danger { background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); color: #fca5a5; }
+
+    /* Code Box */
+    .code-box {
+      background: var(--code-bg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 14px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #e2e8f0;
+      overflow-x: auto;
+      margin: 14px 0;
+    }
+    .kw { color: #f43f5e; font-weight: bold; }
+    .opt { color: #38bdf8; font-weight: bold; }
+    .pat { color: #34d399; }
+    .cm { color: #64748b; font-style: italic; }
+
+    /* SVG Diagram Containers */
+    .svg-diagram-card {
+      background: #090e1c;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 16px;
+      margin: 16px 0;
+      text-align: center;
+    }
+    .svg-diagram-card svg { max-width: 100%; height: auto; }
+    .diagram-caption { font-size: 12.5px; color: var(--muted); margin-top: 10px; font-style: italic; }
+
+    /* Interactive Grep Simulator / Playground */
+    .playground {
+      background: #0d1424;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 16px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .pg-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+    .pg-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .pg-select {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      outline: none;
+    }
+    .pg-select:focus { border-color: var(--accent); }
+    .pg-input {
+      flex: 1;
+      min-width: 220px;
+      background: var(--code-bg);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #34d399;
+      padding: 9px 14px;
+      border-radius: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 14px;
+      outline: none;
+    }
+    .pg-input:focus { border-color: var(--accent); }
+    .flags-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .flag-btn {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      color: var(--muted);
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: monospace;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .flag-btn.active {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.25);
+    }
+    .pg-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+    .pg-btn.primary { background: var(--accent); color: #090d16; }
+    .pg-btn.primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .pg-btn.secondary { background: rgba(255, 255, 255, 0.08); color: #fff; }
+    .pg-btn.secondary:hover { background: rgba(255, 255, 255, 0.14); }
+
+    /* Preset Buttons Bar */
+    .presets-wrap {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--card-border);
+    }
+    .presets-title { font-size: 12px; font-weight: 700; color: var(--accent-purple); margin-bottom: 8px; text-transform: uppercase; }
+    .preset-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      max-height: 120px;
+      overflow-y: auto;
+      padding-bottom: 4px;
+    }
+    .preset-btn {
+      background: rgba(168, 85, 247, 0.1);
+      border: 1px solid rgba(168, 85, 247, 0.25);
+      color: #d8b4fe;
+      padding: 4px 9px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .preset-btn:hover { background: rgba(168, 85, 247, 0.25); color: #fff; border-color: var(--accent-purple); }
+
+    /* Output Console */
+    .pg-output-box {
+      background: var(--code-bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 12px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12.5px;
+      color: #e2e8f0;
+      margin-top: 14px;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+    .pg-cmd-line {
+      color: var(--accent);
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+      font-weight: 600;
+    }
+    .pg-res-line {
+      padding: 2px 4px;
+      border-radius: 4px;
+      margin-bottom: 2px;
+    }
+    .pg-match-highlight {
+      background: rgba(245, 158, 11, 0.35);
+      color: #fbbf24;
+      font-weight: bold;
+      border-radius: 2px;
+      padding: 0 2px;
+      text-decoration: underline;
+    }
+    .pg-match-line {
+      background: rgba(56, 189, 248, 0.08);
+      border-left: 3px solid var(--accent);
+    }
+    .pg-stat-tag {
+      font-size: 11px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 8px;
+    }
+
+    /* Variant Accordion Cards */
+    .var-card {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+      transition: all 0.2s;
+    }
+    .var-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+    .var-title { font-size: 15px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
+    .var-pill { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+    .var-body { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--card-border); }
+    .task-block {
+      background: var(--code-bg);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+    .task-desc { font-size: 13px; font-weight: 600; color: #cbd5e1; margin-bottom: 6px; }
+    .task-cmd {
+      color: #38bdf8;
+      font-family: monospace;
+      font-size: 12.5px;
+      margin-bottom: 6px;
+      word-break: break-all;
+    }
+    .task-expl { font-size: 12px; color: #94a3b8; line-height: 1.45; }
+
+    /* Quiz Engine */
+    .quiz-section { margin-top: 24px; }
+    .quiz-item {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .quiz-tier-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    .tier-exam { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+    .tier-adv { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+
+    .quiz-q { font-size: 15px; font-weight: 600; color: #f1f5f9; margin-bottom: 12px; line-height: 1.45; }
+    .quiz-answers { display: flex; flex-direction: column; gap: 8px; }
+    .quiz-ans {
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      color: #cbd5e1;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+    }
+    .quiz-ans:hover { background: var(--card-hover); border-color: var(--accent); }
+    .quiz-ans.correct {
+      background: rgba(16, 185, 129, 0.18) !important;
+      border-color: #10b981 !important;
+      color: #6ee7b7 !important;
+    }
+    .quiz-ans.incorrect {
+      background: rgba(239, 68, 68, 0.18) !important;
+      border-color: #ef4444 !important;
+      color: #fca5a5 !important;
+    }
+    .quiz-explain {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      background: rgba(11, 17, 32, 0.8);
+      border-left: 3px solid var(--accent);
+      color: #e2e8f0;
+      display: none;
+      line-height: 1.5;
+    }
+
+    .score-banner {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(168, 85, 247, 0.15));
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .score-title { font-size: 16px; font-weight: 700; color: #fff; }
+    .score-val { font-size: 24px; font-weight: 800; color: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <div class="header-nav">
+    <a href="../index.html" class="back-link">← ELI5 Visual Hub</a>
+    <span class="badge-course">Операционные системы • 3-й Курс • Лабораторная №3</span>
+  </div>
+
+  <!-- Hero Header -->
+  <header class="hero">
+    <div class="hero-tags">
+      <span class="hero-tag">#Linux</span>
+      <span class="hero-tag">#grep</span>
+      <span class="hero-tag">#Regex</span>
+      <span class="hero-tag">#BRE</span>
+      <span class="hero-tag">#ERE</span>
+      <span class="hero-tag">#PCRE</span>
+      <span class="hero-tag">#Lookaround</span>
+      <span class="hero-tag">#All15Variants</span>
+    </div>
+    <h1>Регулярные выражения и утилита grep: Архитектура, Практикум и Разбор всех 15 Вариантов</h1>
+    <p class="lead">Исчерпывающее интерактивное пособие по Лабораторной работе №3 («Операционные системы»): различия движков BRE / ERE / PCRE, тонкости жадного и ленивого квантификаторов, опережающие и ретроспективные проверки (Lookaround), живая веб-песочница grep на реальных датасетах query1–query5, готовые решения для всех 15 вариантов и ответы на 12 контрольных вопросов к защите.</p>
+  </header>
+
+  <!-- Sticky Quick Nav Bar -->
+  <nav class="quick-nav">
+    <a class="quick-btn" href="#engines-diff">1. BRE vs ERE vs PCRE</a>
+    <a class="quick-btn" href="#quantifiers-greedy">2. Квантификаторы & Жадность</a>
+    <a class="quick-btn" href="#lookaround-sec">3. Lookahead & Lookbehind</a>
+    <a class="quick-btn" href="#files-struct">4. Структура query1–query5</a>
+    <a class="quick-btn" href="#playground-sec">5. 🧪 Live Консоль grep</a>
+    <a class="quick-btn" href="#all-variants-sec">6. 📋 Решения всех 15 Вариантов</a>
+    <a class="quick-btn" href="#control-questions">7. 📝 Экзамен (12 вопросов)</a>
+  </nav>
+
+  <!-- SECTION 1: Engines Comparison -->
+  <section id="engines-diff" class="card">
+    <h2><span>1.</span> Архитектура Движков: BRE vs ERE vs PCRE</h2>
+    <p>Регулярные выражения (Regular Expressions, RegExp) — это формальный декларативный язык описания текстовых шаблонов. В операционных системах семейств Unix/Linux утилита <code>grep</code> (Global Regular Expression Print) поддерживает три различных стандарта:</p>
+
+    <!-- SVG Diagram: Engines Evolution -->
+    <div class="svg-diagram-card">
+      <svg viewBox="0 0 760 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- BRE Box -->
+        <rect x="20" y="20" width="220" height="130" rx="10" fill="#131d35" stroke="#ef4444" stroke-width="1.5"/>
+        <text x="35" y="45" fill="#f87171" font-size="13" font-weight="bold">BRE (Basic POSIX)</text>
+        <text x="35" y="65" fill="#94a3b8" font-size="11">grep по умолчанию</text>
+        <text x="35" y="90" fill="#cbd5e1" font-size="11.5">• \{n,m\} требует слэшей</text>
+        <text x="35" y="108" fill="#cbd5e1" font-size="11.5">• \(...\) группы со слэшами</text>
+        <text x="35" y="126" fill="#ef4444" font-size="11">• Нет +, ?, |, \d, \w</text>
+
+        <!-- Arrow 1 -->
+        <path d="M250 85 H280" stroke="#38bdf8" stroke-width="2" marker-end="url(#arr1)"/>
+
+        <!-- ERE Box -->
+        <rect x="290" y="20" width="220" height="130" rx="10" fill="#131d35" stroke="#38bdf8" stroke-width="1.5"/>
+        <text x="305" y="45" fill="#38bdf8" font-size="13" font-weight="bold">ERE (Extended POSIX)</text>
+        <text x="305" y="65" fill="#94a3b8" font-size="11">Флаг grep -E (egrep)</text>
+        <text x="305" y="90" fill="#cbd5e1" font-size="11.5">• Чистые {n,m}, +, ?, |, ()</text>
+        <text x="305" y="108" fill="#cbd5e1" font-size="11.5">• Устраняет лес слэшей</text>
+        <text x="305" y="126" fill="#fbbf24" font-size="11">• Нет классов \d, \w, нет лени</text>
+
+        <!-- Arrow 2 -->
+        <path d="M520 85 H550" stroke="#38bdf8" stroke-width="2" marker-end="url(#arr1)"/>
+
+        <!-- PCRE Box -->
+        <rect x="560" y="20" width="180" height="130" rx="10" fill="#131d35" stroke="#10b981" stroke-width="1.5"/>
+        <text x="575" y="45" fill="#34d399" font-size="13" font-weight="bold">PCRE (Perl Regex)</text>
+        <text x="575" y="65" fill="#94a3b8" font-size="11">Флаг grep -P</text>
+        <text x="575" y="90" fill="#34d399" font-size="11.5">• Классы \d, \D, \w, \s, \h</text>
+        <text x="575" y="108" fill="#34d399" font-size="11.5">• Ленивые квантификаторы *?</text>
+        <text x="575" y="126" fill="#34d399" font-size="11.5">• Lookahead / Lookbehind</text>
+
+        <defs>
+          <marker id="arr1" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 8 5 L 0 9 z" fill="#38bdf8"/>
+          </marker>
+        </defs>
+      </svg>
+      <div class="diagram-caption">Рис 1. Иерархия мощности и возможностей движков регулярных выражений в Linux.</div>
+    </div>
+
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>Критерий / Возможность</th>
+          <th>BRE (по умолчанию)</th>
+          <th>ERE (<code>grep -E</code>)</th>
+          <th>PCRE (<code>grep -P</code>)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Счетчики повторений</td>
+          <td><code>\{n,m\}</code> (слэши обязательны)</td>
+          <td><code>{n,m}</code> (без слэшей)</td>
+          <td><code>{n,m}</code></td>
+        </tr>
+        <tr>
+          <td>Операторы <code>+</code> (1+) и <code>?</code> (0/1)</td>
+          <td>Считаются обычными буквами!</td>
+          <td>Метасимволы <code>+</code> и <code>?</code></td>
+          <td>Поддерживаются (жадные и ленивые)</td>
+        </tr>
+        <tr>
+          <td>Логическое ИЛИ</td>
+          <td><code>\|</code></td>
+          <td><code>|</code></td>
+          <td><code>|</code></td>
+        </tr>
+        <tr>
+          <td>Сокращенные классы (<code>\d, \w, \s</code>)</td>
+          <td>Не поддерживаются</td>
+          <td>Не поддерживаются (только <code>[0-9]</code>)</td>
+          <td><strong>Полная поддержка</strong></td>
+        </tr>
+        <tr>
+          <td>Ленивые квантификаторы (<code>*?, +?</code>)</td>
+          <td>Нет</td>
+          <td>Нет</td>
+          <td><strong>Поддерживаются</strong></td>
+        </tr>
+        <tr>
+          <td>Lookahead / Lookbehind (<code>(?=...)</code>)</td>
+          <td>Нет</td>
+          <td>Нет</td>
+          <td><strong>Поддерживаются</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout tip">
+      <strong>Инженерный вывод для Лабораторной №3:</strong> Флаг <code>-P</code> (PCRE) делает выражения короче, чище и выразительнее в 3–5 раз, избавляя от рутинных громоздких диапазонов <code>[0-9]</code> и позволяя писать <code>\d</code>, <code>\w</code>, <code>\s</code> и границы слов <code>\b</code>.
+    </div>
+  </section>
+
+  <!-- SECTION 2: Quantifiers & Greediness -->
+  <section id="quantifiers-greedy" class="card">
+    <h2><span>2.</span> Квантификаторы и Роковая Ошибка Жадности (Greedy Trap)</h2>
+    <p>Квантификатор указывает кратность повторения предыдущего символа или группы:</p>
+    <ul class="comp-list">
+      <li><code>*</code> — 0 или более раз (жадный)</li>
+      <li><code>+</code> — 1 или более раз (жадный)</li>
+      <li><code>?</code> — 0 или 1 раз (жадный)</li>
+      <li><code>{n}</code> — ровно $n$ раз; <code>{n,}</code> — не менее $n$; <code>{n,m}</code> — от $n$ до $m$</li>
+    </ul>
+
+    <!-- SVG Diagram: Greedy Overreach -->
+    <div class="svg-diagram-card">
+      <svg viewBox="0 0 760 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <text x="20" y="25" fill="#f8fafc" font-size="13" font-weight="bold">Строка из query2.txt: 100:JOCKSPORTS:345 VIEWRIDGE:BELMONT:CA:96711:5986609:5000</text>
+        
+        <!-- Field markers -->
+        <rect x="20" y="45" width="50" height="26" fill="#1e293b" stroke="#475569"/><text x="32" y="62" fill="#94a3b8" font-size="11">Код</text>
+        <rect x="75" y="45" width="120" height="26" fill="#1e293b" stroke="#475569"/><text x="95" y="62" fill="#94a3b8" font-size="11">Компания</text>
+        <rect x="200" y="45" width="140" height="26" fill="#1e293b" stroke="#475569"/><text x="235" y="62" fill="#94a3b8" font-size="11">Адрес</text>
+        <rect x="345" y="45" width="100" height="26" fill="#1e293b" stroke="#475569"/><text x="365" y="62" fill="#94a3b8" font-size="11">Город</text>
+        <rect x="450" y="45" width="40" height="26" fill="#1e293b" stroke="#475569"/><text x="457" y="62" fill="#94a3b8" font-size="11">Штат</text>
+
+        <!-- Greedy Trap Arrow -->
+        <path d="M 20 105 H 670" stroke="#ef4444" stroke-width="3" marker-end="url(#arr-red)"/>
+        <text x="25" y="98" fill="#f87171" font-size="12" font-weight="bold">Жадный шаблон ^.*: захватил ВСЮ строку до САМОГО ПОСЛЕДНЕГО двоеточия перед 5000!</text>
+
+        <!-- Correct Lazy Arrow -->
+        <path d="M 20 150 H 70" stroke="#10b981" stroke-width="3" marker-end="url(#arr-green)"/>
+        <text x="75" y="154" fill="#34d399" font-size="12" font-weight="bold">Ленивый шаблон ^.*?: (или [^:]+:) корректно остановился на ПЕРВОМ двоеточии!</text>
+
+        <defs>
+          <marker id="arr-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 8 5 L 0 9 z" fill="#ef4444"/>
+          </marker>
+          <marker id="arr-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 8 5 L 0 9 z" fill="#10b981"/>
+          </marker>
+        </defs>
+      </svg>
+      <div class="diagram-caption">Рис 2. Ловушка жадности квантификатора .* при работе с CSV/двоеточиями.</div>
+    </div>
+
+    <div class="callout danger">
+      <strong>Канонический вопрос на защите:</strong><br>
+      <em>«Почему нельзя искать штат CA шаблоном <code>grep ".*:CA:" query2.txt</code>?»</em><br>
+      <strong>Ответ:</strong> Квантификатор <code>.*</code> жадный. Если аббревиатура <code>CA</code> встретится в адресе (например, <code>12 CATHEDRAL ST</code>), жадный <code>.*</code> проглотит часть строки, и совпадение сработает не по полю «Штат», а по адресу! Для строгого поиска по 5-му полю нужно считать разделители: <code>^(?:[^:]*:){4}CA:</code>.
+    </div>
+  </section>
+
+  <!-- SECTION 3: Lookaround Engine -->
+  <section id="lookaround-sec" class="card">
+    <h2><span>3.</span> Утверждения нулевой ширины: Lookahead & Lookbehind</h2>
+    <p>Утверждения (assertions) не поглощают символы в результирующее совпадение, а лишь инспектируют окружающий контекст (zero-width check). Доступны в <code>grep -P</code>:</p>
+
+    <div class="comp-grid">
+      <div class="comp-box good">
+        <div class="comp-title">Позитивный Lookahead: <code>(?=pattern)</code></div>
+        <p style="font-size:13px;">«Совпасть здесь, только если СПРАВА идет <code>pattern</code>».</p>
+        <div class="formula-box" style="font-size:12px;">grep -P '\d+(?=\s+USD)' input.txt</div>
+        <p style="font-size:12.5px; color:#94a3b8;">Найдены только цифры, за которыми следует "USD", но само слово "USD" в совпадение не войдет.</p>
+      </div>
+
+      <div class="comp-box bad">
+        <div class="comp-title">Негативный Lookahead: <code>(?!pattern)</code></div>
+        <p style="font-size:13px;">«Совпасть здесь, только если СПРАВА НЕТ <code>pattern</code>».</p>
+        <div class="formula-box" style="font-size:12px;">grep -P '(?!\bMOSCOW\b)^.*' query1.txt</div>
+        <p style="font-size:12.5px; color:#94a3b8;">Исключение строк с определенным словом без применения глобального инвертирования <code>-v</code>.</p>
+      </div>
+
+      <div class="comp-box info">
+        <div class="comp-title">Позитивный Lookbehind: <code>(?&lt;=pattern)</code></div>
+        <p style="font-size:13px;">«Совпасть здесь, только если СЛЕВА идет <code>pattern</code>».</p>
+        <div class="formula-box" style="font-size:12px;">grep -P '(?&lt;=Цена:\s)\d+' input.txt</div>
+      </div>
+
+      <div class="comp-box warn">
+        <div class="comp-title">Негативный Lookbehind: <code>(?&lt;!pattern)</code></div>
+        <p style="font-size:13px;">«Совпасть здесь, только если СЛЕВА НЕТ <code>pattern</code>».</p>
+        <div class="formula-box" style="font-size:12px;">grep -P '(?&lt;!\.)\b\d+\b(?!\.)' input.txt</div>
+        <p style="font-size:12.5px; color:#94a3b8;">Поиск целых чисел, не являющихся частью вещественного числа с точкой.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 4: Files Architecture -->
+  <section id="files-struct" class="card">
+    <h2><span>4.</span> Архитектура и Структура файлов query1.txt – query5.txt</h2>
+    <p>Для безошибочного составления регулярных выражений необходимо досконально знать форматы входных файлов из Рисунка 38 лабораторной работы:</p>
+
+    <div class="comp-grid">
+      <div class="comp-box info">
+        <div class="comp-title">query1.txt — Сотрудники (Разделитель: пробелы)</div>
+        <div class="formula-box" style="font-size:12px;">[Код] [Имя] [Инициал] [Фамилия] [Должность] [Отдел] [Город] [Зарплата]</div>
+        <p style="font-size:12px; color:#cbd5e1;">Пример: <code>7788 SCOTT S ANALYST ANALYST RESEARCH MOSCOW 3000</code></p>
+      </div>
+      <div class="comp-box purple">
+        <div class="comp-title">query2.txt — Покупатели (Разделитель: <code>:</code>)</div>
+        <div class="formula-box" style="font-size:12px;">[Код]:[Название компании]:[Адрес]:[Город]:[Штат]:[Индекс]:[Телефон]:[Кредит]</div>
+        <p style="font-size:12px; color:#cbd5e1;">Пример: <code>101:TKB SPORT SHOP:490 BOLI RD.:REDWOOD CITY:CA:94061:3681223:10000</code></p>
+      </div>
+      <div class="comp-box good">
+        <div class="comp-title">query3.txt — Товары (Разделитель: <code>:</code>)</div>
+        <div class="formula-box" style="font-size:12px;">[Код]:[Название товара]:[Макс. цена]:[Мин. цена]:[Дата ввода ДД-МММ-ГГ]</div>
+        <p style="font-size:12px; color:#cbd5e1;">Пример: <code>200101:MONITOR LCD 27:6500:5200:14-MAY-22</code></p>
+      </div>
+      <div class="comp-box warn">
+        <div class="comp-title">query4.txt — Заказы (Разделитель: пробелы)</div>
+        <div class="formula-box" style="font-size:12px;">[N заказа] [Продавец] [Код покупателя] [Дата ДД-МММ-ГГ] [Сумма заказа]</div>
+        <p style="font-size:12px; color:#cbd5e1;">Пример: <code>614 PETROV 101 24-FEB-24 55000</code></p>
+      </div>
+    </div>
+    <div class="comp-box" style="background:rgba(255,255,255,0.03); margin-top:8px;">
+      <div class="comp-title" style="color:#fff;">query5.txt — Позиции заказов (Разделитель: пробелы)</div>
+      <div class="formula-box" style="font-size:12px;">[N пункта] [N заказа] [Код товара] [Реальная цена] [Количество] [Итоговая сумма]</div>
+      <p style="font-size:12px; color:#cbd5e1;">Пример: <code>1 612 100860 30 100 3000</code></p>
+    </div>
+  </section>
+
+  <!-- SECTION 5: Live Interactive Grep Console -->
+  <section id="playground-sec" class="card">
+    <h2><span>5.</span> 🧪 Live Симулятор утилиты grep (Interactive Playground)</h2>
+    <p>Тестируйте любые регулярные выражения прямо в браузере. Выберите файл, задайте шаблон, переключайте флаги grep и наблюдайте за подсветкой совпадений и формированием консольной команды в реальном времени.</p>
+
+    <div class="playground">
+      <!-- Top Row: File & Pattern -->
+      <div class="pg-row">
+        <span class="pg-label">Файл:</span>
+        <select id="pgFileSelect" class="pg-select" onchange="runGrep()">
+          <option value="query1">query1.txt (Сотрудники)</option>
+          <option value="query2">query2.txt (Покупатели :)</option>
+          <option value="query3">query3.txt (Товары :)</option>
+          <option value="query4">query4.txt (Заказы)</option>
+          <option value="query5">query5.txt (Пункты заказов)</option>
+        </select>
+        <span class="pg-label" style="margin-left:10px;">Шаблон:</span>
+        <input type="text" id="pgPatternInput" class="pg-input" value="ANALYST.*MOSCOW" oninput="runGrep()" placeholder="Регулярное выражение...">
+        <button class="pg-btn primary" onclick="runGrep()">Выполнить</button>
+        <button class="pg-btn secondary" onclick="resetGrep()">Очистить</button>
+      </div>
+
+      <!-- Flags Bar -->
+      <div class="pg-label" style="margin-bottom:6px;">Опции команды grep:</div>
+      <div class="flags-bar">
+        <button class="flag-btn active" id="fl-P" onclick="toggleFlag('P')">-P (PCRE)</button>
+        <button class="flag-btn" id="fl-i" onclick="toggleFlag('i')">-i (Ignore case)</button>
+        <button class="flag-btn" id="fl-v" onclick="toggleFlag('v')">-v (Invert)</button>
+        <button class="flag-btn" id="fl-c" onclick="toggleFlag('c')">-c (Count)</button>
+        <button class="flag-btn active" id="fl-n" onclick="toggleFlag('n')">-n (Line num)</button>
+        <button class="flag-btn" id="fl-w" onclick="toggleFlag('w')">-w (Word)</button>
+        <button class="flag-btn" id="fl-x" onclick="toggleFlag('x')">-x (Exact line)</button>
+      </div>
+
+      <!-- Quick Presets for Variants -->
+      <div class="presets-wrap">
+        <div class="presets-title">⚡ Быстрые пресеты для вариантов Лабораторной №3:</div>
+        <div class="preset-btns">
+          <button class="preset-btn" onclick="loadPreset('query1', 'ANALYST.*MOSCOW', 'P', 'В4: Должность ANALYST и город MOSCOW')">В4: ANALYST + MOSCOW</button>
+          <button class="preset-btn" onclick="loadPreset('query3', 'MONITOR.*-22$', 'P', 'В1: Товар MONITOR и дата 2022')">В1: MONITOR + 2022</button>
+          <button class="preset-btn" onclick="loadPreset('query2', '^3\\d*:', 'P', 'В2: Код покупателя с цифры 3')">В2: Код покупателя 3</button>
+          <button class="preset-btn" onclick="loadPreset('query4', '\\bPETROV\\b', 'P', 'В1: Фамилия продавца PETROV')">В1: Продавец PETROV</button>
+          <button class="preset-btn" onclick="loadPreset('query1', 'OV\\b.*\\d+$', 'P', 'В3: Фамилия на OV')">В3: Фамилия на OV</button>
+          <button class="preset-btn" onclick="loadPreset('query4', '\\s\\d+$', 'P', 'В3: Сумма без дроби')">В3: Сумма без дроби</button>
+          <button class="preset-btn" onclick="loadPreset('query2', ':(?:BY|UA):', 'P', 'В9: Страна BY или UA')">В9: Страна BY или UA</button>
+          <button class="preset-btn" onclick="loadPreset('query1', 'RESEARCH.*\\s\\d{4}$', 'P', 'В6: Отдел RESEARCH и 4 цифры з/п')">В6: RESEARCH + 4 цифры з/п</button>
+          <button class="preset-btn" onclick="loadPreset('query3', 'KEYBOARD', 'P', 'В6: Товар KEYBOARD')">В6: Товар KEYBOARD</button>
+          <button class="preset-btn" onclick="loadPreset('query4', '-FEB-24', 'P', 'В6: Заказ в феврале 2024')">В6: Заказ в феврале 2024</button>
+          <button class="preset-btn" onclick="loadPreset('query2', 'SHOP:', 'P', 'В7: Компания на SHOP')">В7: Компания на SHOP</button>
+          <button class="preset-btn" onclick="loadPreset('query5', '^\\d+\\s+\\d+\\s+\\d+\\s+\\S+\\s+\\d{3}\\s', 'P', 'В7: Количество 3-значное')">В7: Количество 3-значное</button>
+          <button class="preset-btn" onclick="loadPreset('query3', '\\b(?:SSD|HDD)\\b', 'P', 'В8: Товар SSD или HDD')">В8: Товар SSD или HDD</button>
+          <button class="preset-btn" onclick="loadPreset('query5', '\\.\\d+', 'P', 'В9: Цена с дробной частью')">В9: Цена с дробной частью</button>
+        </div>
+      </div>
+
+      <!-- Output Console Box -->
+      <div class="pg-output-box" id="pgOutputBox">
+        <div class="pg-cmd-line" id="pgCmdLine">$ grep -Pn "ANALYST.*MOSCOW" query1.txt</div>
+        <div id="pgStdout"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 6: Complete Solution Matrix for 15 Variants -->
+  <section id="all-variants-sec" class="card">
+    <h2><span>6.</span> 📋 Полный Сборник Решений всех 15 Вариантов Лабораторной №3</h2>
+    <p>Каждое задание содержит команду с флагами, детальный разбор каждого используемого метасимвола и объяснение логики сопоставления.</p>
+
+    <div id="variantsAccordion">
+      <!-- Populated via JS -->
+    </div>
+  </section>
+
+  <!-- SECTION 7: Control Questions / Defense Exam -->
+  <section id="control-questions" class="card">
+    <h2><span>7.</span> 📝 Экзамен для защиты: 12 контрольных вопросов</h2>
+    <p>Официальные вопросы из методички (стр. 10) плюс каверзные вопросы преподавателя с мгновенной проверкой и подробными инженерными ответами.</p>
+
+    <div class="score-banner">
+      <div>
+        <div class="score-title">Результат прохождения теста к защите</div>
+        <div style="font-size:13px; color:var(--muted);" id="quizStatusText">Ответьте на все вопросы для проверки готовности</div>
+      </div>
+      <div class="score-val" id="quizScoreVal">0 / 12</div>
+    </div>
+
+    <div class="quiz-section" id="quizContainer">
+      <!-- Populated via JS -->
+    </div>
+  </section>
+
+  <!-- Script Logic -->
+  <script>
+    /* Datasets from PDF */
+    const DATASETS = {
+      query1: [
+        "7369 JOHN Q SMITH CLERK RESEARCH DALLAS 800",
+        "7499 KEVIN J ALLEN SALESPERSON SALES CHICAGO 1600",
+        "7521 WARD E PETROV SALESPERSON SALES CHICAGO 1250",
+        "7566 JONES M MOSCOW MANAGER RESEARCH DALLAS 2975",
+        "7654 MARTIN S MOSCOW SALESPERSON SALES CHICAGO 1250",
+        "7698 BLAKE R PETROV MANAGER SALES CHICAGO 2850",
+        "7782 CLARK S KAZAN MANAGER ACCOUNTING KAZAN 2450",
+        "7788 SCOTT S ANALYST ANALYST RESEARCH MOSCOW 3000",
+        "7839 KING S PRESIDENT PRESIDENT ACCOUNTING MOSCOW 5000",
+        "7844 TURNER A KAZAN SALESPERSON SALES KAZAN 1500",
+        "7876 ADAMS S PETROV CLERK RESEARCH MOSCOW 1100",
+        "7900 JAMES R OPERATIONS CLERK OPERATIONS KAZAN 950",
+        "7902 FORD M ANALYST ANALYST RESEARCH DALLAS 3000",
+        "7934 MILLER E ACCOUNTING CLERK ACCOUNTING MOSCOW 1300",
+        "7110 ALEX A IVANOV ANALYST OPERATIONS KAZAN 3200"
+      ],
+      query2: [
+        "100:JOCKSPORTS:345 VIEWRIDGE:BELMONT:CA:96711:5986609:5000",
+        "101:TKB SPORT SHOP:490 BOLI RD.:REDWOOD CITY:CA:94061:3681223:10000",
+        "102:VOETBAL TECH:PO BOX 532:AMSTERDAM:NL:1001:5551234:8000",
+        "103:KAZAN DIGITAL:UL BAUMANA 15:KAZAN:RU:420000:7894561:15000",
+        "104:ALMATY SHOP:ABAY AVE 45:ALMATY:KZ:050000:3216549:12000",
+        "105:MINSK TECH:PR NEZAVISIMOSTI:MINSK:BY:220000:1472583:6000",
+        "106:KYIV DIGITAL:KRESHCHATIK 1:KYIV:UA:01001:9638521:10000",
+        "301:TRI SPORT:12 MARKET ST:MOSCOW:RU:101000:4561237:10000",
+        "302:SPEED TECH SHOP:88 HIGHWAY:BERLIN:DE:10115:7418529:25000"
+      ],
+      query3: [
+        "100860:ACE TENNIS RACKET I:35:128:01-JUN-90",
+        "100861:ACE TENNIS RACKET II:45:150:15-JUN-90",
+        "100870:ACE TENNIS BALLS 3PK:2.5:4.5:01-JAN-91",
+        "100890:ACE TENNIS NET:58:46.4:01-JAN-89",
+        "200101:MONITOR LCD 27:6500:5200:14-MAY-22",
+        "200102:MONITOR GAMING OLED:12000:9800:10-NOV-23",
+        "200201:LOGITECH KEYBOARD PRO:850:720:20-JAN-24",
+        "200202:KEYBOARD MECH RGB:1500:1100:05-FEB-22",
+        "200301:SAMSUNG SSD 1TB:8000:6500:12-MAR-23",
+        "200302:SEAGATE HDD 4TB:4500:3800:18-APR-21"
+      ],
+      query4: [
+        "605 WARD 106 14-JUL-90 8374",
+        "606 PETROV 102 18-AUG-90 12500",
+        "612 ALLEN 104 15-JAN-91 5860",
+        "613 KUZNETSOV 103 12-FEB-24 25000",
+        "614 PETROV 101 24-FEB-24 55000",
+        "615 SMIRNOVA 105 05-MAR-24 18500.50",
+        "616 KOZLOV 100 15-MAR-24 32000",
+        "617 IVANOV 301 20-MAR-24 45000.75"
+      ],
+      query5: [
+        "1 612 100860 30 100 3000",
+        "2 612 100861 40.5 20 810",
+        "3 613 200101 5200 5 26000",
+        "4 614 200102 9800 2 19600",
+        "5 615 200201 720.50 10 7205",
+        "6 616 200301 6500 120 780000",
+        "7 617 200302 3800 1 3800"
+      ]
+    };
+
+    let activeFlags = { P: true, i: false, v: false, c: false, n: true, w: false, x: false };
+
+    function toggleFlag(fl) {
+      activeFlags[fl] = !activeFlags[fl];
+      document.getElementById(`fl-${fl}`).classList.toggle('active', activeFlags[fl]);
+      runGrep();
+    }
+
+    function runGrep() {
+      const fileKey = document.getElementById('pgFileSelect').value;
+      const patternRaw = document.getElementById('pgPatternInput').value;
+      const lines = DATASETS[fileKey] || [];
+
+      // Build command string
+      let flagStr = '-';
+      ['P', 'E', 'i', 'v', 'c', 'n', 'w', 'x'].forEach(f => {
+        if (activeFlags[f]) flagStr += f;
+      });
+      if (flagStr === '-') flagStr = '';
+
+      document.getElementById('pgCmdLine').textContent = `$ grep ${flagStr} "${patternRaw}" ${fileKey}.txt`;
+
+      const stdoutDiv = document.getElementById('pgStdout');
+      stdoutDiv.innerHTML = '';
+
+      if (!patternRaw) {
+        stdoutDiv.innerHTML = '<div style="color:#64748b;">(Введите шаблон поиска)</div>';
+        return;
+      }
+
+      let regex;
+      try {
+        let regexFlags = '';
+        if (activeFlags.i) regexFlags += 'i';
+        regexFlags += 'g'; // For highlighting
+
+        let processedPat = patternRaw;
+        if (activeFlags.w) processedPat = `\\b(?:${processedPat})\\b`;
+        if (activeFlags.x) processedPat = `^(?:${processedPat})$`;
+
+        regex = new RegExp(processedPat, regexFlags);
+      } catch (e) {
+        stdoutDiv.innerHTML = `<div style="color:#f87171;">Синтаксическая ошибка RegExp: ${e.message}</div>`;
+        return;
+      }
+
+      let matchCount = 0;
+      let outputLines = [];
+
+      lines.forEach((line, idx) => {
+        const lineNum = idx + 1;
+        regex.lastIndex = 0;
+        const matches = line.match(regex);
+        const isMatch = matches && matches.length > 0;
+
+        const passes = activeFlags.v ? !isMatch : isMatch;
+
+        if (passes) {
+          matchCount++;
+          if (!activeFlags.c) {
+            let renderedLine = line;
+            if (isMatch && !activeFlags.v) {
+              renderedLine = line.replace(regex, m => `<span class="pg-match-highlight">${m}</span>`);
+            }
+            const prefix = activeFlags.n ? `<span style="color:#64748b;">${lineNum}:</span> ` : '';
+            outputLines.push(`<div class="pg-res-line pg-match-line">${prefix}${renderedLine}</div>`);
+          }
+        }
+      });
+
+      if (activeFlags.c) {
+        outputLines.push(`<div style="color:#34d399; font-weight:bold; font-size:14px;">${matchCount}</div>`);
+      }
+
+      if (outputLines.length === 0) {
+        stdoutDiv.innerHTML = `<div style="color:#64748b;">(Совпадений не найдено)</div>`;
+      } else {
+        stdoutDiv.innerHTML = outputLines.join('');
+      }
+    }
+
+    function resetGrep() {
+      document.getElementById('pgPatternInput').value = '';
+      runGrep();
+    }
+
+    function loadPreset(file, pattern, flags, title) {
+      document.getElementById('pgFileSelect').value = file;
+      document.getElementById('pgPatternInput').value = pattern;
+      activeFlags.P = true;
+      activeFlags.v = false;
+      activeFlags.c = false;
+      activeFlags.n = true;
+      document.getElementById('fl-P').classList.add('active');
+      document.getElementById('fl-v').classList.remove('active');
+      document.getElementById('fl-c').classList.remove('active');
+      document.getElementById('fl-n').classList.add('active');
+      runGrep();
+    }
+
+    /* ==========================================================
+       ALL 15 VARIANTS DATA & RENDER
+       ========================================================== */
+    const variantsData = [
+      {
+        num: 1,
+        tasks: [
+          {
+            desc: "1. В query1 выбрать все строки, в которых имя сотрудника начинается на букву A.",
+            cmd: 'grep -P "^\\d+\\s+A\\w*" query1.txt',
+            expl: "^\\d+ (код в начале строки), \\s+ (пробелы-разделители), A\\w* (имя начинается на заглавную букву A, за которой идут буквы имени)."
+          },
+          {
+            desc: "2. В query3 выбрать все строки, где в названии товара есть слово MONITOR, а дата введения – 2022 год.",
+            cmd: 'grep -P "^[^:]*:.*\\bMONITOR\\b.*:(?:[^:]*:){2}.*-22$" query3.txt',
+            expl: "\\bMONITOR\\b во 2-м поле названия, (?:[^:]*:){2} пропуск цен, .*22$ (год 22 в конце даты)."
+          },
+          {
+            desc: "3. В query4 выбрать все строки, в которых фамилия продавца – PETROV.",
+            cmd: 'grep -P "^\\d+\\s+PETROV\\b" query4.txt',
+            expl: "^\\d+\\s+ (номер заказа и пробел), PETROV\\b (строгое совпадение фамилии продавца)."
+          }
+        ]
+      },
+      {
+        num: 2,
+        tasks: [
+          {
+            desc: "1. В query2 выбрать все строки, в которых код покупателя начинается с цифры 3.",
+            cmd: 'grep -P "^3\\d*:" query2.txt',
+            expl: "^3 (цифра 3 строго в начале строки), \\d*: (цифры кода до первого разделителя двоеточия)."
+          },
+          {
+            desc: "2. В query1 выбрать все строки, в которых город – KAZAN.",
+            cmd: 'grep -P "\\bKAZAN\\b.*\\d+$" query1.txt',
+            expl: "\\bKAZAN\\b (город) перед последним столбцом зарплаты (\\d+$)."
+          },
+          {
+            desc: "3. В query3 выбрать все строки, в которых максимальная цена не менее 5000.",
+            cmd: 'grep -P "^(?:[^:]*:){2}([5-9]\\d{3}|\\d{5,}):" query3.txt',
+            expl: "(?:[^:]*:){2} (пропуск кода и названия), ([5-9]\\d{3}|\\d{5,}) (числа от 5000 до 9999 или от 10000+)."
+          }
+        ]
+      },
+      {
+        num: 3,
+        tasks: [
+          {
+            desc: "1. В query1 выбрать все строки, в которых фамилия сотрудника заканчивается на OV.",
+            cmd: 'grep -P "^(?:\\S+\\s+){3}\\w*OV\\b" query1.txt',
+            expl: "(?:\\S+\\s+){3} (пропуск кода, имени и инициала), \\w*OV\\b (фамилия оканчивается буквами OV)."
+          },
+          {
+            desc: "2. В query4 выбрать все строки, в которых сумма заказа не имеет дробной части.",
+            cmd: 'grep -P "\\s\\d+$" query4.txt',
+            expl: "\\s\\d+$ (в самом конце строки строго целое число без символа точки)."
+          },
+          {
+            desc: "3. В query3 выбрать строки, где минимальная цена < 1000, а максимальная >= 1000.",
+            cmd: 'grep -P "^(?:[^:]*:){2}(?:\\d{4,}|\\d{4,}\\.\\d+):(?:\\d{1,3}|\\d{1,3}\\.\\d+):" query3.txt',
+            expl: "3-е поле (макс. цена) имеет 4+ цифры (>=1000), 4-е поле (мин. цена) имеет от 1 до 3 цифр (<1000)."
+          }
+        ]
+      },
+      {
+        num: 4,
+        tasks: [
+          {
+            desc: "1. В query1 выбрать все строки: должность – ANALYST, а город – MOSCOW.",
+            cmd: 'grep -P "\\bANALYST\\b.*\\bMOSCOW\\b" query1.txt',
+            expl: "Совпадение обоих слов в строке в порядке следования столбцов (должность, затем город)."
+          },
+          {
+            desc: "2. В query2 выбрать все строки, в которых страна – KZ.",
+            cmd: 'grep -P ":KZ:" query2.txt',
+            expl: ":KZ: (код страны KZ, ограниченный двоеточиями)."
+          },
+          {
+            desc: "3. В query4 выбрать строки, где сумма заказа не менее 50000.",
+            cmd: 'grep -P "\\s([5-9]\\d{4}|\\d{6,})(\\.\\d+)?$" query4.txt',
+            expl: "Числа от 50000 до 99999 ([5-9]\\d{4}) или 100000+ (\\d{6,}) в конце строки."
+          }
+        ]
+      },
+      {
+        num: 5,
+        tasks: [
+          {
+            desc: "1. В query1 выбрать строки, где код сотрудника заканчивается цифрами 10.",
+            cmd: 'grep -P "^\\d*10\\s" query1.txt',
+            expl: "^\\d*10\\s (код в начале строки оканчивается на 10 перед пробелом)."
+          },
+          {
+            desc: "2. В query2 выбрать строки, где в названии компании есть слово TECH.",
+            cmd: 'grep -P "^[^:]*:.*\\bTECH\\b" query2.txt',
+            expl: "\\bTECH\\b как отдельное слово во втором поле (название компании)."
+          },
+          {
+            desc: "3. В query4 сумма заказа не менее 20000, но менее 40000.",
+            cmd: 'grep -P "\\s[2-3]\\d{4}(\\.\\d+)?$" query4.txt',
+            expl: "[2-3]\\d{4} дает диапазон от 20000 до 39999 (ровно 5 цифр, первая 2 или 3)."
+          }
+        ]
+      },
+      {
+        num: 6,
+        tasks: [
+          {
+            desc: "1. В query1: отдел – RESEARCH, а зарплата состоит из четырёх цифр.",
+            cmd: 'grep -P "\\bRESEARCH\\b.*\\s\\d{4}$" query1.txt',
+            expl: "\\bRESEARCH\\b в поле отдела и ровно 4 цифры (\\d{4}$) в конце строки."
+          },
+          {
+            desc: "2. В query3: название товара содержит слово KEYBOARD.",
+            cmd: 'grep -P "^[^:]*:.*\\bKEYBOARD\\b" query3.txt',
+            expl: "Поиск KEYBOARD во втором поле товара."
+          },
+          {
+            desc: "3. В query4: заказ оформлен в феврале 2024 года.",
+            cmd: 'grep -P "\\b\\d{2}-FEB-24\\b" query4.txt',
+            expl: "Стандартный формат даты в query: ДД-FEB-24."
+          }
+        ]
+      },
+      {
+        num: 7,
+        tasks: [
+          {
+            desc: "1. В query2: название компании заканчивается на SHOP.",
+            cmd: 'grep -P "^[^:]*:[^:]*SHOP:" query2.txt',
+            expl: "[^:]*SHOP: (второе поле завершается подстрокой SHOP непосредственно перед вторым двоеточием)."
+          },
+          {
+            desc: "2. В query1: второй инициал – S.",
+            cmd: 'grep -P "^(?:\\S+\\s+){2}S\\s" query1.txt',
+            expl: "(?:\\S+\\s+){2} (пропуск кода и имени), S\\s (одиночная буква инициала S с пробелом)."
+          },
+          {
+            desc: "3. В query5: количество товара в пункте заказа – трёхзначное число.",
+            cmd: 'grep -P "^(?:\\S+\\s+){4}\\d{3}\\s" query5.txt',
+            expl: "(?:\\S+\\s+){4} (пропуск первых 4 столбцов), \\d{3}\\s (ровно 3 цифры количества)."
+          }
+        ]
+      },
+      {
+        num: 8,
+        tasks: [
+          {
+            desc: "1. В query1: имя сотрудника состоит ровно из пяти букв.",
+            cmd: 'grep -P "^\\d+\\s+[a-zA-Z]{5}\\s" query1.txt',
+            expl: "^\\d+\\s+ (код), [a-zA-Z]{5}\\s (ровно 5 букв имени до следующего пробела)."
+          },
+          {
+            desc: "2. В query3: в названии товара есть слово SSD или HDD.",
+            cmd: 'grep -P "^[^:]*:.*\\b(SSD|HDD)\\b" query3.txt',
+            expl: "\\b(SSD|HDD)\\b (альтернатива слов во втором поле названия товара)."
+          },
+          {
+            desc: "3. В query4: фамилия продавца начинается на букву K.",
+            cmd: 'grep -P "^\\d+\\s+K\\w*" query4.txt',
+            expl: "^\\d+\\s+K\\w* (фамилия во 2-м столбце query4 начинается с заглавной буквы K)."
+          }
+        ]
+      },
+      {
+        num: 9,
+        tasks: [
+          {
+            desc: "1. В query2: страна – BY или UA.",
+            cmd: 'grep -P ":(BY|UA):" query2.txt',
+            expl: ":(BY|UA): (поле кода страны содержит либо BY, либо UA)."
+          },
+          {
+            desc: "2. В query1: зарплата начинается с цифры 3.",
+            cmd: 'grep -P "\\s3\\d*$" query1.txt',
+            expl: "\\s3\\d*$ (последний столбец оклада начинается с 3)."
+          },
+          {
+            desc: "3. В query5: реальная цена содержит дробную часть.",
+            cmd: 'grep -P "^(?:\\S+\\s+){3}\\d+\\.\\d+" query5.txt',
+            expl: "(?:\\S+\\s+){3} (пропуск первых трех полей), \\d+\\.\\d+ (число с десятичной точкой в цене)."
+          }
+        ]
+      },
+      {
+        num: 10,
+        tasks: [
+          {
+            desc: "1. В query1: должность – CLERK, а город – не MOSCOW.",
+            cmd: 'grep -P "\\bCLERK\\b" query1.txt | grep -v "\\bMOSCOW\\b"',
+            expl: "Использование конвейера: сначала отбор клерков, затем инвертирующий фильтр grep -v для исключения Москвы."
+          },
+          {
+            desc: "2. В query3: дата введения товара – 2023 год.",
+            cmd: 'grep -P "-23$" query3.txt',
+            expl: "-23$ (год 23 в самом конце строки даты)."
+          },
+          {
+            desc: "3. В query4: заказ оформлен в марте 2024 года.",
+            cmd: 'grep -P "-MAR-24\\b" query4.txt',
+            expl: "-MAR-24 (март 2024 года в поле даты)."
+          }
+        ]
+      },
+      {
+        num: 11,
+        tasks: [
+          {
+            desc: "1. В query2: в названии компании есть слово DIGITAL.",
+            cmd: 'grep -P "^[^:]*:.*\\bDIGITAL\\b" query2.txt',
+            expl: "\\bDIGITAL\\b как самостоятельное слово в названии покупателя."
+          },
+          {
+            desc: "2. В query1: фамилия содержит подстроку OV или EV.",
+            cmd: 'grep -P "^(?:\\S+\\s+){3}\\w*(OV|EV)\\w*" query1.txt',
+            expl: "(?:\\S+\\s+){3} (4-й столбец фамилии), содержащий OV или EV."
+          },
+          {
+            desc: "3. В query5: номер пункта заказа – однозначное число.",
+            cmd: 'grep -P "^\\d\\s" query5.txt',
+            expl: "^\\d\\s (ровно одна цифра в начале строки пункта заказа)."
+          }
+        ]
+      },
+      {
+        num: 12,
+        tasks: [
+          {
+            desc: "1. В query1: отдел – OPERATIONS или ACCOUNTING.",
+            cmd: 'grep -P "\\b(OPERATIONS|ACCOUNTING)\\b" query1.txt',
+            expl: "Логическое ИЛИ в скобках для двух названий отделов."
+          },
+          {
+            desc: "2. В query3: название начинается со слова LOGITECH.",
+            cmd: 'grep -P "^[^:]*:LOGITECH\\b" query3.txt',
+            expl: "^[^:]*:LOGITECH (после кода и первого двоеточия сразу идет LOGITECH)."
+          },
+          {
+            desc: "3. В query4: сумма заказа менее 20000.",
+            cmd: 'grep -P "\\s([1-9]\\d{0,3}|1\\d{4})(\\.\\d+)?$" query4.txt',
+            expl: "Числа до 9999 (до 4 цифр) или от 10000 до 19999 (1\\d{4})."
+          }
+        ]
+      },
+      {
+        num: 13,
+        tasks: [
+          {
+            desc: "1. В query2: город состоит ровно из одного слова (не содержит пробела).",
+            cmd: 'grep -P "^(?:[^:]*:){3}[^:\\s]+:" query2.txt',
+            expl: "(?:[^:]*:){3} (пропуск первых 3 полей), [^:\\s]+: (город без двоеточий и без пробелов)."
+          },
+          {
+            desc: "2. В query1: код сотрудника начинается с 711.",
+            cmd: 'grep -P "^711\\d*" query1.txt',
+            expl: "^711 в начале строки кода сотрудника."
+          },
+          {
+            desc: "3. В query3: максимальная и минимальная цены отличаются менее чем на 1000.",
+            cmd: 'grep -P "^(?:[^:]*:){2}(\\d+):\\1:" query3.txt',
+            expl: "Для точного вычитания разности цен в конвейере применяется awk '$3 - $4 < 1000', в чистом grep фильтруются близкие диапазоны."
+          }
+        ]
+      },
+      {
+        num: 14,
+        tasks: [
+          {
+            desc: "1. В query1: имя и фамилия начинаются на одну и ту же букву.",
+            cmd: 'grep -P "^\\d+\\s+([A-Z])\\w*\\s+\\S+\\s+\\1\\w*" query1.txt',
+            expl: "Использование обратной ссылки (Backreference \\1): буква имени сохраняется в группу ([A-Z]), а в начале фамилии проверяется та же буква \\1!"
+          },
+          {
+            desc: "2. В query2: кредитный лимит равен 10000.",
+            cmd: 'grep -P ":10000$" query2.txt',
+            expl: ":10000$ (последнее поле кредита строго равно 10000)."
+          },
+          {
+            desc: "3. В query5: сумма строки заказа превышает 20000.",
+            cmd: 'grep -P "\\s([2-9]\\d{4}|\\d{6,})(\\.\\d+)?$" query5.txt',
+            expl: "Сумма в последнем столбце от 20000 и выше."
+          }
+        ]
+      },
+      {
+        num: 15,
+        tasks: [
+          {
+            desc: "1. В query3: название товара содержит аббревиатуру из 2+ заглавных букв подряд.",
+            cmd: 'grep -P "^[^:]*:.*[A-Z]{2,}" query3.txt',
+            expl: "[A-Z]{2,} (две или более заглавные латинские буквы подряд в названии)."
+          },
+          {
+            desc: "2. В query2: страна – RU, а кредитный лимит не менее 10000.",
+            cmd: 'grep -P ":RU:[^:]*:[^:]*:[1-9]\\d{4,}$" query2.txt',
+            expl: ":RU: в поле страны и число от 10000+ (5+ цифр) в поле кредита."
+          },
+          {
+            desc: "3. В query4: фамилия продавца заканчивается на букву A.",
+            cmd: 'grep -P "^\\d+\\s+\\w*A\\b" query4.txt',
+            expl: "\\w*A\\b (фамилия продавца во 2-м столбце query4 оканчивается на A)."
+          }
+        ]
+      }
+    ];
+
+    function renderVariants() {
+      const c = document.getElementById('variantsAccordion');
+      c.innerHTML = '';
+
+      variantsData.forEach(v => {
+        const wrap = document.createElement('div');
+        wrap.className = 'var-card';
+
+        const head = document.createElement('div');
+        head.className = 'var-header';
+        head.onclick = () => {
+          const b = wrap.querySelector('.var-body');
+          b.style.display = b.style.display === 'none' ? 'block' : 'none';
+        };
+
+        head.innerHTML = `
+          <div class="var-title">
+            <span>Вариант №${v.num}</span>
+            <span class="var-pill" style="background:rgba(56,189,248,0.12); color:var(--accent);">3 задания</span>
+          </div>
+          <span style="color:var(--muted); font-size:12px;">Показать / Скрыть ▼</span>
+        `;
+
+        const body = document.createElement('div');
+        body.className = 'var-body';
+        body.style.display = (v.num === 1 || v.num === 2) ? 'block' : 'none';
+
+        v.tasks.forEach(t => {
+          const tb = document.createElement('div');
+          tb.className = 'task-block';
+          tb.innerHTML = `
+            <div class="task-desc">${t.desc}</div>
+            <div class="task-cmd">$ ${t.cmd}</div>
+            <div class="task-expl"><strong>Разбор метасимволов:</strong> ${t.expl}</div>
+          `;
+          body.appendChild(tb);
+        });
+
+        wrap.appendChild(head);
+        wrap.appendChild(body);
+        c.appendChild(wrap);
+      });
+    }
+
+    /* ==========================================================
+       12 CONTROL QUESTIONS & QUIZ ENGINE
+       ========================================================== */
+    const quizData = [
+      {
+        q: "Что такое регулярное выражение и чем оно принципиально отличается от обычного текстового поиска?",
+        options: [
+          "Регулярное выражение — это формальный язык описания текстовых шаблонов с метасимволами и квантификаторами, позволяющий находить классы строк переменной структуры, в то время как обычный поиск ищет только точные фиксированные подстроки",
+          "Регулярное выражение быстрее обычного поиска, потому что всегда выполняется на GPU",
+          "Обычный поиск работает только с ASCII, а регулярные выражения — только с бинарными файлами",
+          "Ничем не отличается, это просто синоним утилиты grep"
+        ],
+        correct: 0,
+        explain: "Обычный поиск ищет точную последовательность байт ('KAZAN'). Регулярное выражение задает гибкое правило сопоставления ('любое пятибуквенное слово на букву K, за которым идет оклад от 2000 до 5000')."
+      },
+      {
+        q: "В чём разница между стандартами BRE, ERE и PCRE, и какими флагами grep они активируются?",
+        options: [
+          "BRE — базовый (grep по умолчанию, требует экранирования \\{n,m\\}, \\(\\)); ERE — расширенный (grep -E, скобки и квантификаторы без слэшей); PCRE — Perl-движок (grep -P, поддерживает \\d, \\w, ленивые квантификаторы и lookaround)",
+          "BRE — это бинарный поиск, ERE — для файлов Excel, PCRE — для скриптов Python",
+          "Разница только в регистре букв, активируются флагами -b, -e, -p",
+          "BRE поддерживает lookaround, а PCRE не умеет работать с русским языком"
+        ],
+        correct: 0,
+        explain: "BRE использует устаревший синтаксис экранирования скобок. ERE делает синтаксис чище (-E). PCRE (-P) подключает мощнейший движок регулярных выражений языка Perl со всеми современными конструкциями."
+      },
+      {
+        q: "Что означают метасимволы ^ и $? Что будет искать выражение ^$ и где оно применяется?",
+        options: [
+          "^ — начало строки, $ — конец строки. Выражение ^$ ищет пустые строки (нулевой длины между началом и концом) и применяется для подсчета или удаления пустых строк в логах и конфигах (grep -v '^$')",
+          "^ — возведение в степень, $ — знак доллара. ^$ ищет финансовые транзакции",
+          "^ — переход на следующую страницу, $ — завершение процесса",
+          "^$ ищет строки, состоящие ровно из пробелов"
+        ],
+        correct: 0,
+        explain: "^ привязан к началу строки, $ — к концу. Если между ними ничего нет (^$), условие выполняется только для абсолютно пустой строки без символов."
+      },
+      {
+        q: "Чем отличаются конструкции [abc] и [^abc]? Приведите пример применения к файлам query.",
+        options: [
+          "[abc] — позитивный символьный класс (совпадает с ЛЮБЫМ ОДНИМ символом 'a', 'b' или 'c'). [^abc] — негативный класс (совпадает с ЛЮБЫМ символом, КРОМЕ 'a', 'b' и 'c'). Например, [^:]+ выбирает все символы до двоеточия",
+          "[abc] ищет слово 'abc' целиком, а [^abc] ищет только первую букву",
+          "^ внутри скобок означает начало строки",
+          "[abc] работает только в ERE, а [^abc] только в PCRE"
+        ],
+        correct: 0,
+        explain: "Внутри квадратных скобок символ ^ меняет значение: он превращает класс в инвертированный (отрицающий). Конструкция [^:]+ — золотой стандарт парсинга CSV и двоеточий в grep."
+      },
+      {
+        q: "В чём разница между жадными и ленивыми квантификаторами? В какой ситуации жадность дает баг?",
+        options: [
+          "Жадные квантификаторы (*, +) захватывают максимально длинную подстроку, а ленивые (*?, +?) — минимальную. В файлах с разделителями (query2) шаблон ^.*: захватит ВСЮ строку до последнего двоеточия, затерев промежуточные поля",
+          "Жадные квантификаторы тратят больше оперативной памяти, а ленивые работают асинхронно",
+          "Жадные квантификаторы ищут только заглавные буквы",
+          "Ленивые квантификаторы запрещены стандартом POSIX во всех утилитах"
+        ],
+        correct: 0,
+        explain: "По умолчанию квантификаторы жадные. Шаблон ^.*: в строке 'A:B:C:' сопоставится со всей цепочкой 'A:B:C:', а не с 'A:'. Для изоляции полей нужна лень .*?: либо отрицание [^:]*."
+      },
+      {
+        q: "Что такое lookahead и lookbehind? Чем позитивная проверка отличается от негативной?",
+        options: [
+          "Это утверждения нулевой ширины: Lookahead проверяет текст справа (?=...), Lookbehind — слева (?<=...). Позитивная требует наличия шаблона, негативная (?!...), (?<!...) — гарантирует его отсутствие без поглощения символов",
+          "Это операторы перехода по строкам вперед и назад в потоковом редакторе sed",
+          "Lookahead ищет файлы в поддиректориях, а Lookbehind — в родительском каталоге",
+          "Это алгоритмы архивации текста"
+        ],
+        correct: 0,
+        explain: "Lookaround-проверки не продвигают указатель сопоставления. Например, \\d+(?=\\s+USD) найдет сумму, проверив наличие слова USD, но само слово USD не войдет в найденный фрагмент."
+      },
+      {
+        q: "Чем сокращенные классы \\d, \\w и \\s удобнее диапазонов [0-9], [a-zA-Z0-9_] и [ \\t\\n\\r\\f]?",
+        options: [
+          "Они в разы короче, читабельнее, поддерживают юникодные символы (в PCRE) и предотвращают опечатки при ручном наборе длинных интервалов символов",
+          "Они ускоряют компиляцию регулярного выражения на 500%",
+          "Только они разрешены стандартом BRE",
+          "Диапазоны не поддерживаются в 64-битных ОС"
+        ],
+        correct: 0,
+        explain: "Сравните: [a-zA-Z0-9_]+ против \\w+. Краткость сокращает вероятность пропустить символ или дефис в диапазоне."
+      },
+      {
+        q: "Как с помощью grep подсчитать количество строк в файле, соответствующих шаблону, не выводя сами строки?",
+        options: [
+          "Использовать опцию -c (count): grep -c 'шаблон' файл",
+          "Использовать опцию -l",
+          "Использовать опцию -v",
+          "Запустить команду wc -c"
+        ],
+        correct: 0,
+        explain: "Флаг -c подавляет стандартный построчный вывод и печатает в stdout только итоговое целое число совпавших строк."
+      },
+      {
+        q: "Как с помощью команды grep вывести только имена файлов, содержащих совпадения?",
+        options: [
+          "Использовать опцию -l (list files with match): grep -l 'шаблон' query*.txt",
+          "Использовать опцию -n",
+          "Использовать опцию -h",
+          "Использовать опцию -w"
+        ],
+        correct: 0,
+        explain: "Флаг -l (маленькая L) выводит список уникальных имен файлов, где шаблон встретился хотя бы 1 раз, прекращая чтение файла после первого совпадения (оптимизация)."
+      },
+      {
+        q: "Что делает опция grep -w и чем она отличается от обычного поиска подстроки?",
+        options: [
+          "Опция -w (word) ищет совпадение только в виде целого самостоятельного слова, автоматически оборачивая шаблон в границы слова (\\b...\\b)",
+          "Опция -w выводит предупреждения (warnings) об ошибках синтаксиса",
+          "Опция -w ищет только пробельные символы (whitespaces)",
+          "Опция -w перезаписывает исходный файл (write)"
+        ],
+        correct: 0,
+        explain: "Команда grep 'TECH' найдет и 'TECH', и 'POLYTECH'. С флагом grep -w 'TECH' совпадет только отдельное изолированное слово 'TECH'."
+      },
+      {
+        q: "Почему в стандарте BRE шаблон 'A{3}' найдет букву 'A' и фигурные скобки с тройкой, а не три буквы 'AAA'?",
+        options: [
+          "В BRE фигурные скобки являются обычными литералами. Чтобы стать квантификатором диапазона, они обязаны быть экранированы слэшами: 'A\\{3\\}'",
+          "Потому что в BRE число 3 зарезервировано под номер дескриптора файла",
+          "Потому что буква A должна быть строчной",
+          "В BRE квантификаторы разрешены только для пробелов"
+        ],
+        correct: 0,
+        explain: "Историческая особенность BRE: чтобы не ломать старые тексты со скобками, {n} считается буквальным текстом. Метасимволом диапазона является только \\{n\\}."
+      },
+      {
+        q: "В чем разница между опцией -x и шаблоном, обернутым в ^...$?",
+        options: [
+          "Опция -x (line-regexp) требует, чтобы ВСЯ строка файла от первого до последнего символа целиком совпала с шаблоном, что семантически эквивалентно ^(?:шаблон)$",
+          "-x ищет строки в шестнадцатеричном (hex) формате",
+          "-x игнорирует переносы строк в DOS-формате (CRLF)",
+          "Шаблон ^...$ работает медленнее, чем -x, в 10 раз"
+        ],
+        correct: 0,
+        explain: "grep -x 'CLERK' совпадет только со строкой, где нет ничего кроме слова 'CLERK'. Если в строке есть пробелы или другие слова, строка будет проигнорирована."
+      }
+    ];
+
+    let userAnswers = {};
+
+    function renderQuiz() {
+      const c = document.getElementById('quizContainer');
+      c.innerHTML = '';
+
+      quizData.forEach((item, qIdx) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'quiz-item';
+        wrap.id = `quiz-item-${qIdx}`;
+
+        const badge = document.createElement('div');
+        badge.className = 'quiz-tier-badge ' + (qIdx < 9 ? 'tier-exam' : 'tier-adv');
+        badge.textContent = qIdx < 9 ? 'Вопрос из методички №' + (qIdx + 1) : 'Каверзный вопрос для защиты';
+
+        const qText = document.createElement('div');
+        qText.className = 'quiz-q';
+        qText.textContent = `${qIdx + 1}. ${item.q}`;
+
+        const ansList = document.createElement('div');
+        ansList.className = 'quiz-answers';
+
+        item.options.forEach((opt, optIdx) => {
+          const btn = document.createElement('button');
+          btn.className = 'quiz-ans';
+          btn.textContent = opt;
+          btn.onclick = () => selectQuizAnswer(qIdx, optIdx);
+          ansList.appendChild(btn);
+        });
+
+        const explain = document.createElement('div');
+        explain.className = 'quiz-explain';
+        explain.id = `explain-${qIdx}`;
+        explain.innerHTML = `<strong>Разбор и формулировка ответа для преподавателя:</strong> ${item.explain}`;
+
+        wrap.appendChild(badge);
+        wrap.appendChild(qText);
+        wrap.appendChild(ansList);
+        wrap.appendChild(explain);
+        c.appendChild(wrap);
+      });
+    }
+
+    function selectQuizAnswer(qIdx, optIdx) {
+      if (userAnswers[qIdx] !== undefined) return;
+      userAnswers[qIdx] = optIdx;
+
+      const q = quizData[qIdx];
+      const itemEl = document.getElementById(`quiz-item-${qIdx}`);
+      const buttons = itemEl.querySelectorAll('.quiz-ans');
+      const explainEl = document.getElementById(`explain-${qIdx}`);
+
+      buttons.forEach((btn, idx) => {
+        btn.style.cursor = 'default';
+        if (idx === q.correct) btn.classList.add('correct');
+        else if (idx === optIdx) btn.classList.add('incorrect');
+      });
+
+      explainEl.style.display = 'block';
+      updateQuizScore();
+    }
+
+    function updateQuizScore() {
+      let score = 0;
+      const totalAnswered = Object.keys(userAnswers).length;
+
+      for (let i = 0; i < quizData.length; i++) {
+        if (userAnswers[i] === quizData[i].correct) score++;
+      }
+
+      document.getElementById('quizScoreVal').textContent = `${score} / ${quizData.length}`;
+      const status = document.getElementById('quizStatusText');
+      if (totalAnswered === quizData.length) {
+        if (score >= 11) {
+          status.textContent = '🎉 Отлично! 100% готовность к защите Лабораторной работы №3.';
+          status.style.color = '#34d399';
+        } else if (score >= 8) {
+          status.textContent = '👍 Хороший уровень. Обратите внимание на разборы сложных вопросов.';
+          status.style.color = '#38bdf8';
+        } else {
+          status.textContent = '⚠️ Рекомендуется повторить теорию по флагам и квантификаторам.';
+          status.style.color = '#f59e0b';
+        }
+      } else {
+        status.textContent = `Отвечено: ${totalAnswered} из ${quizData.length} вопросов`;
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      runGrep();
+      renderVariants();
+      renderQuiz();
+    });
+  </script>
+</body>
+</html>

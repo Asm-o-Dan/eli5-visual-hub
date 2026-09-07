@@ -1,5 +1,24 @@
 [
   {
+    "id": "os-lab3-grep-regex",
+    "title": "ОС: Регулярные выражения и утилита grep (Лабораторная №3)",
+    "description": "Полный интерактивный учебник и симулятор: BRE vs ERE vs PCRE, квантификаторы, опережающие и ретроспективные проверки, решения всех 15 вариантов (45 задач), песочница с query1-5.txt и 12 вопросов защиты.",
+    "category": "Операционные системы (3 курс)",
+    "tags": [
+      "OS",
+      "grep",
+      "Regex",
+      "BRE",
+      "ERE",
+      "PCRE",
+      "Linux",
+      "Interactive",
+      "Quiz"
+    ],
+    "date": "2026-09-07",
+    "file": "artifacts/os-lab3-grep-regex.html"
+  },
+  {
     "id": "linux-filesystem-inodes-links",
     "title": "Файловая система Linux: Inode и Ссылки",
     "description": "Интерактивный путеводитель: архитектура Inode, жесткие vs мягкие ссылки, симулятор удаления и блиц-тест.",
