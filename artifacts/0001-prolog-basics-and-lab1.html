@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Урок 1: Введение в Visual Prolog 5.2 и Лабораторная работа №1</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --card-border: #30363d;
+      --text: #c9d1d9;
+      --text-bright: #f0f6fc;
+      --accent: #58a6ff;
+      --accent-hover: #79c0ff;
+      --female: #f472b6;
+      --male: #60a5fa;
+      --spouse: #fbbf24;
+      --success: #3fb950;
+      --warning: #d29922;
+      --code-bg: #090d13;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      padding: 24px;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 32px;
+      padding: 24px;
+      background: linear-gradient(180deg, rgba(88, 166, 255, 0.12) 0%, transparent 100%);
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+    }
+    h1 {
+      color: var(--text-bright);
+      font-size: 2.2rem;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: var(--accent);
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+    section {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+    h2 {
+      color: var(--text-bright);
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    h3 {
+      color: var(--accent-hover);
+      margin: 18px 0 8px 0;
+      font-size: 1.15rem;
+    }
+    p { margin-bottom: 12px; }
+    ul, ol { margin-left: 24px; margin-bottom: 14px; }
+    li { margin-bottom: 6px; }
+    
+    pre, code {
+      font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid #21262d;
+      border-radius: 8px;
+      padding: 14px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      color: #e6edf3;
+      margin-bottom: 14px;
+      position: relative;
+    }
+    code {
+      background: rgba(110, 118, 129, 0.2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+      color: #79c0ff;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #21262d;
+      border: 1px solid #30363d;
+      color: #c9d1d9;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .copy-btn:hover {
+      background: #30363d;
+      color: #fff;
+    }
+    
+    /* Interactive Simulator */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .btn {
+      background: #21262d;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .btn:hover, .btn.active {
+      background: var(--accent);
+      color: #0d1117;
+      font-weight: 600;
+      border-color: var(--accent);
+    }
+    .result-box {
+      background: #090d13;
+      border-left: 4px solid var(--accent);
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin-top: 12px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.95rem;
+    }
+    
+    /* Tree SVG Container */
+    .tree-container {
+      width: 100%;
+      overflow-x: auto;
+      background: #090d13;
+      border-radius: 8px;
+      padding: 16px;
+      border: 1px solid var(--card-border);
+      text-align: center;
+    }
+    svg {
+      max-width: 100%;
+      height: auto;
+    }
+    .node rect {
+      rx: 8;
+      ry: 8;
+      stroke-width: 2;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .node.male rect { fill: #1e3a8a; stroke: #3b82f6; }
+    .node.female rect { fill: #831843; stroke: #ec4899; }
+    .node.selected rect { stroke: #facc15; stroke-width: 4; filter: drop-shadow(0 0 8px #facc15); }
+    .node.highlight-res rect { stroke: #4ade80; stroke-width: 4; filter: drop-shadow(0 0 8px #4ade80); }
+    .node text {
+      fill: #fff;
+      font-size: 13px;
+      font-weight: bold;
+      pointer-events: none;
+      text-anchor: middle;
+      dominant-baseline: central;
+    }
+    .link {
+      fill: none;
+      stroke: #4b5563;
+      stroke-width: 1.8;
+    }
+    .link.spouse {
+      stroke: #fbbf24;
+      stroke-dasharray: 4, 3;
+      stroke-width: 2;
+    }
+    
+    /* Quiz */
+    .quiz-q {
+      background: #11151c;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .quiz-options button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: #1c2128;
+      border: 1px solid #30363d;
+      color: #c9d1d9;
+      padding: 10px 14px;
+      margin-top: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .quiz-options button:hover {
+      background: #282e37;
+    }
+    .quiz-options button.correct {
+      background: rgba(63, 185, 80, 0.2) !important;
+      border-color: #3fb950 !important;
+      color: #3fb950 !important;
+      font-weight: bold;
+    }
+    .quiz-options button.wrong {
+      background: rgba(248, 81, 73, 0.2) !important;
+      border-color: #f85149 !important;
+      color: #f85149 !important;
+    }
+    .explanation {
+      display: none;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 6px;
+      background: #161b22;
+      font-size: 0.9rem;
+    }
+
+    /* Grid for Images */
+    .img-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+      margin: 16px 0;
+    }
+    .img-card {
+      background: #090d13;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+    .img-card img {
+      max-width: 100%;
+      border-radius: 4px;
+      border: 1px solid #30363d;
+    }
+    .img-card p {
+      font-size: 0.85rem;
+      color: #8b949e;
+      margin-top: 6px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 32px;
+      padding: 20px;
+      color: #8b949e;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-nav" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--card-border);">
+      <a href="../index.html" style="color: var(--accent); text-decoration: none; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">← В каталог хаба</a>
+      <span class="badge" style="margin-top: 0;">Visual Prolog 5.2 • Лабораторная 1</span>
+    </div>
+    <header>
+      <h1>Урок 1: Основы Visual Prolog 5.2</h1>
+      <div class="subtitle">Лабораторная работа № 1: «Факты и правила на Прологе»</div>
+      <div class="badge">ПГУ им. Т.Г. Шевченко • ИТИ • Системы ИИ</div>
+    </header>
+
+    <!-- SECTION 1: THEORY -->
+    <section>
+      <h2>🧠 1. Ментальная модель: как думает Пролог?</h2>
+      <p>В обычных языках (C#, Python, C++) вы пишете <strong>инструкции</strong>: «возьми это, проверь условие, повтори цикл». В Прологе вы создаете <strong>мир знаний</strong> (базу фактов и правил) и задаете вопросы (цели), а Пролог сам находит логические следствия!</p>
+      
+      <h3>3 кита Пролога:</h3>
+      <ul>
+        <li><strong>Факты (Facts):</strong> Аксиомы, о которых известно, что они истинны. Например: <code>likes(tom, baseball).</code> (Тому нравится бейсбол).</li>
+        <li><strong>Правила (Rules):</strong> Формулы вывода логики первого порядка: <em>«Голова истинна, ЕСЛИ тело истинно»</em>. Например:
+          <pre><code>likes(bill, Activity) :- likes(tom, Activity).</code></pre>
+          (Биллу нравится любая активность, которая нравится Тому).
+        </li>
+        <li><strong>Унификация и Backtracking:</strong> Пролог примеряет вопрос к фактам. Если натыкается на тупик, он <strong>откатывается назад</strong> к предыдущей развилке и ищет альтернативные пути.</li>
+      </ul>
+
+      <h3>Анатомия программы в Visual Prolog 5.2:</h3>
+      <p>В отличие от обычного Пролога (где типы динамические), Visual Prolog 5.2 строго типизирован для максимальной скорости компиляции:</p>
+      <pre><code>domains
+  % 1. Определение пользовательских типов данных (синонимов типов)
+  person = symbol
+
+predicates
+  % 2. Объявление предикатов и типов их аргументов
+  likes(person, symbol)
+
+clauses
+  % 3. Предложения: факты и правила
+  likes(tom, baseball).
+  likes(bill, Act) :- likes(tom, Act).
+
+goal
+  % 4. Запрос к системе (что нужно доказать/найти)
+  likes(bill, What).</code></pre>
+    </section>
+
+    <!-- SECTION 2: VISUAL PROLOG IDE GUIDE -->
+    <section>
+      <h2>⚙️ 2. Настройка среды Visual Prolog 5.2</h2>
+      <p>Чтобы запускать программы в режиме тестирования целей (<strong>Test Goal</strong> / <kbd>Ctrl+G</kbd>):</p>
+      <ol>
+        <li>Запустите Visual Prolog: <code>C:\VIP\BIN\WIN\32\vip.exe</code></li>
+        <li>Создайте базовый проект через <strong>Project | New Project</strong>:
+          <ul>
+            <li>В поле <em>Base Directory</em> укажите: <code>C:\VIP\DOC\Examples\TestGoal</code></li>
+            <li>В поле <em>Project Name</em> укажите: <code>TestGoal</code></li>
+            <li>Отметьте галочку <strong>Multiprogrammer Mode</strong></li>
+          </ul>
+        </li>
+        <li>На вкладке <strong>Target</strong> нажмите <em>Create</em>.</li>
+        <li>Откройте <strong>Options | Project | Compiler Options</strong> (вкладка <em>Warning</em>):
+          <ul>
+            <li>Включите переключатель <strong>Nondeterm</strong> (чтобы предикаты могли выдавать все решения).</li>
+            <li>Снимите галочки <em>Non Quoted Symbols</em>, <em>Strong Type Conversion Check</em>.</li>
+          </ul>
+        </li>
+        <li>Откройте файл с программой через <strong>File | Open</strong> (например, <code>Lab1_5.PRO</code>) и нажмите <strong>Project | Test Goal (Ctrl+G)</strong>!</li>
+      </ol>
+
+      <div class="img-grid">
+        <div class="img-card">
+          <img src="data:image/png;base64,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" alt="Application Expert">
+          <p>Рис. 1: Общие установки диалогового окна Application Expert</p>
+        </div>
+        <div class="img-card">
+          <img src="data:image/png;base64,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" alt="Target Tab">
+          <p>Рис. 2: Установки на вкладке Target</p>
+        </div>
+        <div class="img-card">
+          <img src="data:image/png;base64,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" alt="Compiler Options">
+          <p>Рис. 3: Установки опций компилятора (Nondeterm)</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: INTERACTIVE FAMILY TREE -->
+    <section>
+      <h2>🌳 3. Интерактивный тренажер: Генеалогическое древо (Задание 5)</h2>
+      <p>Ниже представлена полная схема семьи из 4 поколений (18 персон). Выберите родственное отношение или кликните по персоне на схеме, чтобы увидеть, как Пролог находит родственников!</p>
+      
+      <div class="controls">
+        <button class="btn" onclick="queryRelation('otec', 'alex')">Отец Alex</button>
+        <button class="btn" onclick="queryRelation('mat', 'alex')">Мать Alex</button>
+        <button class="btn" onclick="queryRelation('dedushka', 'alex')">Дедушки Alex</button>
+        <button class="btn" onclick="queryRelation('babushka', 'alex')">Бабушки Alex</button>
+        <button class="btn" onclick="queryRelation('pradedushka', 'kostya')">Прадедушки Kostya</button>
+        <button class="btn" onclick="queryRelation('brat', 'petr')">Сестра Petr</button>
+        <button class="btn" onclick="queryRelation('cousins', 'alex')">Двоюродные для Alex</button>
+        <button class="btn" onclick="queryRelation('dyadya', 'alex')">Дядя Alex</button>
+        <button class="btn" onclick="queryRelation('tetya', 'alex')">Тетя Alex</button>
+        <button class="btn" onclick="queryRelation('teshcha', 'alex')">Теща Alex</button>
+        <button class="btn" onclick="queryRelation('svekor', 'juli')">Свекор Juli</button>
+        <button class="btn" onclick="queryRelation('shurin', 'alex')">Шурин Alex</button>
+        <button class="btn" onclick="queryRelation('dever', 'natali')">Деверь / Золовка Natali</button>
+        <button class="btn" onclick="resetHighlight()">Сброс</button>
+      </div>
+
+      <div class="tree-container">
+        <svg id="treeSvg" width="950" height="520" viewBox="0 0 950 520">
+          <!-- Generation Labels -->
+          <text x="30" y="55" fill="#6b7280" font-size="12" font-weight="bold">Поколение 1</text>
+          <text x="30" y="185" fill="#6b7280" font-size="12" font-weight="bold">Поколение 2</text>
+          <text x="30" y="325" fill="#6b7280" font-size="12" font-weight="bold">Поколение 3</text>
+          <text x="30" y="465" fill="#6b7280" font-size="12" font-weight="bold">Поколение 4</text>
+
+          <!-- Marriage links (horizontal dashed) -->
+          <!-- Gen 1 -->
+          <line x1="160" y1="50" x2="210" y2="50" class="link spouse"/>
+          <line x1="430" y1="50" x2="480" y2="50" class="link spouse"/>
+          <line x1="700" y1="50" x2="750" y2="50" class="link spouse"/>
+          <!-- Gen 2 -->
+          <line x1="260" y1="180" x2="310" y2="180" class="link spouse"/>
+          <line x1="530" y1="180" x2="580" y2="180" class="link spouse"/>
+          <line x1="800" y1="180" x2="850" y2="180" class="link spouse"/>
+          <!-- Gen 3 -->
+          <line x1="285" y1="320" x2="335" y2="320" class="link spouse"/>
+          <line x1="645" y1="320" x2="695" y2="320" class="link spouse"/>
+
+          <!-- Parent-Child links -->
+          <!-- (Valera + Barbara) -> Liza, Nikolay -->
+          <path d="M 185 50 L 185 110 L 135 110 L 135 160" class="link"/>
+          <path d="M 185 110 L 235 110 L 235 160" class="link"/>
+
+          <!-- (Anna + Sergey) -> Katya, Petr -->
+          <path d="M 455 50 L 455 110 L 405 110 L 405 160" class="link"/>
+          <path d="M 455 110 L 505 110 L 505 160" class="link"/>
+
+          <!-- (Tatiana + Dmitriy) -> Natali, Mihail -->
+          <path d="M 725 50 L 725 110 L 675 110 L 675 160" class="link"/>
+          <path d="M 725 110 L 775 110 L 775 160" class="link"/>
+
+          <!-- (Liza + Petr) -> Alex -->
+          <path d="M 285 180 L 285 250 L 260 250 L 260 300" class="link"/>
+
+          <!-- (Nikolay + Natali) -> Raisa -->
+          <path d="M 555 180 L 555 250 L 505 250 L 505 300" class="link"/>
+
+          <!-- (Katya + Mihail) -> Alexandr, Juli -->
+          <path d="M 825 180 L 825 250 L 750 250 L 750 300" class="link"/>
+          <path d="M 825 250 L 850 250 L 850 300" class="link"/>
+
+          <!-- (Alex + Juli) -> Kostya -->
+          <path d="M 310 320 L 310 390 L 360 390 L 360 440" class="link"/>
+
+          <!-- (Raisa + Alexandr) -> Lyuda -->
+          <path d="M 670 320 L 670 390 L 620 390 L 620 440" class="link"/>
+
+          <!-- NODES: Gen 1 -->
+          <g id="node_valera" class="node male" onclick="nodeClicked('valera')">
+            <rect x="70" y="30" width="90" height="40"/>
+            <text x="115" y="50">Valera ♂</text>
+          </g>
+          <g id="node_barbara" class="node female" onclick="nodeClicked('barbara')">
+            <rect x="210" y="30" width="90" height="40"/>
+            <text x="255" y="50">Barbara ♀</text>
+          </g>
+
+          <g id="node_sergey" class="node male" onclick="nodeClicked('sergey')">
+            <rect x="340" y="30" width="90" height="40"/>
+            <text x="385" y="50">Sergey ♂</text>
+          </g>
+          <g id="node_anna" class="node female" onclick="nodeClicked('anna')">
+            <rect x="480" y="30" width="90" height="40"/>
+            <text x="525" y="50">Anna ♀</text>
+          </g>
+
+          <g id="node_dmitriy" class="node male" onclick="nodeClicked('dmitriy')">
+            <rect x="610" y="30" width="90" height="40"/>
+            <text x="655" y="50">Dmitriy ♂</text>
+          </g>
+          <g id="node_tatiana" class="node female" onclick="nodeClicked('tatiana')">
+            <rect x="750" y="30" width="90" height="40"/>
+            <text x="795" y="50">Tatiana ♀</text>
+          </g>
+
+          <!-- NODES: Gen 2 -->
+          <g id="node_nikolay" class="node male" onclick="nodeClicked('nikolay')">
+            <rect x="90" y="160" width="90" height="40"/>
+            <text x="135" y="180">Nikolay ♂</text>
+          </g>
+          <g id="node_liza" class="node female" onclick="nodeClicked('liza')">
+            <rect x="215" y="160" width="90" height="40"/>
+            <text x="260" y="180">Liza ♀</text>
+          </g>
+          <g id="node_petr" class="node male" onclick="nodeClicked('petr')">
+            <rect x="310" y="160" width="90" height="40"/>
+            <text x="355" y="180">Petr ♂</text>
+          </g>
+          <g id="node_katya" class="node female" onclick="nodeClicked('katya')">
+            <rect x="435" y="160" width="90" height="40"/>
+            <text x="480" y="180">Katya ♀</text>
+          </g>
+          <g id="node_natali" class="node female" onclick="nodeClicked('natali')">
+            <rect x="580" y="160" width="90" height="40"/>
+            <text x="625" y="180">Natali ♀</text>
+          </g>
+          <g id="node_mihail" class="node male" onclick="nodeClicked('mihail')">
+            <rect x="770" y="160" width="90" height="40"/>
+            <text x="815" y="180">Mihail ♂</text>
+          </g>
+
+          <!-- NODES: Gen 3 -->
+          <g id="node_alex" class="node male" onclick="nodeClicked('alex')">
+            <rect x="215" y="300" width="90" height="40"/>
+            <text x="260" y="320">Alex ♂</text>
+          </g>
+          <g id="node_juli" class="node female" onclick="nodeClicked('juli')">
+            <rect x="335" y="300" width="90" height="40"/>
+            <text x="380" y="320">Juli ♀</text>
+          </g>
+
+          <g id="node_raisa" class="node female" onclick="nodeClicked('raisa')">
+            <rect x="460" y="300" width="90" height="40"/>
+            <text x="505" y="320">Raisa ♀</text>
+          </g>
+          <g id="node_alexandr" class="node male" onclick="nodeClicked('alexandr')">
+            <rect x="695" y="300" width="90" height="40"/>
+            <text x="740" y="320">Alexandr ♂</text>
+          </g>
+
+          <!-- NODES: Gen 4 -->
+          <g id="node_kostya" class="node male" onclick="nodeClicked('kostya')">
+            <rect x="315" y="440" width="90" height="40"/>
+            <text x="360" y="460">Kostya ♂</text>
+          </g>
+          <g id="node_lyuda" class="node female" onclick="nodeClicked('lyuda')">
+            <rect x="575" y="440" width="90" height="40"/>
+            <text x="620" y="460">Lyuda ♀</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="result-box" id="resultOutput">
+        Кликните на кнопку запроса выше или на любого персонажа на схеме.
+      </div>
+    </section>
+
+    <!-- SECTION 4: CODE SOLUTIONS -->
+    <section>
+      <h2>💻 4. Решения задач и код для сдачи работы</h2>
+
+      <h3>Задания 1–4: Письменные ответы для отчета</h3>
+      <p>Полный текст ответов с обоснованиями уже сформирован в файле <code>lab1/REPORT_LAB1.md</code>.</p>
+
+      <h3>Задание 5: Исходный код Lab1_5.PRO для Visual Prolog 5.2</h3>
+      <p>Этот файл уже скомпилирован и скопирован в <code>C:\VIP\DOC\Examples\TestGoal\Lab1_5.PRO</code>:</p>
+      
+      <div style="position: relative;">
+        <button class="copy-btn" onclick="copyCode('proCodeBlock')">Копировать код</button>
+        <pre><code id="proCodeBlock">/*****************************************************************************
+    Лабораторная работа № 1
+    Задание 5: Генеалогическое древо и родственные отношения
+    Среда: Visual Prolog 5.2 Personal Edition
+*****************************************************************************/
+
+domains
+  person = symbol
+
+predicates
+  % Факты
+  мужчина(person)
+  женщина(person)
+  родитель(person, person)
+  супруг(person, person)
+
+  % Вспомогательные предикаты
+  родной_дядя(person, person)
+  родная_тетя(person, person)
+
+  % Кровные родственники
+  отец(person, person)
+  мать(person, person)
+  брат(person, person)
+  сестра(person, person)
+  дедушка(person, person)
+  бабушка(person, person)
+  прадедушка(person, person)
+  прабабушка(person, person)
+  дядя(person, person)
+  тетя(person, person)
+  племянник(person, person)
+  племянница(person, person)
+  двоюродный_брат(person, person)
+  двоюродная_сестра(person, person)
+  двоюродный_дедушка(person, person)
+  двоюродная_бабушка(person, person)
+  двоюродный_дядя(person, person)
+  двоюродная_тетя(person, person)
+  внучатый_племянник(person, person)
+  внучатая_племянница(person, person)
+
+  % Свойство (родство через брак)
+  муж(person, person)
+  жена(person, person)
+  тесть(person, person)
+  теща(person, person)
+  свекор(person, person)
+  свекровь(person, person)
+  невестка(person, person)
+  зять(person, person)
+  шурин(person, person)
+  свояченица(person, person)
+  деверь(person, person)
+  золовка(person, person)
+
+clauses
+  % --- Факты: мужчины и женщины ---
+  мужчина(valera).   мужчина(sergey).   мужчина(dmitriy).
+  мужчина(nikolay).  мужчина(petr).     мужчина(mihail).
+  мужчина(alex).     мужчина(alexandr). мужчина(kostya).
+
+  женщина(barbara).  женщина(anna).     женщина(tatiana).
+  женщина(liza).     женщина(katya).    женщина(natali).
+  женщина(raisa).    женщина(juli).     женщина(lyuda).
+
+  % --- Факты: родитель(Кто, Чей) ---
+  родитель(barbara, liza).    родитель(barbara, nikolay).
+  родитель(valera, liza).     родитель(valera, nikolay).
+  родитель(anna, katya).      родитель(anna, petr).
+  родитель(sergey, katya).    родитель(sergey, petr).
+  родитель(tatiana, natali).  родитель(tatiana, mihail).
+  родитель(dmitriy, natali).  родитель(dmitriy, mihail).
+
+  родитель(liza, alex).       родитель(petr, alex).
+  родитель(nikolay, raisa).   родитель(natali, raisa).
+  родитель(katya, alexandr).  родитель(katya, juli).
+  родитель(mihail, alexandr). родитель(mihail, juli).
+
+  родитель(alex, kostya).     родитель(juli, kostya).
+  родитель(raisa, lyuda).     родитель(alexandr, lyuda).
+
+  % --- Факты: супруг(Кто, Чей) ---
+  супруг(barbara, valera).    супруг(valera, barbara).
+  супруг(anna, sergey).       супруг(sergey, anna).
+  супруг(tatiana, dmitriy).   супруг(dmitriy, tatiana).
+  супруг(liza, petr).         супруг(petr, liza).
+  супруг(nikolay, natali).    супруг(natali, nikolay).
+  супруг(katya, mihail).      супруг(mihail, katya).
+  супруг(alex, juli).         супруг(juli, alex).
+  супруг(raisa, alexandr).    супруг(alexandr, raisa).
+
+  % --- Правила родства ---
+  отец(X, Y) :- родитель(X, Y), мужчина(X).
+  мать(X, Y) :- родитель(X, Y), женщина(X).
+
+  брат(X, Y) :-
+    мужчина(X), мать(M, X), мать(M, Y),
+    отец(F, X), отец(F, Y), X <> Y.
+
+  сестра(X, Y) :-
+    женщина(X), мать(M, X), мать(M, Y),
+    отец(F, X), отец(F, Y), X <> Y.
+
+  родной_дядя(X, Y) :- брат(X, P), родитель(P, Y).
+  родная_тетя(X, Y) :- сестра(X, P), родитель(P, Y).
+
+  дядя(X, Y) :- родной_дядя(X, Y).
+  дядя(X, Y) :- мужчина(X), супруг(X, W), родная_тетя(W, Y).
+
+  тетя(X, Y) :- родная_тетя(X, Y).
+  тетя(X, Y) :- женщина(X), супруг(X, H), родной_дядя(H, Y).
+
+  племянник(X, Y) :- мужчина(X), родитель(P, X), брат(P, Y).
+  племянник(X, Y) :- мужчина(X), родитель(P, X), сестра(P, Y).
+
+  племянница(X, Y) :- женщина(X), родитель(P, X), брат(P, Y).
+  племянница(X, Y) :- женщина(X), родитель(P, X), сестра(P, Y).
+
+  двоюродный_брат(X, Y) :- мужчина(X), родитель(P, X), родной_дядя(P, Y).
+  двоюродный_брат(X, Y) :- мужчина(X), родитель(P, X), родная_тетя(P, Y).
+
+  двоюродная_сестра(X, Y) :- женщина(X), родитель(P, X), родной_дядя(P, Y).
+  двоюродная_сестра(X, Y) :- женщина(X), родитель(P, X), родная_тетя(P, Y).
+
+  дедушка(X, Y) :- мужчина(X), родитель(X, P), родитель(P, Y).
+  бабушка(X, Y) :- женщина(X), родитель(X, P), родитель(P, Y).
+
+  прадедушка(X, Y) :- мужчина(X), родитель(X, P), дедушка(P, Y).
+  прадедушка(X, Y) :- мужчина(X), родитель(X, P), бабушка(P, Y).
+
+  прабабушка(X, Y) :- женщина(X), родитель(X, P), дедушка(P, Y).
+  прабабушка(X, Y) :- женщина(X), родитель(X, P), бабушка(P, Y).
+
+  двоюродный_дедушка(X, Y) :- родитель(P, Y), родной_дядя(X, P).
+  двоюродная_бабушка(X, Y) :- родитель(P, Y), родная_тетя(X, P).
+
+  двоюродный_дядя(X, Y) :- родитель(P, Y), двоюродный_брат(X, P).
+  двоюродная_тетя(X, Y) :- родитель(P, Y), двоюродная_сестра(X, P).
+
+  внучатый_племянник(X, Y) :- мужчина(X), родитель(P, X), племянник(P, Y).
+  внучатый_племянник(X, Y) :- мужчина(X), родитель(P, X), племянница(P, Y).
+
+  внучатая_племянница(X, Y) :- женщина(X), родитель(P, X), племянник(P, Y).
+  внучатая_племянница(X, Y) :- женщина(X), родитель(P, X), племянница(P, Y).
+
+  % --- Свойство (брачные отношения) ---
+  муж(X, Y) :- мужчина(X), супруг(X, Y).
+  жена(X, Y) :- женщина(X), супруг(X, Y).
+
+  тесть(X, Y) :- мужчина(Y), жена(W, Y), отец(X, W).
+  теща(X, Y) :- мужчина(Y), жена(W, Y), мать(X, W).
+
+  свекор(X, Y) :- женщина(Y), муж(H, Y), отец(X, H).
+  свекровь(X, Y) :- женщина(Y), муж(H, Y), мать(X, H).
+
+  невестка(X, Y) :- женщина(X), муж(H, X), родитель(Y, H).
+  невестка(X, Y) :- женщина(X), муж(H, X), брат(Y, H).
+  невестка(X, Y) :- женщина(X), муж(H, X), сестра(Y, H).
+
+  зять(X, Y) :- мужчина(X), жена(W, X), родитель(Y, W).
+  зять(X, Y) :- мужчина(X), жена(W, X), брат(Y, W).
+  зять(X, Y) :- мужчина(X), жена(W, X), сестра(Y, W).
+
+  шурин(X, Y) :- мужчина(Y), жена(W, Y), брат(X, W).
+  свояченица(X, Y) :- мужчина(Y), жена(W, Y), сестра(X, W).
+
+  деверь(X, Y) :- женщина(Y), муж(H, Y), брат(X, H).
+  золовка(X, Y) :- женщина(Y), муж(H, Y), сестра(X, H).
+
+goal
+  % Проверка всех дедушек Алекса:
+  дедушка(Ded, alex),
+  write("Дедушка Алекса: ", Ded), nl,
+  fail; true.</code></pre>
+      </div>
+    </section>
+
+    <!-- SECTION 5: RETRIEVAL PRACTICE QUIZ -->
+    <section>
+      <h2>🎯 5. Проверь себя (Тест на понимание)</h2>
+      
+      <div class="quiz-q" id="q1">
+        <p><strong>1. Что произойдет, если в Visual Prolog задать цель: <code>likes(Who, _)</code>?</strong></p>
+        <div class="quiz-options">
+          <button onclick="checkAns(this, false, 'q1')">Пролог выдаст синтаксическую ошибку отсутствия второй переменной</button>
+          <button onclick="checkAns(this, true, 'q1')">Пролог найдет всех людей Who, не связывая значение второго аргумента</button>
+          <button onclick="checkAns(this, false, 'q1')">Пролог присвоит анонимной переменной строковое значение 'any'</button>
+        </div>
+        <div class="explanation">Символ <code>_</code> (анонимная переменная) сопоставляется с любым объектом, но никогда не связывает значение и не выводит его пользователю.</div>
+      </div>
+
+      <div class="quiz-q" id="q2">
+        <p><strong>2. Почему в Visual Prolog дизъюнкцию условий правила обычно оформляют отдельными предложениями (clauses)?</strong></p>
+        <div class="quiz-options">
+          <button onclick="checkAns(this, false, 'q2')">Потому что оператор 'точка с запятой' запрещен компилятором вовсе</button>
+          <button onclick="checkAns(this, true, 'q2')">Потому что Visual Prolog не поддерживает группировку дизъюнкций скобками в теле правила</button>
+          <button onclick="checkAns(this, false, 'q2')">Потому что в Прологе вообще не бывает дизъюнкций</button>
+        </div>
+        <div class="explanation">В Turbo/Visual Prolog конструкции вида <code>(A ; B)</code> внутри предложения вызывают ошибку 406. Дизъюнкция логично реализуется альтернативными предложениями с одинаковой головой!</div>
+      </div>
+
+      <div class="quiz-q" id="q3">
+        <p><strong>3. Кто приходится «шурином» для Алекса (Alex)?</strong></p>
+        <div class="quiz-options">
+          <button onclick="checkAns(this, false, 'q3')">Николай (Nikolay)</button>
+          <button onclick="checkAns(this, true, 'q3')">Александр (Alexandr)</button>
+          <button onclick="checkAns(this, false, 'q3')">Константин (Kostya)</button>
+        </div>
+        <div class="explanation">Шурин — это брат жены! Жена Алекса — Джули (Juli). Брат Джули — Александр (Alexandr). Значит, шурин Алекса — Александр!</div>
+      </div>
+    </section>
+
+    <footer>
+      Обучающий модуль подготовлен персональным AI-наставником Antigravity • Впереди Лабораторная работа № 2!
+    </footer>
+  </div>
+
+  <script>
+    // Database for interactive demo
+    const database = {
+      valera:   { name: 'Valera',   gender: 'm', spouse: 'barbara', parents: [], children: ['liza', 'nikolay'] },
+      barbara:  { name: 'Barbara',  gender: 'f', spouse: 'valera',  parents: [], children: ['liza', 'nikolay'] },
+      sergey:   { name: 'Sergey',   gender: 'm', spouse: 'anna',    parents: [], children: ['katya', 'petr'] },
+      anna:     { name: 'Anna',     gender: 'f', spouse: 'sergey',  parents: [], children: ['katya', 'petr'] },
+      dmitriy:  { name: 'Dmitriy',  gender: 'm', spouse: 'tatiana', parents: [], children: ['natali', 'mihail'] },
+      tatiana:  { name: 'Tatiana',  gender: 'f', spouse: 'dmitriy', parents: [], children: ['natali', 'mihail'] },
+
+      nikolay:  { name: 'Nikolay',  gender: 'm', spouse: 'natali',   parents: ['valera', 'barbara'], children: ['raisa'] },
+      liza:     { name: 'Liza',     gender: 'f', spouse: 'petr',     parents: ['valera', 'barbara'], children: ['alex'] },
+      petr:     { name: 'Petr',     gender: 'm', spouse: 'liza',     parents: ['sergey', 'anna'],    children: ['alex'] },
+      katya:    { name: 'Katya',    gender: 'f', spouse: 'mihail',   parents: ['sergey', 'anna'],    children: ['alexandr', 'juli'] },
+      natali:   { name: 'Natali',   gender: 'f', spouse: 'nikolay',  parents: ['dmitriy', 'tatiana'], children: ['raisa'] },
+      mihail:   { name: 'Mihail',   gender: 'm', spouse: 'katya',    parents: ['dmitriy', 'tatiana'], children: ['alexandr', 'juli'] },
+
+      alex:     { name: 'Alex',     gender: 'm', spouse: 'juli',     parents: ['petr', 'liza'],     children: ['kostya'] },
+      juli:     { name: 'Juli',     gender: 'f', spouse: 'alex',     parents: ['mihail', 'katya'],  children: ['kostya'] },
+      raisa:    { name: 'Raisa',    gender: 'f', spouse: 'alexandr', parents: ['nikolay', 'natali'], children: ['lyuda'] },
+      alexandr: { name: 'Alexandr', gender: 'm', spouse: 'raisa',    parents: ['mihail', 'katya'],  children: ['lyuda'] },
+
+      kostya:   { name: 'Kostya',   gender: 'm', spouse: null,       parents: ['alex', 'juli'],     children: [] },
+      lyuda:    { name: 'Lyuda',    gender: 'f', spouse: null,       parents: ['alexandr', 'raisa'], children: [] }
+    };
+
+    function resetHighlight() {
+      document.querySelectorAll('.node').forEach(el => {
+        el.classList.remove('selected', 'highlight-res');
+      });
+      document.getElementById('resultOutput').innerHTML = 'Готово к выполнению следующего запроса.';
+    }
+
+    function nodeClicked(id) {
+      resetHighlight();
+      const node = document.getElementById('node_' + id);
+      if (node) node.classList.add('selected');
+      const p = database[id];
+      let html = `<strong>Информация о персоне: ${p.name} (${p.gender === 'm' ? 'Мужчина' : 'Женщина'})</strong><br>`;
+      html += `• Супруг(а): ${p.spouse ? database[p.spouse].name : 'Нет'}<br>`;
+      html += `• Родители: ${p.parents.length ? p.parents.map(x => database[x].name).join(', ') : 'Не указаны в БД (Поколение 1)'}<br>`;
+      html += `• Дети: ${p.children.length ? p.children.map(x => database[x].name).join(', ') : 'Нет'}<br>`;
+      document.getElementById('resultOutput').innerHTML = html;
+    }
+
+    function queryRelation(type, target) {
+      resetHighlight();
+      const targetNode = document.getElementById('node_' + target);
+      if (targetNode) targetNode.classList.add('selected');
+
+      let results = [];
+      let explanation = '';
+
+      if (type === 'otec') {
+        results = database[target].parents.filter(p => database[p].gender === 'm');
+        explanation = `Отец: родитель мужского пола. Для ${target} -> ${results.join(', ')}`;
+      } else if (type === 'mat') {
+        results = database[target].parents.filter(p => database[p].gender === 'f');
+        explanation = `Мать: родитель женского пола. Для ${target} -> ${results.join(', ')}`;
+      } else if (type === 'dedushka') {
+        results = [];
+        database[target].parents.forEach(p => {
+          database[p].parents.forEach(gp => {
+            if (database[gp].gender === 'm') results.push(gp);
+          });
+        });
+        explanation = `Дедушки: отцы родителей. Родители: ${database[target].parents.join(', ')} -> отцы: ${results.join(', ')}`;
+      } else if (type === 'babushka') {
+        results = [];
+        database[target].parents.forEach(p => {
+          database[p].parents.forEach(gp => {
+            if (database[gp].gender === 'f') results.push(gp);
+          });
+        });
+        explanation = `Бабушки: матери родителей. Родители: ${database[target].parents.join(', ')} -> матери: ${results.join(', ')}`;
+      } else if (type === 'pradedushka') {
+        results = ['valera', 'sergey', 'dmitriy'];
+        explanation = `Прадедушки Kostya: дедушки его родителей Alex (Valera, Sergey) и Juli (Dmitriy, Sergey)`;
+      } else if (type === 'brat') {
+        // сестра petr
+        results = ['katya'];
+        explanation = `Сестра Петра: дочь Сергея и Анны (Katya)`;
+      } else if (type === 'cousins') {
+        results = ['raisa', 'alexandr', 'juli'];
+        explanation = `Двоюродные братья и сестры для Alex: дети дядей и теток (Nikolay, Katya). Результаты: Raisa, Alexandr, Juli`;
+      } else if (type === 'dyadya') {
+        results = ['nikolay', 'mihail'];
+        explanation = `Дяди для Alex: родной дядя Nikolay (брат матери Liza) и дядя по браку Mihail (муж тети Katya)`;
+      } else if (type === 'tetya') {
+        results = ['katya', 'natali'];
+        explanation = `Тети для Alex: родная тетя Katya (сестра отца Petr) и тетя по браку Natali (жена дяди Nikolay)`;
+      } else if (type === 'teshcha') {
+        // Теща Alex: мать жены Juli -> Katya
+        results = ['katya'];
+        explanation = `Теща Алекса: мать его жены Juli. Жена: Juli -> мать: Katya`;
+      } else if (type === 'svekor') {
+        // Свекор Juli: отец мужа Alex -> Petr
+        results = ['petr'];
+        explanation = `Свекор Джули: отец ее мужа Alex. Муж: Alex -> отец: Petr`;
+      } else if (type === 'shurin') {
+        // Шурин Alex: брат жены Juli -> Alexandr
+        results = ['alexandr'];
+        explanation = `Шурин Алекса: брат его жены Juli -> Alexandr`;
+      } else if (type === 'dever') {
+        // Деверь/золовка для Natali (муж Nikolay):
+        // сестра мужа -> Liza (золовка)
+        results = ['liza'];
+        explanation = `Золовка для Natali: сестра ее мужа Nikolay -> Liza (деверей нет, так как у Nikolay нет братьев)`;
+      }
+
+      results.forEach(id => {
+        const el = document.getElementById('node_' + id);
+        if (el) el.classList.add('highlight-res');
+      });
+
+      let html = `<strong>?- ${type}(X, ${target}).</strong><br>`;
+      html += `Найдено решений: ${results.length}<br>`;
+      results.forEach(r => {
+        html += `• X = <strong>${database[r].name}</strong><br>`;
+      });
+      html += `<span style="color: #8b949e;">💡 Логический вывод: ${explanation}</span>`;
+      document.getElementById('resultOutput').innerHTML = html;
+    }
+
+    function checkAns(btn, isCorrect, qId) {
+      const q = document.getElementById(qId);
+      const buttons = q.querySelectorAll('button');
+      buttons.forEach(b => b.disabled = true);
+      if (isCorrect) {
+        btn.classList.add('correct');
+      } else {
+        btn.classList.add('wrong');
+        buttons.forEach(b => {
+          if (b.getAttribute('onclick').includes('true')) b.classList.add('correct');
+        });
+      }
+      q.querySelector('.explanation').style.display = 'block';
+    }
+
+    function copyCode(id) {
+      const text = document.getElementById(id).innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Код успешно скопирован в буфер обмена!');
+      });
+    }
+  </script>
+</body>
+</html>
