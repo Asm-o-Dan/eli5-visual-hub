@@ -542,279 +542,257 @@ goal
       <div style="position: relative;">
         <button class="copy-btn" onclick="copyCode('proCodeBlock')">Копировать код</button>
         <pre><code id="proCodeBlock">/*****************************************************************************
-    Visual Prolog 5.2 - Laboratory Work 1 - Task 5
-    Genealogical Tree & Kinship Rules (Rodstvennye svyazi)
-    Encoding: Standard ASCII (No mojibake / Net krakosyabr)
+    Лабораторная работа 1
+    Задание 5: Генеалогическое древо и родственные отношения
+    Среда: Visual Prolog 5.2
 *****************************************************************************/
 
 domains
   person = symbol
 
 predicates
-  % --- Bazovye fakty ---
-  muzhchina(person)
-  zhenshchina(person)
-  roditel(person, person)
-  suprug(person, person)
+  % Базовые предикаты фактов
+  мужчина(person)
+  женщина(person)
+  родитель(person, person)
+  супруг(person, person)
 
-  % --- Vspomogatelnye predikaty ---
-  rodnoy_dyadya(person, person)
-  rodnaya_tetya(person, person)
+  % Вспомогательные предикаты
+  родной_дядя(person, person)
+  родная_тетя(person, person)
 
-  % --- Krovnye rodstvenniki ---
-  otec(person, person)
-  mat(person, person)
-  brat(person, person)
-  sestra(person, person)
-  dedushka(person, person)
-  babushka(person, person)
-  pradedushka(person, person)
-  prababushka(person, person)
-  dyadya(person, person)
-  tetya(person, person)
-  plemyannik(person, person)
-  plemyannica(person, person)
-  dvoyurodny_brat(person, person)
-  dvoyurodnaya_sestra(person, person)
-  dvoyurodny_dedushka(person, person)
-  dvoyurodnaya_babushka(person, person)
-  dvoyurodny_dyadya(person, person)
-  dvoyurodnaya_tetya(person, person)
-  vnuchaty_plemyannik(person, person)
-  vnuchataya_plemyannica(person, person)
+  % Кровные родственники
+  отец(person, person)
+  мать(person, person)
+  брат(person, person)
+  сестра(person, person)
+  дедушка(person, person)
+  бабушка(person, person)
+  прадедушка(person, person)
+  прабабушка(person, person)
+  дядя(person, person)
+  тетя(person, person)
+  племянник(person, person)
+  племянница(person, person)
+  двоюродный_брат(person, person)
+  двоюродная_сестра(person, person)
+  двоюродный_дедушка(person, person)
+  двоюродная_бабушка(person, person)
+  двоюродный_дядя(person, person)
+  двоюродная_тетя(person, person)
+  внучатый_племянник(person, person)
+  внучатая_племянница(person, person)
 
-  % --- Svoystvo (brak) ---
-  muzh(person, person)
-  zhena(person, person)
-  test_(person, person)
-  teshcha(person, person)
-  svekor(person, person)
-  svekrov(person, person)
-  nevestka(person, person)
-  zyat(person, person)
-  shurin(person, person)
-  svoyachenica(person, person)
-  dever(person, person)
-  zolovka(person, person)
-
-  % --- English Aliases (Dlya udobstva) ---
-  father(person, person)
-  mother(person, person)
-  brother(person, person)
-  sister(person, person)
-  grandfather(person, person)
-  grandmother(person, person)
-  uncle(person, person)
-  aunt(person, person)
+  % Свойство (родство через брак)
+  муж(person, person)
+  жена(person, person)
+  тесть(person, person)
+  теща(person, person)
+  свекор(person, person)
+  свекровь(person, person)
+  невестка(person, person)
+  зять(person, person)
+  шурин(person, person)
+  свояченица(person, person)
+  деверь(person, person)
+  золовка(person, person)
 
 clauses
   % =========================================================================
-  % 1. FAKTY: Muzhchiny i Zhenshchiny
+  % 1. ФАКТЫ: Мужчины и Женщины
   % =========================================================================
-  muzhchina(valera).
-  muzhchina(sergey).
-  muzhchina(dmitriy).
-  muzhchina(nikolay).
-  muzhchina(petr).
-  muzhchina(mihail).
-  muzhchina(alex).
-  muzhchina(alexandr).
-  muzhchina(kostya).
+  мужчина(valera).
+  мужчина(sergey).
+  мужчина(dmitriy).
+  мужчина(nikolay).
+  мужчина(petr).
+  мужчина(mihail).
+  мужчина(alex).
+  мужчина(alexandr).
+  мужчина(kostya).
 
-  zhenshchina(barbara).
-  zhenshchina(anna).
-  zhenshchina(tatiana).
-  zhenshchina(liza).
-  zhenshchina(katya).
-  zhenshchina(natali).
-  zhenshchina(raisa).
-  zhenshchina(juli).
-  zhenshchina(lyuda).
-
-  % =========================================================================
-  % 2. FAKTY: roditel(Kto, Chey)
-  % =========================================================================
-  % Pokolenie 1 -> 2
-  roditel(barbara, liza).
-  roditel(barbara, nikolay).
-  roditel(valera, liza).
-  roditel(valera, nikolay).
-
-  roditel(anna, katya).
-  roditel(anna, petr).
-  roditel(sergey, katya).
-  roditel(sergey, petr).
-
-  roditel(tatiana, natali).
-  roditel(tatiana, mihail).
-  roditel(dmitriy, natali).
-  roditel(dmitriy, mihail).
-
-  % Pokolenie 2 -> 3
-  roditel(liza, alex).
-  roditel(petr, alex).
-
-  roditel(nikolay, raisa).
-  roditel(natali, raisa).
-
-  roditel(katya, alexandr).
-  roditel(katya, juli).
-  roditel(mihail, alexandr).
-  roditel(mihail, juli).
-
-  % Pokolenie 3 -> 4
-  roditel(alex, kostya).
-  roditel(juli, kostya).
-
-  roditel(raisa, lyuda).
-  roditel(alexandr, lyuda).
+  женщина(barbara).
+  женщина(anna).
+  женщина(tatiana).
+  женщина(liza).
+  женщина(katya).
+  женщина(natali).
+  женщина(raisa).
+  женщина(juli).
+  женщина(lyuda).
 
   % =========================================================================
-  % 3. FAKTY: suprug(Kto, Chey)
+  % 2. ФАКТЫ: Отношение родитель(Кто, Чей)
   % =========================================================================
-  suprug(barbara, valera).
-  suprug(valera, barbara).
+  % Поколение 1 -> 2
+  родитель(barbara, liza).
+  родитель(barbara, nikolay).
+  родитель(valera, liza).
+  родитель(valera, nikolay).
 
-  suprug(anna, sergey).
-  suprug(sergey, anna).
+  родитель(anna, katya).
+  родитель(anna, petr).
+  родитель(sergey, katya).
+  родитель(sergey, petr).
 
-  suprug(tatiana, dmitriy).
-  suprug(dmitriy, tatiana).
+  родитель(tatiana, natali).
+  родитель(tatiana, mihail).
+  родитель(dmitriy, natali).
+  родитель(dmitriy, mihail).
 
-  suprug(liza, petr).
-  suprug(petr, liza).
+  % Поколение 2 -> 3
+  родитель(liza, alex).
+  родитель(petr, alex).
 
-  suprug(nikolay, natali).
-  suprug(natali, nikolay).
+  родитель(nikolay, raisa).
+  родитель(natali, raisa).
 
-  suprug(katya, mihail).
-  suprug(mihail, katya).
+  родитель(katya, alexandr).
+  родитель(katya, juli).
+  родитель(mihail, alexandr).
+  родитель(mihail, juli).
 
-  suprug(alex, juli).
-  suprug(juli, alex).
+  % Поколение 3 -> 4
+  родитель(alex, kostya).
+  родитель(juli, kostya).
 
-  suprug(raisa, alexandr).
-  suprug(alexandr, raisa).
+  родитель(raisa, lyuda).
+  родитель(alexandr, lyuda).
 
   % =========================================================================
-  % 4. PRAVILA: Krovnoe rodstvo
+  % 3. ФАКТЫ: Отношение супруг(Кто, Чей)
   % =========================================================================
-  % Otec i mat
-  otec(X, Y) :- roditel(X, Y), muzhchina(X).
-  mat(X, Y) :- roditel(X, Y), zhenshchina(X).
+  супруг(barbara, valera).
+  супруг(valera, barbara).
 
-  % Rodnye brat i sestra (obshchie otec i mat, X <> Y)
-  brat(X, Y) :-
-    muzhchina(X),
-    mat(M, X), mat(M, Y),
-    otec(F, X), otec(F, Y),
+  супруг(anna, sergey).
+  супруг(sergey, anna).
+
+  супруг(tatiana, dmitriy).
+  супруг(dmitriy, tatiana).
+
+  супруг(liza, petr).
+  супруг(petr, liza).
+
+  супруг(nikolay, natali).
+  супруг(natali, nikolay).
+
+  супруг(katya, mihail).
+  супруг(mihail, katya).
+
+  супруг(alex, juli).
+  супруг(juli, alex).
+
+  супруг(raisa, alexandr).
+  супруг(alexandr, raisa).
+
+  % =========================================================================
+  % 4. ПРАВИЛА: Кровные родственники
+  % =========================================================================
+  % Отец и мать
+  отец(X, Y) :- родитель(X, Y), мужчина(X).
+  мать(X, Y) :- родитель(X, Y), женщина(X).
+
+  % Родные брат и сестра (общие отец и мать, исключая совпадение X = Y)
+  брат(X, Y) :-
+    мужчина(X),
+    мать(M, X), мать(M, Y),
+    отец(F, X), отец(F, Y),
     X <> Y.
 
-  sestra(X, Y) :-
-    zhenshchina(X),
-    mat(M, X), mat(M, Y),
-    otec(F, X), otec(F, Y),
+  сестра(X, Y) :-
+    женщина(X),
+    мать(M, X), мать(M, Y),
+    отец(F, X), отец(F, Y),
     X <> Y.
 
-  % Rodnoy dyadya i rodnaya tetya
-  rodnoy_dyadya(X, Y) :- brat(X, P), roditel(P, Y).
-  rodnaya_tetya(X, Y) :- sestra(X, P), roditel(P, Y).
+  % Родные дядя и тетя (брат / сестра одного из родителей)
+  родной_дядя(X, Y) :- брат(X, P), родитель(P, Y).
+  родная_тетя(X, Y) :- сестра(X, P), родитель(P, Y).
 
-  % Dyadya i tetya (rodnye + po braku)
-  dyadya(X, Y) :- rodnoy_dyadya(X, Y).
-  dyadya(X, Y) :- muzhchina(X), suprug(X, W), rodnaya_tetya(W, Y).
+  % Дядя и тетя (включая супругов)
+  дядя(X, Y) :- родной_дядя(X, Y).
+  дядя(X, Y) :- мужчина(X), супруг(X, W), родная_тетя(W, Y).
 
-  tetya(X, Y) :- rodnaya_tetya(X, Y).
-  tetya(X, Y) :- zhenshchina(X), suprug(X, H), rodnoy_dyadya(H, Y).
+  тетя(X, Y) :- родная_тетя(X, Y).
+  тетя(X, Y) :- женщина(X), супруг(X, H), родной_дядя(H, Y).
 
-  % Plemyannik i plemyannica
-  plemyannik(X, Y) :- muzhchina(X), roditel(P, X), brat(P, Y).
-  plemyannik(X, Y) :- muzhchina(X), roditel(P, X), sestra(P, Y).
+  % Племянник и племянница (дети братьев и сестер)
+  племянник(X, Y) :- мужчина(X), родитель(P, X), брат(P, Y).
+  племянник(X, Y) :- мужчина(X), родитель(P, X), сестра(P, Y).
 
-  plemyannica(X, Y) :- zhenshchina(X), roditel(P, X), brat(P, Y).
-  plemyannica(X, Y) :- zhenshchina(X), roditel(P, X), sestra(P, Y).
+  племянница(X, Y) :- женщина(X), родитель(P, X), брат(P, Y).
+  племянница(X, Y) :- женщина(X), родитель(P, X), сестра(P, Y).
 
-  % Dvoyurodny brat i sestra
-  dvoyurodny_brat(X, Y) :- muzhchina(X), roditel(P, X), rodnoy_dyadya(P, Y).
-  dvoyurodny_brat(X, Y) :- muzhchina(X), roditel(P, X), rodnaya_tetya(P, Y).
+  % Двоюродный брат и двоюродная сестра (дети родных дяди или тети)
+  двоюродный_брат(X, Y) :- мужчина(X), родитель(P, X), родной_дядя(P, Y).
+  двоюродный_брат(X, Y) :- мужчина(X), родитель(P, X), родная_тетя(P, Y).
 
-  dvoyurodnaya_sestra(X, Y) :- zhenshchina(X), roditel(P, X), rodnoy_dyadya(P, Y).
-  dvoyurodnaya_sestra(X, Y) :- zhenshchina(X), roditel(P, X), rodnaya_tetya(P, Y).
+  двоюродная_сестра(X, Y) :- женщина(X), родитель(P, X), родной_дядя(P, Y).
+  двоюродная_сестра(X, Y) :- женщина(X), родитель(P, X), родная_тетя(P, Y).
 
-  % Dedushka i babushka
-  dedushka(X, Y) :- muzhchina(X), roditel(X, P), roditel(P, Y).
-  babushka(X, Y) :- zhenshchina(X), roditel(X, P), roditel(P, Y).
+  % Дедушка и бабушка
+  дедушка(X, Y) :- мужчина(X), родитель(X, P), родитель(P, Y).
+  бабушка(X, Y) :- женщина(X), родитель(X, P), родитель(P, Y).
 
-  % Pradedushka i prababushka
-  pradedushka(X, Y) :- muzhchina(X), roditel(X, P), dedushka(P, Y).
-  pradedushka(X, Y) :- muzhchina(X), roditel(X, P), babushka(P, Y).
+  % Прадедушка и прабабушка
+  прадедушка(X, Y) :- мужчина(X), родитель(X, P), дедушка(P, Y).
+  прадедушка(X, Y) :- мужчина(X), родитель(X, P), бабушка(P, Y).
 
-  prababushka(X, Y) :- zhenshchina(X), roditel(X, P), dedushka(P, Y).
-  prababushka(X, Y) :- zhenshchina(X), roditel(X, P), babushka(P, Y).
+  прабабушка(X, Y) :- женщина(X), родитель(X, P), дедушка(P, Y).
+  прабабушка(X, Y) :- женщина(X), родитель(X, P), бабушка(P, Y).
 
-  % Dvoyurodny dedushka i babushka (dyadya/tetya otca ili materi)
-  dvoyurodny_dedushka(X, Y) :- roditel(P, Y), rodnoy_dyadya(X, P).
-  dvoyurodnaya_babushka(X, Y) :- roditel(P, Y), rodnaya_tetya(X, P).
+  % Двоюродный дедушка и двоюродная бабушка (дядя/тетя отца или матери)
+  двоюродный_дедушка(X, Y) :- родитель(P, Y), родной_дядя(X, P).
+  двоюродная_бабушка(X, Y) :- родитель(P, Y), родная_тетя(X, P).
 
-  % Dvoyurodny dyadya i tetya (dvoyurodny brat/sestra otca ili materi)
-  dvoyurodny_dyadya(X, Y) :- roditel(P, Y), dvoyurodny_brat(X, P).
-  dvoyurodnaya_tetya(X, Y) :- roditel(P, Y), dvoyurodnaya_sestra(X, P).
+  % Двоюродный дядя и двоюродная тетя (двоюродный брат/сестра отца или матери)
+  двоюродный_дядя(X, Y) :- родитель(P, Y), двоюродный_брат(X, P).
+  двоюродная_тетя(X, Y) :- родитель(P, Y), двоюродная_сестра(X, P).
 
-  % Vnuchaty plemyannik i plemyannica
-  vnuchaty_plemyannik(X, Y) :- muzhchina(X), roditel(P, X), plemyannik(P, Y).
-  vnuchaty_plemyannik(X, Y) :- muzhchina(X), roditel(P, X), plemyannica(P, Y).
+  % Внучатый племянник и внучатая племянница (дети племянника или племянницы)
+  внучатый_племянник(X, Y) :- мужчина(X), родитель(P, X), племянник(P, Y).
+  внучатый_племянник(X, Y) :- мужчина(X), родитель(P, X), племянница(P, Y).
 
-  vnuchataya_plemyannica(X, Y) :- zhenshchina(X), roditel(P, X), plemyannik(P, Y).
-  vnuchataya_plemyannica(X, Y) :- zhenshchina(X), roditel(P, X), plemyannica(P, Y).
-
-  % =========================================================================
-  % 5. PRAVILA: Svoystvo (brak)
-  % =========================================================================
-  muzh(X, Y) :- muzhchina(X), suprug(X, Y).
-  zhena(X, Y) :- zhenshchina(X), suprug(X, Y).
-
-  % Test i Teshcha
-  test_(X, Y) :- muzhchina(Y), zhena(W, Y), otec(X, W).
-  teshcha(X, Y) :- muzhchina(Y), zhena(W, Y), mat(X, W).
-
-  % Svekor i Svekrov
-  svekor(X, Y) :- zhenshchina(Y), muzh(H, Y), otec(X, H).
-  svekrov(X, Y) :- zhenshchina(Y), muzh(H, Y), mat(X, H).
-
-  % Nevestka
-  nevestka(X, Y) :- zhenshchina(X), muzh(H, X), roditel(Y, H).
-  nevestka(X, Y) :- zhenshchina(X), muzh(H, X), brat(Y, H).
-  nevestka(X, Y) :- zhenshchina(X), muzh(H, X), sestra(Y, H).
-
-  % Zyat
-  zyat(X, Y) :- muzhchina(X), zhena(W, X), roditel(Y, W).
-  zyat(X, Y) :- muzhchina(X), zhena(W, X), brat(Y, W).
-  zyat(X, Y) :- muzhchina(X), zhena(W, X), sestra(Y, W).
-
-  % Shurin i Svoyachenica
-  shurin(X, Y) :- muzhchina(Y), zhena(W, Y), brat(X, W).
-  svoyachenica(X, Y) :- muzhchina(Y), zhena(W, Y), sestra(X, W).
-
-  % Dever i Zolovka
-  dever(X, Y) :- zhenshchina(Y), muzh(H, Y), brat(X, H).
-  zolovka(X, Y) :- zhenshchina(Y), muzh(H, Y), sestra(X, H).
+  внучатая_племянница(X, Y) :- женщина(X), родитель(P, X), племянник(P, Y).
+  внучатая_племянница(X, Y) :- женщина(X), родитель(P, X), племянница(P, Y).
 
   % =========================================================================
-  % 6. English Aliases
+  % 5. ПРАВИЛА: Родство через брак (Свойство)
   % =========================================================================
-  father(X, Y) :- otec(X, Y).
-  mother(X, Y) :- mat(X, Y).
-  brother(X, Y) :- brat(X, Y).
-  sister(X, Y) :- sestra(X, Y).
-  grandfather(X, Y) :- dedushka(X, Y).
-  grandmother(X, Y) :- babushka(X, Y).
-  uncle(X, Y) :- dyadya(X, Y).
-  aunt(X, Y) :- tetya(X, Y).
+  муж(X, Y) :- мужчина(X), супруг(X, Y).
+  жена(X, Y) :- женщина(X), супруг(X, Y).
+
+  % Тесть и теща (родители жены)
+  тесть(X, Y) :- мужчина(Y), жена(W, Y), отец(X, W).
+  теща(X, Y) :- мужчина(Y), жена(W, Y), мать(X, W).
+
+  % Свекор и свекровь (родители мужа)
+  свекор(X, Y) :- женщина(Y), муж(H, Y), отец(X, H).
+  свекровь(X, Y) :- женщина(Y), муж(H, Y), мать(X, H).
+
+  % Невестка (сноха)
+  невестка(X, Y) :- женщина(X), муж(H, X), родитель(Y, H).
+  невестка(X, Y) :- женщина(X), муж(H, X), брат(Y, H).
+  невестка(X, Y) :- женщина(X), муж(H, X), сестра(Y, H).
+
+  % Зять
+  зять(X, Y) :- мужчина(X), жена(W, X), родитель(Y, W).
+  зять(X, Y) :- мужчина(X), жена(W, X), брат(Y, W).
+  зять(X, Y) :- мужчина(X), жена(W, X), сестра(Y, W).
+
+  % Шурин и свояченица
+  шурин(X, Y) :- мужчина(Y), жена(W, Y), брат(X, W).
+  свояченица(X, Y) :- мужчина(Y), жена(W, Y), сестра(X, W).
+
+  % Деверь и золовка
+  деверь(X, Y) :- женщина(Y), муж(H, Y), брат(X, H).
+  золовка(X, Y) :- женщина(Y), муж(H, Y), сестра(X, H).
 
 goal
-  % Zapros dlya proverki: najti vseh dedushek dlya alex
-  dedushka(Ded, alex),
-  write("Dedushka Alex: ", Ded), nl,
+  % Тестовый запрос: найти дедушек для alex
+  дедушка(Ded, alex),
+  write("Дедушка Alex: ", Ded), nl,
   fail; true.
 </code></pre>
       </div>
