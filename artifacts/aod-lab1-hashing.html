@@ -1,0 +1,1822 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>АОД: Хеширование и Хеш-таблицы (Лабораторная работа №1) | ELI5 Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #090d16;
+      --bg-surface: #101726;
+      --bg-surface-elevated: #182236;
+      --bg-code: #0b111e;
+      --border-color: #1e293b;
+      --border-highlight: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-blue: #3b82f6;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-purple: #8b5cf6;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    code, pre, .mono-font {
+      font-family: 'Fira Code', monospace;
+    }
+
+    .container {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Top Nav */
+    .top-nav {
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(16, 23, 38, 0.85);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 14px 0;
+    }
+    .nav-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-primary);
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+    .nav-brand span.badge {
+      background: rgba(59, 130, 246, 0.15);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-family: 'Fira Code', monospace;
+    }
+    .nav-links {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+    }
+    .nav-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.88rem;
+      transition: color 0.2s;
+    }
+    .nav-link:hover { color: var(--accent-cyan); }
+
+    /* Hero */
+    .hero-section {
+      padding: 48px 0 32px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .badge-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid var(--border-color);
+      color: var(--accent-cyan);
+    }
+    .tag.green { color: var(--accent-emerald); border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.1); }
+    .tag.purple { color: var(--accent-purple); border-color: rgba(139, 92, 246, 0.3); background: rgba(139, 92, 246, 0.1); }
+    .tag.amber { color: var(--accent-amber); border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.1); }
+
+    h1.hero-title {
+      font-size: 2.3rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #ffffff 0%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-desc {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      max-width: 900px;
+      margin-bottom: 24px;
+    }
+
+    /* Cards & Grids */
+    .section-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 28px;
+      margin-top: 32px;
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4);
+    }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 14px;
+    }
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Dataset Table */
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      background: var(--bg-code);
+      max-height: 360px;
+      overflow-y: auto;
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      text-align: left;
+    }
+    table.data-table th {
+      background: var(--bg-surface-elevated);
+      padding: 10px 14px;
+      position: sticky;
+      top: 0;
+      color: var(--accent-cyan);
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+      font-weight: 600;
+    }
+    table.data-table td {
+      padding: 8px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+    table.data-table tr:hover td {
+      background: rgba(59, 130, 246, 0.05);
+      color: #fff;
+    }
+
+    /* Hash Simulator Container */
+    .sim-panel {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 900px) {
+      .sim-panel { grid-template-columns: 1fr; }
+    }
+    .sim-controls {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .control-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .control-select, .control-input {
+      background: var(--bg-code);
+      border: 1px solid var(--border-highlight);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-family: inherit;
+      outline: none;
+    }
+    .control-select:focus, .control-input:focus {
+      border-color: var(--accent-blue);
+    }
+    .btn-action {
+      background: var(--accent-blue);
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-action:hover {
+      background: #2563eb;
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* Hash Visual Grid */
+    .sim-visual-area {
+      background: var(--bg-code);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .stats-ribbon {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      background: var(--bg-surface);
+      padding: 12px 18px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+    .stat-pill {
+      display: flex;
+      flex-direction: column;
+    }
+    .stat-val {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      font-family: 'Fira Code', monospace;
+    }
+    .stat-lbl {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .cells-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+      gap: 8px;
+      max-height: 480px;
+      overflow-y: auto;
+      padding-right: 6px;
+    }
+    .cell-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 0.78rem;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+    .cell-card.empty {
+      border-color: rgba(255, 255, 255, 0.05);
+      opacity: 0.5;
+    }
+    .cell-card.occupied {
+      border-color: rgba(59, 130, 246, 0.5);
+      background: rgba(59, 130, 246, 0.08);
+    }
+    .cell-card.deleted {
+      border-color: rgba(245, 158, 11, 0.5);
+      background: rgba(245, 158, 11, 0.08);
+    }
+    .cell-card.flash {
+      border-color: var(--accent-emerald) !important;
+      background: rgba(16, 185, 129, 0.25) !important;
+      transform: scale(1.04);
+    }
+    .cell-card.flash-probe {
+      border-color: var(--accent-rose) !important;
+      background: rgba(244, 63, 94, 0.2) !important;
+    }
+    .cell-header {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+      font-family: 'Fira Code', monospace;
+      font-size: 0.72rem;
+      margin-bottom: 4px;
+    }
+    .cell-body {
+      font-weight: 600;
+      color: #fff;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Chaining view */
+    .chain-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      margin-bottom: 6px;
+      font-size: 0.8rem;
+    }
+    .chain-node {
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid var(--accent-blue);
+      padding: 4px 10px;
+      border-radius: 4px;
+      color: #93c5fd;
+      font-size: 0.76rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .chain-arrow {
+      color: var(--text-muted);
+    }
+
+    /* Variants Grid */
+    .variants-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .var-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: border-color 0.2s;
+    }
+    .var-card:hover {
+      border-color: var(--accent-blue);
+    }
+    .var-badge {
+      background: rgba(139, 92, 246, 0.15);
+      color: #c4b5fd;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-family: 'Fira Code', monospace;
+      font-weight: 600;
+    }
+
+    /* QA Accordion */
+    .qa-item {
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      margin-bottom: 12px;
+      background: var(--bg-surface-elevated);
+      overflow: hidden;
+    }
+    .qa-question {
+      padding: 16px 20px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+      transition: background 0.2s;
+    }
+    .qa-question:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .qa-answer {
+      padding: 0 20px 18px;
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 14px;
+      display: none;
+    }
+    .qa-item.open .qa-answer { display: block; }
+    .qa-item.open .qa-toggle-icon { transform: rotate(180deg); }
+
+    /* Code Viewer Tabs */
+    .code-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .code-tab-btn {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: 'Fira Code', monospace;
+    }
+    .code-tab-btn.active {
+      background: var(--accent-blue);
+      border-color: var(--accent-blue);
+      color: #fff;
+    }
+    .code-block {
+      background: var(--bg-code);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      max-height: 400px;
+      overflow-y: auto;
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      white-space: pre;
+    }
+
+    /* Quiz */
+    .quiz-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .quiz-progress-bar {
+      height: 6px;
+      background: var(--border-color);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .quiz-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .quiz-option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 12px 18px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      font-size: 0.92rem;
+      transition: all 0.2s;
+    }
+    .quiz-option-btn:hover:not([disabled]) {
+      border-color: var(--accent-blue);
+      background: rgba(59, 130, 246, 0.1);
+    }
+    .quiz-option-btn.correct {
+      background: rgba(16, 185, 129, 0.2) !important;
+      border-color: var(--accent-emerald) !important;
+      color: #a7f3d0 !important;
+    }
+    .quiz-option-btn.wrong {
+      background: rgba(244, 63, 94, 0.2) !important;
+      border-color: var(--accent-rose) !important;
+      color: #fecdd3 !important;
+    }
+    .quiz-expl {
+      margin-top: 16px;
+      padding: 14px 18px;
+      background: #0c1424;
+      border-left: 4px solid var(--accent-cyan);
+      border-radius: 0 8px 8px 0;
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <nav class="top-nav">
+    <div class="container nav-content">
+      <a href="https://asm-o-dan.github.io/eli5-visual-hub/" class="nav-brand">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>ELI5 Visual Hub</span>
+        <span class="badge">АОД ЛАБ №1</span>
+      </a>
+      <div class="nav-links">
+        <a href="#dataset" class="nav-link">Датасет (30 строк)</a>
+        <a href="#theory" class="nav-link">Теория</a>
+        <a href="#simulator" class="nav-link">Симулятор</a>
+        <a href="#variants" class="nav-link">Все 21 вариант</a>
+        <a href="#code" class="nav-link">Код C++ & Python</a>
+        <a href="#defense" class="nav-link">Вопросы защиты</a>
+        <a href="#quiz" class="nav-link">Квиз</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+
+    <!-- Hero Header -->
+    <header class="hero-section">
+      <div class="badge-row">
+        <span class="tag">АОД / АиСД 3 курс</span>
+        <span class="tag green">Таблица 1 (30 записей CSV)</span>
+        <span class="tag purple">M = 30 & M = 60</span>
+        <span class="tag amber">Метод золотого сечения Кнута</span>
+        <span class="tag">Все 21 вариант решены</span>
+      </div>
+      <h1 class="hero-title">Хеширование и Хеш-таблицы</h1>
+      <p class="hero-desc">
+        Интерактивный лабораторный комплекс по дисциплине «Алгоритмы и структуры данных». Содержит живой пошаговый визуализатор метода цепочек и открытой адресации (линейное, квадратичное, двойное), полный верифицированный решебник всех 21 вариантов, эталонный код на C++ и Python, таблицу оценки качества по ГОСТ и аттестационный тренажер к защите.
+      </p>
+    </header>
+
+    <!-- Section: Dataset Table 1 -->
+    <section id="dataset" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          Исходные данные: Таблица 1 (30 записей, CSV с разделителем «;»)
+        </h2>
+        <div>
+          <button class="btn-action btn-secondary" style="font-size: 0.78rem; padding: 6px 14px;" onclick="downloadCSV()">
+            ⬇ Скачать data_30_records.csv
+          </button>
+        </div>
+      </div>
+
+      <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 14px;">
+        Таблица сформирована строго по требованиям Таблицы 1 методички: 7 столбцов (Ф.И.О., дата рождения, телефон, паспорт, адрес, счет, остаток). Разделитель полей — <code>;</code>.
+      </p>
+
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>№</th>
+              <th>I: Ф.И.О. (строка)</th>
+              <th>II: Дата (чч.мм.гггг)</th>
+              <th>III: Телефон (хх-ххх-хх)</th>
+              <th>IV: Паспорт (строка)</th>
+              <th>V: Адрес прописки (строка)</th>
+              <th>VI: Номер счета (целое)</th>
+              <th>VII: Остаток (вещ. число)</th>
+            </tr>
+          </thead>
+          <tbody id="raw-table-body">
+            <!-- Filled by JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Section 1: Theory -->
+    <section id="theory" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          1. Архитектурный фундамент и математика хеширования
+        </h2>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 24px;">
+        <!-- Card 1: Multiplicative Knuth -->
+        <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 10px; padding: 18px;">
+          <div style="color: var(--accent-amber); font-weight: 700; margin-bottom: 8px; font-size: 1.05rem;">Мультипликативный метод (Д. Кнут)</div>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 10px;">
+            В отличие от метода деления, не требует простого $M$. Основан на умножении целочисленного ключа $k$ на константу золотого сечения:
+          </p>
+          <div style="background: var(--bg-code); padding: 10px 14px; border-radius: 6px; font-size: 0.82rem; font-family: 'Fira Code', monospace; color: #cbd5e1; margin-bottom: 8px;">
+            A = (√5 - 1) / 2 ≈ 0.6180339887...<br>
+            h(k) = ⌊ M · ((k · A) mod 1) ⌋
+          </div>
+          <p style="font-size: 0.78rem; color: var(--text-muted);">
+            Теорема Вейля гарантирует, что дробные доли $\{k \cdot A\}$ равномерно распределены на интервале $[0, 1)$ при любом распределении ключей.
+          </p>
+        </div>
+
+        <!-- Card 2: Chaining vs Open Addressing -->
+        <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 10px; padding: 18px;">
+          <div style="color: var(--accent-blue); font-weight: 700; margin-bottom: 8px; font-size: 1.05rem;">Цепочки (M=30) vs Открытая адресация (M=60)</div>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px;">
+            • <b>Метод цепочек ($M=30$):</b> списки в каждой корзине. Фактор загрузки $\alpha = 30 / 30 = 1.0$. Память выделяется динамически.<br>
+            • <b>Открытая адресация ($M=60$):</b> единый массив, $\alpha = 30 / 60 = 0.5$. Элементы смещаются в свободные ячейки по формуле $h_i(k)$.
+          </p>
+          <div style="background: var(--bg-code); padding: 8px 12px; border-radius: 6px; font-size: 0.78rem; font-family: 'Fira Code', monospace; color: #cbd5e1;">
+            Линейное: h_i = (h0 + i) mod M<br>
+            Квадратичное: h_i = (h0 + i + i²) mod M<br>
+            Двойное: h_i = (h0 + i · h2) mod M
+          </div>
+        </div>
+
+        <!-- Card 3: 3 States & Tombstone -->
+        <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 10px; padding: 18px;">
+          <div style="color: var(--accent-rose); font-weight: 700; margin-bottom: 8px; font-size: 1.05rem;">3 состояния ячейки: EMPTY, OCCUPIED, DELETED 🪦</div>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 10px;">
+            При открытой адресации физическое зануление ячейки при удалении <b>недопустимо</b>:
+          </p>
+          <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.6;">
+            • <code>EMPTY (0)</code>: ячейка никогда не использовалась. Обрывает цепочку поиска.<br>
+            • <code>OCCUPIED (1)</code>: ячейка занята активными данными.<br>
+            • <code>DELETED (2)</code>: маркёр «надгробия» (Tombstone). <b>Поиск продолжается дальше</b>, а вставка может использовать эту ячейку повторно.
+          </div>
+        </div>
+      </div>
+
+      <!-- Coprime 60 Theorem Banner -->
+      <div style="background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: 10px; padding: 16px 20px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+          <span style="background: var(--accent-cyan); color: #000; font-weight: 800; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; font-family: 'Fira Code', monospace;">ТЕОРЕМА</span>
+          <span style="font-weight: 700; font-size: 0.95rem; color: #fff;">Обязательная взаимная простота шага h₂(k) при двойном хешировании с M=60</span>
+        </div>
+        <p style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.6;">
+          Число $M = 60 = 2^2 \times 3 \times 5$ является составным. Если шаг второй хеш-функции $h_2(k)$ имеет общий делитель с 60 (например, $h_2 = 15$), цепочка проб зациклится всего на 4 ячейках, вызывая ложное «переполнение таблицы»! Для обхода <b>всех 60 ячеек</b> шаг $h_2(k)$ обязан принадлежать кольцу вычетов, взаимно простых с 60 (функция Эйлера $\phi(60) = 16$):<br>
+          <code style="color: var(--accent-cyan); font-weight: 600;">COPRIMES_60 = { 1, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 49, 53, 59 }</code>
+        </p>
+      </div>
+    </section>
+
+    <!-- Section 2: Hash Simulator -->
+    <section id="simulator" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          2. Интерактивная песочница хеш-таблицы (Live Simulator)
+        </h2>
+        <span style="font-size: 0.8rem; color: var(--accent-emerald);">● Движок мультипликативного хеширования активен</span>
+      </div>
+
+      <div class="sim-panel">
+        <!-- Controls Left -->
+        <div class="sim-controls">
+          <div class="control-group">
+            <label class="control-label">Архитектура хеш-таблицы</label>
+            <select id="sim-arch" class="control-select" onchange="onArchChanged()">
+              <option value="open">Открытая адресация (M = 60)</option>
+              <option value="chain">Метод цепочек (M = 30)</option>
+            </select>
+          </div>
+
+          <div class="control-group" id="group-probe">
+            <label class="control-label">Метод опробования</label>
+            <select id="sim-probe" class="control-select" onchange="resetAndRehash()">
+              <option value="linear">Линейное опробование (Linear)</option>
+              <option value="quadratic">Квадратичное опробование (Quadratic)</option>
+              <option value="double">Двойное хеширование (Double)</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label">Столбец ключа хеширования</label>
+            <select id="sim-col" class="control-select" onchange="resetAndRehash()">
+              <option value="0">Столбец I: Ф.И.О. (строка)</option>
+              <option value="1">Столбец II: Дата рождения</option>
+              <option value="2">Столбец III: Номер телефона</option>
+              <option value="3">Столбец IV: Серия и номер паспорта</option>
+              <option value="4">Столбец V: Адрес прописки</option>
+              <option value="5">Столбец VI: Номер счета</option>
+              <option value="6">Столбец VII: Остаток денег</option>
+            </select>
+          </div>
+
+          <div style="display: flex; gap: 8px;">
+            <button class="btn-action" style="flex: 1;" onclick="insertNextRecord()">
+              ＋ Шаг (1 запись)
+            </button>
+            <button class="btn-action btn-secondary" style="flex: 1;" onclick="insertAllRecords()">
+              ⚡ Все 30 записей
+            </button>
+          </div>
+
+          <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 4px 0;">
+
+          <!-- Search & Delete Operations -->
+          <div class="control-group">
+            <label class="control-label">Операции по ключу</label>
+            <input type="text" id="sim-op-input" class="control-input" placeholder="Введите ключ или часть ФИО..." value="Иванов Иван Иванович">
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn-action btn-secondary" style="flex: 1;" onclick="searchKey()">
+              🔍 Найти ключ
+            </button>
+            <button class="btn-action btn-secondary" style="flex: 1; color: var(--accent-rose); border-color: rgba(244,63,94,0.3);" onclick="deleteKey()">
+              🗑 Удалить (Tombstone)
+            </button>
+          </div>
+
+          <button class="btn-action btn-secondary" style="font-size: 0.8rem; margin-top: 6px;" onclick="resetSimulator()">
+            ↺ Сбросить таблицу
+          </button>
+        </div>
+
+        <!-- Visual Right -->
+        <div class="sim-visual-area">
+          <div class="stats-ribbon">
+            <div class="stat-pill">
+              <span class="stat-val" id="stat-inserted">0 / 30</span>
+              <span class="stat-lbl">Вставлено записей</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-val" id="stat-alpha">0.00</span>
+              <span class="stat-lbl">Фактор загрузки (α)</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-val" id="stat-total-probes">0</span>
+              <span class="stat-lbl">Сумма попыток (проб)</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-val" id="stat-avg-probes">0.00</span>
+              <span class="stat-lbl">Среднее число проб</span>
+            </div>
+            <div class="stat-pill" style="margin-left: auto;">
+              <span class="stat-val" id="stat-last-action" style="font-size: 0.95rem; color: #fff;">Готов</span>
+              <span class="stat-lbl">Статус операции</span>
+            </div>
+          </div>
+
+          <!-- Cells / Chains display -->
+          <div id="sim-cells-container" class="cells-grid"></div>
+
+          <!-- Collision Canvas Histogram -->
+          <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Гистограмма распределения ключей по корзинам (п. 7-8 методички)</span>
+              <span style="font-size: 0.75rem; color: var(--accent-cyan);" id="hist-peak">Пик корзины: 0</span>
+            </div>
+            <canvas id="collisionCanvas" height="90" style="width: 100%; display: block;"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: All 21 Variants -->
+    <section id="variants" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+          3. Полный решебник всех 21 вариантов (эмпирическая верификация)
+        </h2>
+        <span style="font-size: 0.8rem; color: var(--text-muted);">N = 30, M = 60</span>
+      </div>
+
+      <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 20px;">
+        Каждый вариант привязан к номеру студента по журналу. Ниже приведены расчетные показатели попыток вставки для всех вариантов при мультипликативном методе Кнута. Нажмите <b>«Запустить вариант»</b> для мгновенной загрузки в симулятор.
+      </p>
+
+      <div class="variants-container" id="variants-grid">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- Section 4: Source Code C++ & Python -->
+    <section id="code" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          4. Эталонные программы для отчета (C++ и Python)
+        </h2>
+        <span style="font-size: 0.8rem; color: var(--accent-emerald);">Готово к компиляции</span>
+      </div>
+
+      <div class="code-tabs">
+        <button class="code-tab-btn active" onclick="switchCodeTab('cpp')">C++ (solution_lab1.cpp)</button>
+        <button class="code-tab-btn" onclick="switchCodeTab('py')">Python (solution_lab1.py)</button>
+      </div>
+
+      <div id="code-cpp" class="code-block">/*
+  Лабораторная работа №1: Хеширование данных (АОД / ПИ)
+  Методы: Метод цепочек (M=30) и Открытая адресация (M=60)
+  Хеш-функция: Мультипликативный метод Кнута (A = (sqrt(5)-1)/2)
+  Состояния ячеек: EMPTY, OCCUPIED, DELETED (Tombstone)
+*/
+
+#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+#include &lt;sstream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cmath&gt;
+#include &lt;iomanip&gt;
+#include &lt;numeric&gt;
+
+using namespace std;
+
+const double A_CONST = (sqrt(5.0) - 1.0) / 2.0; // ~0.6180339887
+const int COPRIMES_60[16] = {1, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 49, 53, 59};
+
+struct Record {
+    string fio;
+    string birth_date;
+    string phone;
+    string passport;
+    string address;
+    string account;
+    double balance;
+};
+
+// Функция преобразования значения выбранного столбца в 64-битный целочисленный ключ
+uint64_t keyToInt(const Record&amp; r, int col) {
+    if (col == 0) { // ФИО (полиномиальный хеш)
+        uint64_t h = 0;
+        for (char c : r.fio) h = (h * 31 + (unsigned char)c) &amp; 0x7FFFFFFF;
+        return h;
+    } else if (col == 1) { // Дата рождения (дд.мм.гггг -&gt; ггггммдд)
+        int d, m, y;
+        char dot;
+        stringstream ss(r.birth_date);
+        ss &gt;&gt; d &gt;&gt; dot &gt;&gt; m &gt;&gt; dot &gt;&gt; y;
+        return (uint64_t)y * 10000 + m * 100 + d;
+    } else if (col == 2) { // Телефон (только цифры)
+        uint64_t num = 0;
+        for (char c : r.phone) if (isdigit(c)) num = num * 10 + (c - '0');
+        return num;
+    } else if (col == 3) { // Паспорт
+        uint64_t h = 0;
+        for (char c : r.passport) {
+            if (isdigit(c)) h = (h * 10 + (c - '0')) &amp; 0x7FFFFFFF;
+            else h = (h * 31 + (unsigned char)c) &amp; 0x7FFFFFFF;
+        }
+        return h;
+    } else if (col == 4) { // Адрес
+        uint64_t h = 0;
+        for (char c : r.address) h = (h * 37 + (unsigned char)c) &amp; 0x7FFFFFFF;
+        return h;
+    } else if (col == 5) { // Номер счета
+        uint64_t h = 0;
+        for (char c : r.account) if (isdigit(c)) h = (h * 10 + (c - '0')) &amp; 0x7FFFFFFF;
+        return h;
+    } else if (col == 6) { // Остаток (копейки)
+        return (uint64_t)round(r.balance * 100.0);
+    }
+    return 0;
+}
+
+// Мультипликативная хеш-функция Кнута
+int multHash(uint64_t k, int M) {
+    double val = (double)k * A_CONST;
+    double frac = val - floor(val);
+    return (int)floor(M * frac);
+}
+
+// --- ЧАСТЬ 1: МЕТОД ЦЕПОЧЕК (M = 30) ---
+struct ChainNode {
+    uint64_t key;
+    Record data;
+    ChainNode* next;
+    ChainNode(uint64_t k, const Record&amp; d) : key(k), data(d), next(nullptr) {}
+};
+
+class ChainingHashTable {
+    int M;
+    vector&lt;ChainNode*&gt; table;
+public:
+    ChainingHashTable(int m = 30) : M(m), table(m, nullptr) {}
+    ~ChainingHashTable() {
+        for (int i = 0; i &lt; M; i++) {
+            ChainNode* cur = table[i];
+            while (cur) {
+                ChainNode* tmp = cur;
+                cur = cur-&gt;next;
+                delete tmp;
+            }
+        }
+    }
+
+    int insert(uint64_t key, const Record&amp; rec) {
+        int idx = multHash(key, M);
+        int probes = 1;
+        if (!table[idx]) {
+            table[idx] = new ChainNode(key, rec);
+            return probes;
+        }
+        ChainNode* cur = table[idx];
+        while (cur-&gt;next) {
+            cur = cur-&gt;next;
+            probes++;
+        }
+        cur-&gt;next = new ChainNode(key, rec);
+        return probes + 1;
+    }
+
+    bool search(uint64_t key, Record&amp; found, int&amp; probes) {
+        int idx = multHash(key, M);
+        probes = 0;
+        ChainNode* cur = table[idx];
+        while (cur) {
+            probes++;
+            if (cur-&gt;key == key) {
+                found = cur-&gt;data;
+                return true;
+            }
+            cur = cur-&gt;next;
+        }
+        return false;
+    }
+
+    bool remove(uint64_t key) {
+        int idx = multHash(key, M);
+        ChainNode* cur = table[idx];
+        ChainNode* prev = nullptr;
+        while (cur) {
+            if (cur-&gt;key == key) {
+                if (prev) prev-&gt;next = cur-&gt;next;
+                else table[idx] = cur-&gt;next;
+                delete cur;
+                return true;
+            }
+            prev = cur;
+            cur = cur-&gt;next;
+        }
+        return false;
+    }
+
+    void print() {
+        cout &lt;&lt; "\n=== ХЕШ-ТАБЛИЦА: МЕТОД ЦЕПОЧЕК (M = " &lt;&lt; M &lt;&lt; ") ===" &lt;&lt; endl;
+        for (int i = 0; i &lt; M; i++) {
+            cout &lt;&lt; "[" &lt;&lt; setw(2) &lt;&lt; i &lt;&lt; "]: ";
+            ChainNode* cur = table[i];
+            if (!cur) {
+                cout &lt;&lt; "&lt;ПУСТО&gt;" &lt;&lt; endl;
+            } else {
+                while (cur) {
+                    cout &lt;&lt; "-&gt; (Ключ:" &lt;&lt; cur-&gt;key &lt;&lt; " | " &lt;&lt; cur-&gt;data.fio &lt;&lt; ") ";
+                    cur = cur-&gt;next;
+                }
+                cout &lt;&lt; endl;
+            }
+        }
+    }
+};
+
+// --- ЧАСТЬ 2: ОТКРЫТАЯ АДРЕСАЦИЯ (M = 60) ---
+enum CellStatus { EMPTY = 0, OCCUPIED = 1, DELETED = 2 };
+
+struct OpenCell {
+    uint64_t key;
+    Record data;
+    CellStatus status = EMPTY;
+};
+
+class OpenAddressingHashTable {
+    int M;
+    string probeType; // "linear", "quadratic", "double"
+    vector&lt;OpenCell&gt; table;
+public:
+    OpenAddressingHashTable(string pType, int m = 60) : probeType(pType), M(m), table(m) {}
+
+    int insert(uint64_t key, const Record&amp; rec) {
+        int h0 = multHash(key, M);
+        int h2 = COPRIMES_60[key % 16]; // Шаг, взаимно простой с 60
+
+        for (int i = 0; i &lt; M; i++) {
+            int idx;
+            if (probeType == "linear") idx = (h0 + i) % M;
+            else if (probeType == "quadratic") idx = (h0 + i + i * i) % M;
+            else idx = (h0 + i * h2) % M; // Double hashing
+
+            if (table[idx].status == EMPTY || table[idx].status == DELETED) {
+                table[idx].key = key;
+                table[idx].data = rec;
+                table[idx].status = OCCUPIED;
+                return i + 1; // Количество попыток
+            }
+        }
+        return -1; // Переполнение
+    }
+
+    bool search(uint64_t key, Record&amp; found, int&amp; probes) {
+        int h0 = multHash(key, M);
+        int h2 = COPRIMES_60[key % 16];
+        probes = 0;
+
+        for (int i = 0; i &lt; M; i++) {
+            probes++;
+            int idx;
+            if (probeType == "linear") idx = (h0 + i) % M;
+            else if (probeType == "quadratic") idx = (h0 + i + i * i) % M;
+            else idx = (h0 + i * h2) % M;
+
+            if (table[idx].status == EMPTY) return false; // Цепочка оборвалась
+            if (table[idx].status == OCCUPIED &amp;&amp; table[idx].key == key) {
+                found = table[idx].data;
+                return true;
+            }
+            // Если DELETED - продолжаем поиск
+        }
+        return false;
+    }
+
+    bool remove(uint64_t key) {
+        int h0 = multHash(key, M);
+        int h2 = COPRIMES_60[key % 16];
+
+        for (int i = 0; i &lt; M; i++) {
+            int idx;
+            if (probeType == "linear") idx = (h0 + i) % M;
+            else if (probeType == "quadratic") idx = (h0 + i + i * i) % M;
+            else idx = (h0 + i * h2) % M;
+
+            if (table[idx].status == EMPTY) return false;
+            if (table[idx].status == OCCUPIED &amp;&amp; table[idx].key == key) {
+                table[idx].status = DELETED; // Маркируем как удалено
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void print() {
+        cout &lt;&lt; "\n=== ХЕШ-ТАБЛИЦА: ОТКРЫТАЯ АДРЕСАЦИЯ (" &lt;&lt; probeType &lt;&lt; ", M = " &lt;&lt; M &lt;&lt; ") ===" &lt;&lt; endl;
+        for (int i = 0; i &lt; M; i++) {
+            cout &lt;&lt; "[" &lt;&lt; setw(2) &lt;&lt; i &lt;&lt; "] ";
+            if (table[i].status == EMPTY) cout &lt;&lt; "[EMPTY]" &lt;&lt; endl;
+            else if (table[i].status == DELETED) cout &lt;&lt; "[DELETED / TOMBSTONE]" &lt;&lt; endl;
+            else {
+                cout &lt;&lt; "[OCCUPIED] Ключ: " &lt;&lt; table[i].key &lt;&lt; " | " &lt;&lt; table[i].data.fio
+                     &lt;&lt; " | Тел: " &lt;&lt; table[i].data.phone &lt;&lt; " | Баланс: " &lt;&lt; table[i].data.balance &lt;&lt; endl;
+            }
+        }
+    }
+};
+
+int main() {
+    ifstream file("data_30_records.csv");
+    if (!file.is_open()) {
+        cerr &lt;&lt; "Ошибка: не удалось открыть файл data_30_records.csv" &lt;&lt; endl;
+        return 1;
+    }
+
+    string line;
+    getline(file, line); // Заголовок CSV
+    vector&lt;Record&gt; records;
+    while (getline(file, line)) {
+        if (line.empty()) continue;
+        stringstream ss(line);
+        Record r;
+        string bal_str;
+        getline(ss, r.fio, ';');
+        getline(ss, r.birth_date, ';');
+        getline(ss, r.phone, ';');
+        getline(ss, r.passport, ';');
+        getline(ss, r.address, ';');
+        getline(ss, r.account, ';');
+        getline(ss, bal_str, ';');
+        r.balance = stod(bal_str);
+        records.push_back(r);
+    }
+
+    cout &lt;&lt; "Успешно загружено " &lt;&lt; records.size() &lt;&lt; " записей из CSV." &lt;&lt; endl;
+
+    int colChoice = 0; // 0 = ФИО (столбец I)
+    cout &lt;&lt; "\nХеширование по столбцу: " &lt;&lt; colChoice + 1 &lt;&lt; endl;
+
+    // Метод цепочек
+    ChainingHashTable chainTable(30);
+    int totalChainProbes = 0;
+    cout &lt;&lt; "\nВставка в метод цепочек:" &lt;&lt; endl;
+    for (size_t i = 0; i &lt; records.size(); i++) {
+        uint64_t k = keyToInt(records[i], colChoice);
+        int p = chainTable.insert(k, records[i]);
+        totalChainProbes += p;
+        cout &lt;&lt; "Запись " &lt;&lt; setw(2) &lt;&lt; i + 1 &lt;&lt; ": попыток = " &lt;&lt; p &lt;&lt; endl;
+    }
+    cout &lt;&lt; "ИТОГО попыток (цепочки): " &lt;&lt; totalChainProbes &lt;&lt; endl;
+    chainTable.print();
+
+    // Открытая адресация (линейное опробование)
+    OpenAddressingHashTable openTable("linear", 60);
+    int totalOpenProbes = 0;
+    cout &lt;&lt; "\nВставка в открытую адресацию (линейное):" &lt;&lt; endl;
+    for (size_t i = 0; i &lt; records.size(); i++) {
+        uint64_t k = keyToInt(records[i], colChoice);
+        int p = openTable.insert(k, records[i]);
+        totalOpenProbes += p;
+        cout &lt;&lt; "Запись " &lt;&lt; setw(2) &lt;&lt; i + 1 &lt;&lt; ": попыток = " &lt;&lt; p &lt;&lt; endl;
+    }
+    cout &lt;&lt; "ИТОГО попыток (открытая адресация): " &lt;&lt; totalOpenProbes &lt;&lt; endl;
+    openTable.print();
+
+    // Демонстрация поиска и удаления
+    uint64_t testKey = keyToInt(records[5], colChoice);
+    cout &lt;&lt; "\n--- ТЕСТ: Поиск записи '" &lt;&lt; records[5].fio &lt;&lt; "' ---" &lt;&lt; endl;
+    Record found;
+    int searchProbes = 0;
+    if (openTable.search(testKey, found, searchProbes)) {
+        cout &lt;&lt; "Найдено за " &lt;&lt; searchProbes &lt;&lt; " попыток: " &lt;&lt; found.fio &lt;&lt; " (" &lt;&lt; found.address &lt;&lt; ")" &lt;&lt; endl;
+    }
+
+    cout &lt;&lt; "\n--- ТЕСТ: Удаление записи '" &lt;&lt; records[5].fio &lt;&lt; "' ---" &lt;&lt; endl;
+    if (openTable.remove(testKey)) {
+        cout &lt;&lt; "Запись успешно удалена (ячейка помечена DELETED)." &lt;&lt; endl;
+    }
+
+    cout &lt;&lt; "\n--- ТЕСТ: Повторный поиск удаленной записи ---" &lt;&lt; endl;
+    if (!openTable.search(testKey, found, searchProbes)) {
+        cout &lt;&lt; "Запись корректно НЕ найдена (проверено " &lt;&lt; searchProbes &lt;&lt; " ячеек до конца цепочки)." &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</div>
+      <div id="code-py" class="code-block" style="display: none;">"""
+Лабораторная работа №1: Хеширование данных (АОД / ПИ)
+Методы: Метод цепочек (M=30) и Открытая адресация (M=60)
+Хеш-функция: Мультипликативный метод Кнута (A = (sqrt(5)-1)/2)
+"""
+
+import math
+import csv
+
+A_CONST = (math.sqrt(5) - 1) / 2 # ~0.6180339887
+COPRIMES_60 = [1, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 49, 53, 59]
+
+EMPTY, OCCUPIED, DELETED = 0, 1, 2
+
+def key_to_int(r, col):
+    val = r[col].strip()
+    if col == 0: # ФИО
+        h = 0
+        for ch in val: h = (h * 31 + ord(ch)) % (2**31 - 1)
+        return h
+    elif col == 1: # Дата дд.мм.гггг
+        d, m, y = map(int, val.split('.'))
+        return y * 10000 + m * 100 + d
+    elif col == 2: # Телефон
+        return int(''.join(c for c in val if c.isdigit()))
+    elif col == 3: # Паспорт
+        h = 0
+        for ch in val:
+            if ch.isdigit(): h = (h * 10 + int(ch)) % (2**31 - 1)
+            else: h = (h * 31 + ord(ch)) % (2**31 - 1)
+        return h
+    elif col == 4: # Адрес
+        h = 0
+        for ch in val: h = (h * 37 + ord(ch)) % (2**31 - 1)
+        return h
+    elif col == 5: # Номер счета
+        return int(''.join(c for c in val if c.isdigit())) % (2**31 - 1)
+    elif col == 6: # Остаток денег
+        return int(round(float(val.replace(',', '.')) * 100)) % (2**31 - 1)
+    return 0
+
+def mult_hash(k, M):
+    val = (k * A_CONST) % 1.0
+    return int(math.floor(M * val))
+
+class ChainingHashTable:
+    def __init__(self, M=30):
+        self.M = M
+        self.table = [[] for _ in range(M)]
+
+    def insert(self, key, record):
+        idx = mult_hash(key, self.M)
+        probes = len(self.table[idx]) + 1
+        self.table[idx].append((key, record))
+        return probes
+
+    def search(self, key):
+        idx = mult_hash(key, self.M)
+        for i, (k, rec) in enumerate(self.table[idx]):
+            if k == key:
+                return rec, i + 1
+        return None, len(self.table[idx])
+
+    def delete(self, key):
+        idx = mult_hash(key, self.M)
+        for i, (k, rec) in enumerate(self.table[idx]):
+            if k == key:
+                del self.table[idx][i]
+                return True
+        return False
+
+class OpenAddressingHashTable:
+    def __init__(self, probe_type='linear', M=60):
+        self.M = M
+        self.probe_type = probe_type
+        self.table = [None] * M
+        self.states = [EMPTY] * M
+
+    def insert(self, key, record):
+        h0 = mult_hash(key, self.M)
+        h2 = COPRIMES_60[key % 16]
+        for i in range(self.M):
+            if self.probe_type == 'linear': idx = (h0 + i) % self.M
+            elif self.probe_type == 'quadratic': idx = (h0 + i + i*i) % self.M
+            else: idx = (h0 + i * h2) % self.M # Double
+
+            if self.states[idx] in (EMPTY, DELETED):
+                self.table[idx] = (key, record)
+                self.states[idx] = OCCUPIED
+                return i + 1
+        raise Exception("Table overflow")
+
+    def search(self, key):
+        h0 = mult_hash(key, self.M)
+        h2 = COPRIMES_60[key % 16]
+        for i in range(self.M):
+            if self.probe_type == 'linear': idx = (h0 + i) % self.M
+            elif self.probe_type == 'quadratic': idx = (h0 + i + i*i) % self.M
+            else: idx = (h0 + i * h2) % self.M
+
+            if self.states[idx] == EMPTY:
+                return None, i + 1
+            if self.states[idx] == OCCUPIED and self.table[idx][0] == key:
+                return self.table[idx][1], i + 1
+        return None, self.M
+
+    def delete(self, key):
+        h0 = mult_hash(key, self.M)
+        h2 = COPRIMES_60[key % 16]
+        for i in range(self.M):
+            if self.probe_type == 'linear': idx = (h0 + i) % self.M
+            elif self.probe_type == 'quadratic': idx = (h0 + i + i*i) % self.M
+            else: idx = (h0 + i * h2) % self.M
+
+            if self.states[idx] == EMPTY:
+                return False
+            if self.states[idx] == OCCUPIED and self.table[idx][0] == key:
+                self.states[idx] = DELETED
+                return True
+        return False
+</div>
+    </section>
+
+    <!-- Section 5: Defense Questions (12) -->
+    <section id="defense" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          5. Контрольные вопросы защиты (Методичка, стр. 2)
+        </h2>
+      </div>
+
+      <div id="defense-qa-container">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- Section 6: Interactive Defense Quiz -->
+    <section id="quiz" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+          6. Аттестационный тренажер к защите (12 вопросов)
+        </h2>
+        <div style="font-size: 0.85rem; color: var(--accent-cyan);" id="quiz-score-badge">Счет: 0 / 12</div>
+      </div>
+
+      <div class="quiz-card">
+        <div class="quiz-progress-bar">
+          <div class="quiz-progress-fill" id="quiz-progress-fill"></div>
+        </div>
+
+        <div id="quiz-question-container">
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;" id="quiz-q-num">Вопрос 1 из 12</div>
+          <div style="font-size: 1.15rem; font-weight: 600; margin-bottom: 20px;" id="quiz-q-text">Текст вопроса...</div>
+          <div id="quiz-options-box"></div>
+          <div class="quiz-expl" id="quiz-expl-box"></div>
+          <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+            <button class="btn-action" id="quiz-next-btn" style="display: none; padding: 8px 18px;" onclick="nextQuizQuestion()">Следующий вопрос →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Embedded Data
+    const RAW_RECORDS = [["Иванов Иван Иванович", "15.04.2002", "23-456-78", "4518 902145", "г. Москва, ул. Тверская, д. 12, кв. 45", "40817810500001234567", "154200.50"], ["Петров Алексей Сергеевич", "28.11.2001", "91-827-36", "2215 348190", "г. Санкт-Петербург, Невский пр-т, д. 88, кв. 14", "40817810600009876543", "89340.75"], ["Смирнова Екатерина Дмитриевна", "03.07.2003", "45-123-89", "4619 812304", "г. Казань, ул. Баумана, д. 25, кв. 112", "40817810700005432109", "312450.00"], ["Соколов Дмитрий Павлович", "19.09.2000", "77-901-42", "4014 654987", "г. Новосибирск, Красный пр-т, д. 45, кв. 3", "40817810800003216549", "45120.25"], ["Козлова Анна Михайловна", "12.01.2002", "34-567-89", "5016 789456", "г. Екатеринбург, пр-т Ленина, д. 101, кв. 67", "40817810900007891234", "198750.80"], ["Морозов Максим Андреевич", "25.08.2001", "88-234-51", "6017 123789", "г. Нижний Новгород, ул. Родионова, д. 15, кв. 9", "40817810000006543218", "76400.00"], ["Волкова Ольга Викторовна", "30.03.2003", "56-789-01", "4512 876543", "г. Самара, Волжский пр-т, д. 4, кв. 23", "40817810100001928374", "523100.90"], ["Новиков Сергей Николаевич", "14.12.2000", "99-345-67", "2913 234567", "г. Ростов-на-Дону, ул. Пушкинская, д. 54, кв. 8", "40817810200009182736", "18450.30"], ["Федорова Татьяна Александровна", "08.06.2002", "12-890-34", "3614 345678", "г. Уфа, ул. Ленина, д. 72, кв. 51", "40817810300008273645", "142900.00"], ["Лебедев Павел Романович", "22.02.2001", "67-456-12", "1815 456789", "г. Красноярск, ул. Мира, д. 30, кв. 19", "40817810400007364512", "67300.40"], ["Семенов Артем Игоревич", "17.10.2002", "83-124-95", "4516 567890", "г. Воронеж, Московский пр-т, д. 115, кв. 4", "40817810500006451237", "289600.15"], ["Егорова Мария Васильевна", "05.05.2003", "24-789-31", "2014 678901", "г. Пермь, ул. Ленина, д. 66, кв. 82", "40817810600005123478", "94500.60"], ["Павлов Кирилл Денисович", "11.09.2001", "95-341-78", "7117 789012", "г. Волгоград, пр-т Ленина, д. 22, кв. 16", "40817810700004231568", "12380.00"], ["Ковалева Дарья Юрьевна", "29.07.2000", "41-902-63", "4515 890123", "г. Краснодар, ул. Красная, д. 150, кв. 34", "40817810800003124579", "410500.20"], ["Николаев Никита Олегович", "18.03.2002", "72-564-19", "2816 901234", "г. Саратов, пр-т Столыпина, д. 9, кв. 2", "40817810900002135680", "159800.00"], ["Васильева Елена Константиновна", "02.11.2001", "38-125-74", "4513 012345", "г. Тюмень, ул. Республики, д. 48, кв. 91", "40817810000001246791", "88200.75"], ["Зайцев Роман Владимирович", "24.08.2003", "84-781-29", "5418 123456", "г. Тольятти, ул. Юбилейная, д. 27, кв. 60", "40817810100009357802", "34500.00"], ["Попова Юлия Сергеевна", "09.01.2002", "51-349-82", "4517 234567", "г. Барнаул, пр-т Ленина, д. 54, кв. 73", "40817810200008468913", "275400.50"], ["Кузнецов Андрей Вячеславович", "16.06.2001", "93-907-45", "1114 345678", "г. Ижевск, ул. Пушкинская, д. 180, кв. 12", "40817810300007579024", "189200.00"], ["Богданова Виктория Антоновна", "31.10.2002", "27-563-08", "4519 456789", "г. Ульяновск, ул. Гончарова, д. 32, кв. 40", "40817810400006680135", "62400.25"], ["Макаров Денис Валерьевич", "20.04.2000", "89-128-64", "6315 567890", "г. Ярославль, ул. Свободы, д. 46, кв. 5", "40817810500005791246", "387900.90"], ["Кудрявцева Алина Руслановна", "07.12.2003", "46-784-21", "4514 678901", "г. Владивосток, ул. Светланская, д. 109, кв. 28", "40817810600004802357", "95300.00"], ["Михайлов Илья Станиславович", "13.07.2001", "78-340-95", "4016 789012", "г. Иркутск, ул. Карла Маркса, д. 21, кв. 15", "40817810700003913468", "168400.80"], ["Белова Полина Артемовна", "26.02.2002", "32-905-67", "4518 890123", "г. Хабаровск, ул. Муравьева-Амурского, д. 18, кв. 77", "40817810800002024579", "451900.00"], ["Григорьев Глеб Тимофеевич", "04.09.2000", "96-562-13", "5215 901234", "г. Махачкала, пр-т Гамидова, д. 49, кв. 33", "40817810900001135680", "54800.30"], ["Тарасова Ксения Игоревна", "21.05.2003", "15-129-84", "4512 012345", "г. Томск, пр-т Ленина, д. 105, кв. 9", "40817810000009246791", "224700.00"], ["Орлов Владислав Эдуардович", "10.03.2001", "68-783-49", "2517 123456", "г. Оренбург, ул. Советская, д. 60, кв. 18", "40817810100008357802", "112300.45"], ["Гордеева Вероника Денисовна", "27.08.2002", "94-348-12", "4516 234567", "г. Кемерово, пр-т Советский, д. 73, кв. 55", "40817810200007468913", "79600.00"], ["Степанов Тимофей Вадимович", "15.11.2000", "43-904-76", "3814 345678", "г. Новокузнецк, ул. Кирова, д. 25, кв. 14", "40817810300006579024", "318500.60"], ["Филиппова Яна Матвеевна", "01.10.2003", "79-561-38", "4519 456789", "г. Рязань, Первомайский пр-т, д. 37, кв. 88", "40817810400005680135", "143200.00"]];
+    const VARIANTS_DATA = [{"variant": 1, "prob_type": "linear", "prob_name": "Линейное", "col_idx": 0, "col_name": "I (Ф.И.О.)", "total_probes": 57, "avg_probes": 1.9, "max_probes": 10}, {"variant": 2, "prob_type": "linear", "prob_name": "Линейное", "col_idx": 1, "col_name": "II (Дата)", "total_probes": 40, "avg_probes": 1.33, "max_probes": 3}, {"variant": 3, "prob_type": "linear", "prob_name": "Линейное", "col_idx": 2, "col_name": "III (Телефон)", "total_probes": 35, "avg_probes": 1.17, "max_probes": 2}, {"variant": 4, "prob_type": "linear", "prob_name": "Линейное", "col_idx": 3, "col_name": "IV (Паспорт)", "total_probes": 48, "avg_probes": 1.6, "max_probes": 8}, {"variant": 5, "prob_type": "linear", "prob_name": "Линейное", "col_idx": 4, "col_name": "V (Адрес)", "total_probes": 46, "avg_probes": 1.53, "max_probes": 4}, {"variant": 6, "prob_type": "linear", "prob_name": "Линейное", "col_idx": 5, "col_name": "VI (Счет)", "total_probes": 52, "avg_probes": 1.73, "max_probes": 8}, {"variant": 7, "prob_type": "linear", "prob_name": "Линейное", "col_idx": 6, "col_name": "VII (Остаток)", "total_probes": 44, "avg_probes": 1.47, "max_probes": 7}, {"variant": 8, "prob_type": "quadratic", "prob_name": "Квадратичное", "col_idx": 0, "col_name": "I (Ф.И.О.)", "total_probes": 47, "avg_probes": 1.57, "max_probes": 5}, {"variant": 9, "prob_type": "quadratic", "prob_name": "Квадратичное", "col_idx": 1, "col_name": "II (Дата)", "total_probes": 37, "avg_probes": 1.23, "max_probes": 3}, {"variant": 10, "prob_type": "quadratic", "prob_name": "Квадратичное", "col_idx": 2, "col_name": "III (Телефон)", "total_probes": 37, "avg_probes": 1.23, "max_probes": 4}, {"variant": 11, "prob_type": "quadratic", "prob_name": "Квадратичное", "col_idx": 3, "col_name": "IV (Паспорт)", "total_probes": 44, "avg_probes": 1.47, "max_probes": 4}, {"variant": 12, "prob_type": "quadratic", "prob_name": "Квадратичное", "col_idx": 4, "col_name": "V (Адрес)", "total_probes": 47, "avg_probes": 1.57, "max_probes": 5}, {"variant": 13, "prob_type": "quadratic", "prob_name": "Квадратичное", "col_idx": 5, "col_name": "VI (Счет)", "total_probes": 50, "avg_probes": 1.67, "max_probes": 7}, {"variant": 14, "prob_type": "quadratic", "prob_name": "Квадратичное", "col_idx": 6, "col_name": "VII (Остаток)", "total_probes": 45, "avg_probes": 1.5, "max_probes": 4}, {"variant": 15, "prob_type": "double", "prob_name": "Двойное", "col_idx": 0, "col_name": "I (Ф.И.О.)", "total_probes": 40, "avg_probes": 1.33, "max_probes": 3}, {"variant": 16, "prob_type": "double", "prob_name": "Двойное", "col_idx": 1, "col_name": "II (Дата)", "total_probes": 38, "avg_probes": 1.27, "max_probes": 3}, {"variant": 17, "prob_type": "double", "prob_name": "Двойное", "col_idx": 2, "col_name": "III (Телефон)", "total_probes": 36, "avg_probes": 1.2, "max_probes": 3}, {"variant": 18, "prob_type": "double", "prob_name": "Двойное", "col_idx": 3, "col_name": "IV (Паспорт)", "total_probes": 41, "avg_probes": 1.37, "max_probes": 3}, {"variant": 19, "prob_type": "double", "prob_name": "Двойное", "col_idx": 4, "col_name": "V (Адрес)", "total_probes": 51, "avg_probes": 1.7, "max_probes": 8}, {"variant": 20, "prob_type": "double", "prob_name": "Двойное", "col_idx": 5, "col_name": "VI (Счет)", "total_probes": 49, "avg_probes": 1.63, "max_probes": 5}, {"variant": 21, "prob_type": "double", "prob_name": "Двойное", "col_idx": 6, "col_name": "VII (Остаток)", "total_probes": 42, "avg_probes": 1.4, "max_probes": 3}];
+    const DEFENSE_QA = [{"q": "1. Что такое хеширование, хеш-функция, хеш-таблица, ключ, хеш-значение, коллизия?", "a": "• <b>Хеширование (Hashing)</b> — метод преобразования входного массива данных произвольной длины в битовую строку фиксированной длины (индекс) по заданному алгоритму.<br>• <b>Хеш-функция (Hash Function, h(k))</b> — математическая функция, отображающая элемент универсума ключей k в диапазон допустимых индексов таблицы [0, M-1].<br>• <b>Хеш-таблица (Hash Table)</b> — ассоциативная структура данных, реализующая интерфейс словаря (поиск, вставка, удаление в среднем за O(1)) с прямой адресацией по хеш-значению.<br>• <b>Ключ (Key, k)</b> — уникальный идентифицирующий атрибут записи (например, ФИО, номер паспорта или телефон), по которому вычисляется адрес размещения.<br>• <b>Хеш-значение (Hash value / Digest)</b> — целочисленный результат работы хеш-функции h(k) в диапазоне [0, M-1].<br>• <b>Коллизия (Collision)</b> — ситуация, когда двум различным ключам k1 != k2 хеш-функция сопоставляет один и тот же индекс таблицы: h(k1) = h(k2) (неизбежна в силу принципа Дирихле, так как число возможных ключей много больше размера таблицы M)."}, {"q": "2. Каковы основные требования к хеш-функции?", "a": "1. <b>Детерминированность:</b> для одного и того же ключа функция обязана всегда возвращать строго одно и то же значение.<br>2. <b>Равномерность распределения (Uniformity):</b> вероятность попадания хеша в любую ячейку таблицы должна быть одинаковой P(h(k) = i) = 1/M, чтобы минимизировать образование кластеров и коллизий.<br>3. <b>Вычислительная эффективность:</b> алгоритм должен вычисляться быстро — за O(1) для числовых ключей и O(L) для строк длины L.<br>4. <b>Чувствительность (Лавинный эффект):</b> минимальное изменение ключа (даже в 1 бит) должно кардинально менять результирующий индекс.<br>5. <b>Диапазон:</b> возвращаемые значения должны строго лежать в границах адресного пространства таблицы [0, M-1]."}, {"q": "3. Что такое коллизия? Причины возникновения коллизий.", "a": "<b>Коллизия</b> — совпадение хеш-адресов h(k1) = h(k2) для разных ключей k1 != k2.<br><br><b>Причины возникновения:</b><br>1. <i>Принцип Дирихле (Pigeonhole Principle):</i> мощность множества возможных ключей |U| практически бесконечна (любые ФИО, любые телефоны), тогда как размер хеш-таблицы M строго конечен (M = 30 или M = 60). При N > M коллизии неизбежны на 100%, но даже при N <= M вероятность коллизии стремительно растет (парадокс дней рождения: уже при 23 записях в таблице из 365 ячеек вероятность коллизии превышает 50%).<br>2. <i>Несовершенство хеш-функции:</i> неравномерное перемешивание битов ключа приводит к скучиванию значений в определенных диапазонах индексов."}, {"q": "4. Назовите основные методы создания хеш-функций.", "a": "• <b>Метод деления (Division method):</b> h(k) = k mod M. Требует выбора M в виде простого числа, не близкого к степеням двойки или десятки.<br>• <b>Мультипликативный метод (Кнута):</b> h(k) = floor(M * ((k * A) mod 1)), где A = (sqrt(5)-1)/2 ≈ 0.6180339887. Преимущество: размер M может быть любым (в т.ч. степенью 2), так как иррациональная константа золотого сечения обеспечивает равномерное распределение дробной доли.<br>• <b>Метод середины квадрата (Mid-square):</b> ключ возводится в квадрат k^2, и из середины двоичного представления извлекаются нужные биты адреса.<br>• <b>Свертка (Folding):</b> ключ разбивается на блоки равной длины, которые затем складываются между собой.<br>• <b>Полиномиальное хеширование (для строк):</b> h(s) = sum(s[i] * p^i) mod 2^64 (схема Горнера)."}, {"q": "5. Каковы требования к размеру хеш-таблицы и параметрам для каждого метода?", "a": "• <b>Метод деления:</b> M должно быть <i>простым числом</i> (prime), чтобы избежать циклических коллизий, возникающих из-за общих делителей ключа и базы счисления.<br>• <b>Мультипликативный метод:</b> M не обязано быть простым (часто берут степень двойки M = 2^p для быстрой битовой адресации через сдвиги `(k * A_int) >> (32 - p)`). Константа A выбирается близкой к золотому сечению Кнута.<br>• <b>Открытая адресация (Двойное хеширование):</b> шаг второй хеш-функции h2(k) обязан быть <i>взаимно простым</i> с M (gcd(h2(k), M) = 1). Если M не простое (как в лабораторной M = 60), h2(k) выбирается из множества чисел, не делящихся на делители 60 (2, 3, 5)."}, {"q": "6. Назовите основные методы разрешения коллизий при хешировании.", "a": "1. <b>Метод внешнего связывания / метод цепочек (Separate Chaining):</b> ячейки таблицы являются заголовками связных списков. При коллизии элемент просто добавляется в список соответствующей корзины.<br>2. <b>Метод открытой адресации (Open Addressing):</b> все элементы хранятся непосредственно в массиве таблицы. При возникновении коллизии происходит переход («опробование») к другой свободной ячейке по детерминированному правилу h_i(k).<br>3. <b>Идеальное хеширование (Perfect Hashing):</b> двухуровневые хеш-таблицы, гарантирующие поиск за O(1) в худшем случае без единой коллизии (для статических словарей)."}, {"q": "7. Какие существуют разновидности метода открытой адресации?", "a": "• <b>Линейное опробование (Linear Probing):</b> h_i(k) = (h(k) + i) mod M. Шаг равен 1. Простейшая реализация, отличная локальность данных в кэше CPU, но страдает от <i>первичной кластеризации</i> (слипание занятых ячеек в длинные блоки).<br>• <b>Квадратичное опробование (Quadratic Probing):</b> h_i(k) = (h(k) + c1 * i + c2 * i^2) mod M. Устраняет первичную кластеризацию, но сохраняет <i>вторичную кластеризацию</i> (ключи с одинаковым h(k) проходят одну и ту же цепочку проб).<br>• <b>Двойное хеширование (Double Hashing):</b> h_i(k) = (h1(k) + i * h2(k)) mod M. Шаг зависит от самого ключа. Полностью устраняет как первичную, так и вторичную кластеризацию, обеспечивая наилучшую аппроксимацию равномерного хеширования."}, {"q": "8. В чем заключается метод цепочек?", "a": "Таблица представляет собой массив из M указателей на связные списки (heads). Каждая корзина i содержит линейный список всех записей, для которых h(k) = i.<br><br><b>Преимущества:</b><br>• Таблица никогда не переполняется физически (фактор загрузки alpha = N/M может превышать 1.0).<br>• Удаление элемента тривиально: обычное удаление узла из связного списка за O(1) без необходимости tombstone-меток.<br>• Менее чувствителен к неравномерности хеш-функции, чем открытая адресация."}, {"q": "9. Опишите алгоритмы вставки, удаления и поиска при открытой адресации.", "a": "Для открытой адресации критично использовать 3 статуса ячейки: `EMPTY` (пусто), `OCCUPIED` (занято), `DELETED` (удалено / tombstone).<br><br>• <b>Вставка:</b> вычисляем цепочку проб h_i(k) для i = 0, 1, ..., M-1. Ищем первую ячейку со статусом `EMPTY` или `DELETED`, записываем данные и ставим статус `OCCUPIED`. Если за M шагов свободной ячейки нет — ошибка переполнения.<br>• <b>Поиск:</b> вычисляем h_i(k). Если ячейка `OCCUPIED` и ключ совпадает — успех. Если ячейка `DELETED` — <i>продолжаем поиск</i> по цепочке дальше! Если ячейка `EMPTY` — останавливаемся (ключа точно нет).<br>• <b>Удаление:</b> находим ячейку алгоритмом поиска и устанавливаем статус `DELETED`. Физически очищать ячейку в `EMPTY` <b>нельзя</b>, иначе цепочка поиска для последующих элементов оборвется!"}, {"q": "10. Опишите алгоритмы вставки, удаления и поиска при методе цепочек.", "a": "• <b>Вставка:</b> вычисляем корзину idx = h(k). Проходим по списку `table[idx]`. Если ключ уже есть — обновляем значение. Если ключа нет — добавляем новый узел в начало или конец списка.<br>• <b>Поиск:</b> вычисляем idx = h(k) и последовательно перебираем элементы связного списка `table[idx]` до совпадения ключа или достижения nullptr.<br>• <b>Удаление:</b> находим элемент в списке `table[idx]`, перелинковываем указатели предшествующего узла `prev->next = cur->next` и освобождаем память узла `delete cur`."}, {"q": "11. Что такое переполнение хеш-таблицы и рехеширование?", "a": "• <b>Фактор загрузки (Load Factor):</b> alpha = N / M.<br>• <b>Переполнение:</b> при открытой адресации вставка невозможна при alpha = 1.0, однако деградация производительности до O(N) начинается уже при alpha > 0.7 - 0.75.<br>• <b>Рехеширование (Rehashing):</b> динамическое расширение таблицы. Выделяется новый массив большего размера (обычно M_new ≈ 2M, выбирается ближайшее простое число), и <i>все существующие элементы повторно хешируются</i> с новой функцией h_new(k) и вставляются в новую таблицу. Амортизированная сложность операции составляет O(1) на элемент."}, {"q": "12. Что такое хеширование по вторичным ключам?", "a": "В реальных СУБД и информационных системах поиск записей часто требуется производить по нескольким атрибутам одновременно (например, основной ключ — Номер счета, а вторичные — Номер телефона или ФИО).<br><br><b>Организация:</b><br>• Создается отдельная <i>вторичная хеш-таблица</i> (индекс), где ключом является вторичный атрибут (например, Телефон), а значением (value) — не полная запись, а ссылка/указатель на основной первичный ключ или ячейку в основной таблице.<br>• Если вторичный ключ неуникален (например, несколько сотрудников с одинаковой фамилией или датой рождения), ячейка вторичной хеш-таблицы хранит список (мультииндекс) ссылок на все совпавшие записи."}];
+    const QUIZ_DATA = [{"id": 1, "q": "Какое значение константы A рекомендовал Дональд Кнут для мультипликативного метода хеширования?", "options": ["A = (sqrt(5) - 1) / 2 ≈ 0.6180339887 (обратное золотое сечение)", "A = 3.1415926535 (число Пи)", "A = 2.7182818284 (число Эйлера e)", "A = 0.5"], "correct": 0, "expl": "Кнут доказал, что золотое сечение (sqrt(5)-1)/2 обеспечивает наилучшее псевдоравномерное распределение дробных долей ключей, минимизируя кластеризацию."}, {"id": 2, "q": "Почему при удалении элемента в открытой адресации ячейку помечают как DELETED, а не EMPTY?", "options": ["Чтобы не разорвать цепочку поиска для других ключей, смещенных коллизией правее", "Чтобы сохранить историю транзакций в оперативной памяти", "Потому что язык C++ запрещает очищать ячейки вектора", "Чтобы предотвратить повторную вставку того же ключа"], "correct": 0, "expl": "Алгоритм поиска в открытой адресации прерывается при первой встрече ячейки EMPTY. Если очистить удаленную ячейку в EMPTY, элементы, вытесненные за неё коллизиями, станут недостижимы."}, {"id": 3, "q": "Что происходит при двойном хешировании, если h2(k) и размер таблицы M имеют общий делитель > 1?", "options": ["Цепочка проб зацикливается по подмножеству ячеек, не обходя всю таблицу (риск ложного переполнения)", "Программа аварийно завершается с ошибкой деления на ноль", "Хеш-таблица автоматически переключается на метод цепочек", "Скорость поиска увеличивается вдвое"], "correct": 0, "expl": "Если gcd(h2(k), M) = d > 1, цепочка проб обходит только M/d ячеек. При M=60 и h2(k)=15 проверяются лишь 4 ячейки из 60, приводя к бесконечному циклу при их занятости."}, {"id": 4, "q": "В чем главное преимущество метода цепочек перед методом открытой адресации?", "options": ["Коэффициент загрузки alpha может превышать 1.0, таблица никогда не переполняется физически", "Метод цепочек вообще не использует память кучи", "Метод цепочек исключает любые коллизии", "Метод цепочек работает без хеш-функции"], "correct": 0, "expl": "В методе цепочек элементы размещаются в динамических связных списках, поэтому в таблицу размера M=30 можно вставить 50, 100 и более записей (alpha > 1.0)."}, {"id": 5, "q": "Какое явление называется 'первичной кластеризацией' (Primary Clustering)?", "options": ["Слияние отдельных коллизионных групп в длинные непрерывные блоки занятых ячеек при линейном опробовании", "Зависание процессора при слишком длинных строках", "Переполнение стека при рекурсивном вызове хеш-функции", "Ошибка чтения CSV-файла с разделителем ';'"], "correct": 0, "expl": "При линейном опробовании вероятность попадания в занятый кластер пропорциональна его длине, поэтому длинные кластеры слипаются и растут все быстрее."}, {"id": 6, "q": "Чему равен фактор загрузки (load factor) alpha для открытой адресации в Лабораторной №1 (N=30, M=60)?", "options": ["alpha = 30 / 60 = 0.5 (50% заполнения)", "alpha = 60 / 30 = 2.0", "alpha = 1.0", "alpha = 0.75"], "correct": 0, "expl": "Фактор загрузки alpha = N / M. При N=30 и M=60 получаем alpha = 0.5, что является оптимальным порогом для открытой адресации."}, {"id": 7, "q": "Как преобразуется вещественное число (Остаток на счете, напр. 154200.50) в целочисленный ключ для хеширования?", "options": ["Умножением на 100 с округлением до целого числа копеек: int(round(val * 100))", "Отбрасыванием дробной части: int(val)", "Взятием длины строки числа", "Вещественные числа нельзя хешировать"], "correct": 0, "expl": "Умножение на 100 переводит рубли и копейки в строгое дискретное целое число копеек без потери дробной информации."}, {"id": 8, "q": "Какая средняя теоретическая сложность поиска и вставки в хеш-таблице?", "options": ["O(1) в среднем, O(N) в худшем случае", "O(log N) всегда", "O(N) всегда", "O(N log N)"], "correct": 0, "expl": "При хорошей хеш-функции и alpha < 0.75 поиск и вставка выполняются за константное время O(1). В худшем случае (все ключи попали в одну корзину) сложность вырождается в O(N)."}, {"id": 9, "q": "Что устраняет квадратичное опробование по сравнению с линейным?", "options": ["Первичную кластеризацию", "Вторичную кластеризацию", "Все коллизии на 100%", "Необходимость вычислять хеш-функцию"], "correct": 0, "expl": "Квадратичное опробование (шаг i^2) устраняет первичную кластеризацию, но сохраняет вторичную (ключи с одинаковым h0 идут по одной траектории)."}, {"id": 10, "q": "Какое число взаимно простых с 60 чисел существует в диапазоне [1, 59] (функция Эйлера phi(60))?", "options": ["16 чисел (1, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 49, 53, 59)", "30 чисел (все нечетные)", "5 чисел", "60 чисел"], "correct": 0, "expl": "phi(60) = 60 * (1 - 1/2) * (1 - 1/3) * (1 - 1/5) = 16. Именно эти 16 шагов гарантируют полный цикл без зацикливания."}, {"id": 11, "q": "Что такое рехеширование (Rehashing)?", "options": ["Пересоздание таблицы большего размера и повторная вставка всех элементов при превышении порога загрузки", "Повторное вычисление хеша при сбое питания", "Шифрование данных алгоритмом SHA-256", "Сортировка связного списка в методе цепочек"], "correct": 0, "expl": "Рехеширование выделяет массив большего размера (обычно x2) и заново распределяет все элементы новой хеш-функцией для восстановления O(1)."}, {"id": 12, "q": "В чем заключается идея вторичного индекса (хеширование по вторичным ключам)?", "options": ["Вторичная хеш-таблица хранит вторичный атрибут как ключ и ссылку на первичную запись как значение", "Вторичный ключ хешируется дважды подряд", "Вторичный ключ используется только при переполнении таблицы", "Это резервная копия таблицы на жестком диске"], "correct": 0, "expl": "Вторичный индекс позволяет быстро находить запись по неосновному полю (напр. по Телефону), ссылаясь на адрес основной записи в БД."}];
+
+    const A_CONST = 0.618033988749895;
+    const COPRIMES_60 = [1, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 49, 53, 59];
+
+    // Simulator State
+    let currentArch = 'open'; // 'open' or 'chain'
+    let currentProbe = 'linear';
+    let currentCol = 0;
+    let tableM = 60;
+    let insertedCount = 0;
+    let tableData = [];
+    let cellStates = []; // 0=EMPTY, 1=OCCUPIED, 2=DELETED
+    let totalProbes = 0;
+    let probesPerRecord = [];
+
+    // Key to integer
+    function keyToInt(rec, col) {
+      const val = (rec[col] || '').trim();
+      if (col === 0) { // ФИО
+        let h = 0;
+        for (let i = 0; i < val.length; i++) h = (h * 31 + val.charCodeAt(i)) & 0x7FFFFFFF;
+        return h;
+      } else if (col === 1) { // Дата дд.мм.гггг
+        const parts = val.split('.');
+        const d = parseInt(parts[0], 10), m = parseInt(parts[1], 10), y = parseInt(parts[2], 10);
+        return y * 10000 + m * 100 + d;
+      } else if (col === 2) { // Телефон
+        return parseInt(val.replace(/\\D/g, ''), 10) || 0;
+      } else if (col === 3) { // Паспорт
+        let h = 0;
+        for (let i = 0; i < val.length; i++) {
+          const c = val.charCodeAt(i);
+          if (val[i] >= '0' && val[i] <= '9') h = (h * 10 + (c - 48)) & 0x7FFFFFFF;
+          else h = (h * 31 + c) & 0x7FFFFFFF;
+        }
+        return h;
+      } else if (col === 4) { // Адрес
+        let h = 0;
+        for (let i = 0; i < val.length; i++) h = (h * 37 + val.charCodeAt(i)) & 0x7FFFFFFF;
+        return h;
+      } else if (col === 5) { // Номер счета
+        const digits = val.replace(/\\D/g, '');
+        let h = 0;
+        for (let i = 0; i < digits.length; i++) h = (h * 10 + (digits.charCodeAt(i) - 48)) & 0x7FFFFFFF;
+        return h;
+      } else if (col === 6) { // Остаток
+        const num = parseFloat(val.replace(',', '.'));
+        return Math.round(num * 100) & 0x7FFFFFFF;
+      }
+      return 0;
+    }
+
+    function multHash(k, M) {
+      const frac = (k * A_CONST) % 1.0;
+      return Math.floor(M * frac);
+    }
+
+    // Initialize Simulator
+    function resetSimulator() {
+      currentArch = document.getElementById('sim-arch').value;
+      currentProbe = document.getElementById('sim-probe').value;
+      currentCol = parseInt(document.getElementById('sim-col').value, 10);
+      tableM = currentArch === 'open' ? 60 : 30;
+
+      insertedCount = 0;
+      totalProbes = 0;
+      probesPerRecord = [];
+
+      if (currentArch === 'open') {
+        tableData = new Array(tableM).fill(null);
+        cellStates = new Array(tableM).fill(0); // 0=EMPTY
+      } else {
+        tableData = Array.from({ length: tableM }, () => []);
+      }
+
+      updateStats();
+      renderCells();
+      drawHistogram();
+      document.getElementById('stat-last-action').textContent = 'Таблица сброшена';
+    }
+
+    function onArchChanged() {
+      const arch = document.getElementById('sim-arch').value;
+      document.getElementById('group-probe').style.display = arch === 'open' ? 'flex' : 'none';
+      resetSimulator();
+    }
+
+    function resetAndRehash() {
+      resetSimulator();
+    }
+
+    function insertNextRecord() {
+      if (insertedCount >= RAW_RECORDS.length) {
+        document.getElementById('stat-last-action').textContent = 'Все 30 записей уже вставлены';
+        return;
+      }
+      const rec = RAW_RECORDS[insertedCount];
+      const k = keyToInt(rec, currentCol);
+
+      if (currentArch === 'open') {
+        const h0 = multHash(k, tableM);
+        const h2 = COPRIMES_60[k % 16];
+        let placed = false;
+        let probes = 0;
+
+        for (let i = 0; i < tableM; i++) {
+          probes++;
+          let idx;
+          if (currentProbe === 'linear') idx = (h0 + i) % tableM;
+          else if (currentProbe === 'quadratic') idx = (h0 + i + i * i) % tableM;
+          else idx = (h0 + i * h2) % tableM;
+
+          if (cellStates[idx] === 0 || cellStates[idx] === 2) { // EMPTY or DELETED
+            tableData[idx] = { key: k, record: rec, probes: probes };
+            cellStates[idx] = 1; // OCCUPIED
+            placed = true;
+            totalProbes += probes;
+            probesPerRecord.push(probes);
+            insertedCount++;
+            flashCell(idx);
+            break;
+          }
+        }
+        if (!placed) alert('Ошибка: таблица переполнена!');
+      } else { // Chaining
+        const idx = multHash(k, tableM);
+        const probes = tableData[idx].length + 1;
+        tableData[idx].push({ key: k, record: rec, probes: probes });
+        totalProbes += probes;
+        probesPerRecord.push(probes);
+        insertedCount++;
+      }
+
+      updateStats();
+      renderCells();
+      drawHistogram();
+      document.getElementById('stat-last-action').textContent = 'Вставлена запись #' + insertedCount;
+    }
+
+    function insertAllRecords() {
+      while (insertedCount < RAW_RECORDS.length) {
+        insertNextRecord();
+      }
+      document.getElementById('stat-last-action').textContent = 'Вставлены все 30 записей';
+    }
+
+    function searchKey() {
+      const term = document.getElementById('sim-op-input').value.trim().toLowerCase();
+      if (!term) return;
+
+      if (currentArch === 'open') {
+        for (let i = 0; i < tableM; i++) {
+          if (cellStates[i] === 1 && tableData[i]) {
+            const r = tableData[i].record;
+            if (r[currentCol].toLowerCase().includes(term) || r[0].toLowerCase().includes(term)) {
+              flashCell(i);
+              document.getElementById('stat-last-action').textContent = 'Найдено в ячейке [' + i + '] (' + tableData[i].probes + ' проб)';
+              return;
+            }
+          }
+        }
+        document.getElementById('stat-last-action').textContent = 'Запись не найдена';
+      } else {
+        for (let b = 0; b < tableM; b++) {
+          for (let item of tableData[b]) {
+            if (item.record[currentCol].toLowerCase().includes(term) || item.record[0].toLowerCase().includes(term)) {
+              document.getElementById('stat-last-action').textContent = 'Найдено в корзине [' + b + ']';
+              return;
+            }
+          }
+        }
+        document.getElementById('stat-last-action').textContent = 'Запись не найдена';
+      }
+    }
+
+    function deleteKey() {
+      const term = document.getElementById('sim-op-input').value.trim().toLowerCase();
+      if (!term) return;
+
+      if (currentArch === 'open') {
+        for (let i = 0; i < tableM; i++) {
+          if (cellStates[i] === 1 && tableData[i]) {
+            const r = tableData[i].record;
+            if (r[currentCol].toLowerCase().includes(term) || r[0].toLowerCase().includes(term)) {
+              cellStates[i] = 2; // DELETED (Tombstone)
+              renderCells();
+              flashCell(i);
+              document.getElementById('stat-last-action').textContent = 'Удалено из ячейки [' + i + '] (помечено DELETED)';
+              return;
+            }
+          }
+        }
+        document.getElementById('stat-last-action').textContent = 'Для удаления запись не найдена';
+      } else {
+        for (let b = 0; b < tableM; b++) {
+          for (let idx = 0; idx < tableData[b].length; idx++) {
+            const r = tableData[b][idx].record;
+            if (r[currentCol].toLowerCase().includes(term) || r[0].toLowerCase().includes(term)) {
+              tableData[b].splice(idx, 1);
+              renderCells();
+              drawHistogram();
+              document.getElementById('stat-last-action').textContent = 'Удалено из корзины [' + b + ']';
+              return;
+            }
+          }
+        }
+        document.getElementById('stat-last-action').textContent = 'Для удаления запись не найдена';
+      }
+    }
+
+    function flashCell(idx) {
+      setTimeout(() => {
+        const el = document.getElementById('cell-' + idx);
+        if (el) {
+          el.classList.add('flash');
+          setTimeout(() => el.classList.remove('flash'), 800);
+        }
+      }, 50);
+    }
+
+    function updateStats() {
+      document.getElementById('stat-inserted').textContent = insertedCount + ' / 30';
+      const alpha = (insertedCount / tableM).toFixed(2);
+      document.getElementById('stat-alpha').textContent = alpha;
+      document.getElementById('stat-total-probes').textContent = totalProbes;
+      const avg = insertedCount > 0 ? (totalProbes / insertedCount).toFixed(2) : '0.00';
+      document.getElementById('stat-avg-probes').textContent = avg;
+    }
+
+    function renderCells() {
+      const container = document.getElementById('sim-cells-container');
+      if (currentArch === 'open') {
+        container.className = 'cells-grid';
+        container.innerHTML = tableData.map((item, idx) => {
+          const state = cellStates[idx];
+          let stateClass = 'empty';
+          let bodyText = '<span style="color: var(--text-muted); font-style: italic;">[EMPTY]</span>';
+          let probeBadge = '';
+
+          if (state === 1 && item) {
+            stateClass = 'occupied';
+            bodyText = item.record[0];
+            probeBadge = '<span style="color: var(--accent-emerald); font-weight: 700;">' + item.probes + 'п</span>';
+          } else if (state === 2) {
+            stateClass = 'deleted';
+            bodyText = '<span style="color: var(--accent-amber);">🪦 [DELETED]</span>';
+          }
+
+          return `
+            <div class="cell-card ${stateClass}" id="cell-${idx}">
+              <div class="cell-header">
+                <span>[${idx}]</span>
+                ${probeBadge}
+              </div>
+              <div class="cell-body" title="${state === 1 && item ? item.record[0] + ' | ' + item.record[currentCol] : ''}">
+                ${bodyText}
+              </div>
+            </div>
+          `;
+        }).join('');
+      } else { // Chaining
+        container.className = '';
+        container.innerHTML = tableData.map((bucket, idx) => `
+          <div class="chain-row" id="cell-${idx}">
+            <span style="width: 45px; color: var(--text-muted); font-family: 'Fira Code', monospace; font-size: 0.78rem;">[${idx}]</span>
+            ${bucket.length === 0 ? '<span style="color: var(--text-muted); font-size: 0.76rem;">null</span>' : ''}
+            ${bucket.map(node => `
+              <div class="chain-node">
+                <span>${node.record[0]}</span>
+                <span style="font-size: 0.68rem; color: var(--accent-cyan);">(${node.record[currentCol]})</span>
+              </div>
+            `).join('<span class="chain-arrow">→</span>')}
+          </div>
+        `).join('');
+      }
+    }
+
+    function drawHistogram() {
+      const canvas = document.getElementById('collisionCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width = canvas.parentElement.clientWidth - 30;
+      const h = canvas.height = 90;
+      ctx.clearRect(0, 0, w, h);
+
+      const counts = new Array(tableM).fill(0);
+      if (currentArch === 'open') {
+        for (let i = 0; i < tableM; i++) if (cellStates[i] === 1) counts[i] = 1;
+      } else {
+        for (let i = 0; i < tableM; i++) counts[i] = tableData[i].length;
+      }
+
+      const maxVal = Math.max(1, ...counts);
+      document.getElementById('hist-peak').textContent = 'Пик корзины: ' + maxVal;
+
+      const barW = Math.max(2, (w / tableM) - 2);
+      for (let i = 0; i < tableM; i++) {
+        const val = counts[i];
+        const barH = (val / maxVal) * (h - 20);
+        const x = i * (w / tableM);
+        const y = h - barH - 5;
+
+        if (val === 0) {
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+          ctx.fillRect(x, h - 8, barW, 3);
+        } else if (val === 1) {
+          ctx.fillStyle = '#3b82f6';
+          ctx.fillRect(x, y, barW, barH);
+        } else {
+          ctx.fillStyle = '#f59e0b'; // Collision!
+          ctx.fillRect(x, y, barW, barH);
+        }
+      }
+    }
+
+    function switchCodeTab(lang) {
+      document.querySelectorAll('.code-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.toLowerCase().includes(lang));
+      });
+      document.getElementById('code-cpp').style.display = lang === 'cpp' ? 'block' : 'none';
+      document.getElementById('code-py').style.display = lang === 'py' ? 'block' : 'none';
+    }
+
+    function loadVariantToSimulator(varNum) {
+      const v = VARIANTS_DATA.find(x => x.variant === varNum);
+      if (!v) return;
+
+      document.getElementById('sim-arch').value = 'open';
+      document.getElementById('group-probe').style.display = 'flex';
+      document.getElementById('sim-probe').value = v.prob_type;
+      document.getElementById('sim-col').value = v.col_idx;
+
+      resetSimulator();
+      insertAllRecords();
+      document.getElementById('simulator').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function downloadCSV() {
+      const header = ["Ф.И.О.", "Дата рождения", "Номер телефона", "Серия и номер паспорта", "Адрес прописки", "Номер банковского счета", "Остаток денег на счете"].join(';');
+      const rows = RAW_RECORDS.map(r => r.join(';')).join('\\n');
+      const blob = new Blob([header + '\\n' + rows], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'data_30_records.csv';
+      a.click();
+    }
+
+    // Render Raw Table Body
+    function renderRawTable() {
+      const tbody = document.getElementById('raw-table-body');
+      tbody.innerHTML = RAW_RECORDS.map((r, i) => `
+        <tr>
+          <td style="color: var(--accent-cyan); font-family: 'Fira Code', monospace;">${i + 1}</td>
+          <td style="font-weight: 600; color: #fff;">${r[0]}</td>
+          <td>${r[1]}</td>
+          <td>${r[2]}</td>
+          <td>${r[3]}</td>
+          <td>${r[4]}</td>
+          <td style="font-family: 'Fira Code', monospace;">${r[5]}</td>
+          <td style="color: var(--accent-emerald); font-weight: 600;">${r[6]} ₽</td>
+        </tr>
+      `).join('');
+    }
+
+    // Render Variants Grid
+    function renderVariantsGrid() {
+      const grid = document.getElementById('variants-grid');
+      grid.innerHTML = VARIANTS_DATA.map(v => `
+        <div class="var-card">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span class="var-badge">Вариант ${v.variant}</span>
+              <span style="font-size: 0.75rem; color: var(--accent-cyan);">${v.prob_name}</span>
+            </div>
+            <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 6px; color: #fff;">
+              По столбцу ${v.col_name}
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 12px;">
+              • Всего попыток: <b style="color: #fff;">${v.total_probes}</b><br>
+              • Среднее число проб: <b style="color: var(--accent-emerald);">${v.avg_probes}</b><br>
+              • Максимум проб: <b style="color: ${v.max_probes > 5 ? 'var(--accent-amber)' : 'var(--accent-cyan)'};">${v.max_probes}</b>
+            </div>
+          </div>
+          <button class="btn-action btn-secondary" style="font-size: 0.78rem; padding: 6px 12px; width: 100%;" onclick="loadVariantToSimulator(${v.variant})">
+            ▶ Запустить вариант ${v.variant}
+          </button>
+        </div>
+      `).join('');
+    }
+
+    // Render Defense QA
+    function renderDefenseQA() {
+      const container = document.getElementById('defense-qa-container');
+      container.innerHTML = DEFENSE_QA.map((item, idx) => `
+        <div class="qa-item ${idx === 0 ? 'open' : ''}">
+          <div class="qa-question" onclick="this.parentElement.classList.toggle('open')">
+            <span>${item.q}</span>
+            <span class="qa-toggle-icon" style="transition: transform 0.2s;">▼</span>
+          </div>
+          <div class="qa-answer">
+            ${item.a}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Quiz logic
+    let curQuizIdx = 0;
+    let quizScore = 0;
+
+    function renderQuizQuestion() {
+      const q = QUIZ_DATA[curQuizIdx];
+      document.getElementById('quiz-q-num').textContent = 'Вопрос ' + (curQuizIdx + 1) + ' из ' + QUIZ_DATA.length;
+      document.getElementById('quiz-q-text').textContent = q.q;
+      document.getElementById('quiz-progress-fill').style.width = ((curQuizIdx / QUIZ_DATA.length) * 100) + '%';
+      document.getElementById('quiz-expl-box').style.display = 'none';
+      document.getElementById('quiz-next-btn').style.display = 'none';
+
+      const optBox = document.getElementById('quiz-options-box');
+      optBox.innerHTML = q.options.map((opt, i) => `
+        <button class="quiz-option-btn" onclick="selectQuizOption(${i})">${opt}</button>
+      `).join('');
+    }
+
+    function selectQuizOption(idx) {
+      const q = QUIZ_DATA[curQuizIdx];
+      const buttons = document.querySelectorAll('.quiz-option-btn');
+      buttons.forEach(b => b.disabled = true);
+
+      if (idx === q.correct) {
+        buttons[idx].classList.add('correct');
+        quizScore++;
+      } else {
+        buttons[idx].classList.add('wrong');
+        buttons[q.correct].classList.add('correct');
+      }
+
+      document.getElementById('quiz-score-badge').textContent = 'Счет: ' + quizScore + ' / ' + QUIZ_DATA.length;
+      const expl = document.getElementById('quiz-expl-box');
+      expl.innerHTML = '<b>Обоснование:</b> ' + q.expl;
+      expl.style.display = 'block';
+
+      const nextBtn = document.getElementById('quiz-next-btn');
+      nextBtn.textContent = curQuizIdx === QUIZ_DATA.length - 1 ? 'Завершить тест' : 'Следующий вопрос →';
+      nextBtn.style.display = 'inline-block';
+    }
+
+    function nextQuizQuestion() {
+      if (curQuizIdx < QUIZ_DATA.length - 1) {
+        curQuizIdx++;
+        renderQuizQuestion();
+      } else {
+        document.getElementById('quiz-progress-fill').style.width = '100%';
+        const pct = Math.round((quizScore / QUIZ_DATA.length) * 100);
+        let grade = pct >= 85 ? 'Отлично (5)' : pct >= 70 ? 'Хорошо (4)' : pct >= 50 ? 'Удовлетворительно (3)' : 'Требуется повторение';
+        document.getElementById('quiz-question-container').innerHTML = `
+          <div style="text-align: center; padding: 24px 0;">
+            <div style="font-size: 3rem; margin-bottom: 8px;">🎓</div>
+            <h3 style="font-size: 1.5rem; margin-bottom: 10px;">Тестирование завершено!</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">Ваш результат: <b>${quizScore} из ${QUIZ_DATA.length} (${pct}%)</b> — оценка: <span style="color: var(--accent-emerald); font-weight: 700;">${grade}</span></p>
+            <button class="btn-action" style="padding: 10px 24px; margin: 0 auto;" onclick="resetQuiz()">Пройти еще раз</button>
+          </div>
+        `;
+      }
+    }
+
+    function resetQuiz() {
+      curQuizIdx = 0;
+      quizScore = 0;
+      document.getElementById('quiz-score-badge').textContent = 'Счет: 0 / ' + QUIZ_DATA.length;
+      renderQuizQuestion();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderRawTable();
+      renderVariantsGrid();
+      renderDefenseQA();
+      renderQuizQuestion();
+      resetSimulator();
+    });
+
+    window.addEventListener('resize', drawHistogram);
+  </script>
+</body>
+</html>
