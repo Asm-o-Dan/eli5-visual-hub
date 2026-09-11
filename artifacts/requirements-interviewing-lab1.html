@@ -1,0 +1,1815 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Интервьюирование стейкхолдеров: Лабораторная работа №1 | Разработка и анализ требований</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #090d16;
+      --bg-surface: #101726;
+      --bg-surface-elevated: #182236;
+      --bg-surface-hover: #1f2c45;
+      --bg-code: #0b111e;
+      --border-color: #1e293b;
+      --border-highlight: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-blue: #38bdf8;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-purple: #a855f7;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-main);
+      line-height: 1.6;
+      padding-bottom: 90px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    code, pre, .mono {
+      font-family: var(--font-mono);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Top Sticky Nav */
+    .top-nav {
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(16, 23, 38, 0.92);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 12px 0;
+    }
+    .nav-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-primary);
+      font-weight: 700;
+      font-size: 1.05rem;
+    }
+    .nav-brand:hover { color: var(--accent-blue); }
+    .badge-tag {
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--accent-blue);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: var(--font-mono);
+    }
+
+    /* Tab Navigation */
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 16px 0 12px 0;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 28px;
+      scrollbar-width: thin;
+    }
+    .tab-btn {
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tab-btn:hover {
+      background: var(--bg-surface-elevated);
+      color: var(--text-primary);
+      border-color: var(--border-highlight);
+    }
+    .tab-btn.active {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-blue);
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.15);
+    }
+
+    .tab-pane {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .tab-pane.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.4) 0%, rgba(16, 23, 38, 0.8) 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 32px 28px;
+      margin: 20px 0 32px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 250px;
+      height: 250px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      background: linear-gradient(90deg, #f8fafc, #93c5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p.lead {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      max-width: 850px;
+      margin-bottom: 18px;
+    }
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .meta-chip {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      padding: 4px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+    .meta-chip strong { color: var(--text-primary); }
+
+    /* Cards & Layout */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 24px;
+      position: relative;
+      transition: border-color 0.2s;
+    }
+    .card:hover {
+      border-color: var(--border-highlight);
+    }
+    .card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card p {
+      color: var(--text-secondary);
+      font-size: 0.92rem;
+      margin-bottom: 12px;
+    }
+    .card ul {
+      margin-left: 20px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    .card ul li { margin-bottom: 6px; }
+
+    /* Bad vs Good Boxes */
+    .box-compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 20px 0;
+    }
+    @media (max-width: 768px) {
+      .box-compare { grid-template-columns: 1fr; }
+    }
+    .box {
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid;
+    }
+    .box.bad {
+      background: rgba(244, 63, 94, 0.06);
+      border-color: rgba(244, 63, 94, 0.35);
+    }
+    .box.bad h4 {
+      color: var(--accent-rose);
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .box.good {
+      background: rgba(16, 185, 129, 0.06);
+      border-color: rgba(16, 185, 129, 0.35);
+    }
+    .box.good h4 {
+      color: var(--accent-emerald);
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    /* SVG Diagram Wrapper */
+    .diagram-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 28px;
+      text-align: center;
+    }
+    .diagram-card h3 {
+      text-align: left;
+      margin-bottom: 6px;
+    }
+    .diagram-card p.desc {
+      text-align: left;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      margin-bottom: 20px;
+    }
+    .svg-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+    .svg-container svg {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+
+    /* Stepper (11 steps) */
+    .stepper-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .step-pill {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .step-pill:hover {
+      color: var(--text-primary);
+      border-color: var(--border-highlight);
+    }
+    .step-pill.active {
+      background: var(--accent-blue);
+      color: #000;
+      border-color: var(--accent-blue);
+      font-weight: 700;
+    }
+    .step-content-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-highlight);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    /* Simulator Sandbox */
+    .sim-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 30px;
+    }
+    .sim-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+    }
+    .persona-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .persona-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #090d16;
+    }
+    .persona-info h4 { font-size: 1.05rem; }
+    .persona-info span { font-size: 0.82rem; color: var(--text-muted); }
+
+    .meters-bar {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .meter-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 130px;
+    }
+    .meter-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      display: flex;
+      justify-content: space-between;
+    }
+    .progress-track {
+      background: var(--bg-surface-elevated);
+      border-radius: 10px;
+      height: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+    .progress-fill {
+      height: 100%;
+      transition: width 0.3s ease, background-color 0.3s ease;
+    }
+
+    .dialogue-history {
+      background: var(--bg-code);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 18px;
+      max-height: 380px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .msg-bubble {
+      max-width: 82%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+    .msg-interviewer {
+      align-self: flex-end;
+      background: #1e3a5f;
+      border: 1px solid #2563eb;
+      color: #e0f2fe;
+    }
+    .msg-stakeholder {
+      align-self: flex-start;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-highlight);
+      color: var(--text-primary);
+    }
+    .msg-feedback {
+      align-self: center;
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px dashed var(--accent-amber);
+      color: #fde68a;
+      font-size: 0.84rem;
+      text-align: center;
+      padding: 8px 14px;
+      border-radius: 8px;
+      width: 90%;
+    }
+
+    .choices-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .choice-btn {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 14px 18px;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .choice-btn:hover {
+      background: var(--bg-surface-hover);
+      border-color: var(--accent-blue);
+      transform: translateX(4px);
+    }
+    .choice-tag {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      color: var(--accent-cyan);
+      white-space: nowrap;
+    }
+
+    /* Report Generator & Copyable */
+    .report-box {
+      background: var(--bg-code);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      position: relative;
+      margin-bottom: 24px;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-highlight);
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover {
+      background: var(--accent-blue);
+      color: #000;
+    }
+
+    /* Accordion */
+    .accordion-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .accordion-header {
+      padding: 16px 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      font-size: 0.98rem;
+      transition: background 0.2s;
+    }
+    .accordion-header:hover {
+      background: var(--bg-surface-elevated);
+    }
+    .accordion-body {
+      display: none;
+      padding: 18px 20px;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-surface-elevated);
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .accordion-body.open {
+      display: block;
+    }
+
+    /* Quiz */
+    .quiz-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .quiz-opt {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-top: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: block;
+      width: 100%;
+      text-align: left;
+      font-size: 0.92rem;
+      color: var(--text-primary);
+    }
+    .quiz-opt:hover {
+      background: var(--bg-surface-hover);
+      border-color: var(--border-highlight);
+    }
+    .quiz-opt.correct {
+      background: rgba(16, 185, 129, 0.15) !important;
+      border-color: var(--accent-emerald) !important;
+      color: #a7f3d0 !important;
+    }
+    .quiz-opt.wrong {
+      background: rgba(244, 63, 94, 0.15) !important;
+      border-color: var(--accent-rose) !important;
+      color: #fecdd3 !important;
+    }
+    .quiz-feedback {
+      margin-top: 12px;
+      font-size: 0.88rem;
+      padding: 10px 14px;
+      border-radius: 8px;
+      display: none;
+    }
+
+    /* Utility */
+    .text-emerald { color: var(--accent-emerald); }
+    .text-rose { color: var(--accent-rose); }
+    .text-cyan { color: var(--accent-cyan); }
+    .text-blue { color: var(--accent-blue); }
+    .text-amber { color: var(--accent-amber); }
+    .text-purple { color: var(--accent-purple); }
+
+    .pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      margin-right: 6px;
+    }
+    .pill-blue { background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); border: 1px solid rgba(56, 189, 248, 0.3); }
+    .pill-emerald { background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .pill-amber { background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); border: 1px solid rgba(245, 158, 11, 0.3); }
+  </style>
+</head>
+<body>
+
+  <!-- Top Sticky Navigation -->
+  <nav class="top-nav">
+    <div class="container nav-content">
+      <a href="../index.html" class="nav-brand">
+        <span>← ELI5 Hub</span>
+        <span class="badge-tag">ЛР №1: Интервью</span>
+      </a>
+      <div style="font-size: 0.85rem; color: var(--text-secondary); display: flex; align-items: center; gap: 12px;">
+        <span>Разработка и анализ требований</span>
+        <a href="https://github.com/Asm-o-Dan/eli5-visual-hub" target="_blank" style="color: var(--text-muted); text-decoration: none;">GitHub ↗</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+
+    <!-- Hero Header -->
+    <header class="hero">
+      <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+        <span class="pill pill-blue">Инженерия требований</span>
+        <span class="pill pill-emerald">Системный анализ</span>
+        <span class="pill pill-amber">ГОСТ 34.602-89</span>
+      </div>
+      <h1>Лабораторная №1: Интервьюирование стейкхолдеров</h1>
+      <p class="lead">
+        Интерактивный тренажер и визуальный гайд по выявлению потребностей заказчика, проведению глубинного интервью по 11-шаговой методологии, проверке гипотез и трансляции болей в формальное ТЗ.
+      </p>
+      <div class="hero-meta">
+        <div class="meta-chip"><strong>Цель:</strong> Идентификация стейкхолдеров & анализ проблем</div>
+        <div class="meta-chip"><strong>Ключевой метод:</strong> Контекстно-свободное интервью</div>
+        <div class="meta-chip"><strong>Результат:</strong> Потребности по ГОСТ 34.602-89 + Глоссарий</div>
+      </div>
+    </header>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('tab-eli5')">🧠 1. Ментальная модель (ELI5)</button>
+      <button class="tab-btn" onclick="switchTab('tab-stepper')">📋 2. 11 шагов интервью</button>
+      <button class="tab-btn" onclick="switchTab('tab-classifier')">⚖️ 3. Свободные vs Зависимые вопросы</button>
+      <button class="tab-btn" onclick="switchTab('tab-sim')">🎮 4. Симулятор интервью (Sandbox)</button>
+      <button class="tab-btn" onclick="switchTab('tab-report')">📄 5. Генератор отчета ЛР №1</button>
+      <button class="tab-btn" onclick="switchTab('tab-defense')">🛡️ 6. Вопросы к защите</button>
+      <button class="tab-btn" onclick="switchTab('tab-quiz')">🎯 7. Экзаменационный тест</button>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 1: ELI5 MENTAL MODEL                   -->
+    <!-- ========================================== -->
+    <div id="tab-eli5" class="tab-pane active">
+      
+      <!-- Bad vs Good -->
+      <div class="box-compare">
+        <div class="box bad">
+          <h4>❌ Ошибка новичка: «Интервью как допрос и навязывание решений»</h4>
+          <ul>
+            <li>Спрашивает: <em>«Вам нужна кнопка экспорта в Excel и фильтр по датам?»</em> — респондент соглашается со всем, но реальную проблему не решает.</li>
+            <li>Фокус на интерфейсе вместо бизнес-процесса и корневых причин.</li>
+            <li>Принимает слова пользователя о решении за чистую монету (путает <strong>Хотелку (Want)</strong> и <strong>Потребность (Need)</strong>).</li>
+            <li>Итог: создается система, которая идеально реализует ошибочные идеи и которой никто не пользуется.</li>
+          </ul>
+        </div>
+        <div class="box good">
+          <h4>✅ Инженерный подход: «Интервью как раскопки корневых болей»</h4>
+          <ul>
+            <li>Спрашивает: <em>«Что отнимает больше всего времени? Почему эта проблема возникает? Как она решается сейчас?»</em></li>
+            <li>Сначала контекстно-свободные вопросы, чтобы не навязать собственные шоры и галлюцинации.</li>
+            <li>Обязательное резюме («Правильно ли я понял, что...») для мгновенной валидации.</li>
+            <li>Итог: переход от жалоб респондента к измеримым целям создания системы по <strong>ГОСТ 34.602-89</strong>.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- SVG Flowchart: Pipeline of Requirements Elicitation -->
+      <div class="diagram-card">
+        <h3>Воронка инженерии требований: от хаоса к ТЗ</h3>
+        <p class="desc">Как мысли и жалобы стейкхолдера превращаются в формализованные цели по ГОСТ 34.602-89</p>
+        <div class="svg-container">
+          <svg viewBox="0 0 960 260" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#0284c7" stop-opacity="0.05"/>
+              </linearGradient>
+              <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#a855f7" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#7e22ce" stop-opacity="0.05"/>
+              </linearGradient>
+              <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#10b981" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#047857" stop-opacity="0.05"/>
+              </linearGradient>
+              <linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#b45309" stop-opacity="0.05"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Node 1: Стейкхолдер -->
+            <rect x="20" y="50" width="190" height="150" rx="12" fill="url(#grad1)" stroke="#38bdf8" stroke-width="2"/>
+            <text x="115" y="85" fill="#38bdf8" font-size="14" font-weight="700" text-anchor="middle" font-family="'Inter', sans-serif">1. Стейкхолдер</text>
+            <text x="115" y="115" fill="#94a3b8" font-size="12" text-anchor="middle" font-family="'Inter', sans-serif">• Боль и рутина</text>
+            <text x="115" y="135" fill="#94a3b8" font-size="12" text-anchor="middle" font-family="'Inter', sans-serif">• Нестыковки данных</text>
+            <text x="115" y="155" fill="#94a3b8" font-size="12" text-anchor="middle" font-family="'Inter', sans-serif">• Ложные гипотезы решений</text>
+            <text x="115" y="180" fill="#64748b" font-size="11" text-anchor="middle" font-family="'Fira Code', monospace">Вход: жалобы и факты</text>
+
+            <!-- Arrow 1 -->
+            <path d="M 215 125 L 260 125" stroke="#38bdf8" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+            <polygon points="260,125 250,119 250,131" fill="#38bdf8"/>
+
+            <!-- Node 2: Интервьюирование -->
+            <rect x="265" y="50" width="200" height="150" rx="12" fill="url(#grad2)" stroke="#a855f7" stroke-width="2"/>
+            <text x="365" y="85" fill="#c084fc" font-size="14" font-weight="700" text-anchor="middle" font-family="'Inter', sans-serif">2. Интервью аналитика</text>
+            <text x="365" y="115" fill="#94a3b8" font-size="12" text-anchor="middle" font-family="'Inter', sans-serif">• Контекстно-свободные ?</text>
+            <text x="365" y="135" fill="#94a3b8" font-size="12" text-anchor="middle" font-family="'Inter', sans-serif">• Понимание среды ПО</text>
+            <text x="365" y="155" fill="#94a3b8" font-size="12" text-anchor="middle" font-family="'Inter', sans-serif">• Проверка предположений</text>
+            <text x="365" y="180" fill="#a855f7" font-size="11" text-anchor="middle" font-family="'Fira Code', monospace">11 частей гайда</text>
+
+            <!-- Arrow 2 -->
+            <polygon points="510,125 500,119 500,131" fill="#a855f7"/>
+            <path d="M 470 125 L 510 125" stroke="#a855f7" stroke-width="3" fill="none"/>
+
+            <!-- Node 3: Анализ и Резюме -->
+            <rect x="515" y="50" width="190" height="150" rx="12" fill="url(#grad4)" stroke="#f59e0b" stroke-width="2"/>
+            <text x="610" y="85" fill="#fbbf24" font-size="14" font-weight="700" text-anchor="middle" font-family="'Inter', sans-serif">3. Анализ & Глоссарий</text>
+            <text x="610" y="115" fill="#94a3b8" font-size="12" text-anchor="middle" font-family="'Inter', sans-serif">• Отсечение шума</text>
+            <text x="610" y="135" fill="#94a3b8" font-size="12" text-anchor="middle" font-family="'Inter', sans-serif">• Единые термины (словарь)</text>
+            <text x="610" y="155" fill="#94a3b8" font-size="12" text-anchor="middle" font-family="'Inter', sans-serif">• Топ-3 приоритета</text>
+            <text x="610" y="180" fill="#f59e0b" font-size="11" text-anchor="middle" font-family="'Fira Code', monospace">Валидация гипотез</text>
+
+            <!-- Arrow 3 -->
+            <polygon points="750,125 740,119 740,131" fill="#10b981"/>
+            <path d="M 710 125 L 750 125" stroke="#10b981" stroke-width="3" fill="none"/>
+
+            <!-- Node 4: Результат по ГОСТ -->
+            <rect x="755" y="50" width="185" height="150" rx="12" fill="url(#grad3)" stroke="#10b981" stroke-width="2"/>
+            <text x="847" y="85" fill="#34d399" font-size="14" font-weight="700" text-anchor="middle" font-family="'Inter', sans-serif">4. ТЗ (ГОСТ 34.602)</text>
+            <text x="847" y="115" fill="#94a3b8" font-size="12" text-anchor="middle" font-family="'Inter', sans-serif">• Границы системы</text>
+            <text x="847" y="135" fill="#94a3b8" font-size="12" text-anchor="middle" font-family="'Inter', sans-serif">• Цели создания системы</text>
+            <text x="847" y="155" fill="#94a3b8" font-size="12" text-anchor="middle" font-family="'Inter', sans-serif">• Измеримые критерии</text>
+            <text x="847" y="180" fill="#10b981" font-size="11" text-anchor="middle" font-family="'Fira Code', monospace">Выход: требования</text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- 3 Core Pillars -->
+      <div class="grid-3">
+        <div class="card">
+          <h3 class="text-cyan">1. Контекстная свобода</h3>
+          <p>Никогда не начинайте беседу с обсуждения интерфейса, кнопок или конкретного стека технологий.</p>
+          <p>Сначала выясните <strong>среду</strong>, <strong>обязанности</strong>, <strong>входящие и исходящие артефакты</strong> респондента. Настоящие требования живут в процессах, а не во внешнем виде экранных форм.</p>
+        </div>
+        <div class="card">
+          <h3 class="text-purple">2. Скрытые предположения</h3>
+          <p>Любой аналитик неосознанно проецирует свой опыт на предметную область заказчика.</p>
+          <p>Обязательно отделяйте <strong>проверенные факты</strong> от <strong>непроверенных догадок</strong>. Прямо формулируйте гипотезу стейкхолдеру: <em>«Я предполагаю, что вам мешает X. Так ли это?»</em></p>
+        </div>
+        <div class="card">
+          <h3 class="text-emerald">3. Мост в ГОСТ 34.602-89</h3>
+          <p>Цель лабораторной — не просто побеседовать, а получить сырье для технического задания.</p>
+          <p>Ответы респондента переводятся в раздел <strong>«Назначение и цели создания системы»</strong>: унификация процедур, исключение субъективности, автоматизация рутинных расчетов.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: 11 STEPS OF INTERVIEW (PPTX)        -->
+    <!-- ========================================== -->
+    <div id="tab-stepper" class="tab-pane">
+      
+      <div style="margin-bottom: 20px;">
+        <h2 style="margin-bottom: 6px;">11 частей канонического интервью аналитика</h2>
+        <p style="color: var(--text-secondary); font-size: 0.95rem;">
+          Структура базируется на материале презентации курса. Нажимайте на шаги, чтобы изучить задачи, эталонные формулировки и антипаттерны.
+        </p>
+      </div>
+
+      <!-- Stepper Nav Pills -->
+      <div class="stepper-nav" id="stepperNav">
+        <!-- Generated by JS -->
+      </div>
+
+      <!-- Active Step Display -->
+      <div class="step-content-card" id="stepContent">
+        <!-- Filled by JS -->
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: CONTEXT-FREE VS DEPENDENT           -->
+    <!-- ========================================== -->
+    <div id="tab-classifier" class="tab-pane">
+      
+      <div style="margin-bottom: 24px;">
+        <h2 style="margin-bottom: 8px;">Контекстно-свободные vs Контекстно-зависимые вопросы</h2>
+        <p style="color: var(--text-secondary);">
+          Главный теоретический базис ЛР №1. Проверьте свое понимание: определите, к какому типу относится вопрос аналитика, и избегайте грубых наводящих ошибок!
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card" style="border-left: 4px solid var(--accent-cyan);">
+          <h3 class="text-cyan">🌐 Контекстно-свободные вопросы (Context-Free)</h3>
+          <p><strong>Цель:</strong> Понять реальную проблему без влияния на ответы заказчика. Вопросы нейтральны и не предполагают заранее заготовленного ответа.</p>
+          <ul style="margin-top: 10px;">
+            <li>«Кто является пользователем системы?»</li>
+            <li>«В чем заключается экономическая или временная потеря от текущей проблемы?»</li>
+            <li>«Где еще можно найти решение данной проблемы?»</li>
+            <li>«Как измеряется успех вашей личной деятельности?»</li>
+          </ul>
+        </div>
+        <div class="card" style="border-left: 4px solid var(--accent-purple);">
+          <h3 class="text-purple">⚙️ Контекстно-зависимые вопросы (Context-Dependent)</h3>
+          <p><strong>Цель:</strong> Исследовать границы возможного решения, характеристики системы, техническую среду и ограничения.</p>
+          <ul style="margin-top: 10px;">
+            <li>«Что, если система позволит формировать рейтинг студента в один клик?»</li>
+            <li>«Каковы ваши требования к скорости отклика системы при пиковых нагрузках?»</li>
+            <li>«Какая СУБД и серверная ОС уже развернуты в вашей организации?»</li>
+            <li>«В каком виде должна выводиться отчетная форма: PDF или интерактивный экран?»</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Interactive Classifier Widget -->
+      <div class="card" style="margin-top: 24px; background: var(--bg-surface-elevated);">
+        <h3 style="margin-bottom: 14px;">🏋️ Интерактивный тренажер классификации</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 18px;">
+          Перед вами вопрос, который аналитик задает на встрече. Определите его категорию:
+        </p>
+        
+        <div id="classifierBox" style="background: var(--bg-code); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 18px;">
+          <div id="classifierQuestion" style="font-size: 1.1rem; font-weight: 600; color: #f8fafc; margin-bottom: 8px;">
+            «Вы согласны, что если мы сделаем экспорт в Excel, то бухгалтерия станет работать вдвое быстрее?»
+          </div>
+          <div id="classifierContext" style="font-size: 0.85rem; color: var(--text-muted);">
+            Ситуация: Первая встреча с главным бухгалтером вуза.
+          </div>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px;">
+          <button class="tab-btn" onclick="checkClassification('free')">Контекстно-свободный</button>
+          <button class="tab-btn" onclick="checkClassification('dependent')">Контекстно-зависимый</button>
+          <button class="tab-btn" style="border-color: rgba(244, 63, 94, 0.4);" onclick="checkClassification('leading')">⚠️ Наводящий вопрос (Антипаттерн)</button>
+        </div>
+
+        <div id="classifierResult" style="display: none; padding: 14px; border-radius: 8px; font-size: 0.92rem;"></div>
+        
+        <div style="margin-top: 14px; display: flex; justify-content: flex-end;">
+          <button class="tab-btn" onclick="nextClassifierQuestion()" id="btnNextClassifier" style="display: none;">Следующий вопрос →</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: INTERACTIVE SIMULATOR (SANDBOX)     -->
+    <!-- ========================================== -->
+    <div id="tab-sim" class="tab-pane">
+      
+      <div class="sim-container">
+        <div class="sim-header">
+          <div class="persona-badge">
+            <div class="persona-avatar" id="simAvatar">ИП</div>
+            <div class="persona-info">
+              <h4 id="simName">Иванов Петр Владимирович</h4>
+              <span id="simRole">Начальник Учебного управления | Вуз «Политех»</span>
+            </div>
+          </div>
+          <div class="meters-bar">
+            <div class="meter-item">
+              <div class="meter-label"><span>Доверие (Trust)</span><span id="trustVal">60%</span></div>
+              <div class="progress-track"><div class="progress-fill" id="trustFill" style="width: 60%; background: var(--accent-blue);"></div></div>
+            </div>
+            <div class="meter-item">
+              <div class="meter-label"><span>Выявлено болей</span><span id="painsVal">0/3</span></div>
+              <div class="progress-track"><div class="progress-fill" id="painsFill" style="width: 0%; background: var(--accent-emerald);"></div></div>
+            </div>
+            <div class="meter-item">
+              <div class="meter-label"><span>Искажение (Bias)</span><span id="biasVal">0%</span></div>
+              <div class="progress-track"><div class="progress-fill" id="biasFill" style="width: 0%; background: var(--accent-rose);"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dialogue Container -->
+        <div class="dialogue-history" id="dialogueBox">
+          <div class="msg-bubble msg-stakeholder">
+            Здравствуйте! Мне сказали, что вы аналитик по проекту автоматизации учебного процесса. Времени у меня мало: через 20 минут совещание у проректора по поводу перевода на кредитно-модульную систему (зачетные единицы). С чего начнем?
+          </div>
+        </div>
+
+        <!-- Choices Area -->
+        <div style="margin-bottom: 12px; font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">
+          ВЫБЕРИТЕ ВАШ ВОПРОС / РЕПЛИКУ АНАЛИТИКА:
+        </div>
+        <div class="choices-grid" id="simChoices">
+          <!-- Populated by JS -->
+        </div>
+
+        <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+          <button class="tab-btn" onclick="resetSim()" style="font-size: 0.82rem;">↺ Начать заново</button>
+          <span id="simPhase" style="font-size: 0.82rem; font-family: var(--font-mono); color: var(--text-muted);">Этап 1 из 5: Профиль и контекст</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 5: LAB REPORT GENERATOR                -->
+    <!-- ========================================== -->
+    <div id="tab-report" class="tab-pane">
+      
+      <div style="margin-bottom: 20px;">
+        <h2>Эталонный отчет по Лабораторной работе №1</h2>
+        <p style="color: var(--text-secondary); font-size: 0.95rem;">
+          Готовые разделы отчета, составленные строго по методическим указаниям <code>Интервью.docx</code> и ГОСТ 34.602-89. Вы можете скопировать любой блок в свой итоговый документ!
+        </p>
+      </div>
+
+      <!-- Section 1 -->
+      <div class="report-box">
+        <button class="copy-btn" onclick="copyText('reportSec1')">📋 Копировать</button>
+        <h3 style="color: var(--accent-blue); margin-bottom: 12px;">1. Предварительный анализ задачи и контур системы</h3>
+        <div id="reportSec1" style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+          <p><strong>Объект автоматизации:</strong> Учебное управление высшего учебного заведения.</p>
+          <p><strong>Границы (контур) проектируемой системы:</strong> Автоматизация учета учебной нагрузки кафедр, планирования аудиторного фонда, фиксации промежуточной аттестации студентов и расчета рейтингов в системе зачетных единиц (ECTS/кредитов), а также формирование консолидированной отчетности для проректората.</p>
+          <p><strong>Актуальность проблемы:</strong> Внедрение кредитно-модульной системы привело к лавинообразному росту трудоемкости ручного учета баллов, несогласованности методик оценивания на разных факультетах и субъективности при выставлении итоговых оценок преподавателями.</p>
+        </div>
+      </div>
+
+      <!-- Section 2 -->
+      <div class="report-box">
+        <button class="copy-btn" onclick="copyText('reportSec2')">📋 Копировать</button>
+        <h3 style="color: var(--accent-purple); margin-bottom: 12px;">2. Перечень заинтересованных лиц (Стейкхолдеров)</h3>
+        <div id="reportSec2" style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+          <table style="width: 100%; border-collapse: collapse; margin-top: 8px;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--border-highlight); text-align: left; color: var(--text-primary);">
+                <th style="padding: 8px;">Стейкхолдер</th>
+                <th style="padding: 8px;">Роль в проекте</th>
+                <th style="padding: 8px;">Зона ответственности / Интерес</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom: 1px solid var(--border-color);">
+                <td style="padding: 8px;"><strong>Начальник Учебного управления</strong></td>
+                <td style="padding: 8px;">Заказчик / Приемщик</td>
+                <td style="padding: 8px;">Контроль графиков учебного процесса, сводные отчеты, нормативно-справочное поле.</td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border-color);">
+                <td style="padding: 8px;"><strong>Деканы факультетов / Замдеканы</strong></td>
+                <td style="padding: 8px;">Ключевые пользователи</td>
+                <td style="padding: 8px;">Своевременный допуск к сессии, движение контингента (переводы, отчисления), печать дипломов.</td>
+              </tr>
+              <tr style="border-bottom: 1px solid var(--border-color);">
+                <td style="padding: 8px;"><strong>Преподаватели кафедр</strong></td>
+                <td style="padding: 8px;">Конечные операторы</td>
+                <td style="padding: 8px;">Быстрый ввод текущей успеваемости, расчет кредитов без дублирования на бумаге.</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px;"><strong>Студенты</strong></td>
+                <td style="padding: 8px;">Косвенные бенефициары</td>
+                <td style="padding: 8px;">Прозрачный личный рейтинг, справедливое распределение стипендий и выбор курсов.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section 3 -->
+      <div class="report-box">
+        <button class="copy-btn" onclick="copyText('reportSec3')">📋 Копировать</button>
+        <h3 style="color: var(--accent-amber); margin-bottom: 12px;">3. Протокол интервью (Таблица 1.1 методических указаний)</h3>
+        <div id="reportSec3" style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.6;">
+          <p><strong>Респондент:</strong> Иванов Петр Владимирович | <strong>Должность:</strong> Начальник Учебного управления</p>
+          <p><strong>Подчинение:</strong> Первому проректору</p>
+          <p><strong>Основные обязанности:</strong> Общее управление учебной деятельностью, обеспечение качества, контроль информационной безопасности.</p>
+          <p><strong>Входящая информация:</strong> Приказы Минобрнауки РФ, Положение об управлении, приказы ректора по контингенту, планы работы факультетов.</p>
+          <p><strong>Исходящая информация:</strong> Семестровые планы, расписания занятий и экзаменов, сводные статистические отчеты по движению студентов.</p>
+          <p><strong>Ключевая проблема:</strong> Отсутствие единого инструмента перевода учебного процесса в систему зачетных единиц.</p>
+          <p><strong>Ожидания от решения:</strong> Высокая эргономичность, безотказность, мгновенный отклик при массовом вводе данных в период сессии.</p>
+        </div>
+      </div>
+
+      <!-- Section 4 -->
+      <div class="report-box">
+        <button class="copy-btn" onclick="copyText('reportSec4')">📋 Копировать</button>
+        <h3 style="color: var(--accent-emerald); margin-bottom: 12px;">4. Потребности заказчика по ГОСТ 34.602-89 (Раздел «Назначение и цели»)</h3>
+        <div id="reportSec4" style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+          <p>На основе анализа интервью сформулированы следующие цели создания системы:</p>
+          <ol style="margin-left: 20px; margin-top: 6px;">
+            <li><strong>Унификация оценивания:</strong> Обеспечить единый регламент и алгоритм расчета знаний в системе кредитов (зачетных единиц) на всех кафедрах и факультетах вуза.</li>
+            <li><strong>Исключение субъективности:</strong> Минимизировать человеческий фактор при выставлении итоговых баллов на промежуточных аттестациях за счет прозрачной балльно-рейтинговой шкалы.</li>
+            <li><strong>Автоматический расчет рейтингов:</strong> Реализовать расчет академического рейтинга студентов в режиме реального времени по гибким параметрам (семестр, группа, направление подготовки).</li>
+            <li><strong>Единая сквозная отчетность:</strong> Автоматизировать построение сводных статистических отчетов об успеваемости и движении контингента без ручного сведения таблиц из разных подразделений.</li>
+          </ol>
+        </div>
+      </div>
+
+      <!-- Section 5 -->
+      <div class="report-box">
+        <button class="copy-btn" onclick="copyText('reportSec5')">📋 Копировать</button>
+        <h3 style="color: var(--accent-cyan); margin-bottom: 12px;">5. Словарь предметной области (Глоссарий)</h3>
+        <div id="reportSec5" style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.6;">
+          <p><strong>Зачетная единица (кредит):</strong> Унифицированная мера трудоемкости образовательной программы, отражающая объем аудиторной и самостоятельной работы студента (1 кредит = 36 академических часов).</p>
+          <p><strong>Контингент студентов:</strong> Совокупность обучающихся вуза, структурированная по формам обучения (очная, очно-заочная, заочная), курсам и специальностям.</p>
+          <p><strong>Семестровый план:</strong> Нормативный график распределения дисциплин, аудиторной нагрузки и контрольных мероприятий на учебный семестр.</p>
+          <p><strong>Балльно-рейтинговая система (БРС):</strong> Комплексная система пошаговой оценки качества освоения дисциплин студентом в течение семестра.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 6: DEFENSE ACCORDION                   -->
+    <!-- ========================================== -->
+    <div id="tab-defense" class="tab-pane">
+      
+      <div style="margin-bottom: 20px;">
+        <h2>Вопросы к защите Лабораторной работы №1</h2>
+        <p style="color: var(--text-secondary); font-size: 0.95rem;">
+          Топ-10 теоретических и практических вопросов преподавателя с развернутыми ответами уровня Senior Business/System Analyst.
+        </p>
+      </div>
+
+      <div id="defenseAccordion">
+        <!-- Generated by JS -->
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 7: KNOWLEDGE GATE QUIZ                 -->
+    <!-- ========================================== -->
+    <div id="tab-quiz" class="tab-pane">
+      
+      <div style="margin-bottom: 20px;">
+        <h2>Экзаменационный тест: Готовность к защите ЛР №1</h2>
+        <p style="color: var(--text-secondary); font-size: 0.95rem;">
+          Ответьте на 10 вопросов без подсказок. Каждый ответ снабжен мгновенным обоснованием и ссылкой на методику.
+        </p>
+      </div>
+
+      <div id="quizContainer">
+        <!-- Rendered by JS -->
+      </div>
+
+      <div id="quizResultSummary" style="display: none; background: var(--bg-surface-elevated); border: 1px solid var(--accent-emerald); padding: 24px; border-radius: 14px; text-align: center; margin-top: 20px;">
+        <h3 id="quizScoreHeader" style="font-size: 1.4rem; margin-bottom: 10px;"></h3>
+        <p id="quizScoreText" style="color: var(--text-secondary); margin-bottom: 16px;"></p>
+        <button class="tab-btn" onclick="restartQuiz()">Пройти тест повторно</button>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    // Tab switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      
+      const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+      if (activeBtn) activeBtn.classList.add('active');
+      
+      const targetPane = document.getElementById(tabId);
+      if (targetPane) targetPane.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Copy to clipboard helper
+    function copyText(elementId) {
+      const el = document.getElementById(elementId);
+      const text = el.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Текст раздела скопирован в буфер обмена!');
+      });
+    }
+
+    // ==========================================
+    // 11 STEPS DATA & LOGIC (FROM PPTX)
+    // ==========================================
+    const STEPS = [
+      {
+        num: 1,
+        title: "Часть 1. Профиль заказчика / пользователя",
+        tag: "Идентификация",
+        desc: "Сбор паспортных данных респондента, его зоны ответственности и должностных функций.",
+        questions: [
+          "Имя, компания, отрасль, должность",
+          "Каковы ваши основные обязанности?",
+          "Что вы в основном производите и для кого?",
+          "Как измеряется личный успех вашей деятельности?",
+          "Какие проблемы влияют на успешность деятельности?"
+        ],
+        goldenRule: "Никаких разговоров о технологиях на этом этапе. Ваша задача — понять контекст рабочего дня человека.",
+        stopWords: "Не спрашивайте: «Какие кнопки вам нужны в интерфейсе?» Спрашивайте: «Что является результатом вашей работы?»"
+      },
+      {
+        num: 2,
+        title: "Часть 2. Оценка проблемы",
+        tag: "Боль и причины",
+        desc: "Выявление прикладных задач, для которых не хватает решений. Техника «А еще?».",
+        questions: [
+          "Для каких проблем вы ощущаете нехватку хороших решений?",
+          "Почему существует эта проблема?",
+          "Как она решается в настоящее время?",
+          "Как вы хотели бы ее решать?"
+        ],
+        goldenRule: "Всегда задавайте вопрос: «А еще?», пока респондент не исчерпает список. Первые названные проблемы часто поверхностны.",
+        stopWords: "Не спорьте с респондентом, если он жалуется на глупые регламенты — фиксируйте реальное поведение."
+      },
+      {
+        num: 3,
+        title: "Часть 3. Понимание пользовательской среды",
+        tag: "Окружение ПО",
+        desc: "Анализ технической зрелости пользователей, используемых платформ и смежного ПО.",
+        questions: [
+          "Кто конечные пользователи и какова их компьютерная грамотность?",
+          "Какая платформа и операционная система используются сейчас?",
+          "Используются ли дополнительные приложения (1С, Excel, корпоративная почта)?",
+          "В каком виде должна быть представлена справка (онлайн, PDF, печатная)?"
+        ],
+        goldenRule: "Если у пользователей низкая компьютерная грамотность, сложные выпадающие списки и скрытые меню погубят проект.",
+        stopWords: "Не навязывайте современные веб-фреймворки, если в отделе стоят компьютеры с устаревшими версиями ОС."
+      },
+      {
+        num: 4,
+        title: "Часть 4. Резюме (Валидация понимания)",
+        tag: "Контрольный срез",
+        desc: "Пересказ проблем своими словами для проверки отсутствия семантических разрывов.",
+        questions: [
+          "«Итак, вы сказали мне: [перечислите 3-4 ключевые проблемы]...»",
+          "Адекватно ли этот список отражает ситуацию?",
+          "Какие еще проблемы мы упустили?"
+        ],
+        goldenRule: "Слова респондента в вашей голове могли исказиться. Перескажите их вслух. Если он кивает и говорит «Именно так!» — вы попали в цель.",
+        stopWords: "Не переходите к решениям без явного подтверждения списка проблем."
+      },
+      {
+        num: 5,
+        title: "Часть 5. Проверка предположений аналитика",
+        tag: "Скрытые гипотезы",
+        desc: "Тестирование догадок аналитика, которые заказчик сам не упомянул из-за эффекта «слепого пятна».",
+        questions: [
+          "«Какие проблемы у вас связаны с [фактор X, который заказчик не назвал]?»",
+          "Является ли эта проблема реальной?",
+          "Каковы ее первопричины и как она решается сейчас?",
+          "Насколько она критична в сравнении с остальными?"
+        ],
+        goldenRule: "Пользователи часто привыкают к боли и считают ее нормой жизни («мы всегда руками копируем из Excel»). Раскройте это слепое пятно.",
+        stopWords: "Не выдавайте свои догадки за факт: предлагайте их как вопрос для валидации."
+      },
+      {
+        num: 6,
+        title: "Часть 6. Оценка предполагаемого вами решения",
+        tag: "Концепция решения",
+        desc: "Первая осторожная примерка будущего функционала (контекстно-зависимая часть).",
+        questions: [
+          "«Что, если вы сможете сформировать рейтинг по кафедре в один клик?»",
+          "Как вы расцениваете важность такой возможности?",
+          "Поможет ли это сократить задержки при закрытии сессии?"
+        ],
+        goldenRule: "Используйте конструкцию «Что, если...». Это включает воображение респондента и позволяет оценить ценность фичи.",
+        stopWords: "Не презентуйте готовые макеты как финальный вариант — респондент закроется или перейдет в режим критики дизайна."
+      },
+      {
+        num: 7,
+        title: "Часть 7. Оценка масштаба и возможностей",
+        tag: "Масштаб системы",
+        desc: "Определение количественных параметров будущей системы и аудитории.",
+        questions: [
+          "Кто непосредственно нуждается в приложении?",
+          "Сколько одновременно активных пользователей будут работать в системе?",
+          "Насколько значимо успешное внедрение для руководства университета?"
+        ],
+        goldenRule: "Разница между системой на 5 методистов и системой на 20 000 студентов — принципиальная архитектурная пропасть.",
+        stopWords: "Не путайте общее число зарегистрированных пользователей и число одновременно работающих (пиковая нагрузка)."
+      },
+      {
+        num: 8,
+        title: "Часть 8. Надежность, производительность, сопровождение",
+        tag: "Нефункциональные",
+        desc: "Оценка требований к доступности, резервному копированию и технической поддержке.",
+        questions: [
+          "Каковы ваши ожидания относительно надежности и времени простоя?",
+          "Какой должна быть скорость реакции интерфейса (секунды, доли секунд)?",
+          "Кто будет заниматься поддержкой (ваш системный администратор или внешний подрядчик)?",
+          "Каковы требования к развертыванию и конфигурации?"
+        ],
+        goldenRule: "Именно здесь закладываются нефункциональные требования для будущего раздела 4 ТЗ по ГОСТ 34.602-89.",
+        stopWords: "Избегайте абстракций вроде «система должна работать быстро». Уточняйте: «сколько секунд допустимо ждать построения отчета?»"
+      },
+      {
+        num: 9,
+        title: "Часть 9. Другие требования и ограничения",
+        tag: "Ограничения & НПА",
+        desc: "Юридические, нормативные и ведомственные стандарты.",
+        questions: [
+          "Существуют ли законодательные акты, приказы Минобрнауки или стандарты?",
+          "Каковы требования по защите персональных данных (ФЗ-152)?",
+          "Есть ли требования к лицензионной чистоте и импортозамещению (реестр отечественного ПО)?"
+        ],
+        goldenRule: "Нарушение нормативных регламентов может сделать невозможным ввод системы в эксплуатацию, даже если код идеален.",
+        stopWords: "Не игнорируйте локальные приказы ректора — в вузах они имеют статус закона."
+      },
+      {
+        num: 10,
+        title: "Часть 10. Окончание интервью",
+        tag: "Канал связи",
+        desc: "Фиксация открытых вопросов и согласование каналов дальнейшей коммуникации.",
+        questions: [
+          "Какие еще вопросы нам следовало обсудить, но мы упустили?",
+          "К кому еще из ваших коллег вы порекомендуете обратиться?",
+          "Как и когда с вами удобнее связываться для согласования спецификации?"
+        ],
+        goldenRule: "Вопрос «С кем еще мне стоит поговорить?» помогает обнаружить скрытых стейкхолдеров (бухгалтерию, отдел кадров, ИТ-службу).",
+        stopWords: "Не убегайте без четкого дедлайна следующего контакта."
+      },
+      {
+        num: 11,
+        title: "Часть 11. Заключение аналитика",
+        tag: "Синтез и Топ-3",
+        desc: "Оформление результатов сразу после встречи, пока детали свежи в памяти.",
+        questions: [
+          "Каковы топ-3 проблемы с наивысшим приоритетом?",
+          "Какие потребности войдут в цели создания системы по ГОСТ?",
+          "Какие термины требуют внесения в глоссарий?"
+        ],
+        goldenRule: "Заполняйте заключение в течение первых 60 минут после завершения интервью. Через сутки вы забудете до 50% невербальных сигналов.",
+        stopWords: "Не откладывайте фиксацию заметок на завтра."
+      }
+    ];
+
+    function renderStepper() {
+      const nav = document.getElementById('stepperNav');
+      nav.innerHTML = STEPS.map((s, idx) => `
+        <button class="step-pill ${idx === 0 ? 'active' : ''}" onclick="selectStep(${idx})">
+          ${s.num}. ${s.tag}
+        </button>
+      `).join('');
+      selectStep(0);
+    }
+
+    function selectStep(idx) {
+      document.querySelectorAll('.step-pill').forEach((p, i) => {
+        p.classList.toggle('active', i === idx);
+      });
+      const s = STEPS[idx];
+      const box = document.getElementById('stepContent');
+      box.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+          <h3 style="color: var(--accent-blue); font-size: 1.25rem;">${s.title}</h3>
+          <span class="pill pill-emerald">Шаг ${s.num} из 11</span>
+        </div>
+        <p style="color: var(--text-primary); font-size: 1rem; margin-bottom: 16px;">${s.desc}</p>
+        
+        <div style="background: var(--bg-surface); padding: 16px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 16px;">
+          <h4 style="color: var(--accent-cyan); font-size: 0.95rem; margin-bottom: 8px;">Ключевые вопросы для интервьюера:</h4>
+          <ul style="margin-left: 20px; color: var(--text-secondary); font-size: 0.92rem;">
+            ${s.questions.map(q => `<li style="margin-bottom: 4px;">${q}</li>`).join('')}
+          </ul>
+        </div>
+
+        <div class="grid-2" style="margin-bottom: 0;">
+          <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 14px;">
+            <strong style="color: var(--accent-emerald); font-size: 0.88rem;">Золотое правило аналитика:</strong>
+            <p style="font-size: 0.88rem; color: #d1fae5; margin-top: 4px;">${s.goldenRule}</p>
+          </div>
+          <div style="background: rgba(244, 63, 94, 0.08); border: 1px solid rgba(244, 63, 94, 0.3); border-radius: 10px; padding: 14px;">
+            <strong style="color: var(--accent-rose); font-size: 0.88rem;">Чего нельзя делать:</strong>
+            <p style="font-size: 0.88rem; color: #ffe4e6; margin-top: 4px;">${s.stopWords}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    // ==========================================
+    // CLASSIFIER DATA & LOGIC
+    // ==========================================
+    const CLASSIFIER_ITEMS = [
+      {
+        q: "«Вы согласны, что если мы сделаем экспорт в Excel, то бухгалтерия станет работать вдвое быстрее?»",
+        context: "Первая встреча с главным бухгалтером вуза.",
+        correct: "leading",
+        explanation: "Это классический наводящий вопрос (Leading Question) — грубейшая ошибка. Вы вкладываете в уста респондента желаемый ответ, навязываете инструмент (Excel) и фантастическую оценку эффективности."
+      },
+      {
+        q: "«Кто в вашей организации принимает решение о допуске студента к пересдаче экзамена?»",
+        context: "Изучение регламента учебного процесса.",
+        correct: "free",
+        explanation: "Это контекстно-свободный вопрос. Он направлен на понимание реальных ролей и бизнес-правил, не навязывая форму решения."
+      },
+      {
+        q: "«Какой максимальный объем задержки допустим при одновременной выгрузке ведомостей 50 кафедрами?»",
+        context: "Сбор нефункциональных требований к производительности.",
+        correct: "dependent",
+        explanation: "Это контекстно-зависимый вопрос. Он исследует параметры конкретного программного решения и критерии качества."
+      },
+      {
+        q: "«Что происходит, если преподаватель вовремя не выставил зачетные единицы в сессионную ведомость?»",
+        context: "Выявление исключительных ситуаций и рисков процесса.",
+        correct: "free",
+        explanation: "Контекстно-свободный вопрос. Аналитик исследует жизненный цикл бизнес-процесса и обработку нештатных ситуаций."
+      },
+      {
+        q: "«Что, если система будет автоматически блокировать закрытие ведомости при наличии незаполненных полей?»",
+        context: "Примерка предполагаемого решения (Часть 6 гайда).",
+        correct: "dependent",
+        explanation: "Контекстно-зависимый вопрос с гипотезой («Что, если...»). Аналитик проверяет реакцию пользователя на конкретную фичу."
+      }
+    ];
+
+    let classifierIdx = 0;
+
+    function renderClassifier() {
+      const item = CLASSIFIER_ITEMS[classifierIdx];
+      document.getElementById('classifierQuestion').innerText = item.q;
+      document.getElementById('classifierContext').innerText = `Ситуация: ${item.context}`;
+      const res = document.getElementById('classifierResult');
+      res.style.display = 'none';
+      document.getElementById('btnNextClassifier').style.display = 'none';
+    }
+
+    function checkClassification(type) {
+      const item = CLASSIFIER_ITEMS[classifierIdx];
+      const res = document.getElementById('classifierResult');
+      res.style.display = 'block';
+
+      if (type === item.correct) {
+        res.style.background = 'rgba(16, 185, 129, 0.15)';
+        res.style.border = '1px solid var(--accent-emerald)';
+        res.style.color = '#a7f3d0';
+        res.innerHTML = `<strong>Верно!</strong> ${item.explanation}`;
+      } else {
+        res.style.background = 'rgba(244, 63, 94, 0.15)';
+        res.style.border = '1px solid var(--accent-rose)';
+        res.style.color = '#fecdd3';
+        res.innerHTML = `<strong>Не совсем так.</strong> ${item.explanation}`;
+      }
+      document.getElementById('btnNextClassifier').style.display = 'inline-block';
+    }
+
+    function nextClassifierQuestion() {
+      classifierIdx = (classifierIdx + 1) % CLASSIFIER_ITEMS.length;
+      renderClassifier();
+    }
+
+    // ==========================================
+    // SIMULATOR (ROLEPLAY SANDBOX)
+    // ==========================================
+    const SIM_TREE = {
+      step: 1,
+      phaseName: "Этап 1 из 4: Установление контакта и обязанности",
+      dialogue: "Здравствуйте! Мне сказали, что вы аналитик по проекту автоматизации учебного процесса. Времени у меня мало: через 20 минут совещание у проректора по поводу перевода на зачетные единицы. С чего начнем?",
+      choices: [
+        {
+          text: "«Петр Владимирович, расскажите, пожалуйста, в чем заключаются ваши основные обязанности и что является главным результатом работы вашего управления?»",
+          tag: "Контекстно-свободный",
+          trustDelta: +15,
+          painDelta: +1,
+          biasDelta: 0,
+          reply: "Управление отвечает за планирование нагрузки, расписание, контроль сессий и учет движения студентов. Главный результат — сводные отчеты и бесперебойный учебный процесс. Но сейчас мы тонем в рутине пересчета кредитов: каждая кафедра считает часы по-своему!",
+          feedback: "Отличный открытый вопрос по Шагу 1 гайда! Респондент раскрыл масштаб и ключевую боль."
+        },
+        {
+          text: "«Добрый день. Мы планируем сделать веб-портал на React и PostgreSQL. Скажите, в браузере вам удобно будет работать или лучше десктоп?»",
+          tag: "Преждевременное решение",
+          trustDelta: -20,
+          painDelta: 0,
+          biasDelta: +25,
+          reply: "Послушайте, мне все равно, какой у вас стек! У меня сотрудники в деканатах вручную на калькуляторах высчитывают зачетные единицы, а вы мне про Реакт рассказываете! Давайте ближе к делу.",
+          feedback: "Грубая ошибка: вы вывалили технический жаргон и решение до понимания проблемы. Доверие упало."
+        },
+        {
+          text: "«Вы согласны, что если мы просто скопируем форму сессионной ведомости из 1С, то все ваши проблемы решатся?»",
+          tag: "Наводящий вопрос",
+          trustDelta: -10,
+          painDelta: 0,
+          biasDelta: +30,
+          reply: "В 1С вообще нет учета балльно-рейтинговой шкалы для кредитов! Если вы просто скопируете форму, мы получим штраф от министерства при первой же проверке.",
+          feedback: "Вы навязали поверхностную идею и показали некомпетентность в предметной области."
+        }
+      ],
+      next: {
+        step: 2,
+        phaseName: "Этап 2 из 4: Выявление корневой проблемы",
+        dialogue: "Итак, мы переводим вуз на кредитную систему. В чем, по-вашему, главная заноза?",
+        choices: [
+          {
+            text: "«Почему именно сейчас этот переход вызывает такие сложности? Как кафедры решают эту задачу сегодня?»",
+            tag: "Анализ причин",
+            trustDelta: +20,
+            painDelta: +1,
+            biasDelta: 0,
+            reply: "Потому что нет единого стандарта! Кафедра физики считает баллы по одной формуле, кафедра истории — по другой. Преподаватели субъективно округляют оценки, а мы при формировании общевузовского рейтинга получаем кашу. Нам нужен унифицированный расчет!",
+            feedback: "Блестяще! Выяснена причина субъективности и потребность №1 по ГОСТ 34.602-89."
+          },
+          {
+            text: "«А может, преподаватели просто не хотят учиться новому и ленятся заполнять таблицы?»",
+            tag: "Обвинение стейкхолдеров",
+            trustDelta: -15,
+            painDelta: 0,
+            biasDelta: +10,
+            reply: "Они не ленятся, у них колоссальная учебная нагрузка! Если интерфейс будет требовать по 10 кликов на студента, они просто будут саботировать работу.",
+            feedback: "Неэтичный вопрос. Аналитик должен искать системные причины сбоя процессов, а не винить людей."
+          }
+        ],
+        next: {
+          step: 3,
+          phaseName: "Этап 3 из 4: Валидация и резюме",
+          dialogue: "Хорошо. Мы также должны выдавать европейские приложения к дипломам на основе этих кредитов. Что еще для вас важно?",
+          choices: [
+            {
+              text: "«Правильно ли я понимаю: ключевая задача — унифицировать правила расчета кредитов на всех факультетах, исключить субъективность преподавателей и автоматом строить рейтинги и приложения к дипломам?»",
+              tag: "Резюме и валидация",
+              trustDelta: +25,
+              painDelta: +1,
+              biasDelta: 0,
+              reply: "В точку! Именно это нам и нужно. Если система еще и будет формировать сводный отчет для ректора без трехдневного ручного сведения в Excel — это будет победа.",
+              feedback: "Идеальное применение Шага 4 гайда (Резюме)! Респондент почувствовал, что его действительно услышали."
+            },
+            {
+              text: "«Я понял. Сделаем кнопку экспорта в PDF с гербом университета, как вы любите.»",
+              tag: "Косметический фокус",
+              trustDelta: -5,
+              painDelta: 0,
+              biasDelta: +15,
+              reply: "Герб — это десятое дело. Главное, чтобы цифры внутри не расходились со стандартами Минобрнауки!",
+              feedback: "Фокус на мишуре вместо бизнес-логики."
+            }
+          ],
+          next: {
+            step: 4,
+            phaseName: "Финал: Заключение аналитика",
+            dialogue: "Время нашей встречи подошло к концу, мне пора к первому проректору. Какие ваши дальнейшие шаги?",
+            choices: [
+              {
+                text: "«Петр Владимирович, я сейчас зафиксирую наши договоренности в протоколе, выделю топ-3 потребности для раздела ТЗ по ГОСТ 34.602 и завтра до 12:00 пришлю вам на согласование черновик.»",
+                tag: "Профессиональный финал",
+                trustDelta: +15,
+                painDelta: 0,
+                biasDelta: 0,
+                reply: "Отлично, договорились! Буду ждать документ на почту. С вами приятно иметь дело.",
+                feedback: "Образцовое завершение по Шагам 10-11 гайда! Интервью успешно завершено с высоким результатом."
+              }
+            ],
+            next: null
+          }
+        }
+      }
+    };
+
+    let currentSimNode = SIM_TREE;
+    let simStats = { trust: 60, pains: 0, bias: 0 };
+
+    function renderSimNode() {
+      document.getElementById('simPhase').innerText = currentSimNode.phaseName;
+      const choicesBox = document.getElementById('simChoices');
+      choicesBox.innerHTML = currentSimNode.choices.map((c, i) => `
+        <button class="choice-btn" onclick="chooseSimOption(${i})">
+          <span class="choice-tag">${c.tag}</span>
+          <span>${c.text}</span>
+        </button>
+      `).join('');
+    }
+
+    function chooseSimOption(idx) {
+      const c = currentSimNode.choices[idx];
+      simStats.trust = Math.max(0, Math.min(100, simStats.trust + c.trustDelta));
+      simStats.pains = Math.min(3, simStats.pains + c.painDelta);
+      simStats.bias = Math.min(100, simStats.bias + c.biasDelta);
+
+      updateMeters();
+
+      // Append to dialogue history
+      const dBox = document.getElementById('dialogueBox');
+      dBox.innerHTML += `
+        <div class="msg-bubble msg-interviewer"><strong>Вы:</strong> ${c.text}</div>
+        <div class="msg-bubble msg-feedback">💡 <em>Разбор хода:</em> ${c.feedback}</div>
+        <div class="msg-bubble msg-stakeholder"><strong>Иванов П.В.:</strong> ${c.reply}</div>
+      `;
+      dBox.scrollTop = dBox.scrollHeight;
+
+      if (currentSimNode.next) {
+        currentSimNode = currentSimNode.next;
+        renderSimNode();
+      } else {
+        // Finish simulation
+        document.getElementById('simChoices').innerHTML = `
+          <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid var(--accent-emerald); padding: 18px; border-radius: 10px; color: #a7f3d0; text-align: center;">
+            <h4 style="margin-bottom: 8px;">🎉 Интервью успешно завершено!</h4>
+            <p>Уровень доверия: <strong>${simStats.trust}%</strong> | Выявлено потребностей: <strong>${simStats.pains}/3</strong> | Риск искажений: <strong>${simStats.bias}%</strong></p>
+            <p style="margin-top: 10px; font-size: 0.88rem; color: #f8fafc;">Собранных данных достаточно для формирования раздела ТЗ по ГОСТ 34.602-89!</p>
+          </div>
+        `;
+      }
+    }
+
+    function updateMeters() {
+      document.getElementById('trustVal').innerText = `${simStats.trust}%`;
+      document.getElementById('trustFill').style.width = `${simStats.trust}%`;
+      
+      document.getElementById('painsVal').innerText = `${simStats.pains}/3`;
+      document.getElementById('painsFill').style.width = `${(simStats.pains / 3) * 100}%`;
+
+      document.getElementById('biasVal').innerText = `${simStats.bias}%`;
+      document.getElementById('biasFill').style.width = `${simStats.bias}%`;
+    }
+
+    function resetSim() {
+      currentSimNode = SIM_TREE;
+      simStats = { trust: 60, pains: 0, bias: 0 };
+      updateMeters();
+      document.getElementById('dialogueBox').innerHTML = `
+        <div class="msg-bubble msg-stakeholder">
+          Здравствуйте! Мне сказали, что вы аналитик по проекту автоматизации учебного процесса. Времени у меня мало: через 20 минут совещание у проректора по поводу перевода на кредитно-модульную систему (зачетные единицы). С чего начнем?
+        </div>
+      `;
+      renderSimNode();
+    }
+
+    // ==========================================
+    // DEFENSE ACCORDION DATA
+    // ==========================================
+    const DEFENSE_QA = [
+      {
+        q: "1. В чем принципиальная разница между анкетированием и интервью? Когда что применять?",
+        a: "<strong>Анкетирование</strong> — метод количественного сбора данных с помощью стандартизированных опросников. Идеально для массового охвата (сотни преподавателей или тысячи студентов) для подтверждения гипотез или оценки частоты проблем. <strong>Интервью</strong> — качественный метод глубинного диалога 1-на-1 с ключевыми стейкхолдерами. Позволяет раскрыть скрытые мотивы, исследовать эмоциональное отношение и на ходу перестраивать ветку вопросов. Наилучший эффект достигается при комбинации: анкета выявляет статистику аномалий, а интервью вскрывает их первопричины."
+      },
+      {
+        q: "2. Что такое контекстно-свободные вопросы и почему аналитик обязан начинать с них?",
+        a: "<strong>Контекстно-свободные (Context-Free) вопросы</strong> — это открытые вопросы, не навязывающие респонденту рамки конкретного технического решения или предвзятую точку зрения (например: «Кто клиент системы?», «Что мешает достижению ваших KPI?», «Какова цена ошибки?»). Если начать сразу с контекстно-зависимых вопросов («Какой цвет кнопки вам нравится?»), аналитик загоняет собеседника в туннель собственного субъективного видения и упускает реальные корневые проблемы бизнеса."
+      },
+      {
+        q: "3. Чем опасны наводящие вопросы («Вам ведь нужна кнопка выгрузки в Excel?»)?",
+        a: "Наводящие вопросы вызывают <strong>искажение подтверждения (Confirmation Bias)</strong> и эффект угодничества (Social Desirability Bias). Респондент соглашается с предложенным вариантом («Да, конечно, давайте Excel»), даже если на самом деле проблема заключается в плохом алгоритме агрегации данных. В итоге аналитик фиксирует ложное требование, тратит бюджет на ненужную фичу, а корневая боль остается нерешенной."
+      },
+      {
+        q: "4. Как отличить истинную потребность (Need) от декларируемой хотелки (Want / Solution)?",
+        a: "Пользователи почти всегда приходят с готовыми <em>решениями</em> («Сделайте нам экран с 50 столбцами!»). Аналитик обязан применить технику «5 Почему?» (5 Whys): <em>«Зачем вам эти 50 столбцов?» → «Чтобы сопоставить часы кафедры с аудиториями» → «А зачем сопоставлять вручную?» → «Потому что нет контроля пересечений!»</em>. Истинная потребность здесь — <strong>автоматическая валидация аудиторных коллизий</strong>, а вовсе не гигантская таблица."
+      },
+      {
+        q: "5. Зачем нужен этап «Резюме» (Часть 4 гайда) перед переходом к решениям?",
+        a: "Человеческая коммуникация подвержена семантическим шумам: слова заказчика проходят через призму его опыта, а аналитик слышит их через призму своего. Этап «Резюме» — это <strong>двусторонняя петля обратной связи</strong>. Аналитик пересказывает услышанное своими словами: <em>«Правильно ли я зафиксировал, что...»</em>. Если заказчик подтверждает, строится доверительный мост, а аналитик страхует себя от переделок ТЗ."
+      },
+      {
+        q: "6. Как результаты интервью переносятся в структуру ТЗ по ГОСТ 34.602-89?",
+        a: "По ГОСТ 34.602-89 ключевые результаты интервью ложатся в <strong>Раздел 2 «Назначение и цели создания системы»</strong>: подраздел 2.1 «Назначение системы» (для кого и каких процессов она создается) и подраздел 2.2 «Цели создания системы» (измеримые научно-технические и экономические критерии: снижение времени расчета, устранение субъективности, унификация отчетности). Описанные объекты и интерфейсы ложатся в Раздел 4 «Требования к системе»."
+      },
+      {
+        q: "7. Как выявить скрытых (неявных) стейкхолдеров системы?",
+        a: "Используются вопросы-маркеры на Шаге 10 гайда: <em>«Кто еще готовит исходные данные для ваших отчетов?»</em>, <em>«Кому передаются результаты вашей работы?»</em>, <em>«Кто будет обслуживать серверы?»</em>, <em>«Чья работа изменится после внедрения?»</em>. Также строится сквозная цепочка создания ценности (Value Stream) и матрица стейкхолдеров (Власть / Интерес)."
+      },
+      {
+        q: "8. Что делать, если респондент не идет на контакт или дает односложные ответы?",
+        a: "1) Снизить формализм: убрать ноутбук и ручку на пару минут, поговорить о его реальных трудностях по-человечески; 2) Сменить фокус с личности на процесс: вместо «Почему вы ошибаетесь?» спросить «Что в текущих регламентах устроено неудобно?»; 3) Использовать провокационную гипотезу: «Я слышал, что пересчет кредитов у вас занимает 2 недели, это преувеличение?». Это заставляет респондента включиться и уточнить факты."
+      },
+      {
+        q: "9. Зачем составлять словарь предметной области (глоссарий) уже на 1-й лабораторной?",
+        a: "В каждой предметной области одни и те же термины используются в разных смыслах (омонимия), либо разные подразделения называют одну сущность по-разному (синонимия). Например, для деканата «студент» — это физлицо в приказе, а для бухгалтерии — это номер лицевого счета. Глоссарий устраняет двусмысленность и предотвращает ошибки при проектировании базы данных."
+      },
+      {
+        q: "10. В чем смысл «Заключения аналитика» (Топ-3 проблемы с наивысшим приоритетом)?",
+        a: "Заказчик в ходе интервью может выдать 50 мелких пожеланий и жалоб. Если попытаться реализовать все сразу, проект утонет в скоупе (Scope Creep). Заключение аналитика отсекает второстепенный шум и выделяет критическое ядро (MVP), без которого система не имеет ценности."
+      }
+    ];
+
+    function renderDefenseAccordion() {
+      const container = document.getElementById('defenseAccordion');
+      container.innerHTML = DEFENSE_QA.map((item, idx) => `
+        <div class="accordion-item">
+          <div class="accordion-header" onclick="toggleAccordion(${idx})">
+            <span>${item.q}</span>
+            <span id="accIcon${idx}" style="color: var(--accent-blue);">+</span>
+          </div>
+          <div class="accordion-body" id="accBody${idx}">
+            ${item.a}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleAccordion(idx) {
+      const body = document.getElementById(`accBody${idx}`);
+      const icon = document.getElementById(`accIcon${idx}`);
+      const isOpen = body.classList.contains('open');
+      
+      document.querySelectorAll('.accordion-body').forEach(b => b.classList.remove('open'));
+      document.querySelectorAll('[id^=accIcon]').forEach(i => i.innerText = '+');
+
+      if (!isOpen) {
+        body.classList.add('open');
+        icon.innerText = '−';
+      }
+    }
+
+    // ==========================================
+    // QUIZ DATA & LOGIC (10 QUESTIONS)
+    // ==========================================
+    const QUIZ_DATA = [
+      {
+        q: "1. Какой вопрос является эталонным контекстно-свободным вопросом?",
+        opts: [
+          "«Вам удобнее открывать ведомость через боковое меню или через панель вкладок?»",
+          "«Кто является конечным пользователем формируемой отчетности и как он ее использует?»",
+          "«Согласны ли вы, что реляционная СУБД лучше справится с хранением ваших кредитов?»",
+          "«Сколько секунд должна занимать генерация сводного отчета в формате Excel?»"
+        ],
+        correct: 1,
+        rationale: "Вопрос об адресатах отчетности полностью нейтрален, не навязывает решения и исследует бизнес-потребности."
+      },
+      {
+        q: "2. Какая главная опасность возникает при задавании наводящих вопросов?",
+        opts: [
+          "Респондент начинает спорить и отказывается продолжать интервью.",
+          "Аналитик фиксирует ложные требования из-за поддакивания респондента.",
+          "Увеличивается время проведения интервью более чем в два раза.",
+          "Нарушаются государственные стандарты ГОСТ 34.602-89 при оформлении."
+        ],
+        correct: 1,
+        rationale: "Наводящие вопросы провоцируют подтверждение субъективных гипотез аналитика, закладывая фатальные ошибки в скоуп проекта."
+      },
+      {
+        q: "3. В какой раздел технического задания (ТЗ) по ГОСТ 34.602-89 заносятся выявленные потребности?",
+        opts: [
+          "Раздел 1. «Общие сведения о создаваемой автоматизированной системе»",
+          "Раздел 2. «Назначение и цели создания (развития) системы»",
+          "Раздел 3. «Характеристика объекта автоматизации»",
+          "Раздел 5. «Состав и содержание работ по созданию системы»"
+        ],
+        correct: 1,
+        rationale: "Согласно методичке и стандарту ГОСТ 34.602-89, потребности заказчика напрямую определяют раздел 2 «Назначение и цели создания системы»."
+      },
+      {
+        q: "4. Зачем в методике интервью рекомендуется повторять вопрос «А еще?» (Часть 2 гайда)?",
+        opts: [
+          "Чтобы занять отведенный регламентом час времени встречи.",
+          "Чтобы выявить глубинные проблемы, о которых респондент не вспомнил сразу.",
+          "Чтобы проверить, не противоречит ли респондент своим предыдущим словам.",
+          "Чтобы утомить заказчика и заставить его согласиться на готовое решение."
+        ],
+        correct: 1,
+        rationale: "Первые ответы — поверхностные жалобы. Вопрос «А еще?» заставляет респондента задуматься о скрытых и системных болях."
+      },
+      {
+        q: "5. Что из перечисленного относится к нефункциональным требованиям (Часть 8 гайда)?",
+        opts: [
+          "Возможность ввода баллов за промежуточную аттестацию старостой группы.",
+          "Время восстановления системы после сбоя электропитания сервера не более 15 минут.",
+          "Печать приложения к диплому государственного образца с гербовой символикой.",
+          "Расчет академического рейтинга с учетом коэффициента сложности дисциплин."
+        ],
+        correct: 1,
+        rationale: "Время восстановления, надежность и производительность — классические нефункциональные требования (качества системы)."
+      },
+      {
+        q: "6. Что должен сделать аналитик на шаге «Резюме» (Часть 4)?",
+        opts: [
+          "Попросить у респондента подписать акт выполненных предпроектных работ.",
+          "Своими словами пересказать ключевые проблемы и получить подтверждение.",
+          "Продемонстрировать рабочий прототип пользовательского интерфейса.",
+          "Задать перечень вопросов по информационной безопасности и парольной политике."
+        ],
+        correct: 1,
+        rationale: "Резюме служит для валидации понимания: аналитик возвращает респонденту его слова, чтобы исключить искажения."
+      },
+      {
+        q: "7. Какая роль стейкхолдера в методическом примере (Иванов П.В., Начальник Учебного управления)?",
+        opts: [
+          "Рядовой оператор ввода данных, не влияющий на принятие решений.",
+          "Заказчик и ключевой стейкхолдер, отвечающий за регламент учебного процесса.",
+          "Внешний аудитор Министерства науки и высшего образования РФ.",
+          "Системный администратор, занимающийся развертыванием СУБД."
+        ],
+        correct: 1,
+        rationale: "Начальник Учебного управления — прямой заказчик системы и лицо, принимающее результаты работы."
+      },
+      {
+        q: "8. В чем заключается цель составления словаря предметной области (глоссария)?",
+        opts: [
+          "Заполнить обязательный объем отчета по лабораторной работе (не менее 5 страниц).",
+          "Устранить многозначность терминов (омонимию и синонимию) в проектной команде.",
+          "Обучить пользователей базовым терминам компьютерной грамотности.",
+          "Перевести все русскоязычные термины на английский язык для международных баз."
+        ],
+        correct: 1,
+        rationale: "Глоссарий фиксирует единое семантическое поле для заказчика, аналитиков и программистов."
+      },
+      {
+        q: "9. Какой вопрос помогает выявить неявных (скрытых) стейкхолдеров на Шаге 10?",
+        opts: [
+          "«Какую зарплату получают сотрудники вашего структурного подразделения?»",
+          "«Кто еще использует данные ваших отчетов или передает вам входную информацию?»",
+          "«Планируете ли вы увольняться до завершения внедрения новой системы?»",
+          "«Какую марку мониторов предпочитают ваши ведущие специалисты?»"
+        ],
+        correct: 1,
+        rationale: "Отслеживание потоков входящей и исходящей информации неизбежно выводит на смежные отделы и скрытых пользователей."
+      },
+      {
+        q: "10. В течение какого времени аналитику рекомендуется заполнять «Заключение» после интервью?",
+        opts: [
+          "Непосредственно в процессе интервью, прерывая речь респондента на 5-10 минут.",
+          "Сразу после окончания встречи (в первые 1-2 часа), пока воспоминания свежи.",
+          "Через неделю после встречи, чтобы мысли отлежались и ушел эмоциональный след.",
+          "Только после того, как программисты закончат проектирование схемы базы данных."
+        ],
+        correct: 1,
+        rationale: "Когнитивные исследования доказывают, что до 50% невербальных нюансов и мелких деталей стираются из памяти уже через сутки."
+      }
+    ];
+
+    let quizAnswers = new Array(QUIZ_DATA.length).fill(null);
+
+    function renderQuiz() {
+      const container = document.getElementById('quizContainer');
+      container.innerHTML = QUIZ_DATA.map((qItem, qIdx) => `
+        <div class="quiz-card" id="quizCard${qIdx}">
+          <h4 style="font-size: 1.05rem; margin-bottom: 12px; color: var(--text-primary);">${qItem.q}</h4>
+          <div>
+            ${qItem.opts.map((opt, optIdx) => `
+              <button class="quiz-opt" id="qOpt_${qIdx}_${optIdx}" onclick="selectQuizAnswer(${qIdx}, ${optIdx})">
+                ${opt}
+              </button>
+            `).join('')}
+          </div>
+          <div class="quiz-feedback" id="qFeedback${qIdx}"></div>
+        </div>
+      `).join('');
+    }
+
+    function selectQuizAnswer(qIdx, optIdx) {
+      if (quizAnswers[qIdx] !== null) return; // already answered
+      quizAnswers[qIdx] = optIdx;
+      
+      const qItem = QUIZ_DATA[qIdx];
+      const optBtn = document.getElementById(`qOpt_${qIdx}_${optIdx}`);
+      const feedback = document.getElementById(`qFeedback${qIdx}`);
+      feedback.style.display = 'block';
+
+      if (optIdx === qItem.correct) {
+        optBtn.classList.add('correct');
+        feedback.style.background = 'rgba(16, 185, 129, 0.15)';
+        feedback.style.border = '1px solid var(--accent-emerald)';
+        feedback.style.color = '#a7f3d0';
+        feedback.innerHTML = `<strong>Верно!</strong> ${qItem.rationale}`;
+      } else {
+        optBtn.classList.add('wrong');
+        const correctBtn = document.getElementById(`qOpt_${qIdx}_${qItem.correct}`);
+        if (correctBtn) correctBtn.classList.add('correct');
+        feedback.style.background = 'rgba(244, 63, 94, 0.15)';
+        feedback.style.border = '1px solid var(--accent-rose)';
+        feedback.style.color = '#fecdd3';
+        feedback.innerHTML = `<strong>Ошибка!</strong> Правильный ответ: <em>«${qItem.opts[qItem.correct]}»</em>. ${qItem.rationale}`;
+      }
+
+      // Check if all answered
+      if (quizAnswers.every(a => a !== null)) {
+        showQuizResults();
+      }
+    }
+
+    function showQuizResults() {
+      const correctCount = quizAnswers.filter((ans, idx) => ans === QUIZ_DATA[idx].correct).length;
+      const summaryBox = document.getElementById('quizResultSummary');
+      summaryBox.style.display = 'block';
+      const header = document.getElementById('quizScoreHeader');
+      const text = document.getElementById('quizScoreText');
+
+      if (correctCount >= 9) {
+        header.innerHTML = `🏆 Отличный результат: ${correctCount} из 10!`;
+        header.style.color = 'var(--accent-emerald)';
+        text.innerText = 'Вы в совершенстве владеете методикой интервьюирования, понимаете разницу вопросов и готовы защитить Лабораторную работу №1 на высший балл!';
+      } else if (correctCount >= 7) {
+        header.innerHTML = `👍 Хороший результат: ${correctCount} из 10!`;
+        header.style.color = 'var(--accent-blue)';
+        text.innerText = 'Базовые понятия усвоены уверенно. Рекомендуем повторить нюансы формулирования потребностей по ГОСТ 34.602-89 и классификацию вопросов.';
+      } else {
+        header.innerHTML = `⚠️ Требуется доработка: ${correctCount} из 10.`;
+        header.style.color = 'var(--accent-amber)';
+        text.innerText = 'Обратите внимание на грубые ошибки (наводящие вопросы) и перечитайте раздел 11 шагов интервью перед защитой.';
+      }
+      summaryBox.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function restartQuiz() {
+      quizAnswers = new Array(QUIZ_DATA.length).fill(null);
+      document.getElementById('quizResultSummary').style.display = 'none';
+      renderQuiz();
+    }
+
+    // Init on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      renderStepper();
+      renderClassifier();
+      renderSimNode();
+      renderDefenseAccordion();
+      renderQuiz();
+    });
+  </script>
+</body>
+</html>
