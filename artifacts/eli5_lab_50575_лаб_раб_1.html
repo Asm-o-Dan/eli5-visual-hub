@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>лаб раб 1 — ELI5 Visual Hub</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --card-bg: #161b22;
+            --border: #30363d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --accent-green: #2ea043;
+            --accent-red: #f85149;
+            --accent-blue: #58a6ff;
+            --accent-purple: #bc8cff;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.5;
+            padding: 1rem;
+            max-width: 820px;
+            margin: 0 auto;
+        }
+        nav {
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        nav a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        .tag {
+            background: #21262d;
+            color: var(--accent-purple);
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        header { margin-bottom: 2rem; }
+        header h1 { font-size: 1.8rem; margin-bottom: 0.4rem; color: #fff; }
+        header p { color: var(--text-secondary); font-size: 1.05rem; }
+
+        /* Conflict comparison grid */
+        .conflict-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        @media (max-width: 600px) {
+            .conflict-grid { grid-template-columns: 1fr; }
+        }
+        .box {
+            background: var(--card-bg);
+            padding: 1.2rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+        .box.bad { border-top: 4px solid var(--accent-red); }
+        .box.good { border-top: 4px solid var(--accent-green); }
+        .box h3 { margin-bottom: 0.5rem; font-size: 1.1rem; display: flex; align-items: center; gap: 0.4rem; }
+        .box ul { padding-left: 1.2rem; color: #c9d1d9; font-size: 0.95rem; }
+        .box li { margin-bottom: 0.3rem; }
+
+        /* SVG Architecture diagram */
+        .diagram-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .diagram-container h3 { margin-bottom: 1rem; font-size: 1.1rem; color: var(--accent-blue); }
+        svg { width: 100%; max-width: 700px; height: auto; }
+
+        /* Pillars */
+        .pillars-section { margin-bottom: 2rem; }
+        .pillar-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+        }
+        .pillar-num {
+            background: var(--accent-blue);
+            color: #000;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        .pillar-content h3 { font-size: 1.05rem; margin-bottom: 0.2rem; }
+        .pillar-content p { color: #8b949e; font-size: 0.95rem; }
+
+        /* Quiz */
+        .quiz-section { margin-top: 2rem; }
+        .quiz-section h2 { font-size: 1.3rem; margin-bottom: 1rem; color: #fff; }
+        .quiz-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.8rem 1rem;
+            margin-bottom: 0.6rem;
+            cursor: pointer;
+        }
+        .quiz-card summary { font-size: 1rem; outline: none; }
+        .quiz-answer { margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid var(--border); font-size: 0.95rem; }
+        .ans-text { color: #e6edf3; margin-bottom: 0.3rem; }
+        .ans-hint { color: var(--accent-green); font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="../index.html">← Назад в Каталог</a>
+        <span class="tag">МЗЯП</span>
+    </nav>
+    <header>
+        <h1>лаб раб 1</h1>
+        <p>Наглядный визуальный разбор за 0.3 секунды</p>
+    </header>
+
+    <section class="conflict-grid">
+        <div class="box bad">
+            <h3>❌ Типичные ошибки и затыки</h3>
+            <ul>
+                <li>Не понимать механику работы и зубрить чужой код</li><li>Игнорировать проверку граничных условий в лаб раб 1</li>
+            </ul>
+        </div>
+        <div class="box good">
+            <h3>✅ Правильное понимание и решение</h3>
+            <ul>
+                <li>Понимать архитектурные инварианты и системные интерфейсы</li><li>Уверенно обосновать выбор алгоритма и структур данных</li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="diagram-container">
+        <h3>Архитектурная схема процесса</h3>
+        <svg viewBox="0 0 500 120" xmlns="http://www.w3.org/2000/svg">
+                <rect x="10" y="30" width="130" height="60" rx="8" fill="#1f6feb" stroke="#58a6ff" stroke-width="2"/>
+                <text x="75" y="65" fill="#fff" font-size="14" text-anchor="middle" font-family="sans-serif">Входные данные</text>
+                <path d="M140 60 L190 60" stroke="#58a6ff" stroke-width="2"/>
+                <rect x="190" y="30" width="130" height="60" rx="8" fill="#238636" stroke="#2ea043" stroke-width="2"/>
+                <text x="255" y="65" fill="#fff" font-size="14" text-anchor="middle" font-family="sans-serif">Ядро алгоритма</text>
+                <path d="M320 60 L370 60" stroke="#2ea043" stroke-width="2"/>
+                <rect x="370" y="30" width="120" height="60" rx="8" fill="#8957e5" stroke="#bc8cff" stroke-width="2"/>
+                <text x="430" y="65" fill="#fff" font-size="14" text-anchor="middle" font-family="sans-serif">Результат</text>
+            </svg>
+    </section>
+
+    <section class="pillars-section">
+        
+            <div class='pillar-card'>
+                <div class='pillar-num'>1</div>
+                <div class='pillar-content'>
+                    <h3>Понимание интерфейсов</h3>
+                    <p>Точное соответствие требованиям преподавателя и входным спецификациям.</p>
+                </div>
+            </div>
+            
+            <div class='pillar-card'>
+                <div class='pillar-num'>2</div>
+                <div class='pillar-content'>
+                    <h3>Детерминированность</h3>
+                    <p>Отсутствие утечек памяти, корректное завершение при любых входных данных.</p>
+                </div>
+            </div>
+            
+            <div class='pillar-card'>
+                <div class='pillar-num'>3</div>
+                <div class='pillar-content'>
+                    <h3>Готовность к защите</h3>
+                    <p>Способность объяснить каждую строчку кода и архитектурные компромиссы.</p>
+                </div>
+            </div>
+            
+    </section>
+
+    <div class='quiz-section'><h2>⚡ Экспресс-контроль перед защитой</h2>
+                <details class='quiz-card'>
+                    <summary><b>Вопрос 1:</b> Каково главное требование к решению лабораторной «лаб раб 1»?</summary>
+                    <div class='quiz-answer'>
+                        <p class='ans-text'><b>Ответ:</b> Чистая реализация с корректной обработкой ошибок и пониманием архитектуры.</p>
+                        <p class='ans-hint'><i>Суть:</i> Преподаватель проверяет не просто запуск, а понимание кода.</p>
+                    </div>
+                </details>
+                </div>
+</body>
+</html>

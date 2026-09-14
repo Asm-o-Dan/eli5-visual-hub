@@ -1,5 +1,21 @@
 [
   {
+    "id": "os_lab4_sed_join",
+    "title": "ОС ЛБ4: Фильтрация данных (sed, join, pipelines)",
+    "description": "Интерактивный разбор конвейеров Linux, pattern vs hold space в sed и связывания join без awk",
+    "category": "Операционные системы",
+    "tags": [
+      "linux",
+      "sed",
+      "join",
+      "bash",
+      "pipelines",
+      "moodle"
+    ],
+    "date": "2026-09-14",
+    "file": "artifacts/os_lab4_sed_join.html"
+  },
+  {
     "id": "requirements-interviewing-lab1",
     "title": "Анализ требований: Интервью стейкхолдеров (ЛР №1)",
     "description": "Интерактивный симулятор, 11 этапов интервью, классификатор контекстно-свободных вопросов, генератор отчета и экзаменатор по ГОСТ 34.602-89.",
