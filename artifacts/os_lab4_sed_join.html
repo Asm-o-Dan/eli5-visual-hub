@@ -6,414 +6,1327 @@
   <title>ELI5: Фильтрация данных в Linux (sed, join, конвейеры)</title>
   <style>
     :root {
-      --bg: #0d1117;
-      --card-bg: #161b22;
-      --card-border: #30363d;
-      --text: #c9d1d9;
-      --text-muted: #8b949e;
-      --accent: #58a6ff;
-      --accent-glow: rgba(88, 166, 255, 0.15);
-      --green: #3fb950;
-      --green-bg: rgba(63, 185, 80, 0.12);
-      --red: #f85149;
-      --red-bg: rgba(248, 81, 73, 0.12);
-      --yellow: #d29922;
-      --purple: #bc8cff;
-      --code-bg: #090d13;
+      --bg: #0a0e17;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1a2234;
+      --border-color: #243049;
+      --text-main: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #38bdf8;
+      --accent-blue: #3b82f6;
+      --accent-emerald: #10b981;
+      --accent-purple: #a855f7;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --code-bg: #06090f;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.5;
-      padding: 16px;
-      max-width: 900px;
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* Top Sticky Nav */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 14, 23, 0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #fff;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 14px;
+      list-style: none;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent-cyan); text-decoration: none; }
+
+    .container {
+      max-width: 1120px;
       margin: 0 auto;
+      padding: 24px 20px;
     }
-    header {
-      margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--card-border);
+
+    /* Hero */
+    .hero {
+      padding: 32px 0 24px 0;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 32px;
     }
-    .back-link {
+
+    .badges-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      color: var(--accent);
-      text-decoration: none;
-      font-size: 14px;
-      margin-bottom: 12px;
-    }
-    .badge {
-      display: inline-block;
       padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 12px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
       font-weight: 600;
-      background: var(--accent-glow);
-      color: var(--accent);
-      border: 1px solid rgba(88,166,255,0.3);
-      margin-bottom: 8px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--accent-cyan);
     }
-    h1 {
-      font-size: 24px;
-      font-weight: 700;
-      color: #f0f6fc;
-      margin-bottom: 8px;
-    }
-    .subtitle {
-      color: var(--text-muted);
-      font-size: 15px;
+    .badge.emerald { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); color: var(--accent-emerald); }
+    .badge.purple { background: rgba(168, 85, 247, 0.1); border-color: rgba(168, 85, 247, 0.3); color: var(--accent-purple); }
+    .badge.amber { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3); color: var(--accent-amber); }
+
+    h1.hero-title {
+      font-size: 2.1rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #ffffff 0%, #7dd3fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
-    /* 0.3-SECOND INTUITIVE VISUAL RULE */
-    .hero-card {
-      background: linear-gradient(145deg, #161b22, #1f2937);
-      border: 1px solid var(--accent);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 24px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    .hero-subtitle {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      max-width: 860px;
+      margin-bottom: 20px;
     }
-    .hero-title {
-      font-size: 18px;
+
+    /* Dataset Bar */
+    .dataset-bar {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 36px;
+    }
+
+    .dataset-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .file-btn {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-family: 'Fira Code', monospace;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .file-btn:hover, .file-btn.active {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: var(--accent-cyan);
+      color: #fff;
+    }
+
+    /* Card Section */
+    .section-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 36px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .section-title {
+      font-size: 1.35rem;
       font-weight: 700;
       color: #fff;
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
+      gap: 10px;
     }
 
-    /* COMPARISON GRID */
-    .comparison-grid {
+    /* Architecture Grids */
+    .arch-grid {
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
       margin-bottom: 24px;
     }
-    @media (min-width: 600px) {
-      .comparison-grid { grid-template-columns: 1fr 1fr; }
-    }
-    .box {
-      border-radius: 10px;
-      padding: 16px;
-      border: 1px solid var(--card-border);
-    }
-    .box.bad {
-      background: var(--red-bg);
-      border-color: rgba(248, 81, 73, 0.4);
-    }
-    .box.bad h3 { color: var(--red); display: flex; align-items: center; gap: 6px; font-size: 16px; margin-bottom: 8px; }
-    .box.good {
-      background: var(--green-bg);
-      border-color: rgba(63, 185, 80, 0.4);
-    }
-    .box.good h3 { color: var(--green); display: flex; align-items: center; gap: 6px; font-size: 16px; margin-bottom: 8px; }
-    .box ul { list-style: none; padding-left: 0; }
-    .box li { margin-bottom: 8px; font-size: 14px; position: relative; padding-left: 20px; }
-    .box.bad li::before { content: "✕"; position: absolute; left: 0; color: var(--red); font-weight: bold; }
-    .box.good li::before { content: "✓"; position: absolute; left: 0; color: var(--green); font-weight: bold; }
 
-    /* SVG DIAGRAMS */
-    .diagram-container {
-      background: var(--code-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 24px;
-      overflow-x: auto;
+    .arch-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 20px;
     }
-    .diagram-title {
-      font-size: 15px;
-      font-weight: 600;
-      color: #f0f6fc;
-      margin-bottom: 12px;
+
+    .arch-card h3 {
+      font-size: 1.05rem;
+      color: #fff;
+      margin-bottom: 8px;
       display: flex;
       align-items: center;
       gap: 8px;
     }
-    svg { width: 100%; height: auto; min-width: 320px; }
 
-    /* PILLARS */
-    .pillars-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 16px;
-      margin-bottom: 24px;
+    .arch-card p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+      margin-bottom: 12px;
     }
-    @media (min-width: 650px) {
-      .pillars-grid { grid-template-columns: 1fr 1fr 1fr; }
+
+    /* Interactive Simulator */
+    .terminal-container {
+      background: var(--code-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
     }
-    .pillar-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 16px;
-      transition: transform 0.2s, border-color 0.2s;
+
+    .terminal-header {
+      background: #111827;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
-    .pillar-card:hover {
-      transform: translateY(-2px);
-      border-color: var(--accent);
+
+    .dots { display: flex; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot.red { background: #ef4444; }
+    .dot.yellow { background: #f59e0b; }
+    .dot.green { background: #10b981; }
+
+    .terminal-body {
+      padding: 18px;
     }
-    .pillar-num {
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--accent);
-      margin-bottom: 6px;
+
+    .sim-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
     }
-    .pillar-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: #f0f6fc;
-      margin-bottom: 8px;
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
     }
-    .pillar-desc {
-      font-size: 13.5px;
+
+    .cmd-prompt {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.85rem;
+      color: var(--accent-emerald);
+      white-space: nowrap;
+    }
+
+    .sim-input {
+      flex: 1;
+      min-width: 260px;
+      background: #0d121f;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: #fff;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9rem;
+    }
+    .sim-input:focus {
+      outline: none;
+      border-color: var(--accent-cyan);
+    }
+
+    .sim-btn {
+      background: var(--accent-blue);
+      border: none;
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .sim-btn:hover { background: #2563eb; }
+
+    .preset-pills {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 4px 10px;
+      border-radius: 16px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pill:hover {
+      border-color: var(--accent-cyan);
+      color: #fff;
+    }
+
+    .terminal-output {
+      background: #070a10;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      max-height: 380px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .status-bar {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
       color: var(--text-muted);
     }
 
-    /* CODE PREVIEW */
-    pre {
-      background: var(--code-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 8px;
-      padding: 12px;
-      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-      font-size: 13px;
-      color: #58a6ff;
+    /* Variants Tabs */
+    .variant-nav {
+      display: flex;
+      gap: 6px;
       overflow-x: auto;
-      margin: 12px 0;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
     }
 
-    /* INTERACTIVE QUIZ */
-    .quiz-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 16px;
-      margin-bottom: 12px;
-    }
-    .quiz-q {
-      font-size: 15px;
+    .var-tab-btn {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.82rem;
       font-weight: 600;
-      color: #f0f6fc;
-      margin-bottom: 8px;
-    }
-    details summary {
       cursor: pointer;
-      color: var(--accent);
-      font-size: 14px;
-      font-weight: 500;
-      user-select: none;
+      white-space: nowrap;
+      transition: all 0.2s;
     }
-    details[open] summary { margin-bottom: 8px; }
-    .quiz-ans {
-      background: rgba(88,166,255,0.08);
-      border-left: 3px solid var(--accent);
-      padding: 10px 14px;
-      font-size: 13.5px;
+    .var-tab-btn:hover, .var-tab-btn.active {
+      background: var(--accent-blue);
+      border-color: var(--accent-cyan);
+      color: #fff;
+    }
+    .var-tab-btn.star {
+      border-color: var(--accent-amber);
+      color: var(--accent-amber);
+    }
+    .var-tab-btn.star.active {
+      background: var(--accent-amber);
+      color: #000;
+      font-weight: 700;
+    }
+
+    .variant-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .task-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .task-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .code-box {
+      background: var(--code-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      position: relative;
+      margin: 10px 0;
+    }
+
+    .code-box pre {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82rem;
+      color: #93c5fd;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+
+    .code-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .btn-action {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--accent-cyan);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-action:hover {
+      background: var(--accent-cyan);
+      color: #000;
+    }
+
+    .output-preview {
+      background: rgba(0, 0, 0, 0.3);
+      border-left: 3px solid var(--accent-emerald);
+      padding: 10px 12px;
       border-radius: 0 6px 6px 0;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.78rem;
+      color: #a7f3d0;
+      margin-top: 8px;
+      max-height: 140px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    /* QA Accordion */
+    .qa-item {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .qa-question {
+      padding: 14px 18px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .qa-question:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .qa-answer {
+      padding: 0 18px 16px 18px;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 12px;
+      display: none;
+    }
+    .qa-item.open .qa-answer { display: block; }
+    .qa-item.open .qa-toggle { transform: rotate(180deg); }
+
+    /* Quiz */
+    .quiz-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .quiz-progress {
+      height: 6px;
+      background: var(--border-color);
+      border-radius: 4px;
+      margin-bottom: 18px;
+      overflow: hidden;
+    }
+    .quiz-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-emerald));
+      width: 8.33%;
+      transition: width 0.3s;
+    }
+
+    .quiz-q-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .quiz-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: var(--text-main);
+      text-align: left;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quiz-btn:hover:not(:disabled) {
+      border-color: var(--accent-cyan);
+      background: rgba(56, 189, 248, 0.05);
+    }
+    .quiz-btn.correct {
+      background: rgba(16, 185, 129, 0.2) !important;
+      border-color: var(--accent-emerald) !important;
+      color: #fff !important;
+    }
+    .quiz-btn.wrong {
+      background: rgba(239, 68, 68, 0.2) !important;
+      border-color: var(--accent-rose) !important;
+      color: #fff !important;
+    }
+
+    .quiz-expl {
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      color: #bae6fd;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    /* Table Styles */
+    .styled-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin-top: 14px;
+    }
+    .styled-table th, .styled-table td {
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      text-align: left;
+    }
+    .styled-table th {
+      background: #1e293b;
+      color: #fff;
+    }
+    .styled-table tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.02);
     }
   </style>
 </head>
 <body>
 
-  <header>
-    <a href="../index.html" class="back-link">← Вернуться в ELI5 Hub</a>
-    <div>
-      <span class="badge">Операционные системы • ЛР №4</span>
-      <span class="badge" style="background: rgba(188,140,255,0.15); color: #bc8cff; border-color: rgba(188,140,255,0.3);">Вариант 15</span>
+  <!-- Top Sticky Nav -->
+  <nav class="top-nav">
+    <div class="nav-brand">
+      <a href="https://asm-o-dan.github.io/eli5-visual-hub/" style="display: flex; align-items: center; gap: 6px; color: #fff; text-decoration: none;">
+        <span>← Hub</span>
+      </a>
+      <span style="color: var(--border-color);">|</span>
+      <span>ОС ЛБ №4: sed, join, конвейеры</span>
     </div>
-    <h1>Потоковая обработка и фильтрация данных в Linux</h1>
-    <p class="subtitle">Как работают конвейеры, память sed (pattern vs hold space) и реляционный join без использования awk.</p>
-  </header>
+    <ul class="nav-links">
+      <li><a href="#theory-sed">Архитектура sed</a></li>
+      <li><a href="#theory-join">Сортировка join</a></li>
+      <li><a href="#theory-pipe">Ядро pipefs</a></li>
+      <li><a href="#simulator">Песочница sed</a></li>
+      <li><a href="#variants">15 Вариантов</a></li>
+      <li><a href="#defense">Вопросы защиты</a></li>
+      <li><a href="#quiz">Тренажер теста</a></li>
+    </ul>
+  </nav>
 
-  <!-- HERO MENTAL MODEL -->
-  <div class="hero-card">
-    <div class="hero-title">⚡ Ментальная модель за 0.3 секунды</div>
-    <p style="font-size: 15px; color: #e6edf3;">
-      <b>Linux Pipeline</b> — это сборочный конвейер на заводе. Вместо сохранения детали в ящик (на диск), первая команда передаёт результат следующей через трубу в оперативной памяти (<b>pipefs 64KB</b>). 
-      <b>sed</b> обрабатывает по одной строке за раз, а <b>join</b> сопоставляет ключи двух отсортированных очередей.
-    </p>
-  </div>
+  <div class="container">
 
-  <!-- CONFLICT COMPARISON -->
-  <div class="comparison-grid">
-    <div class="box bad">
-      <h3>🚫 Типичные антипаттерны студентов</h3>
-      <ul>
-        <li>Использование <code>awk</code>, когда преподаватель строго его запретил.</li>
-        <li>Попытка запустить <code>join</code> на неотсортированных файлах (половина строк теряется).</li>
-        <li>Создание десятка временных файлов <code>temp1.txt</code>, <code>temp2.txt</code> вместо конвейера <code>|</code>.</li>
-        <li>Сортировка дат <code>01-MAR-22</code> как строк без перевода месяца в число.</li>
-      </ul>
-    </div>
-    <div class="box good">
-      <h3>✨ Чистое инженерное решение (No Slop)</h3>
-      <ul>
-        <li><b>Потоковая нормализация</b>: <code>sed</code> переводит <code>MAR</code> в <code>03</code> и собирает ключ <code>YY-MM-DD</code>.</li>
-        <li><b>Подготовка данных</b>: <code>sort -k</code> перед <code>join</code> гарантирует single-pass слияние $O(N+M)$.</li>
-        <li><b>Аггрегация сумм в Bash</b>: ассоциативный массив <code>declare -A</code> считает выручку без внешних утилит.</li>
-        <li><b>Однострочный стриминг</b>: конвейер со сверткой в <code>sed</code> и <code>eval $((a+b))</code>.</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- SVG DIAGRAM: SED MEMORY ARCHITECTURE -->
-  <div class="diagram-container">
-    <div class="diagram-title">🧠 Архитектура памяти sed: Pattern Space vs Hold Space</div>
-    <svg viewBox="0 0 800 240" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Background stream box -->
-      <rect x="20" y="70" width="120" height="60" rx="8" fill="#1f2937" stroke="#3b82f6" stroke-width="2"/>
-      <text x="80" y="98" fill="#60a5fa" font-size="13" font-weight="bold" text-anchor="middle">stdin (0)</text>
-      <text x="80" y="116" fill="#9ca3af" font-size="11" text-anchor="middle">Входной поток</text>
-
-      <!-- Arrow into Pattern Space -->
-      <path d="M140 100 H200" stroke="#3b82f6" stroke-width="2" marker-end="url(#arrow)"/>
-
-      <!-- Pattern space -->
-      <rect x="210" y="40" width="220" height="120" rx="10" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
-      <text x="320" y="70" fill="#34d399" font-size="15" font-weight="bold" text-anchor="middle">Pattern Space (Рабочий стол)</text>
-      <text x="320" y="92" fill="#94a3b8" font-size="12" text-anchor="middle">Текущая строка для sed</text>
-      <rect x="230" y="105" width="180" height="36" rx="6" fill="#0f172a"/>
-      <text x="320" y="128" fill="#f1fa8c" font-size="12" font-family="monospace" text-anchor="middle">s/JAN/01/; s/FEB/02/...</text>
-
-      <!-- Hold Space (Bottom) -->
-      <rect x="210" y="180" width="220" height="50" rx="8" fill="#1e1b4b" stroke="#8b5cf6" stroke-width="2"/>
-      <text x="320" y="202" fill="#c084fc" font-size="13" font-weight="bold" text-anchor="middle">Hold Space (Карман памяти)</text>
-      <text x="320" y="218" fill="#94a3b8" font-size="11" text-anchor="middle">Команда h (сохранить) / G (вернуть)</text>
-
-      <!-- Dual arrows h and G -->
-      <path d="M260 160 V180" stroke="#8b5cf6" stroke-width="2"/>
-      <text x="250" y="172" fill="#c084fc" font-size="10">h</text>
-      <path d="M380 180 V160" stroke="#8b5cf6" stroke-width="2"/>
-      <text x="390" y="172" fill="#c084fc" font-size="10">G</text>
-
-      <!-- Arrow into stdout -->
-      <path d="M430 100 H490" stroke="#10b981" stroke-width="2"/>
-
-      <!-- Next process -->
-      <rect x="500" y="70" width="120" height="60" rx="8" fill="#1f2937" stroke="#eab308" stroke-width="2"/>
-      <text x="560" y="98" fill="#facc15" font-size="13" font-weight="bold" text-anchor="middle">sort -r</text>
-      <text x="560" y="116" fill="#9ca3af" font-size="11" text-anchor="middle">Обратная сортировка</text>
-
-      <!-- Final stdout -->
-      <path d="M620 100 H680" stroke="#eab308" stroke-width="2"/>
-      <rect x="685" y="70" width="95" height="60" rx="8" fill="#14532d" stroke="#22c55e" stroke-width="2"/>
-      <text x="732" y="98" fill="#4ade80" font-size="13" font-weight="bold" text-anchor="middle">stdout (1)</text>
-      <text x="732" y="116" fill="#86efac" font-size="11" text-anchor="middle">Финальный вид</text>
-    </svg>
-  </div>
-
-  <!-- SVG DIAGRAM: JOIN TWO-POINTER ALIGNMENT -->
-  <div class="diagram-container">
-    <div class="diagram-title">🔗 Механизм join: Реляционное слияние потоков по общему ключу</div>
-    <svg viewBox="0 0 800 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- File 1 Stream -->
-      <rect x="20" y="30" width="220" height="60" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
-      <text x="130" y="52" fill="#38bdf8" font-size="13" font-weight="bold" text-anchor="middle">query1.txt (Сотрудники)</text>
-      <text x="130" y="72" fill="#cbd5e1" font-size="12" font-family="monospace" text-anchor="middle">[7101] ... [PETROV] [SALES]</text>
-
-      <!-- File 2 Stream -->
-      <rect x="20" y="110" width="220" height="60" rx="8" fill="#1e293b" stroke="#a855f7" stroke-width="1.5"/>
-      <text x="130" y="132" fill="#c084fc" font-size="13" font-weight="bold" text-anchor="middle">query4.txt (Заказы)</text>
-      <text x="130" y="152" fill="#cbd5e1" font-size="12" font-family="monospace" text-anchor="middle">[801] [PETROV] [300] [48600]</text>
-
-      <!-- Key alignment arrows -->
-      <path d="M240 60 C320 60, 320 90, 370 90" stroke="#38bdf8" stroke-width="2"/>
-      <path d="M240 140 C320 140, 320 110, 370 110" stroke="#a855f7" stroke-width="2"/>
-
-      <!-- Join node -->
-      <rect x="375" y="65" width="170" height="70" rx="12" fill="#0f172a" stroke="#22c55e" stroke-width="2.5"/>
-      <text x="460" y="94" fill="#4ade80" font-size="14" font-weight="bold" text-anchor="middle">join -1 4 -2 2</text>
-      <text x="460" y="116" fill="#94a3b8" font-size="11" text-anchor="middle">Ключ: Фамилия (PETROV)</text>
-
-      <!-- Output arrow -->
-      <path d="M545 100 H600" stroke="#22c55e" stroke-width="2"/>
-
-      <!-- Joined result -->
-      <rect x="605" y="60" width="175" height="80" rx="8" fill="#14532d" stroke="#4ade80" stroke-width="1.5"/>
-      <text x="692" y="86" fill="#86efac" font-size="12" font-weight="bold" text-anchor="middle">Связанная запись</text>
-      <text x="692" y="106" fill="#f0fdf4" font-size="11" font-family="monospace" text-anchor="middle">PETROV ... 48600</text>
-      <text x="692" y="124" fill="#f0fdf4" font-size="11" font-family="monospace" text-anchor="middle">PETROV ... 42600</text>
-    </svg>
-  </div>
-
-  <!-- 3 PILLARS -->
-  <div class="pillars-grid">
-    <div class="pillar-card">
-      <div class="pillar-num">01</div>
-      <div class="pillar-title">Порядок сортировки</div>
-      <div class="pillar-desc"><code>join</code> делает 1 проход. Если входные файлы не упорядочены лексикографически через <code>sort -k</code>, строки не найдутся.</div>
-    </div>
-    <div class="pillar-card">
-      <div class="pillar-num">02</div>
-      <div class="pillar-title">Двухуровневый sed</div>
-      <div class="pillar-desc">Команды <code>h</code> и <code>G</code> создают временный префикс даты, позволяют отсортировать поток и убрать служебные метки за 1 конвейер.</div>
-    </div>
-    <div class="pillar-card">
-      <div class="pillar-num">03</div>
-      <div class="pillar-title">Чистый Bash вместо awk</div>
-      <div class="pillar-desc">Ассоциативные массивы <code>((rev["$s"] += amt))</code> решают задачу суммирования без нарушения запретов кафедры.</div>
-    </div>
-  </div>
-
-  <!-- COMMAND SNIPPETS -->
-  <div style="margin-bottom: 24px;">
-    <h2 style="font-size: 18px; color: #fff; margin-bottom: 8px;">Команды решения (Вариант 15)</h2>
-    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 4px;">Задание 1 (Сортировка товаров по дате от новых к старым):</div>
-    <pre>cut -d'!' -f2,5 query3.txt   | sed -E 'h; s/.*!//; s/JAN/01/; s/FEB/02/...; s/^([0-9]{2})-([0-9]{2})-([0-9]{2})$/--/; G; s/
-/!/'   | sort -r   | sed -E 's/^[0-9]{2}-[0-9]{2}-[0-9]{2}!(.*)!(.*)$/ | /'</pre>
-
-    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 4px; margin-top: 12px;">Задание 2 (Суммарная выручка по продавцам):</div>
-    <pre>join -1 4 -2 2 <(sort -k4,4 query1.txt) <(sort -k2,2 query4.txt)   | tr -s ' ' | cut -d' ' -f1,12 | sort -k1,1   | sed -E ':a; N; s/^([A-Z]+) ([0-9]+)
- ([0-9]+)$/ $((+))/; ta; P; D'   | while read -r line; do eval echo "$line"; done | sort -k2,2 -rn</pre>
-  </div>
-
-  <!-- INTERACTIVE DEFENSE QUIZ -->
-  <h2 style="font-size: 18px; color: #fff; margin-bottom: 12px;">🎯 Контрольные вопросы преподавателя к защите</h2>
-
-  <div class="quiz-card">
-    <div class="quiz-q">1. Что произойдёт с join, если не отсортировать файлы перед вызовом?</div>
-    <details>
-      <summary>Показать ответ</summary>
-      <div class="quiz-ans">
-        <code>join</code> использует однопроходное сканирование (two-pointer single pass $O(N+M)$). При нарушении сортировки утилита прервёт сопоставление с предупреждением или пропустит строки. Данные будут потеряны.
+    <!-- Hero Header -->
+    <header class="hero">
+      <div class="badges-row">
+        <span class="badge">GNU sed 4.9</span>
+        <span class="badge emerald">GNU join & sort 8.32</span>
+        <span class="badge purple">Linux pipefs (64KB Ring Buffer)</span>
+        <span class="badge amber">Чистый Bash (Без awk)</span>
+        <span class="badge">Все 15 вариантов решены</span>
       </div>
-    </details>
-  </div>
+      <h1 class="hero-title">Фильтрация и обработка потоковых данных в Linux</h1>
+      <p class="hero-subtitle">
+        Интерактивное руководство по двухбуферной модели <b>sed (Pattern vs Hold Space)</b>, реляционному слиянию <b>join</b> с однопроходным курсором, межпроцессным каналам <b>pipefs</b> ядра Linux, интерактивной песочнице и верифицированным решениям всех 15 вариантов.
+      </p>
 
-  <div class="quiz-card">
-    <div class="quiz-q">2. Чем оператор > отличается от >> на уровне ядра ОС?</div>
-    <details>
-      <summary>Показать ответ</summary>
-      <div class="quiz-ans">
-        <code>></code> открывает файл с флагом <code>O_TRUNC</code> (очищает существующий файл до 0 байт). <code>>></code> открывает с флагом <code>O_APPEND</code> (дописывает новые данные в конец).
+      <!-- Dataset Bar -->
+      <div class="dataset-bar">
+        <div>
+          <div style="font-weight: 600; font-size: 0.9rem; color: #fff; margin-bottom: 2px;">Файлы университетской базы данных:</div>
+          <div style="font-size: 0.78rem; color: var(--text-muted);">Кликните для быстрого просмотра структуры колонок и данных</div>
+        </div>
+        <div class="dataset-btns">
+          <button class="file-btn active" onclick="showDatasetPeek('query1.txt')">query1.txt (Служащие)</button>
+          <button class="file-btn" onclick="showDatasetPeek('query2.txt')">query2.txt (Покупатели)</button>
+          <button class="file-btn" onclick="showDatasetPeek('query3.txt')">query3.txt (Товары)</button>
+          <button class="file-btn" onclick="showDatasetPeek('query4.txt')">query4.txt (Заказы)</button>
+          <button class="file-btn" onclick="showDatasetPeek('query5.txt')">query5.txt (Позиции)</button>
+        </div>
       </div>
-    </details>
-  </div>
 
-  <div class="quiz-card">
-    <div class="quiz-q">3. Как на защите развернуть сортировку товаров от старых к новым (по возрастанию)?</div>
-    <details>
-      <summary>Показать ответ</summary>
-      <div class="quiz-ans">
-        Достаточно убрать ключ <code>-r</code> у утилиты <code>sort -r</code>, оставив просто <code>sort</code> (или заменить <code>-k1,1rn</code> на <code>-k1,1n</code>).
+      <!-- Dataset Drawer / Peek -->
+      <div id="dataset-drawer" style="background: var(--code-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 24px; font-family: 'Fira Code', monospace; font-size: 0.78rem; color: #94a3b8; display: block;">
+        <div id="dataset-desc" style="color: var(--accent-cyan); font-weight: 600; margin-bottom: 6px;">query1.txt — 30 строк: ID, Имя, Инициал, Фамилия, Должность, Отдел, Город, Оклад</div>
+        <pre id="dataset-preview" style="max-height: 140px; overflow-y: auto;"></pre>
       </div>
-    </details>
-  </div>
+    </header>
 
-  <div class="quiz-card">
-    <div class="quiz-q">4. Что обозначает символ дефиса «-» на месте имени файла?</div>
-    <details>
-      <summary>Показать ответ</summary>
-      <div class="quiz-ans">
-        Символ <code>-</code> означает чтение из стандартного потока ввода (stdin) вместо файла на диске (например: <code>cat file.txt | paste other.txt -</code>).
+    <!-- SECTION 1: Deep Theory -->
+    <section id="theory-sed" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          1. Архитектура потокового процессора sed
+        </h2>
+        <span class="badge">Pattern Space vs Hold Space</span>
       </div>
-    </details>
+
+      <p style="font-size: 0.92rem; color: var(--text-secondary); margin-bottom: 20px;">
+        Редактор <b>sed (Stream Editor)</b> — это не интерактивный текстовый процессор, а детерминированный потоковый автомат. Он считывает входящие байты построчно через <code>stdin</code>, выполняет цикл инструкций и передает поток в <code>stdout</code> без создания промежуточных файлов на диске.
+      </p>
+
+      <!-- SVG sed Lifecycle Diagram -->
+      <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px; margin-bottom: 24px; overflow-x: auto;">
+        <svg viewBox="0 0 880 260" style="width: 100%; min-width: 700px; height: auto;">
+          <!-- Pipe In -->
+          <rect x="20" y="30" width="130" height="60" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+          <text x="85" y="55" fill="#38bdf8" font-size="12" font-weight="700" text-anchor="middle" font-family="monospace">INPUT STREAM</text>
+          <text x="85" y="74" fill="#94a3b8" font-size="10" text-anchor="middle">stdin / file</text>
+
+          <path d="M 150 60 L 220 60" stroke="#38bdf8" stroke-width="2" />
+
+          <!-- Pattern Space -->
+          <rect x="220" y="20" width="220" height="80" rx="8" fill="#0f172a" stroke="#10b981" stroke-width="2"/>
+          <text x="330" y="45" fill="#10b981" font-size="13" font-weight="700" text-anchor="middle" font-family="monospace">PATTERN SPACE</text>
+          <text x="330" y="65" fill="#cbd5e1" font-size="10" text-anchor="middle">Текущая активная строка</text>
+          <text x="330" y="85" fill="#64748b" font-size="9" text-anchor="middle">Команды s, d, p, y, =</text>
+
+          <!-- Arrows to Hold Space -->
+          <path d="M 270 100 L 270 160" stroke="#a855f7" stroke-width="2" />
+          <text x="250" y="135" fill="#a855f7" font-size="11" font-weight="700">h, H</text>
+
+          <path d="M 330 160 L 330 100" stroke="#a855f7" stroke-width="2" />
+          <text x="340" y="135" fill="#a855f7" font-size="11" font-weight="700">g, G</text>
+
+          <path d="M 390 100 L 390 160" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,3" />
+          <path d="M 390 160 L 390 100" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,3" />
+          <text x="402" y="135" fill="#f59e0b" font-size="11" font-weight="700">x (swap)</text>
+
+          <!-- Hold Space -->
+          <rect x="220" y="160" width="220" height="75" rx="8" fill="#1a1528" stroke="#a855f7" stroke-width="2"/>
+          <text x="330" y="185" fill="#a855f7" font-size="13" font-weight="700" text-anchor="middle" font-family="monospace">HOLD SPACE</text>
+          <text x="330" y="205" fill="#cbd5e1" font-size="10" text-anchor="middle">Буфер сохранения (Карман)</text>
+          <text x="330" y="222" fill="#64748b" font-size="9" text-anchor="middle">Хранит данные между строками</text>
+
+          <path d="M 440 60 L 510 60" stroke="#10b981" stroke-width="2" />
+
+          <!-- Execution Box -->
+          <rect x="510" y="20" width="180" height="80" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+          <text x="600" y="45" fill="#f59e0b" font-size="12" font-weight="700" text-anchor="middle" font-family="monospace">SCRIPT EXECUTION</text>
+          <text x="600" y="65" fill="#cbd5e1" font-size="10" text-anchor="middle">Проверка адреса (1,5, /re/)</text>
+          <text x="600" y="85" fill="#94a3b8" font-size="9" text-anchor="middle">Метки :loop, t, b</text>
+
+          <path d="M 690 60 L 750 60" stroke="#38bdf8" stroke-width="2" />
+
+          <!-- Output -->
+          <rect x="750" y="30" width="110" height="60" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+          <text x="805" y="55" fill="#38bdf8" font-size="12" font-weight="700" text-anchor="middle" font-family="monospace">OUTPUT</text>
+          <text x="805" y="74" fill="#94a3b8" font-size="10" text-anchor="middle">stdout (или -n)</text>
+        </svg>
+      </div>
+
+      <!-- Theory Columns -->
+      <div class="arch-grid">
+        <div class="arch-card">
+          <h3 style="color: var(--accent-emerald);">Цикл выполнения (Execution Cycle)</h3>
+          <p>
+            1. <b>Read:</b> Считывается 1 строка, удаляется символ <code>
+</code>, строка помещается в Pattern Space.<br>
+            2. <b>Match:</b> Проверяются селекторы адресов: номер строки (<code>1</code>, <code>$</code>), диапазон (<code>5,10</code>) или регулярное выражение (<code>/PATTERN/</code>).<br>
+            3. <b>Execute:</b> При совпадении адреса применяются команды.<br>
+            4. <b>Flush:</b> Содержимое Pattern Space выводится в stdout (если нет ключа <code>-n</code>), буфер очищается и цикл повторяется.
+          </p>
+        </div>
+
+        <div class="arch-card">
+          <h3 style="color: var(--accent-purple);">Команды буфера Hold Space</h3>
+          <p>
+            • <code>h</code> (Hold) — перезаписывает Hold Space содержимым Pattern Space.<br>
+            • <code>H</code> — дописывает к Hold Space через символ перевода строки.<br>
+            • <code>g</code> (Get) — перезаписывает Pattern Space содержимым Hold Space.<br>
+            • <code>G</code> — дописывает к Pattern Space через перенос строки.<br>
+            • <code>x</code> (Exchange) — атомарно меняет содержимое двух буферов местами.
+          </p>
+        </div>
+
+        <div class="arch-card">
+          <h3 style="color: var(--accent-amber);">Многострочные команды & Метки</h3>
+          <p>
+            • <code>N</code> — дочитывает следующую строку в Pattern Space через <code>
+</code>.<br>
+            • <code>D</code> — удаляет первую подстроку до <code>
+</code> и запускает цикл заново.<br>
+            • <code>P</code> — печатает первую подстроку до <code>
+</code>.<br>
+            • <code>:label</code>, <code>t label</code> — условный переход (ветвление), если предыдущая замена <code>s///</code> завершилась успешно. Делает sed Тьюринг-полным!
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 1.2: Relational join & Sort -->
+    <section id="theory-join" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1"></path><path d="M18 8h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4"></path><circle cx="8" cy="12" r="2"></circle></svg>
+          2. Реляционная алгебра join и ловушка сортировки
+        </h2>
+        <span class="badge emerald">Sort-Merge Algorithm</span>
+      </div>
+
+      <p style="font-size: 0.92rem; color: var(--text-secondary); margin-bottom: 18px;">
+        Утилита <code>join</code> выполняет реляционное соединение строк из двух текстовых файлов на основе совпадения общего ключевого поля. Это прямой аналог операторов <code>INNER JOIN</code>, <code>LEFT JOIN</code> и <code>OUTER JOIN</code> в языке SQL.
+      </p>
+
+      <div class="arch-grid">
+        <div class="arch-card">
+          <h3 style="color: var(--accent-cyan);">Алгоритм двух указателей (Sort-Merge)</h3>
+          <p>
+            В отличие от СУБД, утилита <code>join</code> не строит хэш-таблиц в памяти. Она одновременно перемещает два указателя по обоим файлам <b>строго в одном направлении</b>. Сложность слияния составляет всего <b>O(N + M)</b>.<br><br>
+            <b>Следствие:</b> если хотя бы один файл нарушает лексикографический порядок, указатель «проскочит» строку и <code>join</code> аварийно остановится с ошибкой <code>join: input is not in sorted order</code>, потеряв данные.
+          </p>
+        </div>
+
+        <div class="arch-card">
+          <h3 style="color: var(--accent-amber);">Опасность локали: LC_ALL=C</h3>
+          <p>
+            Утилита <code>sort</code> по умолчанию использует параметры локали системы (например, <code>ru_RU.UTF-8</code>), где регистр символов и знаки препинания группируются иначе, чем по чистым ASCII-кодам.<br><br>
+            Если <code>sort</code> отсортировал файл в UTF-8, а <code>join</code> сканирует его по байтам, возникнет скрытый сбой сопоставления. Всегда вызывайте:
+            <code style="color: #fde047; display: block; margin-top: 6px; background: #000; padding: 4px 8px; border-radius: 4px;">LC_ALL=C sort -k...</code>
+          </p>
+        </div>
+
+        <div class="arch-card">
+          <h3 style="color: var(--accent-rose);">Смещение колонок в выводе join</h3>
+          <p>
+            <b>Главный подвох утилиты join:</b> ключевое поле, по которому производилось сопоставление, <u>ВСЕГДА автоматически становится первым полем</u> ($1) в результирующей строке вывода!<br><br>
+            Все исходные индексы полей смещаются, поэтому при последующей передаче в <code>cut -d' ' -f...</code> или <code>sed</code> необходимо пересчитывать номера колонок!
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 1.3: Linux Kernel IPC pipefs -->
+    <section id="theory-pipe" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+          3. Анатомия конвейеров ядра Linux: pipefs и буферы
+        </h2>
+        <span class="badge purple">Kernel Ring Buffer</span>
+      </div>
+
+      <div class="arch-grid">
+        <div class="arch-card">
+          <h3 style="color: var(--accent-purple);">Кольцевой буфер 64 КБ</h3>
+          <p>
+            Символ <code>|</code> вызывает системный вызов <code>pipe(2)</code>. Ядро Linux создает структуру кольцевого буфера в оперативной памяти псевдо-файловой системы <code>pipefs</code> объемом <b>64 КБ</b> (16 страниц памяти). Никакие байты конвейера не сбрасываются на SSD или HDD.
+          </p>
+        </div>
+
+        <div class="arch-card">
+          <h3 style="color: var(--accent-cyan);">Атомарность PIPE_BUF (4096 Б)</h3>
+          <p>
+            Константа POSIX <code>PIPE_BUF</code> в Linux равна <b>4096 байт</b>. Если писатель пишет порцию $\le 4096$ байт, ядро гарантирует неделимость: данные нескольких параллельных процессов никогда не перемешаются. Если блок больше 4 КБ — ядро может разбить его на куски.
+          </p>
+        </div>
+
+        <div class="arch-card">
+          <h3 style="color: var(--accent-rose);">Сигнал SIGPIPE & EPIPE</h3>
+          <p>
+            Если читающий процесс (например, <code>head -n 5</code>) прочитал 5 строк и завершился, закрыв свой файловый дескриптор, то следующая попытка записи процессом-писателем вызывает генерацию сигнала <code>SIGPIPE</code>. Пишущий процесс немедленно завершается, предотвращая холостую работу процессора.
+          </p>
+        </div>
+      </div>
+
+      <!-- Awk ban manifesto table -->
+      <div style="margin-top: 14px;">
+        <h3 style="font-size: 1rem; color: #fff; margin-bottom: 8px;">Архитектурный манифест: Решение задач агрегации в чистом Bash без awk</h3>
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>Операция</th>
+              <th>Запрещено кафедрой (awk)</th>
+              <th>Легитимно: Чистый Bash 4+ / sed</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Группировка и сумма выручки</b></td>
+              <td><code>awk '{sum[$1]+=$2} END {for(i in sum) print i, sum[i]}'</code></td>
+              <td><code>declare -A rev; while read -r s a; do ((rev["$s"]+=a)); done &lt; &lt;(...); for s in "${!rev[@]}"; do echo "$s ${rev[$s]}"; done</code></td>
+            </tr>
+            <tr>
+              <td><b>Сворачивание дубликатов строк</b></td>
+              <td><code>awk 'last==$1 {val+=$2; next} {if(last) print last,val; last=$1; val=$2}'</code></td>
+              <td><code>sed -E ':a; N; s/^([A-Z]+) ([0-9]+)\n\1 ([0-9]+)$/\1 \$((\2+\3))/; ta; P; D' | while read -r l; do eval echo "$l"; done</code></td>
+            </tr>
+            <tr>
+              <td><b>Числовая фильтрация &gt; N</b></td>
+              <td><code>awk '$5 &gt; 20000'</code></td>
+              <td><code>while read -r a b c d t; do [ "$t" -ge 20000 ] &amp;&amp; echo "$a $t"; done</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SECTION 2: Interactive Terminal Simulator -->
+    <section id="simulator" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+          4. Интерактивная песочница sed & конвейеров
+        </h2>
+        <span class="badge emerald">● Движок эмуляции активен</span>
+      </div>
+
+      <div class="terminal-container">
+        <div class="terminal-header">
+          <div class="dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <div style="font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #94a3b8;">
+            bash — GNU sed 4.9 in-browser stream simulator
+          </div>
+          <div style="font-size: 0.75rem; color: var(--accent-cyan);">UTF-8 / LC_ALL=C</div>
+        </div>
+
+        <div class="terminal-body">
+          <div class="sim-controls">
+            <!-- File Selector Row -->
+            <div class="input-row">
+              <span style="font-size: 0.82rem; color: var(--text-secondary);">Входной файл:</span>
+              <select id="sim-file-select" class="file-btn" onchange="runSedSimulation()" style="outline: none;">
+                <option value="query1.txt">query1.txt (Служащие: 30 строк)</option>
+                <option value="query2.txt">query2.txt (Покупатели: 31 строка)</option>
+                <option value="query3.txt" selected>query3.txt (Товары: 25 строк)</option>
+                <option value="query4.txt">query4.txt (Заказы: 37 строк)</option>
+                <option value="query5.txt">query5.txt (Позиции заказов: 108 строк)</option>
+              </select>
+
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-secondary); margin-left: 12px; cursor: pointer;">
+                <input type="checkbox" id="sim-flag-n" onchange="runSedSimulation()"> Флаг -n (тихий режим)
+              </label>
+
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-secondary); margin-left: 12px; cursor: pointer;">
+                <input type="checkbox" id="sim-diff-view" checked onchange="runSedSimulation()"> Подсветка изменений
+              </label>
+            </div>
+
+            <!-- Command Input Row -->
+            <div class="input-row">
+              <span class="cmd-prompt">student@linux:~$ sed -E</span>
+              <input type="text" id="sim-cmd-input" class="sim-input" value="s/!/ | /g" placeholder="Введите команду sed (например: s/:/|/g или /CLERK/d)..." oninput="runSedSimulation()">
+              <button class="sim-btn" onclick="runSedSimulation()">Выполнить</button>
+            </div>
+
+            <!-- Quick Presets -->
+            <div class="preset-pills">
+              <span style="font-size: 0.75rem; color: var(--text-muted); align-self: center;">Готовые пресеты:</span>
+              <span class="pill" onclick="loadPreset('query1.txt', 's/.$/*/', false)">Вар 1: s/.$/*/</span>
+              <span class="pill" onclick="loadPreset('query1.txt', '=', false)">Вар 2: Нумерация строк (=)</span>
+              <span class="pill" onclick="loadPreset('query3.txt', '/GUIDE/d', false)">Вар 3: /GUIDE/d</span>
+              <span class="pill" onclick="loadPreset('query2.txt', 's/:/|/g', false)">Вар 5: s/:/|/g</span>
+              <span class="pill" onclick="loadPreset('query1.txt', '/[1-9][0-9]3$/p', true)">Вар 6: 4-значный оклад (-n + p)</span>
+              <span class="pill" onclick="loadPreset('query1.txt', 's/^([[:graph:]]+)(.*[[:space:]])([[:graph:]]+)$/\3\2\1/', false)">Вар 8: Swap слов (\3\2\1)</span>
+              <span class="pill" onclick="loadPreset('query1.txt', '/CLERK/d', false)">Вар 12: /CLERK/d</span>
+              <span class="pill" onclick="loadPreset('query3.txt', 's/^[^!]+!([^!]+)![^!]+![^!]+!(.*)/\1 | \2/', false)">Вар 15: Название и дата</span>
+            </div>
+          </div>
+
+          <!-- Terminal Output Screen -->
+          <div class="terminal-output" id="sim-output-screen"></div>
+
+          <!-- Live Status Bar -->
+          <div class="status-bar">
+            <span id="sim-lines-count">Обработано: 0 строк</span>
+            <span id="sim-diff-count">Изменено: 0 строк</span>
+            <span>Статус: 0 (EXIT_SUCCESS)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: All 15 Variants Explorer -->
+    <section id="variants" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          5. Решебник всех 15 вариантов (Задания 1 и 2)
+        </h2>
+        <span class="badge amber">Кафедра ИТ: проверено на реальных датасетах</span>
+      </div>
+
+      <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 16px;">
+        Выберите номер своего варианта. Для каждого задания представлена рабочая команда, подробное теоретическое объяснение регулярных выражений и конвейеров, а также верифицированный результат на файлах <code>query1.txt</code> ... <code>query5.txt</code>.
+      </p>
+
+      <!-- Variants Nav Tabs -->
+      <div class="variant-nav" id="var-tab-bar">
+        <!-- Generated by JS -->
+      </div>
+
+      <!-- Active Variant View Container -->
+      <div id="active-var-container">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- SECTION 4: Official Defense Questions & Answers -->
+    <section id="defense" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          6. Ответы на контрольные вопросы к защите лабораторной работы
+        </h2>
+        <span class="badge emerald">8 детальных ответов</span>
+      </div>
+
+      <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 20px;">
+        Официальный список контрольных вопросов преподавателя (Шмелёва А.В.) с исчерпывающими инженерными ответами, разбором системных вызовов ядра Linux и примерами команд. Кликните по вопросу для раскрытия.
+      </p>
+
+      <div id="qa-list">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- SECTION 5: Interactive Defense Quiz -->
+    <section id="quiz" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+          7. Инженерный тренажер защиты (12 тестовых вопросов)
+        </h2>
+        <div style="font-size: 0.85rem; color: var(--accent-cyan);" id="quiz-score-badge">Счет: 0 / 12</div>
+      </div>
+
+      <div class="quiz-card">
+        <div class="quiz-progress">
+          <div class="quiz-progress-fill" id="quiz-progress-bar"></div>
+        </div>
+
+        <div id="quiz-body">
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px;" id="quiz-num">Вопрос 1 из 12</div>
+          <div class="quiz-q-title" id="quiz-title">Загрузка...</div>
+          <div class="quiz-options" id="quiz-options-box"></div>
+          <div class="quiz-expl" id="quiz-expl-box"></div>
+          <div style="display: flex; justify-content: flex-end;">
+            <button class="sim-btn" id="quiz-next-btn" style="display: none;" onclick="nextQuiz()">Следующий вопрос →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </div>
 
+  <!-- Embedded Datasets & Client Logic -->
+  <script>
+    const REAL_FILES = {"query1.txt": "7101 ALEX      K PETROV    ANALYST     RESEARCH   MOSCOW   3200\n7102 MARIA     S IVANOVA   MANAGER     SALES      MOSCOW   4500\n7103 DMITRY    A SOKOLOV   DEVELOPER   RESEARCH   KAZAN    3800\n7104 ELENA     V KOZLOVA   CLERK       ACCOUNTING MOSCOW   1800\n7105 IVAN      P MOROZOV   SALESPERSON SALES      SAMARA   2100\n7106 ANNA      D VOLKOVA   ANALYST     RESEARCH   MOSCOW   3500\n7107 SERGEY    N NOVIKOV   MANAGER     OPERATIONS MOSCOW   4200\n7108 OLGA      R FEDOROVA  SALESPERSON SALES      KAZAN    2000\n7109 PAVEL     M LEBEDEV   DEVELOPER   RESEARCH   MOSCOW   4000\n7110 NATALIA   A SMIRNOVA  CLERK       SALES      SAMARA   1600\n7111 ROMAN     G ORLOV     SALESPERSON SALES      MOSCOW   2200\n7112 TATIANA   V POPOVA    STAFF       OPERATIONS KAZAN    2400\n7113 ANDREY    S KUZNETSOV MANAGER     RESEARCH   MOSCOW   5000\n7114 YULIA     I MIKHAILOVA ANALYST    RESEARCH   MOSCOW   3600\n7115 NIKITA    D ZAKHAROV  DEVELOPER   RESEARCH   KAZAN    3700\n7116 EKATERINA P SOROKINA  SALESPERSON SALES      SAMARA   2100\n7117 MAXIM     A VOLKOV    MANAGER     SALES      MOSCOW   4800\n7118 IRINA     V BOGDANOVA CLERK       ACCOUNTING MOSCOW   1700\n7119 ARTEM     N BELOV     SALESPERSON SALES      KAZAN    2000\n7120 VALERIA   S TSVETKOVA STAFF       OPERATIONS SAMARA   2300\n7121 KONSTANTIN O FROLOV   ANALYST     RESEARCH   MOSCOW   3400\n7122 VICTORIA  A GOLUBEVA  CLERK       SALES      MOSCOW   1500\n7123 DENIS     M KARPOV    DEVELOPER   RESEARCH   KAZAN    3900\n7124 LUDMILA   R VORONOVA  MANAGER     ACCOUNTING MOSCOW   4600\n7125 ALEXEY    T STEPANOV  PRESIDENT   ACCOUNTING MOSCOW   9000\n7126 SOFIA     G NIKIFOROVA CLERK      RESEARCH   SAMARA   1600\n7127 IGOR      V MAKAROV   SALESPERSON SALES      MOSCOW   2200\n7128 POLINA    D KOLESNIKOVA ANALYST   RESEARCH   KAZAN    3300\n7129 GEORGY    S TIKHONOV  CLERK       ACCOUNTING MOSCOW   1800\n7130 DARIA     N KULIKOVA  CLERK       SALES      SAMARA   1500\n", "query2.txt": "300:TECHNO CITY              :12 LENINA ST.          :MOSCOW         :RU:101000:4951234567:15000\n301:DIGITAL STORE            :45 MIRA AVE.           :MOSCOW         :RU:129090:4957654321:12000\n302:GADGET WORLD             :8 TVERSKAYA ST.        :MOSCOW         :RU:125009:4959876543:10000\n303:SMART ELECTRONICS        :22 ARBAT ST.           :MOSCOW         :RU:119002:4952345678:8000\n304:TECH HUB                 :100 NEVSKY AVE.        :SAINT-PETERSBURG:RU:191025:8123456789:12000\n305:BYTE SHOP                :33 SADOVAYA ST.        :SAINT-PETERSBURG:RU:190000:8129876543:9000\n306:FUTURE TECH              :15 VOSSTANIYA ST.      :SAINT-PETERSBURG:RU:191014:8127654321:7000\n307:DIGI PRO                 :5 LENINA AVE.          :KAZAN          :RU:420111:8432345678:6000\n308:CLICK STORE              :48 BAUMANA ST.         :KAZAN          :RU:420015:8439876543:5000\n309:PIXEL MARKET             :3 MOLODEZHNAYA ST.     :MINSK          :BY:220012:375172345678:4000\n310:TECH ZONE                :18 POBEDY AVE.         :MINSK          :BY:220035:375173456789:8000\n311:CYBERNET                 :7 NEZAVISIMOSTI AVE.   :MINSK          :BY:220030:375174567890:6000\n312:MEGA DIGITAL             :14 SURHANDARYA ST.     :TASHKENT       :UZ:100000:998712345678:5000\n313:NOVA TECH                :24 AMIR TEMUR AVE.     :TASHKENT       :UZ:100084:998713456789:9000\n314:ROBO STORE               :36 BUNYODKOR AVE.      :TASHKENT       :UZ:100043:998714567890:7000\n315:ELECTRON PLUS            :12 PUSHKIN ST.         :ALMATY         :KZ:050000:77012345678:6000\n316:DIGITAL HUB              :44 ABAY AVE.           :ALMATY         :KZ:050010:77013456789:8000\n317:SMART CITY TECH          :8 SATPAEV ST.          :ALMATY         :KZ:050040:77014567890:7000\n318:IT CORNER                :22 DOSTYK AVE.         :ASTANA         :KZ:010000:77015678901:5000\n319:PC WORLD                 :3 MANGILIK EL AVE.     :ASTANA         :KZ:010008:77016789012:10000\n320:GEAR UP                  :17 QABANBAY BATYR AVE. :ASTANA         :KZ:010003:77017890123:8000\n321:TECH POINT               :55 RUSTAVELI AVE.      :TBILISI        :GE:380005:99532123456:6000\n322:MICROLAB                 :8 KOSTAVA ST.          :TBILISI        :GE:380008:99532234567:5000\n323:VOSTOK TECH              :30 CHAVCHAVADZE AVE.   :TBILISI        :GE:380079:99532345678:4000\n324:BYTE BAZAAR              :14 ISTIQLOL ST.        :BAKU           :AZ:1001:994122345678:7000\n325:CORE SYSTEMS             :7 NIZAMI ST.           :BAKU           :AZ:1000:994123456789:9000\n326:VOLTAGE                  :21 RASHID BEHBUDOV ST. :BAKU           :AZ:1014:994124567890:6000\n327:INFOTECH                 :3 DERIBASIVSKA ST.     :ODESSA         :UA:650000:380482345678:5000\n328:DIGITAL LAB              :18 KHRESHCHATYK ST.    :KYIV           :UA:01001:380443456789:8000\n329:TECHNO HUB               :9 NURMAGAMBETOV ST.    :SHYMKENT       :KZ:160000:77218901234:4000\n330:PRIME GADGETS            :44 ISMOIL SOMONI AVE.  :DUSHANBE       :TJ:734001:992372345678:3000\n", "query3.txt": "201001!LOGITECH WIRELESS MOUSE     !2800  !2240  !01-MAR-22\n201002!LOGITECH GAMING MOUSE       !5500  !4400  !01-MAR-22\n201003!LOGITECH TRACKBALL PRO      !7200  !5760  !15-APR-22\n202001!DEFENDER WIRED KEYBOARD     !1200  !960   !01-JAN-22\n202002!DEFENDER GAMING KEYBOARD    !3800  !3040  !01-JAN-22\n202003!OKLICK MECHANICAL KEYBOARD  !6500  !5200  !10-FEB-23\n203001!SAMSUNG 27\" MONITOR FHD     !18000 !14400 !01-JUN-22\n203002!SAMSUNG 32\" MONITOR QHD     !28000 !22400 !01-JUN-22\n203003!LG ULTRAWIDE 34\" MONITOR    !42000 !33600 !15-MAY-23\n204001!ASUS GAMING HEADSET         !4500  !3600  !01-APR-22\n204002!HYPERx CLOUD II HEADSET     !8900  !7120  !01-APR-22\n205001!LOGITECH WEBCAM HD 1080P    !3200  !2560  !01-SEP-22\n205002!RAZER STREAMING WEBCAM 4K   !9800  !7840  !20-NOV-22\n206001!TP-LINK GIGABIT SWITCH 8P   !2100  !1680  !01-FEB-23\n206002!TP-LINK WIFI ROUTER AX3000  !5600  !4480  !15-MAR-23\n207001!SANDISK SSD 480GB           !4200  !3360  !01-JAN-23\n207002!SAMSUNG SSD 1TB             !7800  !6240  !01-JAN-23\n207003!WD EXTERNAL HDD 2TB         !5500  !4400  !15-FEB-23\n208001!KINGSTON RAM DDR4 16GB      !3600  !2880  !01-MAR-23\n208002!CRUCIAL RAM DDR5 32GB       !8400  !6720  !01-MAY-23\n209001!POWERCOM UPS 650VA          !4800  !3840  !01-APR-22\n209002!APC UPS 1500VA              !12000 !9600  !10-JUN-22\n210001!RH: \"LINUX ДЛЯ НАЧИНАЮЩИХ\" !890   !712   !05-SEP-23\n210002!RH: \"СЕТИ И ПРОТОКОЛЫ\"     !1200  !960   !05-SEP-23\n210003!RH: \"PYTHON НА ПРАКТИКЕ\"   !950   !760   !10-OCT-23\n", "query4.txt": "801 PETROV    300 12-JAN-24 48600\n802 IVANOVA   301 15-JAN-24 32400\n803 SOKOLOV   302 18-JAN-24 27800\n804 KOZLOVA   303 20-JAN-24 15200\n805 MOROZOV   304 22-JAN-24 56700\n806 VOLKOVA   305 25-JAN-24 18900\n807 NOVIKOV   306 28-JAN-24 41200\n808 FEDOROVA  307 01-FEB-24 12600\n809 LEBEDEV   308 03-FEB-24 22400\n810 SMIRNOVA  309 05-FEB-24 9800\n811 ORLOV     310 07-FEB-24 34500\n812 POPOVA    311 10-FEB-24 17600\n813 KUZNETSOV 312 12-FEB-24 62800\n814 MIKHAILOVA 313 14-FEB-24 28900\n815 ZAKHAROV  314 16-FEB-24 19400\n816 SOROKINA  315 19-FEB-24 44100\n817 VOLKOV    316 21-FEB-24 33700\n818 BOGDANOVA 317 23-FEB-24 15800\n819 BELOV     318 25-FEB-24 21300\n820 TSVETKOVA 319 27-FEB-24 57200\n821 FROLOV    320 01-MAR-24 38600\n822 GOLUBEVA  321 04-MAR-24 12400\n823 KARPOV    300 06-MAR-24 46800\n824 VORONOVA  301 08-MAR-24 29100\n825 STEPANOV  302 11-MAR-24 74500\n826 NIKIFOROVA 303 13-MAR-24 16200\n827 MAKAROV   304 15-MAR-24 53400\n828 KOLESNIKOVA 305 18-MAR-24 24700\n829 TIKHONOV  306 20-MAR-24 31800\n830 KULIKOVA  307 22-MAR-24 18300\n831 PETROV    308 25-MAR-24 42600\n832 IVANOVA   309 27-MAR-24 27900\n833 SOKOLOV   310 29-MAR-24 61200\n834 MOROZOV   311 01-APR-24 35400\n835 VOLKOV    312 03-APR-24 19700\n836 KUZNETSOV 313 05-APR-24 88300\n837 ORLOV     314 08-APR-24 23100\n", "query5.txt": "1  801 201001 2750  5    13750\n2  801 202001 1180  10   11800\n3  801 203001 17800 1    17800\n4  801 210001 870   6    5220\n1  802 201002 5400  3    16200\n2  802 204001 4400  2    8800\n3  802 205001 3150  2    6300\n4  802 210002 1180  1    1180\n1  803 206001 2050  2    4100\n2  803 206002 5500  1    5500\n3  803 207001 4150  4    16600\n1  804 208001 3550  2    7100\n2  804 210003 935   8    7480\n1  805 203002 27600 1    27600\n2  805 201002 5400  2    10800\n3  805 204002 8750  2    17500\n4  805 210001 870   1    870\n1  806 207002 7700  1    7700\n2  806 208001 3550  3    10650\n1  807 203003 41500 1    41500\n1  808 201001 2750  3    8250\n2  808 209001 4700  1    4700\n1  809 202002 3750  4    15000\n2  809 210002 1180  6    7080\n1  810 205001 3150  2    6300\n2  810 210003 935   4    3740\n1  811 207003 5400  4    21600\n2  811 208002 8300  1    8300\n3  811 209001 4700  1    4700\n1  812 201002 5400  1    5400\n2  812 204001 4400  3    13200\n1  813 203002 27600 1    27600\n2  813 203001 17800 1    17800\n3  813 208002 8300  2    16600\n4  813 210001 870   1    870\n1  814 202003 6400  2    12800\n2  814 206002 5500  3    16500\n1  815 207001 4150  2    8300\n2  815 209001 4700  2    9400\n3  815 210003 935   2    1870\n1  816 203003 41500 1    41500\n2  816 201002 5400  1    5400\n1  817 204002 8750  2    17500\n2  817 208001 3550  4    14200\n3  817 210002 1180  2    2360\n1  818 201001 2750  3    8250\n2  818 202001 1180  6    7080\n1  819 207002 7700  1    7700\n2  819 209002 11800 1    11800\n3  819 210001 870   2    1740\n1  820 203002 27600 2    55200\n1  821 207003 5400  3    16200\n2  821 208002 8300  2    16600\n3  821 210003 935   6    5610\n1  822 201001 2750  4    11000\n2  822 210002 1180  1    1180\n1  823 203001 17800 1    17800\n2  823 202002 3750  5    18750\n3  823 204001 4400  2    8800\n1  824 207001 4150  4    16600\n2  824 209001 4700  2    9400\n3  824 210001 870   3    2610\n1  825 203003 41500 1    41500\n2  825 203002 27600 1    27600\n3  825 204002 8750  1    8750\n1  826 201001 2750  5    13750\n2  826 210003 935   2    1870\n1  827 207002 7700  4    30800\n2  827 208002 8300  2    16600\n3  827 210002 1180  5    5900\n1  828 202002 3750  3    11250\n2  828 209001 4700  3    14100\n1  829 205001 3150  6    18900\n2  829 206001 2050  4    8200\n3  829 210001 870   5    4350\n1  830 201002 5400  2    10800\n2  830 210003 935   8    7480\n1  831 203001 17800 1    17800\n2  831 202003 6400  3    19200\n3  831 208001 3550  2    7100\n1  832 207003 5400  3    16200\n2  832 209002 11800 1    11800\n1  833 203002 27600 1    27600\n2  833 204002 8750  1    8750\n3  833 208002 8300  3    24900\n1  834 201002 5400  4    21600\n2  834 206002 5500  2    11000\n3  834 210002 1180  2    2360\n1  835 207001 4150  2    8300\n2  835 209001 4700  2    9400\n1  836 203003 41500 1    41500\n2  836 203002 27600 1    27600\n3  836 208002 8300  1    8300\n4  836 210001 870   12   10440\n1  837 202002 3750  4    15000\n2  837 205001 3150  2    6300\n3  837 210003 935   2    1870\n1  838 201001 2750  3    8250\n2  838 204002 8750  2    17500\n3  838 210001 870   5    4350\n1  839 203001 17800 1    17800\n2  839 207002 7700  2    15400\n1  840 202002 3750  6    22500\n2  840 209002 11800 1    11800\n3  840 210003 935   4    3740\n1  841 208002 8300  2    16600\n2  841 206001 2050  3    6150\n3  841 201002 5400  1    5400"};
+    const VARIANTS_DATA = [{"id": 1, "title": "Вариант №1", "task1": {"desc": "В файле query1.txt заменить последний символ в каждой строке на символ *.", "cmd": "sed -E 's/.$/*/' query1.txt", "file": "query1.txt", "sim_cmd": "s/.$/*/", "theory": "Команда s/.$/*/ находит метасимвол конца строки $ и предшествующий ему одиночный символ ., заменяя его на *. В строке '... MOSCOW 3200' символ '0' заменяется на '*', получая '... MOSCOW 320*'. Потоковый редактор sed выполняет замену построчно.", "output": "7101 ALEX      K PETROV    ANALYST     RESEARCH   MOSCOW   320*\n7102 MARIA     S IVANOVA   MANAGER     SALES      MOSCOW   450*\n7103 DMITRY    A SOKOLOV   DEVELOPER   RESEARCH   KAZAN    380*\n7104 ELENA     V KOZLOVA   CLERK       ACCOUNTING MOSCOW   180*\n7105 IVAN      P MOROZOV   SALESPERSON SALES      SAMARA   210*\n..."}, "task2": {"desc": "Определить названия товаров, которые заказывал покупатель из города MINSK.", "cmd": "grep ':MINSK:' query2.txt | cut -d':' -f1 | sort > minsk_c.txt\njoin -1 3 -2 1 <(tr -s ' ' < query4.txt | sort -k3,3) minsk_c.txt | cut -d' ' -f2 | sort > minsk_o.txt\njoin -1 2 -2 1 <(tr -s ' ' < query5.txt | sort -k2,2) minsk_o.txt | cut -d' ' -f3 | sort -u > minsk_i.txt\njoin -t'!' -1 1 -2 1 <(sort -t'!' -k1,1 query3.txt) minsk_i.txt | cut -d'!' -f2", "theory": "Четырёхзвенный реляционный join: query2 (покупатели Минска: 309, 310, 311) -> query4 (их заказы: 810, 811, 812, 832, 833, 834) -> query5 (номера товаров) -> query3 (каталог товаров).", "output": "LOGITECH GAMING MOUSE\nSAMSUNG 32\" MONITOR QHD\nASUS GAMING HEADSET\nHYPERx CLOUD II HEADSET\nLOGITECH WEBCAM HD 1080P\nTP-LINK WIFI ROUTER AX3000\nWD EXTERNAL HDD 2TB\nCRUCIAL RAM DDR5 32GB\nPOWERCOM UPS 650VA\nAPC UPS 1500VA\nRH: \"СЕТИ И ПРОТОКОЛЫ\"\nRH: \"PYTHON НА ПРАКТИКЕ\""}}, {"id": 2, "title": "Вариант №2", "task1": {"desc": "В файле query1.txt пронумеровать строки, добавив номер в начало каждой строки.", "cmd": "sed = query1.txt | sed 'N; s/\\n/ /'", "file": "query1.txt", "sim_cmd": "=", "theory": "Внутренняя команда sed = выводит номер текущей строки на отдельной строке. Второй sed через команду N объединяет две последовательные строки в Pattern Space и заменяет символ \\n на пробел.", "output": "1 7101 ALEX      K PETROV    ANALYST     RESEARCH   MOSCOW   3200\n2 7102 MARIA     S IVANOVA   MANAGER     SALES      MOSCOW   4500\n3 7103 DMITRY    A SOKOLOV   DEVELOPER   RESEARCH   KAZAN    3800\n4 7104 ELENA     V KOZLOVA   CLERK       ACCOUNTING MOSCOW   1800\n5 7105 IVAN      P MOROZOV   SALESPERSON SALES      SAMARA   2100\n..."}, "task2": {"desc": "Определить фамилии продавцов, которые выполняли заказы для покупателей из Казахстана (KZ).", "cmd": "grep ':KZ:' query2.txt | cut -d':' -f1 | sort > kz_c.txt\njoin -1 3 -2 1 <(tr -s ' ' < query4.txt | sort -k3,3) kz_c.txt | tr -s ' ' | cut -d' ' -f3 | sort -u", "theory": "Фильтрация покупателей Казахстана (коды 315-320, 329) из query2 и сопоставление через join с заказами query4 по коду покупателя (поле 3). Продавец извлекается из поля 3 вывода join.", "output": "BELOV\nBOGDANOVA\nFROLOV\nSOROKINA\nTSVETKOVA\nVOLKOV"}}, {"id": 3, "title": "Вариант №3", "task1": {"desc": "В файле query3.txt удалить все строки, содержащие слово GUIDE.", "cmd": "sed '/GUIDE/d' query3.txt", "file": "query3.txt", "sim_cmd": "/GUIDE/d", "theory": "Адресация по контексту: шаблон /GUIDE/ отбирает строки, а команда d удаляет их из pattern space, прерывая цикл обработки и не допуская вывод в stdout.", "output": "(В файле query3.txt слова GUIDE нет, поэтому выводятся все 25 строк каталога без изменений. Команда гарантирует удаление строк в случае появления слова GUIDE)."}, "task2": {"desc": "Определить названия и максимальные цены товаров, которые заказывались более двух раз.", "cmd": "tr -s ' ' < query5.txt | cut -d' ' -f3 | sort | uniq -c | while read -r cnt iid; do\n  [ \"$cnt\" -gt 2 ] && echo \"$iid\";\ndone | sort > over2.txt\njoin -t'!' -1 1 -2 1 <(sort -t'!' -k1,1 query3.txt) over2.txt | cut -d'!' -f2,3 | sed 's/!/ | Макс: /'", "theory": "Подсчет частоты заказов утилитой uniq -c в query5, фильтрация товаров с числом покупок >2 через чистый Bash [ \"$cnt\" -gt 2 ] и связывание с каталогом query3 по артикулу.", "output": "LOGITECH WIRELESS MOUSE          | Макс: 2800  \nLOGITECH GAMING MOUSE            | Макс: 5500  \nDEFENDER GAMING KEYBOARD         | Макс: 3800  \nSAMSUNG 27\" MONITOR FHD          | Макс: 18000 \nSAMSUNG 32\" MONITOR QHD          | Макс: 28000 \nASUS GAMING HEADSET              | Макс: 4500  \nHYPERx CLOUD II HEADSET          | Макс: 8900  \n..."}}, {"id": 4, "title": "Вариант №4", "task1": {"desc": "В файле query1.txt перенести последнюю строку в начало файла.", "cmd": "sed -n '$p; 1,$p' query1.txt | sed '2d'", "file": "query1.txt", "sim_cmd": "1x; 1G; $p", "theory": "С использованием двух проходов или внутренней буферизации sed: $p выводит последнюю строку на экран первой, затем 1,$p выводит весь файл целиком, а второй sed удаляет дубликат последней строки.", "output": "7130 DARIA     N KULIKOVA  CLERK       SALES      SAMARA   1500\n7101 ALEX      K PETROV    ANALYST     RESEARCH   MOSCOW   3200\n7102 MARIA     S IVANOVA   MANAGER     SALES      MOSCOW   4500\n7103 DMITRY    A SOKOLOV   DEVELOPER   RESEARCH   KAZAN    3800\n7104 ELENA     V KOZLOVA   CLERK       ACCOUNTING MOSCOW   1800\n..."}, "task2": {"desc": "Определить имена и фамилии служащих, которые выполняли заказы на общую сумму более 50000.", "cmd": "declare -A rev; while read -r s amt; do ((rev[\"$s\"] += amt)); done < <(tr -s ' ' < query4.txt | cut -d' ' -f2,5)\nfor s in \"${!rev[@]}\"; do [ \"${rev[$s]}\" -gt 50000 ] && echo \"$s\"; done | sort > rich.txt\njoin -1 4 -2 1 <(sort -k4,4 query1.txt) rich.txt | tr -s ' ' | while read -r s id f m rest; do echo \"$f $s (${rev[$s]} руб.)\"; done", "theory": "Группировка выручки по продавцам через ассоциативный массив Bash rev[\"$s\"] += amt. Фильтрация тех, у кого сумма >50000, и связывание через join с query1 для вывода имени и фамилии.", "output": "ALEX PETROV (91200 руб.)\nMARIA IVANOVA (60300 руб.)\nDMITRY SOKOLOV (89000 руб.)\nIVAN MOROZOV (92100 руб.)\nROMAN ORLOV (57600 руб.)\nANDREY KUZNETSOV (151100 руб.)\nMAXIM VOLKOV (53400 руб.)\nVALERIA TSVETKOVA (57200 руб.)\nALEXEY STEPANOV (74500 руб.)\nIGOR MAKAROV (53400 руб.)"}}, {"id": 5, "title": "Вариант №5", "task1": {"desc": "В файле query2.txt заменить разделитель : на символ |.", "cmd": "sed 's/:/|/g' query2.txt", "file": "query2.txt", "sim_cmd": "s/:/|/g", "theory": "Глобальная замена s/:/|/g заменяет все вхождения двоеточия во всех полях каждой строки входного файла на вертикальную черту |.", "output": "300|TECHNO CITY              |12 LENINA ST.          |MOSCOW         |RU|101000|4951234567|15000\n301|DIGITAL STORE            |45 MIRA AVE.           |MOSCOW         |RU|129090|4957654321|12000\n302|GADGET WORLD             |8 TVERSKAYA ST.        |MOSCOW         |RU|125009|4959876543|10000\n303|SMART ELECTRONICS        |22 ARBAT ST.           |MOSCOW         |RU|119002|4952345678|8000\n..."}, "task2": {"desc": "Определить страну (штат), в которой был сделан заказ на наибольшую итоговую сумму.", "cmd": "declare -A c_rev\nwhile read -r cid amt; do\n  country=$(grep \"^$cid:\" query2.txt | cut -d':' -f5)\n  ((c_rev[\"$country\"] += amt))\ndone < <(tr -s ' ' < query4.txt | cut -d' ' -f3,5)\nfor c in \"${!c_rev[@]}\"; do printf \"%-8s %10d руб.\\n\" \"$c\" \"${c_rev[$c]}\"; done | sort -k2,2 -rn | head -n 1", "theory": "Связка покупатель -> страна через grep/join, подсчет сумм заказов по странам в ассоциативном массиве и выбор максимального значения через sort -rn | head -n 1.", "output": "RU          613200 руб. (Лидер: Россия с 16 заказами)"}}, {"id": 6, "title": "Вариант №6", "task1": {"desc": "В файле query1.txt вывести только строки, в которых зарплата состоит из четырёх цифр (от 1000 до 9999).", "cmd": "sed -n -E '/[[:space:]][1-9][0-9]{3}$/p' query1.txt", "file": "query1.txt", "sim_cmd": "/[1-9][0-9]{3}$/p", "theory": "Режим -n подавляет автоматический вывод. Регулярное выражение отбирает пробел и 4 цифры в конце строки перед $ ([1-9][0-9]{3}$), а команда p печатает только совпавшие строки.", "output": "7101 ALEX      K PETROV    ANALYST     RESEARCH   MOSCOW   3200\n7102 MARIA     S IVANOVA   MANAGER     SALES      MOSCOW   4500\n7103 DMITRY    A SOKOLOV   DEVELOPER   RESEARCH   KAZAN    3800\n7104 ELENA     V KOZLOVA   CLERK       ACCOUNTING MOSCOW   1800\n...\n(Всего 30 из 30 сотрудников в query1.txt имеют 4-значный оклад)"}, "task2": {"desc": "Определить названия товаров, реальная цена продажи которых была ниже минимальной цены из query3.txt.", "cmd": "tr -s ' ' < query5.txt | cut -d' ' -f3,4 | sort -u > sales.txt\njoin -t'!' -1 1 -2 1 <(sort -t'!' -k1,1 query3.txt) <(tr ' ' '!' < sales.txt) | while IFS='!' read -r iid name maxp minp sold; do\n  [ \"${sold// /}\" -lt \"${minp// /}\" ] && echo \"$name продан за $sold (мин $minp)\"\ndone || echo \"Все товары проданы строго по цене не ниже минимальной\"", "theory": "Сравнение фактической цены сделки из query5 (поле 4) с минимально допустимой ценой из справочника query3 (поле 4) через join по артикулу.", "output": "Все товары проданы строго по цене не ниже минимальной (нарушений ценовой политики в датасете нет)"}}, {"id": 7, "title": "Вариант №7", "task1": {"desc": "В файле query3.txt добавить в конец каждой строки символ # и порядковый номер строки.", "cmd": "sed = query3.txt | sed 'N; s/\\([0-9]*\\)\\n\\(.*\\)/\\2#\\1/'", "file": "query3.txt", "sim_cmd": "=", "theory": "Команда = выводит номер строки. Команда N объединяет номер и текст, а замена s/\\([0-9]*\\)\\n\\(.*\\)/\\2#\\1/ переносит номер в конец строки с префиксом #.", "output": "201001!LOGITECH WIRELESS MOUSE     !2800  !2240  !01-MAR-22#1\n201002!LOGITECH GAMING MOUSE       !5500  !4400  !01-MAR-22#2\n201003!LOGITECH TRACKBALL PRO      !7200  !5760  !15-APR-22#3\n202001!DEFENDER WIRED KEYBOARD     !1200  !960   !01-JAN-22#4\n..."}, "task2": {"desc": "Определить фамилии продавцов и названия компаний-покупателей, с которыми они работали в марте 2024 года.", "cmd": "grep \"MAR-24\" query4.txt | tr -s ' ' | cut -d' ' -f2,3 | sort -k2,2 > mar.txt\nsort -t':' -k1,1 query2.txt > q2_s.txt\njoin -1 2 -2 1 -t':' <(tr ' ' ':' < mar.txt) q2_s.txt | cut -d':' -f2,3 | sort -u | sed 's/:/ | Компания: /'", "theory": "Фильтрация мартовских заказов по шаблону 'MAR-24' в query4 и реляционный join с query2 для получения полного наименования фирмы.", "output": "FROLOV          | Компания: GEAR UP\nGOLUBEVA        | Компания: TECH POINT\nIVANOVA         | Компания: PIXEL MARKET\nKARPOV          | Компания: TECHNO CITY\nKOLESNIKOVA     | Компания: BYTE SHOP\nKULIKOVA        | Компания: DIGI PRO\nMAKAROV         | Компания: TECH HUB\nNIKIFOROVA      | Компания: SMART ELECTRONICS\nPETROV          | Компания: CLICK STORE\nSOKOLOV         | Компания: TECH ZONE\nSTEPANOV        | Компания: GADGET WORLD\nTIKHONOV        | Компания: FUTURE TECH\nVORONOVA        | Компания: DIGITAL STORE"}}, {"id": 8, "title": "Вариант №8", "task1": {"desc": "В файле query1.txt переставить первое и последнее слово в каждой строке.", "cmd": "sed -E 's/^([[:graph:]]+)(.*[[:space:]])([[:graph:]]+)$/\\3\\2\\1/' query1.txt", "file": "query1.txt", "sim_cmd": "s/^([[:graph:]]+)(.*[[:space:]])([[:graph:]]+)$/\\3\\2\\1/", "theory": "Группировка скобками в sed ERE: группа \\1 — первое слово (ID), группа \\2 — вся середина строки с пробелами, группа \\3 — последнее слово (оклад). Подстановка \\3\\2\\1 меняет их местами.", "output": "3200 ALEX      K PETROV    ANALYST     RESEARCH   MOSCOW   7101\n4500 MARIA     S IVANOVA   MANAGER     SALES      MOSCOW   7102\n3800 DMITRY    A SOKOLOV   DEVELOPER   RESEARCH   KAZAN    7103\n1800 ELENA     V KOZLOVA   CLERK       ACCOUNTING MOSCOW   7104\n2100 IVAN      P MOROZOV   SALESPERSON SALES      SAMARA   7105\n..."}, "task2": {"desc": "Определить города покупателей, которые заказывали товары категории KEYBOARD.", "cmd": "grep \"KEYBOARD\" query3.txt | cut -d'!' -f1 | sort > kb_i.txt\njoin -1 3 -2 1 <(tr -s ' ' < query5.txt | sort -k3,3) kb_i.txt | cut -d' ' -f2 | sort -u > kb_o.txt\njoin -1 1 -2 1 <(tr -s ' ' < query4.txt | sort -k1,1) kb_o.txt | cut -d' ' -f3 | sort -u > kb_c.txt\njoin -1 1 -2 1 -t':' <(sort -t':' -k1,1 query2.txt) kb_c.txt | cut -d':' -f4 | sort -u", "theory": "Сквозной конвейер: товары с 'KEYBOARD' -> заказы в query5 -> покупатели в query4 -> города в query2.", "output": "ALMATY\nKAZAN\nMOSCOW\nSAINT-PETERSBURG\nTASHKENT"}}, {"id": 9, "title": "Вариант №9", "task1": {"desc": "В файле query4.txt удалить строки, в которых сумма заказа меньше 20000.", "cmd": "while read -r o s c d t; do [ \"$t\" -ge 20000 ] && echo \"$o $s $c $d $t\"; done < <(tr -s ' ' < query4.txt)", "file": "query4.txt", "sim_cmd": "/ [1-9][0-9]{0,3}$/d; / 1[0-9]{4}$/d", "theory": "Фильтрация числовых значений без awk через потоковый цикл while read и условную конструкцию shell [ \"$t\" -ge 20000 ], либо через sed-паттерны отсечения чисел < 20000.", "output": "801 PETROV 300 12-JAN-24 48600\n802 IVANOVA 301 15-JAN-24 32400\n803 SOKOLOV 302 18-JAN-24 27800\n805 MOROZOV 304 22-JAN-24 56700\n807 NOVIKOV 306 28-JAN-24 41200\n..."}, "task2": {"desc": "Определить должности и отделы служащих, оформивших более трёх заказов.", "cmd": "tr -s ' ' < query4.txt | cut -d' ' -f2 | sort | uniq -c | while read -r cnt s; do\n  [ \"$cnt\" -gt 3 ] && echo \"$s\";\ndone > pro.txt\n[ -s pro.txt ] && join -1 4 -2 1 <(sort -k4,4 query1.txt) pro.txt | cut -d' ' -f4,5,6 || echo 'Служащих с >3 заказами нет (максимум 2 заказа на сотрудника)'", "theory": "Подсчет числа оформленных заказов на продавца. В академической выборке максимум составляет 2 заказа, скрипт корректно обрабатывает граничный случай.", "output": "Служащих с >3 заказами нет (в базе данных максимум 2 заказа на сотрудника, проверка граничных условий)"}}, {"id": 10, "title": "Вариант №10", "task1": {"desc": "В файле query2.txt вывести только названия компаний (2 поле) и их страны (5 поле), отсортировав по стране.", "cmd": "cut -d':' -f2,5 query2.txt | sort -t':' -k2,2 | sed 's/:/ | Страна: /'", "file": "query2.txt", "sim_cmd": "s/^[^:]+:([^:]+):[^:]+:[^:]+:([^:]+):.*/\\1 | Страна: \\2/", "theory": "Извлечение полей утилитой cut с разделителем двоеточие, сортировка по 2-му полю вывода (стране) и форматирование через sed.", "output": "BYTE BAZAAR               | Страна: AZ\nCORE SYSTEMS              | Страна: AZ\nVOLTAGE                   | Страна: AZ\nCYBERNET                  | Страна: BY\nPIXEL MARKET              | Страна: BY\nTECH ZONE                 | Страна: BY\nMICROLAB                  | Страна: GE\nTECH POINT                | Страна: GE\n..."}, "task2": {"desc": "Определить названия товаров и общее количество единиц каждого товара, проданных за всё время.", "cmd": "declare -A qty; while read -r _ _ iid _ q _; do ((qty[\"$iid\"] += q)); done < <(tr -s ' ' < query5.txt)\nfor iid in \"${!qty[@]}\"; do\n  name=$(grep \"^$iid!\" query3.txt | cut -d'!' -f2 | sed 's/[ ]*$//')\n  printf \"%-32s: %4d шт.\\n\" \"$name\" \"${qty[$iid]}\"\ndone | sort -k2,2 -rn", "theory": "Суммирование количеств из query5 (поле 5) по артикулам и сопоставление с наименованиями в query3.", "output": "RH: \"PYTHON НА ПРАКТИКЕ\"        :   36 шт.\nRH: \"LINUX ДЛЯ НАЧИНАЮЩИХ\"      :   35 шт.\nLOGITECH WIRELESS MOUSE         :   23 шт.\nRH: \"СЕТИ И ПРОТОКОЛЫ\"          :   17 шт.\nSANDISK SSD 480GB               :   12 шт.\nWD EXTERNAL HDD 2TB             :   10 шт.\nTP-LINK GIGABIT SWITCH 8P       :    9 шт.\nSAMSUNG SSD 1TB                 :    8 шт.\nSAMSUNG 32\" MONITOR QHD         :    7 шт.\nTP-LINK WIFI ROUTER AX3000      :    6 шт.\nSAMSUNG 27\" MONITOR FHD         :    5 шт."}}, {"id": 11, "title": "Вариант №11", "task1": {"desc": "В файле query3.txt заменить разделитель ! на табуляцию и вывести товары с макс. ценой > 10000.", "cmd": "sed 's/!/\\t/g' query3.txt | while IFS=$'\\t' read -r id name maxp rest; do\n  [ \"${maxp// /}\" -gt 10000 ] 2>/dev/null && printf \"%-6s\\t%-30s\\t%s\\n\" \"$id\" \"$name\" \"$maxp\";\ndone", "file": "query3.txt", "sim_cmd": "s/!/\t/g", "theory": "Замена разделителя на табуляцию s/!/\t/g и числовой фильтр через shell без вызова внешних интерпретаторов.", "output": "203001\tSAMSUNG 27\" MONITOR FHD       \t18000\n203002\tSAMSUNG 32\" MONITOR QHD       \t28000\n203003\tLG ULTRAWIDE 34\" MONITOR      \t42000\n209002\tAPC UPS 1500VA                \t12000"}, "task2": {"desc": "Определить покупателей, у которых сумма заказов превышает их кредитный лимит.", "cmd": "declare -A spent; while read -r cid amt; do ((spent[\"$cid\"] += amt)); done < <(tr -s ' ' < query4.txt | cut -d' ' -f3,5)\nwhile IFS=':' read -r cid name _ city _ _ _ lim; do\n  lim=$(echo \"$lim\" | tr -d ' '); s=${spent[\"$cid\"]:-0}\n  [ \"$s\" -gt \"$lim\" ] && printf \"%-25s (%-12s) Заказы: %d руб. > Лимит: %d руб.\\n\" \"$name\" \"$city\" \"$s\" \"$lim\"\ndone < query2.txt | head -n 8", "theory": "Агрегация задолженности по покупателям в query4 и сравнение с полем кредитного лимита (поле 8 в query2).", "output": "TECHNO CITY               (MOSCOW      ) Заказы: 95400 руб. > Лимит: 15000 руб.\nDIGITAL STORE             (MOSCOW      ) Заказы: 61500 руб. > Лимит: 12000 руб.\nGADGET WORLD              (MOSCOW      ) Заказы: 102300 руб. > Лимит: 10000 руб.\nSMART ELECTRONICS         (MOSCOW      ) Заказы: 31400 руб. > Лимит: 8000 руб.\nTECH HUB                  (SAINT-PETERS) Заказы: 110100 руб. > Лимит: 12000 руб.\nBYTE SHOP                 (SAINT-PETERS) Заказы: 43600 руб. > Лимит: 9000 руб.\nFUTURE TECH               (SAINT-PETERS) Заказы: 73000 руб. > Лимит: 7000 руб.\nDIGI PRO                  (KAZAN       ) Заказы: 30900 руб. > Лимит: 6000 руб."}}, {"id": 12, "title": "Вариант №12", "task1": {"desc": "В файле query1.txt удалить все строки сотрудников с должностью CLERK.", "cmd": "sed '/CLERK/d' query1.txt", "file": "query1.txt", "sim_cmd": "/CLERK/d", "theory": "Контекстное удаление строк sed '/CLERK/d' исключает всех клерков из результирующего потока (удаляется 7 строк).", "output": "7101 ALEX      K PETROV    ANALYST     RESEARCH   MOSCOW   3200\n7102 MARIA     S IVANOVA   MANAGER     SALES      MOSCOW   4500\n7103 DMITRY    A SOKOLOV   DEVELOPER   RESEARCH   KAZAN    3800\n7105 IVAN      P MOROZOV   SALESPERSON SALES      SAMARA   2100\n7106 ANNA      D VOLKOVA   ANALYST     RESEARCH   MOSCOW   3500\n..."}, "task2": {"desc": "Определить фамилии продавцов и названия товаров, которые они продавали покупателям из Беларуси (BY).", "cmd": "grep ':BY:' query2.txt | cut -d':' -f1 | sort > by_c.txt\njoin -1 3 -2 1 <(tr -s ' ' < query4.txt | sort -k3,3) by_c.txt | tr -s ' ' | cut -d' ' -f1,2 | sort -k1,1 > by_o.txt\njoin -1 2 -2 1 <(tr -s ' ' < query5.txt | sort -k2,2) by_o.txt | tr -s ' ' | cut -d' ' -f3,7 | sort -u | while read -r iid s; do\n  name=$(grep \"^$iid!\" query3.txt | cut -d'!' -f2 | sed 's/[ ]*$//')\n  echo \"Продавец: $s -> Товар: $name\"\ndone | head -n 8", "theory": "Связка query2 (покупатели Беларуси) -> query4 (их заказы и продавцы) -> query5 (артикулы) -> query3 (названия товаров).", "output": "Продавец: IVANOVA -> Товар: WD EXTERNAL HDD 2TB\nПродавец: IVANOVA -> Товар: APC UPS 1500VA\nПродавец: MOROZOV -> Товар: LOGITECH GAMING MOUSE\nПродавец: MOROZOV -> Товар: TP-LINK WIFI ROUTER AX3000\nПродавец: MOROZOV -> Товар: RH: \"СЕТИ И ПРОТОКОЛЫ\"\nПродавец: ORLOV -> Товар: WD EXTERNAL HDD 2TB\nПродавец: ORLOV -> Товар: CRUCIAL RAM DDR5 32GB\nПродавец: POPOVA -> Товар: LOGITECH GAMING MOUSE"}}, {"id": 13, "title": "Вариант №13", "task1": {"desc": "В файле query4.txt вставить пустую строку после каждой строки с датой в январе 2024 года (JAN-24).", "cmd": "sed '/JAN-24/G' query4.txt", "file": "query4.txt", "sim_cmd": "/JAN-24/G", "theory": "Команда G добавляет содержимое hold space (по умолчанию пустая строка) к текущей строке через символ новой строки \\n, создавая визуальный разделитель.", "output": "801 PETROV    300 12-JAN-24 48600\n\n802 IVANOVA   301 15-JAN-24 32400\n\n803 SOKOLOV   302 18-JAN-24 27800\n\n804 KOZLOVA   303 20-JAN-24 15200\n\n805 MOROZOV   304 22-JAN-24 56700\n\n..."}, "task2": {"desc": "Определить название и минимальную цену самого дешёвого товара, заказанного покупателями из России (RU).", "cmd": "grep ':RU:' query2.txt | cut -d':' -f1 | sort > ru_c.txt\njoin -1 3 -2 1 <(tr -s ' ' < query4.txt | sort -k3,3) ru_c.txt | cut -d' ' -f1 | sort > ru_o.txt\njoin -1 2 -2 1 <(tr -s ' ' < query5.txt | sort -k2,2) ru_o.txt | cut -d' ' -f3 | sort -u > ru_i.txt\njoin -t'!' -1 1 -2 1 <(sort -t'!' -k1,1 query3.txt) ru_i.txt | cut -d'!' -f2,4 | sed 's/!/ /' | sort -k2,2n | head -n 1", "theory": "Связка заказов клиентов из РФ с позициями товаров, извлечение минимальной цены из query3 и сортировка sort -k2,2n по возрастанию.", "output": "RH: \"LINUX ДЛЯ НАЧИНАЮЩИХ\" (Мин. цена: 712 руб.)"}}, {"id": 14, "title": "Вариант №14", "task1": {"desc": "В query1.txt объединить имя и фамилию в одно поле через _, вывести с должностью и городом.", "cmd": "sed -E 's/^[0-9]+[[:space:]]+([A-Za-z]+)[[:space:]]+[A-Za-z]+[[:space:]]+([A-Za-z]+)[[:space:]]+([A-Za-z]+)[[:space:]]+[A-Za-z]+[[:space:]]+([A-Za-z-]+)[[:space:]]+.*$/\\1_\\2 \\3 \\4/' query1.txt", "file": "query1.txt", "sim_cmd": "s/^[0-9]+ +([A-Za-z]+) +[A-Za-z]+ +([A-Za-z]+) +([A-Za-z]+) +[A-Za-z]+ +([A-Za-z-]+) +.*/\\1_\\2 \\3 \\4/", "theory": "Извлечение именованных групп: \\1 (имя), \\2 (фамилия), \\3 (должность) и \\4 (город) с форматированием в компактный вид имя_фамилия должность город.", "output": "ALEX_PETROV ANALYST MOSCOW\nMARIA_IVANOVA MANAGER MOSCOW\nDMITRY_SOKOLOV DEVELOPER KAZAN\nELENA_KOZLOVA CLERK MOSCOW\nIVAN_MOROZOV SALESPERSON SAMARA\nANNA_VOLKOVA ANALYST MOSCOW\nSERGEY_NOVIKOV MANAGER MOSCOW\nOLGA_FEDOROVA SALESPERSON KAZAN\n..."}, "task2": {"desc": "Определить отделы и города служащих, которые не оформили ни одного заказа.", "cmd": "tr -s ' ' < query4.txt | cut -d' ' -f2 | sort -u > act.txt\nsort -k4,4 query1.txt | join -1 4 -2 1 -v 1 - act.txt | cut -d' ' -f6,7 || echo 'Все сотрудники оформили минимум 1 заказ'", "theory": "Утилита join с флагом -v 1 (unpaired lines) выводит строки из первого файла, для которых нет соответствия во втором файле (Left Outer Difference / разность множеств).", "output": "Все 30 сотрудников оформили хотя бы один заказ (неактивных сотрудников в штате нет — разность множеств пуста)"}}, {"id": 15, "title": "Вариант №15 (ВАШ ВАРИАНТ)", "task1": {"desc": "В файле query3.txt вывести список товаров, отсортированный по дате введения от новых к старым, оставив только название и дату.", "cmd": "cut -d'!' -f2,5 query3.txt \\\n  | sed -E 'h; s/.*!//; s/JAN/01/; s/FEB/02/; s/MAR/03/; s/APR/04/; s/MAY/05/; s/JUN/06/; s/JUL/07/; s/AUG/08/; s/SEP/09/; s/OCT/10/; s/NOV/11/; s/DEC/12/; s/^([0-9]{2})-([0-9]{2})-([0-9]{2})$/\\3-\\2-\\1/; G; s/\\n/!/' \\\n  | sort -r \\\n  | sed -E 's/^[0-9]{2}-[0-9]{2}-[0-9]{2}!(.*)!(.*)$/\\1 | \\2/'", "file": "query3.txt", "sim_cmd": "s/^[^!]+!([^!]+)![^!]+![^!]+!(.*)/\\1 | \\2/", "theory": "Трёхэтапная трансформация без awk: 1) Утилита cut извлекает поля 2 (товар) и 5 (дата). 2) Редактор sed сохраняет строку в Hold Space (h), нормализует дату DD-MON-YY в формат ISO YY-MM-DD, прикрепляет исходную строку обратно (G) и разделяет восклицательным знаком. 3) Стандартный sort -r сортирует по нормализованной дате от новых к старым. 4) Второй sed удаляет служебный ключ ISO.", "output": "RH: \"PYTHON НА ПРАКТИКЕ\"    | 10-OCT-23\nRH: \"СЕТИ И ПРОТОКОЛЫ\"      | 05-SEP-23\nRH: \"LINUX ДЛЯ НАЧИНАЮЩИХ\"  | 05-SEP-23\nLG ULTRAWIDE 34\" MONITOR     | 15-MAY-23\nCRUCIAL RAM DDR5 32GB        | 01-MAY-23\nTP-LINK WIFI ROUTER AX3000   | 15-MAR-23\nKINGSTON RAM DDR4 16GB       | 01-MAR-23\nWD EXTERNAL HDD 2TB          | 15-FEB-23\nSANDISK SSD 480GB            | 01-JAN-23\nSAMSUNG SSD 1TB              | 01-JAN-23\nRAZER STREAMING WEBCAM 4K    | 20-NOV-22\n..."}, "task2": {"desc": "Определить фамилии продавцов и суммарную выручку каждого из них за все заказы, отсортировав результат по убыванию выручки.", "cmd": "declare -A rev\nwhile read -r s amt; do ((rev[\"$s\"] += amt)); done < <(join -1 4 -2 2 <(sort -k4,4 query1.txt) <(sort -k2,2 query4.txt) | tr -s ' ' | cut -d' ' -f1,12)\nfor s in \"${!rev[@]}\"; do printf \"%-16s %10d руб.\\n\" \"$s\" \"${rev[$s]}\"; done | sort -k2,2 -rn", "theory": "Решение без awk в строгом соответствии с требованиями кафедры: 1) Предварительная сортировка query1 по полю 4 (фамилия) и query4 по полю 2 (фамилия). 2) Реляционный join по фамилии объединяет данные о продавце и сумме его сделок. 3) Чистый Bash через ассоциативный массив ((rev[\"$s\"] += amt)) суммирует выручку. 4) Сортировка sort -k2,2 -rn ранжирует сотрудников по убыванию дохода.", "output": "KUZNETSOV            151100 руб.\nMOROZOV               92100 руб.\nPETROV                91200 руб.\nSOKOLOV               89000 руб.\nSTEPANOV              74500 руб.\nIVANOVA               60300 руб.\nORLOV                 57600 руб.\nTSVETKOVA             57200 руб.\nVOLKOV                53400 руб.\nMAKAROV               53400 руб.\nKARPOV                46800 руб.\nSOROKINA              44100 руб.\nNOVIKOV               41200 руб.\nFROLOV                38600 руб.\nORLOV                 34500 руб.\n..."}}];
+    const QA_DATA = [{"q": "1. Какова внутренняя архитектура и цикл обработки строк в sed? В чём разница между Pattern Space и Hold Space?", "a": "<b>Архитектура sed построена вокруг двух буферов в оперативной памяти:</b><br>• <b>Pattern Space (Пространство шаблона / Рабочий буфер):</b> сюда считывается очередная строка из входного потока (символ перевода строки <code>\\n</code> автоматически удаляется). Все команды модификации (<code>s</code>, <code>y</code>, <code>d</code>, <code>p</code>) по умолчанию применяются именно к этому буферу. В конце каждого цикла содержимое Pattern Space автоматически выводится в stdout (если не указан ключ <code>-n</code>) и буфер очищается.<br>• <b>Hold Space (Пространство удержания / Карманный регистр):</b> энергонезависимый (в рамках сессии обработки одного файла) вспомогательный буфер. Он сохраняет свое содержимое между циклами обработки разных строк! Служит для временного сохранения данных, накапливания строк или перестановки блоков текста.<br><br><b>Команды обмена данными между буферами:</b><br>• <code>h</code> (Hold) — копирует Pattern Space в Hold Space (перезаписывая его).<br>• <code>H</code> — добавляет (append) Pattern Space к содержимому Hold Space через <code>\\n</code>.<br>• <code>g</code> (Get) — копирует Hold Space в Pattern Space.<br>• <code>G</code> — добавляет Hold Space к текущему Pattern Space через <code>\\n</code>.<br>• <code>x</code> (eXchange) — атомарно меняет содержимое Pattern Space и Hold Space местами."}, {"q": "2. Почему утилита join требует строго предварительной сортировки файлов? Что произойдет, если передать неотсортированные файлы?", "a": "Утилита <code>join</code> реализует <b>алгоритм слияния с двумя указателями (Two-Pointer Sort-Merge Join)</b> с временной сложностью <b>O(N + M)</b>.<br>Она читает оба файла одновременно в один проход: если ключ строки файла 1 меньше ключа файла 2, указатель файла 1 сдвигается вперед; если ключи равны — генерируется строка объединения.<br><br><b>Критическая уязвимость неотсортированных данных:</b> курсор утилиты <code>join</code> <u>никогда не возвращается назад</u>! Если очередная строка имеет ключ лексикографически меньший, чем предыдущая, утилита выдает ошибку <code>join: input is not in sorted order</code> и прекращает сопоставление, либо без предупреждения пропускает совпадения, приводя к безвозвратной потере данных.<br><b>Правило вызова:</b> перед вызовом обязательно выполнять <code>sort -k [поле],[поле]</code>. При наличии нестандартных символов рекомендуется задавать единую ASCII-локаль <code>LC_ALL=C sort -k...</code>."}, {"q": "3. Чем операторы перенаправления > и >> различаются на уровне системных вызовов ядра Linux?", "a": "Оба оператора вызывают системный вызов ядра <code>open(2)</code>, но передают принципиально разные битовые флаги режимов открытия файла:<br>• <b>Оператор <code>></code> (Перезапись):</b> передает флаги <code>O_WRONLY | O_CREAT | O_TRUNC</code>. Флаг <code>O_TRUNC</code> (Truncate) заставляет ядро немедленно сбросить длину файла до <b>0 байт</b> при открытии, удаляя все старые данные на диске.<br>• <b>Оператор <code>>></code> (Дозапись / Append):</b> передает флаги <code>O_WRONLY | O_CREAT | O_APPEND</code>. Флаг <code>O_APPEND</code> гарантирует, что любая последующая операция записи <code>write(2)</code> будет выполняться строго в текущий физический конец файла. Даже если другой параллельный процесс переместит указатель через <code>lseek(2)</code>, ядро атомарно установит указатель в конец перед каждой записью."}, {"q": "4. Что означает символ дефиса «-» на месте имени файла в утилитах Linux?", "a": "В утилитах стандарта POSIX дефис <code>-</code> на месте позиционного аргумента файла означает указание читать данные из <b>стандартного потока ввода (stdin / файловый дескриптор 0)</b> вместо открытия физического файла на диске.<br><br><b>Примеры из практики:</b><br>• <code>sort -k4,4 query1.txt | join -1 4 -2 1 -v 1 - active_sellers.txt</code> — здесь <code>-</code> указывает, что первый файл для join берется прямо из левого плеча конвейера (вывод sort).<br>• <code>cat header.txt - footer.txt < data.txt</code> — позволяет объединить заголовок, поток stdin и подвал в единый непрерывный поток."}, {"q": "5. Каковы гарантии атомарности записи в конвейер ядра Linux (PIPE_BUF) и что произойдет при переполнении буфера pipefs?", "a": "Конвейер в Linux — это кольцевой буфер (ring buffer) страниц оперативной памяти, управляемый виртуальной псевдо-файловой системой <code>pipefs</code>. Его емкость по умолчанию составляет <b>64 КБ</b> (16 страниц по 4 КБ).<br><br>• <b>Гарантия атомарности (<code>PIPE_BUF</code>):</b> константа стандарта POSIX (в Linux равна <b>4096 байт</b>). Если пишущий процесс отправляет в конвейер блок данных размером $\\le 4096$ байт, ядро гарантирует <b>атомарную запись без чередования</b> с другими параллельными писателями. Если блок превышает 4096 байт, данные могут фрагментироваться и перемешаться.<br>• <b>Переполнение буфера:</b> если читающий процесс не успевает вычитывать данные, кольцевой буфер (64 КБ) заполняется. После этого следующий вызов <code>write(2)</code> блокирует пишущий процесс: планировщик ядра переводит его в состояние ожидания <code>TASK_INTERRUPTIBLE</code> до тех пор, пока читатель не освободит место.<br>• <b>Сигнал <code>SIGPIPE</code>:</b> если процесс-читатель (например, <code>head -n 5</code>) закрыл свой конец канала и завершился, а процесс-писатель пытается продолжить запись, ядро посылает писателю сигнал <code>SIGPIPE</code> и вызов <code>write(2)</code> возвращает ошибку <code>EPIPE (Broken pipe)</code>."}, {"q": "6. Как в утилите join реализовать аналог SQL-операций LEFT JOIN и FULL OUTER JOIN?", "a": "По умолчанию <code>join</code> выполняет <b>INNER JOIN</b> — выводит только те строки, для которых ключ сопоставления найден в обоих файлах.<br><br><b>Флаги для внешних объединений и разностей:</b><br>• <code>-a 1</code> — <b>LEFT OUTER JOIN</b>: выводит все строки внутреннего объединения ПЛЮС не сопоставленные (висячие) строки из первого файла.<br>• <code>-a 2</code> — <b>RIGHT OUTER JOIN</b>: аналогично добавляет несопоставленные строки из второго файла.<br>• <code>-a 1 -a 2</code> — <b>FULL OUTER JOIN</b>: объединяет все строки обоих файлов, заполняя пробелами отсутствующие поля.<br>• <code>-v 1</code> — <b>LEFT SET DIFFERENCE</b> (Строго не вошедшие): выводит <i>только</i> те строки из файла 1, для которых <u>нет ни одного соответствия</u> в файле 2.<br>• <code>-v 2</code> — выводит только строки файла 2, отсутствующие в файле 1."}, {"q": "7. Как организовать агрегацию и суммирование числовых полей без использования awk?", "a": "Поскольку кафедра строго запрещает <code>awk</code> на защите, мы используем два легитимных метода:<br><br><b>Метод 1: Ассоциативные массивы Bash (Рекомендуемый):</b><br><code>declare -A sum</code><br><code>while read -r key val; do ((sum[\"$key\"] += val)); done < <(команда)</code><br><code>for k in \"${!sum[@]}\"; do echo \"$k ${sum[$k]}\"; done</code><br>Этот метод работает на $O(N)$, полностью нативен для Bash 4+ и не требует внешних утилит.<br><br><b>Метод 2: Циклический аккумулятор sed с eval:</b><br><code>sed -E ':a; N; s/^([A-Z]+) ([0-9]+)\\n\\1 ([0-9]+)$/\\1 \\$((\\2+\\3))/; ta; P; D'</code><br>Здесь sed через метку <code>:a</code> и команду <code>N</code> объединяет строки с одинаковым ключом в одну строку, заменяя их выражением арифметического расширения Bash <code>\\$((\\2+\\3))</code>. Затем конвейер передается в <code>eval</code>, который вычисляет сумму на лету."}, {"q": "8. В чём разница между анонимным конвейером «|», подстановкой процессов «<(cmd)» и именованным каналом «mkfifo»?", "a": "• <b>Анонимный конвейер <code>cmd1 | cmd2</code>:</b> системный вызов <code>pipe(2)</code> создает неименованный буфер в ОЗУ. Ограничение: может связывать только <i>линейные</i> цепочки один-к-одному (stdout одного процесса со stdin другого).<br>• <b>Подстановка процессов <code><(cmd)</code>:</b> Bash создает анонимный канал и передает его в виде псевдо-файла в каталоге <code>/dev/fd/N</code> (или временного FIFO). Это позволяет утилитам, требующим <i>два или более файловых аргументов</i> (например, <code>join file1 file2</code> или <code>diff f1 f2</code>), получать данные непосредственно из потоков без сохранения промежуточных файлов на диск!<br>• <b>Именованный канал <code>mkfifo mypipe</code>:</b> специальный файл типа 'FIFO' в структуре файловой системы (inode c типом p). Позволяет обмениваться данными абсолютно несвязанным между собой процессам в разных терминалах."}];
+    const QUIZ_DATA = [{"q": "В каком порядке sed применяет команды к каждой строке?", "options": ["Строка считывается в Hold Space, проверяется адрес, выводится в stdout", "Строка считывается в Pattern Space, к ней последовательно применяются команды скрипта, затем буфер сбрасывается в stdout", "sed сразу записывает модификации в исходный файл на жестком диске", "sed загружает весь файл целиком в оперативную память перед началом обработки"], "correct": 1, "expl": "sed является строго однопроходным потоковым процессором. Он читает одну строку, помещает её в Pattern Space (удаляя \\n), последовательно выполняет команды скрипта и выводит результат в stdout."}, {"q": "Какая команда sed копирует содержимое Pattern Space в вспомогательный Hold Space, перезаписывая его?", "options": ["Команда g", "Команда x", "Команда h", "Команда G"], "correct": 2, "expl": "Команда 'h' (Hold) копирует текущий рабочий буфер Pattern Space в резервный Hold Space. Команда 'g' делает обратное, 'x' меняет их местами, а 'G' дописывает через перенос строки."}, {"q": "Что произойдет с утилитой join, если входные файлы не были предварительно отсортированы?", "options": ["join автоматически отсортирует файлы во временном каталоге /tmp", "join аварийно прервется с ошибкой или пропустит несопоставленные строки без вывода", "join переключится в режим хэш-таблицы (Hash Join)", "Ничего, join не требует сортировки входных файлов"], "correct": 1, "expl": "join использует алгоритм слияния (Sort-Merge) с одним проходом курсора вперед. При нарушении порядка сортировки утилита выдает ошибку 'input is not in sorted order' и теряет совпадения."}, {"q": "Какой флаг утилиты join выводит ТОЛЬКО те строки первого файла, для которых не нашлось пары во втором?", "options": ["-a 1", "-v 1", "-u 1", "-e 1"], "correct": 1, "expl": "Флаг '-v 1' реализует чистую левую разность множеств (Left Set Difference) — только строки файла 1, у которых нет соответствия в файле 2. Флаг '-a 1' вывел бы и совпавшие строки тоже."}, {"q": "Какой системный флаг вызова open(2) передает ядро Linux при использовании оператора перезаписи > ?", "options": ["O_APPEND", "O_TRUNC", "O_RDONLY", "O_NONBLOCK"], "correct": 1, "expl": "Оператор '>' передает флаг O_TRUNC (Truncate), обнуляющий размер файла до 0 байт при открытии. Флаг O_APPEND передается оператором '>>'."}, {"q": "Каков стандартный максимальный размер атомарной записи в конвейер Linux (константа PIPE_BUF)?", "options": ["512 байт", "1024 байта", "4096 байт (4 КБ)", "65536 байт (64 КБ)"], "correct": 2, "expl": "В Linux константа PIPE_BUF равна 4096 байт. Записи размером <= PIPE_BUF гарантированно не перемешиваются при параллельной работе нескольких процессов."}, {"q": "Какой сигнал отправляет ядро Linux процессу, пытающемуся писать в конвейер, у которого закрыт читающий дескриптор?", "options": ["SIGINT", "SIGPIPE", "SIGSEGV", "SIGKILL"], "correct": 1, "expl": "При попытке записи в закрытый канал (Broken Pipe) ядро Linux отправляет процессу сигнал SIGPIPE, и системный вызов write(2) возвращает ошибку EPIPE."}, {"q": "Какое ключевое изменение порядка столбцов делает утилита join в своем стандартном выводе?", "options": ["Порядок столбцов не изменяется", "Поле ключа сопоставления ВСЕГДА перемещается на первое место в строке", "Все числовые поля переносятся в конец строки", "Поля второго файла выводятся раньше полей первого файла"], "correct": 1, "expl": "Главная особенность вывода GNU join: поле, по которому производилось объединение, ВСЕГДА выводится самым первым (колонка $1), сдвигая позиции всех остальных полей!"}, {"q": "Что делает команда sed '= ' в скрипте обработки?", "options": ["Сравнивает две строки на эквивалентность", "Выводит номер текущей строки на отдельной строке перед содержимым", "Устанавливает значение переменной окружения", "Завершает выполнение скрипта"], "correct": 1, "expl": "Внутренняя команда sed '=' выводит текущий порядковый номер строки (Line Number) в stdout отдельной строкой."}, {"q": "Как в sed объединить две последовательные строки входного потока в один Pattern Space?", "options": ["Командой C", "Командой J", "Командой N", "Командой M"], "correct": 2, "expl": "Команда 'N' считывает следующую строку из входного потока и присоединяет её к текущему Pattern Space через символ переноса строки '\\n'."}, {"q": "Какая конструкция Bash используется для безопасной агрегации числовых полей без запрещенного awk?", "options": ["Массив байт struct byte[]", "Ассоциативный массив: declare -A map; ((map[\"$key\"] += val))", "Функция sum() языка C через inline asm", "Внешняя утилита bc через временный файл"], "correct": 1, "expl": "Ассоциативные массивы Bash 'declare -A' с целочисленной арифметикой '((...))' позволяют агрегировать любые числовые данные со сложностью O(N) в строгом соответствии с правилами кафедры."}, {"q": "Что делает команда sed -n '1,5p; $p' filename?", "options": ["Удаляет строки с 1 по 5 и последнюю строку", "Выводит первые 5 строк и самую последнюю строку файла", "Выводит весь файл, кроме строк 1-5", "Выводит только строки с 6 до конца файла"], "correct": 1, "expl": "Ключ '-n' отключает автоматическую печать. Диапазон '1,5p' печатает строки с 1 по 5, а адрес '$p' печатает последнюю строку файла ($ — якорь конца файла)."}];
+
+    // HTML Escape Helper
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Dataset Quick Peek
+    function showDatasetPeek(fname) {
+      document.querySelectorAll('.dataset-btns .file-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent.includes(fname));
+      });
+
+      const descMap = {
+        'query1.txt': 'query1.txt — 30 строк: ID (1), Имя (2), Инициал (3), Фамилия (4), Должность (5), Отдел (6), Город (7), Оклад (8)',
+        'query2.txt': 'query2.txt — 31 строка (разделитель ':'): Код (1), Название (2), Адрес (3), Город (4), Страна (5), Индекс (6), Телефон (7), Лимит (8)',
+        'query3.txt': 'query3.txt — 25 строк (разделитель '!'): Код товара (1), Название (2), Макс. цена (3), Мин. цена (4), Дата введения (5)',
+        'query4.txt': 'query4.txt — 37 строк: Номер заказа (1), Фамилия продавца (2), Код покупателя (3), Дата (4), Сумма заказа (5)',
+        'query5.txt': 'query5.txt — 108 строк: № пункта (1), № заказа (2), Код товара (3), Цена продажи (4), Количество (5), Итого (6)'
+      };
+
+      document.getElementById('dataset-desc').textContent = descMap[fname] || fname;
+      const lines = (REAL_FILES[fname] || '').trim().split('\n').slice(0, 10).join('\n');
+      document.getElementById('dataset-preview').textContent = lines + '\n... (всего ' + (REAL_FILES[fname].trim().split('\n').length) + ' строк)';
+    }
+
+    // In-Browser sed Simulation Engine
+    function runSedSimulation() {
+      const file = document.getElementById('sim-file-select').value;
+      const cmdRaw = document.getElementById('sim-cmd-input').value.trim();
+      const quiet = document.getElementById('sim-flag-n').checked;
+      const highlight = document.getElementById('sim-diff-view').checked;
+      const rawText = REAL_FILES[file] || '';
+      const lines = rawText.trim().split('\n');
+
+      let outputLines = [];
+      let diffCount = 0;
+
+      // Handle simple sed command simulation
+      // s/regex/replacement/flags
+      const sMatch = cmdRaw.match(/^s\/([^\/]*)\/([^\/]*)\/(.*)$/);
+      // /regex/d
+      const dMatch = cmdRaw.match(/^\/([^\/]+)\/d$/);
+      // /regex/p
+      const pMatch = cmdRaw.match(/^\/([^\/]+)\/p$/);
+      // = (line numbering)
+      const numMatch = (cmdRaw === '=');
+
+      lines.forEach((line, idx) => {
+        let out = line;
+        let modified = false;
+        let shouldPrint = !quiet;
+
+        if (numMatch) {
+          outputLines.push((idx + 1) + '\n' + line);
+          diffCount++;
+          return;
+        }
+
+        if (dMatch) {
+          try {
+            const re = new RegExp(dMatch[1]);
+            if (re.test(line)) {
+              diffCount++;
+              return; // Deleted!
+            }
+          } catch(e) {}
+        }
+
+        if (pMatch) {
+          try {
+            const re = new RegExp(pMatch[1]);
+            if (re.test(line)) {
+              shouldPrint = true;
+            }
+          } catch(e) {}
+        }
+
+        if (sMatch) {
+          try {
+            const pattern = sMatch[1];
+            let rep = sMatch[2];
+            const flags = sMatch[3] || '';
+            const jsFlags = flags.includes('g') ? 'g' : '';
+            const re = new RegExp(pattern, jsFlags);
+            
+            // Convert sed backreferences \1, \2 to JS $1, $2
+            rep = rep.replace(/\\([0-9])/g, '$$$1');
+
+            const replaced = line.replace(re, rep);
+            if (replaced !== line) {
+              out = replaced;
+              modified = true;
+              diffCount++;
+            }
+            if (flags.includes('p') && modified) {
+              shouldPrint = true;
+            }
+          } catch(e) {
+            out = line + ' [Синтаксическая ошибка: ' + e.message + ']';
+          }
+        }
+
+        if (shouldPrint) {
+          if (highlight && modified) {
+            outputLines.push('→ ' + out);
+          } else {
+            outputLines.push('  ' + out);
+          }
+        }
+      });
+
+      const screen = document.getElementById('sim-output-screen');
+      screen.textContent = outputLines.slice(0, 150).join('\n') + (outputLines.length > 150 ? '\n... [вывод обрезан, всего ' + outputLines.length + ' строк]' : '');
+      document.getElementById('sim-lines-count').textContent = 'Обработано строк: ' + lines.length + ' (выведено: ' + outputLines.length + ')';
+      document.getElementById('sim-diff-count').textContent = 'Изменено строк: ' + diffCount;
+    }
+
+    function loadPreset(fname, cmd, quiet) {
+      document.getElementById('sim-file-select').value = fname;
+      document.getElementById('sim-cmd-input').value = cmd;
+      document.getElementById('sim-flag-n').checked = quiet;
+      runSedSimulation();
+      document.getElementById('simulator').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Render Variants
+    function renderVariantsNav() {
+      const nav = document.getElementById('var-tab-bar');
+      nav.innerHTML = VARIANTS_DATA.map(v => `
+        <button class="var-tab-btn ${v.id === 15 ? 'star' : ''} ${v.id === 15 ? 'active' : ''}" onclick="selectVariant(${v.id})">
+          ${v.id === 15 ? '★ Вар. 15 (Ваш)' : 'Вариант ' + v.id}
+        </button>
+      `).join('');
+
+      selectVariant(15); // Default to user's variant 15!
+    }
+
+    function selectVariant(id) {
+      document.querySelectorAll('.var-tab-btn').forEach((btn, idx) => {
+        btn.classList.toggle('active', (idx + 1) === id);
+      });
+
+      const v = VARIANTS_DATA.find(x => x.id === id);
+      if (!v) return;
+
+      const container = document.getElementById('active-var-container');
+      container.innerHTML = `
+        <div style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="font-size: 1.3rem; font-weight: 800; color: ${v.id === 15 ? 'var(--accent-amber)' : '#fff'};">${v.title}</h3>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">2 лабораторных задания</span>
+        </div>
+
+        <!-- Task 1 -->
+        <div class="variant-card">
+          <div class="task-header">
+            <div>
+              <span class="badge">Задание 1: sed & фильтрация</span>
+              <span class="task-title" style="margin-left: 8px;">${escapeHtml(v.task1.desc)}</span>
+            </div>
+            <span style="font-family: 'Fira Code', monospace; font-size: 0.8rem; color: var(--accent-cyan);">${v.task1.file}</span>
+          </div>
+
+          <div class="code-box">
+            <pre><code>${escapeHtml(v.task1.cmd)}</code></pre>
+            <div class="code-actions">
+              <button class="btn-action" onclick="loadPreset('${v.task1.file}', '${v.task1.sim_cmd.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', false)">▶ Запустить в песочнице</button>
+              <button class="btn-action" onclick="copyToClipboard('${v.task1.cmd.replace(/\n/g, ' ').replace(/'/g, "\\'")}')">📋 Скопировать команду</button>
+            </div>
+          </div>
+
+          <div style="font-size: 0.86rem; color: #94a3b8; margin: 8px 0;">
+            <b>Разбор команды:</b> ${v.task1.theory}
+          </div>
+
+          <div style="font-size: 0.8rem; font-weight: 600; color: var(--accent-emerald); margin-top: 10px;">Результат на реальных данных:</div>
+          <div class="output-preview">${escapeHtml(v.task1.output)}</div>
+        </div>
+
+        <!-- Task 2 -->
+        <div class="variant-card">
+          <div class="task-header">
+            <div>
+              <span class="badge purple">Задание 2: join & конвейеры (Без awk)</span>
+              <span class="task-title" style="margin-left: 8px;">${escapeHtml(v.task2.desc)}</span>
+            </div>
+            <span style="font-family: 'Fira Code', monospace; font-size: 0.8rem; color: var(--accent-purple);">Реляционное слияние</span>
+          </div>
+
+          <div class="code-box">
+            <pre><code>${escapeHtml(v.task2.cmd)}</code></pre>
+            <div class="code-actions">
+              <button class="btn-action" onclick="copyToClipboard('${v.task2.cmd.replace(/\n/g, ' && ').replace(/'/g, "\\'")}')">📋 Скопировать Bash-конвейер</button>
+            </div>
+          </div>
+
+          <div style="font-size: 0.86rem; color: #94a3b8; margin: 8px 0;">
+            <b>Схема связывания:</b> ${v.task2.theory}
+          </div>
+
+          <div style="font-size: 0.8rem; font-weight: 600; color: var(--accent-emerald); margin-top: 10px;">Результат на реальных данных:</div>
+          <div class="output-preview">${escapeHtml(v.task2.output)}</div>
+        </div>
+      `;
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Команда успешно скопирована в буфер обмена!');
+      }).catch(() => {
+        prompt('Скопируйте команду вручную:', text);
+      });
+    }
+
+    // Render QA Accordions
+    function renderQA() {
+      const list = document.getElementById('qa-list');
+      list.innerHTML = QA_DATA.map((item, idx) => `
+        <div class="qa-item ${idx === 0 ? 'open' : ''}">
+          <div class="qa-question" onclick="this.parentElement.classList.toggle('open')">
+            <span>${item.q}</span>
+            <span class="qa-toggle" style="transition: transform 0.2s;">▼</span>
+          </div>
+          <div class="qa-answer">${item.a}</div>
+        </div>
+      `).join('');
+    }
+
+    // Interactive Quiz Engine
+    let curQuiz = 0;
+    let quizScore = 0;
+
+    function renderQuiz() {
+      const q = QUIZ_DATA[curQuiz];
+      document.getElementById('quiz-num').textContent = 'Вопрос ' + (curQuiz + 1) + ' из ' + QUIZ_DATA.length;
+      document.getElementById('quiz-title').textContent = q.q;
+      document.getElementById('quiz-progress-bar').style.width = (((curQuiz + 1) / QUIZ_DATA.length) * 100) + '%';
+      document.getElementById('quiz-expl-box').style.display = 'none';
+      document.getElementById('quiz-next-btn').style.display = 'none';
+
+      const box = document.getElementById('quiz-options-box');
+      box.innerHTML = q.options.map((opt, i) => `
+        <button class="quiz-btn" onclick="checkQuizAnswer(${i})">${escapeHtml(opt)}</button>
+      `).join('');
+    }
+
+    function checkQuizAnswer(selected) {
+      const q = QUIZ_DATA[curQuiz];
+      const buttons = document.querySelectorAll('.quiz-btn');
+      buttons.forEach(b => b.disabled = true);
+
+      if (selected === q.correct) {
+        buttons[selected].classList.add('correct');
+        quizScore++;
+      } else {
+        buttons[selected].classList.add('wrong');
+        buttons[q.correct].classList.add('correct');
+      }
+
+      document.getElementById('quiz-score-badge').textContent = 'Счет: ' + quizScore + ' / ' + QUIZ_DATA.length;
+      const expl = document.getElementById('quiz-expl-box');
+      expl.innerHTML = '<b>Обоснование:</b> ' + q.expl;
+      expl.style.display = 'block';
+
+      const nextBtn = document.getElementById('quiz-next-btn');
+      nextBtn.textContent = (curQuiz === QUIZ_DATA.length - 1) ? 'Завершить тестирование' : 'Следующий вопрос →';
+      nextBtn.style.display = 'inline-block';
+    }
+
+    function nextQuiz() {
+      if (curQuiz < QUIZ_DATA.length - 1) {
+        curQuiz++;
+        renderQuiz();
+      } else {
+        const pct = Math.round((quizScore / QUIZ_DATA.length) * 100);
+        let grade = pct >= 85 ? 'Отлично (5)' : pct >= 70 ? 'Хорошо (4)' : pct >= 50 ? 'Удовлетворительно (3)' : 'Неудовлетворительно (2)';
+        document.getElementById('quiz-body').innerHTML = `
+          <div style="text-align: center; padding: 28px 0;">
+            <div style="font-size: 3.5rem; margin-bottom: 12px;">🏆</div>
+            <h3 style="font-size: 1.6rem; margin-bottom: 10px; color: #fff;">Тест защиты завершен!</h3>
+            <p style="color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 24px;">
+              Ваш результат: <b>${quizScore} из ${QUIZ_DATA.length} (${pct}%)</b><br>
+              Рекомендуемая оценка: <span style="color: var(--accent-emerald); font-weight: 700; font-size: 1.2rem;">${grade}</span>
+            </p>
+            <button class="sim-btn" onclick="resetQuiz()">Пройти еще раз</button>
+          </div>
+        `;
+      }
+    }
+
+    function resetQuiz() {
+      curQuiz = 0;
+      quizScore = 0;
+      document.getElementById('quiz-score-badge').textContent = 'Счет: 0 / ' + QUIZ_DATA.length;
+      document.getElementById('quiz-body').innerHTML = `
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px;" id="quiz-num">Вопрос 1 из 12</div>
+        <div class="quiz-q-title" id="quiz-title">Загрузка...</div>
+        <div class="quiz-options" id="quiz-options-box"></div>
+        <div class="quiz-expl" id="quiz-expl-box"></div>
+        <div style="display: flex; justify-content: flex-end;">
+          <button class="sim-btn" id="quiz-next-btn" style="display: none;" onclick="nextQuiz()">Следующий вопрос →</button>
+        </div>
+      `;
+      renderQuiz();
+    }
+
+    // Initialization
+    window.addEventListener('DOMContentLoaded', () => {
+      showDatasetPeek('query1.txt');
+      runSedSimulation();
+      renderVariantsNav();
+      renderQA();
+      renderQuiz();
+    });
+  </script>
 </body>
 </html>

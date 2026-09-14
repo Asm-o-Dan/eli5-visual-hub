@@ -1,8 +1,8 @@
 [
   {
     "id": "os_lab4_sed_join",
-    "title": "ОС ЛБ4: Фильтрация данных (sed, join, pipelines)",
-    "description": "Интерактивный разбор конвейеров Linux, pattern vs hold space в sed и связывания join без awk",
+    "title": "ОС ЛБ4: Фильтрация данных (sed, join, конвейеры)",
+    "description": "Полная теория sed (Pattern vs Hold space), join без awk, IPC pipefs ядра Linux, тренажер и 15 вариантов",
     "category": "Операционные системы",
     "tags": [
       "linux",
@@ -10,7 +10,8 @@
       "join",
       "bash",
       "pipelines",
-      "moodle"
+      "moodle",
+      "simulator"
     ],
     "date": "2026-09-14",
     "file": "artifacts/os_lab4_sed_join.html"
