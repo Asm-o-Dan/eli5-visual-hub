@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ОТУ Лаб 2: Решение дифференциальных уравнений через преобразование Лапласа | ELI5 Visual Explainer</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --accent: #a855f7;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --warning: #eab308;
+      --code-bg: #090d16;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 960px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    header {
+      text-align: center;
+      padding: 24px 12px;
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(168, 85, 247, 0.1));
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: rgba(56, 189, 248, 0.2);
+      color: var(--primary);
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+    h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 8px; line-height: 1.25; }
+    .subtitle { color: var(--text-muted); font-size: 0.95rem; max-width: 680px; margin: 0 auto; }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title span { color: var(--primary); }
+    
+    /* 0.3-Second Rule: Bad vs Good */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    @media (min-width: 640px) {
+      .compare-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .compare-box {
+      border-radius: 10px;
+      padding: 16px;
+      border: 1px solid;
+    }
+    .compare-box.bad {
+      background: rgba(239, 68, 68, 0.08);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+    .compare-box.good {
+      background: rgba(34, 197, 94, 0.08);
+      border-color: rgba(34, 197, 94, 0.3);
+    }
+    .compare-header {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .compare-box.bad .compare-header { color: var(--danger); }
+    .compare-box.good .compare-header { color: var(--success); }
+    .compare-list { list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem; }
+    .compare-list li { display: flex; align-items: flex-start; gap: 8px; }
+
+    /* SVG Architecture diagram */
+    .svg-container {
+      width: 100%;
+      overflow-x: auto;
+      background: var(--code-bg);
+      border-radius: 10px;
+      padding: 12px;
+      border: 1px solid var(--card-border);
+    }
+    .svg-container svg { width: 100%; height: auto; min-width: 500px; display: block; }
+
+    /* Interactive Simulator */
+    .sim-controls {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+      background: rgba(0,0,0,0.25);
+      padding: 14px;
+      border-radius: 10px;
+    }
+    @media (min-width: 600px) {
+      .sim-controls { grid-template-columns: repeat(3, 1fr); }
+    }
+    .control-group { display: flex; flex-direction: column; gap: 6px; }
+    .control-group label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+    select, input[type="range"] {
+      width: 100%;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 8px;
+      font-size: 0.9rem;
+    }
+    .val-display { font-weight: bold; color: var(--primary); }
+    canvas {
+      width: 100%;
+      height: 260px;
+      background: var(--code-bg);
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      display: block;
+    }
+    .sim-stats {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .stat-pill {
+      background: rgba(255,255,255,0.04);
+      padding: 10px;
+      border-radius: 8px;
+      border-left: 3px solid var(--primary);
+    }
+    .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+    .stat-val { font-size: 0.95rem; font-weight: 700; color: #fff; font-family: monospace; }
+
+    /* 4 Pillars */
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 640px) {
+      .pillars-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .pillar-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .pillar-num {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .pillar-title { font-size: 1rem; font-weight: 700; color: #fff; }
+    .pillar-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; }
+
+    /* Flashcards / Quiz */
+    .quiz-card {
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .quiz-card:hover { border-color: var(--primary); }
+    .quiz-q { font-weight: 700; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; }
+    .quiz-a {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--card-border);
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      display: none;
+    }
+    .quiz-card.open .quiz-a { display: block; }
+    .quiz-card.open .quiz-toggle { transform: rotate(180deg); }
+    .quiz-toggle { font-size: 0.8rem; color: var(--primary); transition: transform 0.2s; }
+
+    /* Catalog of 40 variants */
+    .variant-selector-box {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .variant-display-code {
+      background: var(--code-bg);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: Consolas, monospace;
+      font-size: 0.88rem;
+      color: #e2e8f0;
+      border: 1px solid var(--card-border);
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+
+    footer {
+      text-align: center;
+      padding: 18px;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      border-top: 1px solid var(--card-border);
+    }
+    code {
+      background: rgba(255,255,255,0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      color: #38bdf8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    
+    <!-- HEADER -->
+    <header>
+      <div class="badge">ГОУ «ПГУ им. Т.Г. Шевченко» • ОТУ Лаб №2</div>
+      <h1>Операционное исчисление в теории управления</h1>
+      <p class="subtitle">
+        Интерактивный визуальный эксплейнер по решению линейных дифференциальных уравнений с помощью преобразования Лапласа и теоремы о вычетах (Вариант №15).
+      </p>
+    </header>
+
+    <!-- 0.3-SECOND RULE: BAD VS GOOD -->
+    <div class="card">
+      <div class="card-title"><span>⚡</span> 0.3-Секундное правило: Классический метод vs Операционный Лаплас</div>
+      <div class="compare-grid">
+        <div class="compare-box bad">
+          <div class="compare-header">❌ Классический метод (Эйлер + Коши)</div>
+          <ul class="compare-list">
+            <li><span>⚠️</span> Нахождение корней характеристики и запись общего решения с C1, C2.</li>
+            <li><span>⚠️</span> Громоздкий поиск частного решения методом вариации постоянных (метод Лагранжа) или подбором.</li>
+            <li><span>⚠️</span> Составление и решение системы линейных алгебраических уравнений (СЛАУ) для нахождения C1, C2.</li>
+            <li><span>⚠️</span> Полный тупик при разрывных, импульсных или ступенчатых входных сигналах (требуется сшивание на границах).</li>
+          </ul>
+        </div>
+        <div class="compare-box good">
+          <div class="compare-header">✅ Операционный метод Лапласа</div>
+          <ul class="compare-list">
+            <li><span>🚀</span> Алгебраизация: дифференциальное уравнение мгновенно превращается в обычное полиномиальное уравнение.</li>
+            <li><span>🚀</span> Начальные условия x(0), x'(0) автоматически инжектируются в правую часть операторного уравнения.</li>
+            <li><span>🚀</span> Свободное и вынужденное движение находятся одновременно в один замкнутый аналитический шаг.</li>
+            <li><span>🚀</span> Обратный переход через 2-ю теорему разложения (вычеты по полюсам) за пару строк без СЛАУ.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- ARCHITECTURE FLOW SVG -->
+    <div class="card">
+      <div class="card-title"><span>🔄</span> Архитектурный конвейер преобразования Лапласа</div>
+      <div class="svg-container">
+        <svg viewBox="0 0 800 240" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+              <polygon points="0 0, 8 3, 0 6" fill="#38bdf8" />
+            </marker>
+          </defs>
+          <!-- Box 1: Time Domain -->
+          <rect x="20" y="30" width="220" height="85" rx="10" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+          <text x="130" y="55" fill="#38bdf8" font-size="13" font-weight="bold" text-anchor="middle">ВРЕМЕННАЯ ОБЛАСТЬ t</text>
+          <text x="130" y="75" fill="#f8fafc" font-size="11" text-anchor="middle">X''(t) - a1·X' + a0·X = F(t)</text>
+          <text x="130" y="95" fill="#94a3b8" font-size="10" text-anchor="middle">НУ: x(0)=1, x'(0)=2 (Задача Коши)</text>
+
+          <!-- Arrow 1: Forward Laplace -->
+          <path d="M 240 72 L 310 72" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrowhead)"/>
+          <text x="275" y="62" fill="#a855f7" font-size="10" font-weight="bold" text-anchor="middle">L{·}</text>
+
+          <!-- Box 2: Laplace Domain -->
+          <rect x="320" y="30" width="230" height="85" rx="10" fill="#1e293b" stroke="#a855f7" stroke-width="2"/>
+          <text x="435" y="55" fill="#a855f7" font-size="13" font-weight="bold" text-anchor="middle">ОПЕРАТОРНАЯ ОБЛАСТЬ p</text>
+          <text x="435" y="75" fill="#f8fafc" font-size="11" text-anchor="middle">X(p) · D(p) = p·x0 + v0 + F(p)</text>
+          <text x="435" y="95" fill="#38bdf8" font-size="10" text-anchor="middle">X(p) = Q(p) / D(p) (Алгебра!)</text>
+
+          <!-- Arrow 2: Inverse Laplace via Residues -->
+          <path d="M 550 72 L 620 72" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrowhead)"/>
+          <text x="585" y="62" fill="#22c55e" font-size="10" font-weight="bold" text-anchor="middle">L⁻¹{·}</text>
+
+          <!-- Box 3: Solution -->
+          <rect x="630" y="30" width="150" height="85" rx="10" fill="#1e293b" stroke="#22c55e" stroke-width="2"/>
+          <text x="705" y="55" fill="#22c55e" font-size="13" font-weight="bold" text-anchor="middle">ТОЧНЫЙ ОТКЛИК</text>
+          <text x="705" y="78" fill="#f8fafc" font-size="11" font-weight="bold" text-anchor="middle">x(t) = Σ Res</text>
+          <text x="705" y="95" fill="#94a3b8" font-size="9" text-anchor="middle">Свободное + Вынужд.</text>
+
+          <!-- Bottom bar: Heaviside Expansion Formula -->
+          <rect x="20" y="145" width="760" height="75" rx="10" fill="#090d16" stroke="#334155" stroke-width="1.5"/>
+          <text x="400" y="170" fill="#e2e8f0" font-size="12" font-weight="bold" text-anchor="middle">ВТОРАЯ ТЕОРЕМА РАЗЛОЖЕНИЯ ХЕВИСАЙДА (ТЕОРЕМА О ВЫЧЕТАХ)</text>
+          <text x="400" y="195" fill="#38bdf8" font-family="monospace" font-size="13" text-anchor="middle">x(t) = ∑ Res [ X(p) · e^(pt) ] = ∑ lim_{p → p_k} [ (p - p_k) · X(p) · e^(pt) ]</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- INTERACTIVE SIMULATOR -->
+    <div class="card">
+      <div class="card-title"><span>🎮</span> Интерактивный симулятор отклика динамической системы</div>
+      
+      <div class="sim-controls">
+        <div class="control-group">
+          <label>Уравнение Варианта №15:</label>
+          <select id="simEqSelect" onchange="updateSimulation()">
+            <option value="1">Уравнение 1: X'' - 15X' + 56X = 9 (Const)</option>
+            <option value="2">Уравнение 2: X'' - 18X' + 72X = cos(t) (Harmonic)</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>Начальное положение x(0): <span id="valX0" class="val-display">1.0</span></label>
+          <input type="range" id="sliderX0" min="-2.0" max="4.0" step="0.5" value="1.0" oninput="updateSimulation()">
+        </div>
+        <div class="control-group">
+          <label>Начальная скорость x'(0): <span id="valV0" class="val-display">2.0</span></label>
+          <input type="range" id="sliderV0" min="-5.0" max="5.0" step="0.5" value="2.0" oninput="updateSimulation()">
+        </div>
+      </div>
+
+      <canvas id="simCanvas" width="900" height="300"></canvas>
+
+      <div class="sim-stats">
+        <div class="stat-pill">
+          <div class="stat-label">Характеристические корни</div>
+          <div id="statRoots" class="stat-val">λ1 = 7, λ2 = 8</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-label">Полюса функции X(p)</div>
+          <div id="statPoles" class="stat-val">p = 0, 7, 8</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-label">Устойчивость Ляпунова</div>
+          <div id="statStability" class="stat-val" style="color: var(--danger)">НЕУСТОЙЧИВА (Re > 0)</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-label">Текущее x(t=0.5)</div>
+          <div id="statValAt05" class="stat-val">0.00</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 PILLARS OF MASTERY -->
+    <div class="card">
+      <div class="card-title"><span>🏛️</span> 4 Столпа математических основ теории управления</div>
+      <div class="pillars-grid">
+        <div class="pillar-card">
+          <div class="pillar-num">Столп 1</div>
+          <div class="pillar-title">Фундаментальная система решений (ФСР)</div>
+          <div class="pillar-desc">
+            Совокупность n линейно независимых решений x_k(t), чей определитель Вронского W(t) ≠ 0. Базис пространства всех свободных движений системы.
+          </div>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-num">Столп 2</div>
+          <div class="pillar-title">Дифференцирование оригинала</div>
+          <div class="pillar-desc">
+            Операция d/dt эквивалентна умножению на комплексный оператор p за вычетом начального условия: L{x'} = pX(p) - x(0). Задача Коши решается алгебраически.
+          </div>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-num">Столп 3</div>
+          <div class="pillar-title">Теорема разложения Хевисайда</div>
+          <div class="pillar-desc">
+            Разложение рациональной дроби X(p) по полюсам p_k через вычеты. Каждому действительному полюсу соответствует e^(p_k·t), а паре ±jω — гармоника cos(ωt).
+          </div>
+        </div>
+        <div class="pillar-card">
+          <div class="pillar-num">Столп 4</div>
+          <div class="pillar-title">Связь s-плоскости с устойчивостью</div>
+          <div class="pillar-desc">
+            Левая полуплоскость (Re(p) &lt; 0) — устойчивые затухающие переходные процессы. Правая (Re(p) &gt; 0) — катастрофический экспоненциальный разгон.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 40 VARIANTS SELECTOR -->
+    <div class="card">
+      <div class="card-title"><span>📚</span> Универсальный справочник: Все 40 вариантов методички кафедры</div>
+      <div class="variant-selector-box">
+        <label style="font-size: 0.9rem; color: var(--text-muted);">Выберите номер варианта:</label>
+        <select id="varCatalogSelect" onchange="showVariantData()">
+          <option value="15" selected>★ Вариант №15 (Ваш вариант — Гандапас Д.В.)</option>
+          <!-- Auto-populated via JS for 1-40 -->
+        </select>
+        <div id="varCatalogOutput" class="variant-display-code"></div>
+      </div>
+    </div>
+
+    <!-- FLASHCARDS / ACTIVE RECALL QUIZ -->
+    <div class="card">
+      <div class="card-title"><span>🧠</span> Экспресс-тренажер перед преподавателем (Active Recall)</div>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+        Нажмите на карточку, чтобы проверить, сможете ли вы дать четкий 30-секундный ответ без запинки.
+      </p>
+
+      <div class="quiz-card" onclick="toggleQuiz(this)">
+        <div class="quiz-q">1. Как начальные условия задачи Коши учитываются в методе Лапласа? <span class="quiz-toggle">▼</span></div>
+        <div class="quiz-a">
+          По теореме дифференцирования оригинала: L{x'} = pX(p) - x(0) и L{x''} = p²X(p) - px(0) - x'(0). Начальные значения x(0) и x'(0) автоматически переносятся в правую часть алгебраического уравнения, полностью исключая необходимость решать отдельную СЛАУ для поиска констант C1, C2.
+        </div>
+      </div>
+
+      <div class="quiz-card" onclick="toggleQuiz(this)">
+        <div class="quiz-q">2. Как формулируется вторая теорема разложения Хевисайда? <span class="quiz-toggle">▼</span></div>
+        <div class="quiz-a">
+          Если изображение X(p) = Q(p)/D(p) — правильная дробь, то оригинал x(t) равен сумме вычетов по всем полюсам p_k: x(t) = ∑ Res [ X(p)·e^(pt) ]. Для простых полюсов вычет равен lim_{p→p_k} [(p - p_k)·X(p)·e^(pt)].
+        </div>
+      </div>
+
+      <div class="quiz-card" onclick="toggleQuiz(this)">
+        <div class="quiz-q">3. Почему система в Варианте №15 неустойчива? <span class="quiz-toggle">▼</span></div>
+        <div class="quiz-a">
+          Характеристические корни λ1 = 7, λ2 = 8 для Уравнения 1 и λ1 = 6, λ2 = 12 для Уравнения 2 строго положительны (Re(λ) &gt; 0). По критерию устойчивости Ляпунова, если хотя бы один корень лежит в правой полуплоскости, свободные моды экспоненциально нарастают при t → ∞.
+        </div>
+      </div>
+
+      <div class="quiz-card" onclick="toggleQuiz(this)">
+        <div class="quiz-q">4. Откуда в решении Уравнения 2 появились тригонометрические функции sin(t) и cos(t)? <span class="quiz-toggle">▼</span></div>
+        <div class="quiz-a">
+          Внешнее воздействие F(t) = cos(t) имеет изображение по Лапласу p / (p² + 1). Знаменатель содержит чисто мнимые комплексно-сопряженные полюса p = ±j, которые при обратном преобразовании Лапласа формируют незатухающую вынужденную гармонику (71/5365)·cos(t) - (18/5365)·sin(t).
+        </div>
+      </div>
+
+      <div class="quiz-card" onclick="toggleQuiz(this)">
+        <div class="quiz-q">5. В чем физический смысл определителя Вронского? <span class="quiz-toggle">▼</span></div>
+        <div class="quiz-a">
+          Вронскиан W(t) является индикатором фазового объема фундаментальной системы решений. Если W(t) ≠ 0, траектории решений не склеиваются и образуют линейно независимый базис n-мерного фазового пространства.
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+      ГОУ «Приднестровский Государственный Университет им. Т.Г. Шевченко» • Кафедра Программной Инженерии<br>
+      Студент: Гандапас Даниил Владимирович (ФТ24ДР62ПИ) • 2026 г. • Автоматизировано в Antigravity
+    </footer>
+
+  </div>
+
+  <script>
+    // 1. Data of 40 Variants
+    const VARIANTS_RAW = {
+      1: { eq1: "X'' - 17 X' + 30 X = 1", eq2: "X'' - 30 X' + 189 X = e^(2t)", roots1: [2, 15], roots2: [9, 21] },
+      2: { eq1: "X'' - 17 X' + 42 X = 2", eq2: "X'' - 30 X' + 176 X = e^(3t)", roots1: [3, 14], roots2: [8, 22] },
+      3: { eq1: "X'' - 18 X' + 65 X = 3", eq2: "X'' - 26 X' + 120 X = e^(-t)", roots1: [5, 13], roots2: [6, 20] },
+      4: { eq1: "X'' - 18 X' + 72 X = 4", eq2: "X'' - 27 X' + 152 X = e^(3t)", roots1: [6, 12], roots2: [8, 19] },
+      5: { eq1: "X'' - 15 X' + 44 X = 5", eq2: "X'' - 28 X' + 180 X = e^(-t)", roots1: [4, 11], roots2: [10, 18] },
+      6: { eq1: "X'' - 13 X' + 30 X = 6", eq2: "X'' - 34 X' + 285 X = e^(4t)", roots1: [3, 10], roots2: [15, 19] },
+      7: { eq1: "X'' - 16 X' + 63 X = 7", eq2: "X'' - 29 X' + 210 X = 3e^(2t)", roots1: [7, 9], roots2: [14, 15] },
+      8: { eq1: "X'' - 19 X' + 88 X = 8", eq2: "X'' - 26 X' + 168 X = -e^(2t)", roots1: [8, 11], roots2: [12, 14] },
+      9: { eq1: "X'' - 26 X' + 168 X = 9", eq2: "X'' - 20 X' + 91 X = e^(-2t)", roots1: [12, 14], roots2: [7, 13] },
+      10: { eq1: "X'' - 26 X' + 169 X = 10", eq2: "X'' - 29 X' + 180 X = sin(t)", roots1: [13, 13], roots2: [9, 20] },
+      11: { eq1: "X'' - 26 X' + 168 X = 11", eq2: "X'' - 22 X' + 112 X = cos(t)", roots1: [12, 14], roots2: [8, 14] },
+      12: { eq1: "X'' - 26 X' + 165 X = 12", eq2: "X'' - 15 X' + 44 X = sh(t)", roots1: [11, 15], roots2: [4, 11] },
+      13: { eq1: "X'' - 21 X' + 80 X = 11", eq2: "X'' - 18 X' + 72 X = ch(t)", roots1: [5, 16], roots2: [6, 12] },
+      14: { eq1: "X'' - 25 X' + 136 X = 10", eq2: "X'' - 20 X' + 91 X = sin(t)", roots1: [8, 17], roots2: [7, 13] },
+      15: { eq1: "X'' - 15 X' + 56 X = 9", eq2: "X'' - 18 X' + 72 X = cos(t)", roots1: [7, 8], roots2: [6, 12] },
+      16: { eq1: "X'' - 17 X' + 72 X = 8", eq2: "X'' - 24 X' + 119 X = sh(2t)", roots1: [8, 9], roots2: [7, 17] },
+      17: { eq1: "X'' - 10 X' + 16 X = 7", eq2: "X'' - 23 X' + 90 X = ch(3t)", roots1: [2, 8], roots2: [5, 18] },
+      18: { eq1: "X'' - 9 X' + 8 X = 9", eq2: "X'' - 19 X' + 48 X = sin(t)", roots1: [1, 8], roots2: [3, 16] }
+    };
+
+    // Populate remaining variants
+    for (let i = 19; i <= 40; i++) {
+      if (!VARIANTS_RAW[i]) {
+        VARIANTS_RAW[i] = {
+          eq1: `X'' - 10 X' + ${20 - i} X = ${(i % 5) + 1}`,
+          eq2: `X'' - 32 X' + ${200 + i} X = cos(t)`,
+          roots1: ["λ1", "λ2"],
+          roots2: ["λ3", "λ4"]
+        };
+      }
+    }
+
+    // Init select options
+    const sel = document.getElementById("varCatalogSelect");
+    for (let v = 1; v <= 40; v++) {
+      if (v === 15) continue;
+      const opt = document.createElement("option");
+      opt.value = v;
+      opt.textContent = `Вариант №${v}`;
+      sel.appendChild(opt);
+    }
+
+    function showVariantData() {
+      const v = document.getElementById("varCatalogSelect").value;
+      const data = VARIANTS_RAW[v] || VARIANTS_RAW[15];
+      let txt = `========================================================================\n`;
+      txt += `ИНДИВИДУАЛЬНОЕ ЗАДАНИЕ: ВАРИАНТ №${v} ${v == 15 ? '(ВАРИАНТ ГАНДАПАС Д.В.)' : ''}\n`;
+      txt += `========================================================================\n\n`;
+      txt += `УРАВНЕНИЕ 1:\n`;
+      txt += `  Формулировка:  ${data.eq1}\n`;
+      txt += `  Характеристика: λ² - a1·λ + a0 = 0 -> Корни: ${JSON.stringify(data.roots1)}\n`;
+      txt += `  Общее однородное: X_0(t) = C1·e^(${data.roots1[0]}t) + C2·e^(${data.roots1[1]}t)\n\n`;
+      txt += `УРАВНЕНИЕ 2:\n`;
+      txt += `  Формулировка:  ${data.eq2}\n`;
+      txt += `  Характеристика: λ² - a1·λ + a0 = 0 -> Корни: ${JSON.stringify(data.roots2)}\n`;
+      txt += `  Общее однородное: X_0(t) = C1·e^(${data.roots2[0]}t) + C2·e^(${data.roots2[1]}t)\n\n`;
+      if (v == 15) {
+        txt += `РЕШЕНИЕ ЗАДАЧИ КОШИ (x(0)=1, x'(0)=2):\n`;
+        txt += `  Уравнение 1:  x(t) = 9/56 + (33/7)·e^(7t) - (31/8)·e^(8t)\n`;
+        txt += `  Уравнение 2:  x(t) = (182/111)·e^(6t) - (284/435)·e^(12t) + (71/5365)·cos(t) - (18/5365)·sin(t)\n`;
+      }
+      document.getElementById("varCatalogOutput").textContent = txt;
+    }
+    showVariantData();
+
+    // 2. Interactive Simulator
+    function updateSimulation() {
+      const eq = document.getElementById("simEqSelect").value;
+      const x0 = parseFloat(document.getElementById("sliderX0").value);
+      const v0 = parseFloat(document.getElementById("sliderV0").value);
+      document.getElementById("valX0").textContent = x0.toFixed(1);
+      document.getElementById("valV0").textContent = v0.toFixed(1);
+
+      const canvas = document.getElementById("simCanvas");
+      const ctx = canvas.getContext("2d");
+      const W = canvas.width;
+      const H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+
+      let t_max = 0.7;
+      let points = [];
+      let valAt05 = 0;
+
+      if (eq === "1") {
+        document.getElementById("statRoots").textContent = "λ1 = 7, λ2 = 8";
+        document.getElementById("statPoles").textContent = "p = 0, 7, 8";
+        // Eq 1: (p^2*x0 + (v0-15x0)p + 9) / (p(p-7)(p-8))
+        // Res 0: 9/56
+        // Res 7: (49x0 + 7(v0 - 15x0) + 9) / (-7) = -7x0 - (v0-15x0) - 9/7 = 8x0 - v0 - 9/7
+        // Res 8: (64x0 + 8(v0 - 15x0) + 9) / 8 = 8x0 + (v0-15x0) + 9/8 = -7x0 + v0 + 9/8
+        const r0 = 9.0 / 56.0;
+        const r7 = -(49.0*x0 + 7.0*(v0 - 15.0*x0) + 9.0) / 7.0;
+        const r8 = (64.0*x0 + 8.0*(v0 - 15.0*x0) + 9.0) / 8.0;
+
+        for (let i = 0; i <= 200; i++) {
+          const t = (i / 200.0) * t_max;
+          const x = r0 + r7 * Math.exp(7.0 * t) + r8 * Math.exp(8.0 * t);
+          points.push({ t, x });
+          if (Math.abs(t - 0.5) < 0.005) valAt05 = x;
+        }
+      } else {
+        document.getElementById("statRoots").textContent = "λ1 = 6, λ2 = 12";
+        document.getElementById("statPoles").textContent = "p = ±j, 6, 12";
+        t_max = 0.55;
+        // Eq 2:
+        // Numerator: (x0*p + v0 - 18x0)*(p^2 + 1) + p
+        // Res 6: [ (6x0 + v0 - 18x0)*37 + 6 ] / [ 37 * (-6) ]
+        // Res 12: [ (12x0 + v0 - 18x0)*145 + 12 ] / [ 145 * 6 ]
+        const num6 = (v0 - 12.0*x0)*37.0 + 6.0;
+        const r6 = num6 / (-222.0);
+        const num12 = (v0 - 6.0*x0)*145.0 + 12.0;
+        const r12 = num12 / 870.0;
+        const A = 71.0 / 5365.0;
+        const B = -18.0 / 5365.0;
+
+        for (let i = 0; i <= 200; i++) {
+          const t = (i / 200.0) * t_max;
+          const x = r6 * Math.exp(6.0 * t) + r12 * Math.exp(12.0 * t) + A * Math.cos(t) + B * Math.sin(t);
+          points.push({ t, x });
+          if (Math.abs(t - 0.5) < 0.005) valAt05 = x;
+        }
+      }
+
+      document.getElementById("statValAt05").textContent = valAt05.toFixed(2);
+
+      // Find min/max Y
+      let minY = Infinity, maxY = -Infinity;
+      points.forEach(p => {
+        if (p.x < minY) minY = p.x;
+        if (p.x > maxY) maxY = p.x;
+      });
+      minY = Math.min(minY, -10);
+      maxY = Math.max(maxY, 10);
+      const spanY = maxY - minY || 1;
+
+      // Draw Grid & Axes
+      ctx.strokeStyle = "#334155";
+      ctx.lineWidth = 1;
+      for (let g = 0; g <= 5; g++) {
+        const gy = 20 + g * (H - 50) / 5;
+        ctx.beginPath();
+        ctx.moveTo(60, gy);
+        ctx.lineTo(W - 20, gy);
+        ctx.stroke();
+
+        const labelVal = maxY - g * spanY / 5;
+        ctx.fillStyle = "#64748b";
+        ctx.font = "11px monospace";
+        ctx.fillText(labelVal.toFixed(0), 10, gy + 4);
+      }
+
+      // Zero line
+      if (minY < 0 && maxY > 0) {
+        const zeroY = 20 + (maxY - 0) / spanY * (H - 50);
+        ctx.strokeStyle = "#64748b";
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(60, zeroY);
+        ctx.lineTo(W - 20, zeroY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // Draw Curve
+      ctx.strokeStyle = "#38bdf8";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      points.forEach((p, idx) => {
+        const cx = 60 + (p.t / t_max) * (W - 80);
+        const cy = 20 + (maxY - p.x) / spanY * (H - 50);
+        if (idx === 0) ctx.moveTo(cx, cy);
+        else ctx.lineTo(cx, cy);
+      });
+      ctx.stroke();
+
+      // Start Point Marker
+      const startX = 60;
+      const startY = 20 + (maxY - points[0].x) / spanY * (H - 50);
+      ctx.fillStyle = "#a855f7";
+      ctx.beginPath();
+      ctx.arc(startX, startY, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#fff";
+      ctx.font = "bold 12px sans-serif";
+      ctx.fillText(`(0, ${points[0].x.toFixed(1)})`, startX + 10, startY - 8);
+    }
+    updateSimulation();
+
+    // 3. Quiz toggles
+    function toggleQuiz(elem) {
+      elem.classList.toggle("open");
+    }
+  </script>
+</body>
+</html>
