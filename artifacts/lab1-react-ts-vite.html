@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ЛР 1: Старт React + TypeScript + Vite | ELI5 Visual Hub</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --surface: #131b2e;
+      --surface-border: #1e293b;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.15);
+      --success: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.1);
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.1);
+      --warning: #f59e0b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.5;
+      padding: 16px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--surface-border);
+    }
+    .nav-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge-tag {
+      background: var(--accent-glow);
+      color: var(--accent);
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    h1 {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+    .subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+    
+    /* 0.3s Rule Conflict Box */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    @media (min-width: 640px) {
+      .compare-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .box {
+      background: var(--surface);
+      border-radius: 10px;
+      padding: 16px;
+      border: 1px solid var(--surface-border);
+    }
+    .box.bad {
+      border-color: rgba(239, 68, 68, 0.4);
+      background: linear-gradient(180deg, var(--danger-bg) 0%, var(--surface) 100%);
+    }
+    .box.good {
+      border-color: rgba(16, 185, 129, 0.4);
+      background: linear-gradient(180deg, var(--success-bg) 0%, var(--surface) 100%);
+    }
+    .box-title {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .box.bad .box-title { color: var(--danger); }
+    .box.good .box-title { color: var(--success); }
+    .box ul { list-style: none; }
+    .box li {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      padding-left: 18px;
+      position: relative;
+    }
+    .box.bad li::before {
+      content: "✕";
+      position: absolute;
+      left: 0;
+      color: var(--danger);
+      font-weight: bold;
+    }
+    .box.good li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--success);
+      font-weight: bold;
+    }
+
+    /* SVG Diagram Card */
+    .diagram-card {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .card-heading {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .svg-wrapper {
+      width: 100%;
+      overflow-x: auto;
+    }
+    svg {
+      display: block;
+      margin: 0 auto;
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* 3 Pillars */
+    .pillars {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    @media (min-width: 640px) {
+      .pillars { grid-template-columns: repeat(3, 1fr); }
+    }
+    .pillar-card {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .pillar-num {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .pillar-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+    .pillar-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Accordion Defense Q&A */
+    .qa-section {
+      margin-bottom: 28px;
+    }
+    .qa-item {
+      background: var(--surface);
+      border: 1px solid var(--surface-border);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    .qa-q {
+      padding: 14px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+    .qa-q:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .qa-a {
+      display: none;
+      padding: 0 16px 14px 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 10px;
+    }
+    .qa-a.open { display: block; }
+
+    /* Interactive Quiz */
+    .quiz-card {
+      background: linear-gradient(180deg, #18223d 0%, var(--surface) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .quiz-opt {
+      background: var(--bg);
+      border: 1px solid var(--surface-border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 6px;
+      margin-top: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      transition: all 0.2s;
+    }
+    .quiz-opt:hover {
+      border-color: var(--accent);
+      background: #151d30;
+    }
+    .feedback-box {
+      display: none;
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="nav-bar">
+      <a href="../index.html" class="nav-link">&larr; В каталог ELI5</a>
+      <span class="badge-tag">ПГУ им. Т.Г. Шевченко • ЛР 1</span>
+    </div>
+
+    <h1>Лабораторная 1: React + TypeScript + Vite</h1>
+    <p class="subtitle">Как устроен проект StudyFlow, почему TypeScript важен на этапе сборки и как ответить на защите на 10/10.</p>
+
+    <!-- 0.3s Rule Grid -->
+    <div class="compare-grid">
+      <div class="box bad">
+        <div class="box-title">Ошибки новичка</div>
+        <ul>
+          <li>Коммитить <code>node_modules/</code> или <code>dist/</code> в репозиторий Git</li>
+          <li>Думать, что TypeScript работает внутри рантайма браузера</li>
+          <li>Запускать сборку без проверки типов <code>tsc -b</code></li>
+          <li>Оставлять дефолтный счетчик и SVG-иконки Vite</li>
+        </ul>
+      </div>
+      <div class="box good">
+        <div class="box-title">Стандарт курса</div>
+        <ul>
+          <li>Строгий <code>.gitignore</code> и чистый запуск через <code>npm ci</code></li>
+          <li>TS проверяет типы на этапе сборки, защищая от runtime ошибок</li>
+          <li>Скрипт <code>"build": "tsc -b &amp;&amp; vite build"</code> гарантирует надежность</li>
+          <li>Семантический экран с адаптивной CSS-разметкой</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SVG Architecture Diagram -->
+    <div class="diagram-card">
+      <div class="card-heading">Архитектурная цепочка монтирования и сборки</div>
+      <div class="svg-wrapper">
+        <svg viewBox="0 0 720 220" width="720" height="220" xmlns="http://www.w3.org/2000/svg">
+          <!-- Background grids / paths -->
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8" />
+            </marker>
+          </defs>
+
+          <!-- Node 1: index.html -->
+          <rect x="20" y="30" width="130" height="70" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+          <text x="85" y="60" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">index.html</text>
+          <text x="85" y="80" text-anchor="middle" fill="#94a3b8" font-size="11">&lt;div id="root"&gt;</text>
+
+          <!-- Arrow 1 -->
+          <line x1="150" y1="65" x2="190" y2="65" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+
+          <!-- Node 2: main.tsx -->
+          <rect x="195" y="30" width="140" height="70" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+          <text x="265" y="60" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">main.tsx</text>
+          <text x="265" y="80" text-anchor="middle" fill="#94a3b8" font-size="11">createRoot().render</text>
+
+          <!-- Arrow 2 -->
+          <line x1="335" y1="65" x2="375" y2="65" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+
+          <!-- Node 3: App.tsx -->
+          <rect x="380" y="30" width="130" height="70" rx="8" fill="#1e293b" stroke="#10b981" stroke-width="2"/>
+          <text x="445" y="60" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">App.tsx</text>
+          <text x="445" y="80" text-anchor="middle" fill="#10b981" font-size="11">UI &amp; Разметка</text>
+
+          <!-- Arrow 3 -->
+          <line x1="510" y1="65" x2="550" y2="65" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+
+          <!-- Node 4: DOM Browser -->
+          <rect x="555" y="30" width="145" height="70" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="2"/>
+          <text x="627" y="60" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="700">DOM в браузере</text>
+          <text x="627" y="80" text-anchor="middle" fill="#f59e0b" font-size="11">Интерактивный UI</text>
+
+          <!-- Bottom: Build gate -->
+          <rect x="195" y="140" width="315" height="60" rx="8" fill="#0f172a" stroke="#818cf8" stroke-dasharray="4"/>
+          <text x="352" y="165" text-anchor="middle" fill="#c7d2fe" font-size="12" font-weight="600">Команда сборки: "tsc -b &amp;&amp; vite build"</text>
+          <text x="352" y="183" text-anchor="middle" fill="#94a3b8" font-size="11">1. Проверка типов &rarr; 2. Баблообразование в frontend/dist</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 3 Pillars -->
+    <div class="pillars">
+      <div class="pillar-card">
+        <div class="pillar-num">Столп 01</div>
+        <div class="pillar-title">Изолированный Frontend</div>
+        <div class="pillar-desc">Код клиентской части находится в подпапке <code>frontend/</code>. Корневой репозиторий готов к добавлению <code>backend/</code> в ЛР 8.</div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-num">Столп 02</div>
+        <div class="pillar-title">Строгий TypeScript</div>
+        <div class="pillar-desc">Флаг <code>strict: true</code> защищает от неявных типов и ошибок присваивания еще до попадания кода в продакшн.</div>
+      </div>
+      <div class="pillar-card">
+        <div class="pillar-num">Столп 03</div>
+        <div class="pillar-title">Детерминизм сборки</div>
+        <div class="pillar-desc">Файл <code>package-lock.json</code> и команда <code>npm ci</code> гарантируют 100% идентичные зависимости на любом компьютере.</div>
+      </div>
+    </div>
+
+    <!-- Questions for Defense -->
+    <div class="qa-section">
+      <h2 style="font-size: 18px; margin-bottom: 12px; color: #ffffff;">Вопросы для защиты перед Бричагом Д.В.</h2>
+
+      <div class="qa-item">
+        <div class="qa-q" onclick="toggleQA(this)">1. Как связаны index.html, main.tsx и App.tsx? <span>+</span></div>
+        <div class="qa-a">
+          <code>index.html</code> — точка входа браузера с контейнером <code>&lt;div id="root"&gt;</code>. Скрипт <code>main.tsx</code> находит этот элемент и вызывает <code>createRoot(...).render(&lt;App /&gt;)</code>, монтируя компонент <code>App.tsx</code> в реальное дерево DOM.
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q" onclick="toggleQA(this)">2. Чем JSX отличается от обычной HTML-разметки? <span>+</span></div>
+        <div class="qa-a">
+          JSX — синтаксический сахар над вызовами JavaScript-функций (React createElement). В отличие от HTML, в JSX классы именуются <code>className</code>, события — в camelCase (<code>onClick</code>), переменные вставляются в фигурных скобках <code>{}</code>, а все теги обязаны явно закрываться.
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q" onclick="toggleQA(this)">3. Какую ошибку в вашем проекте обнаруживает TypeScript? <span>+</span></div>
+        <div class="qa-a">
+          Компилятор <code>tsc</code> проводит статический анализ типов. Если переменной <code>appTitle: string</code> присвоить число, <code>tsc -b</code> выбросит ошибку <code>TS2322</code> и заблокирует создание production-сборки в папке <code>dist/</code>.
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q" onclick="toggleQA(this)">4. Чем отличаются dev, build и preview? <span>+</span></div>
+        <div class="qa-a">
+          <code>dev</code> отдает нативные ES-модули и выполняет Fast Refresh (HMR) на лету без сборки файлов на диск. <code>build</code> запускает строгий анализ типов и собирает минифицированные файлы в <code>dist/</code>. <code>preview</code> запускает локальный HTTP-сервер для проверки собранного <code>dist/</code>.
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q" onclick="toggleQA(this)">5. Зачем нужен package-lock.json и почему node_modules не хранится в Git? <span>+</span></div>
+        <div class="qa-a">
+          <code>node_modules</code> содержит тысячи тяжелых платформозависимых файлов, которые легко восстановить командой <code>npm ci</code>. <code>package-lock.json</code> фиксирует точные версии и контрольные суммы дерева пакетов, гарантируя воспроизводимость.
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q" onclick="toggleQA(this)">6. Чем отличаются commit и push? <span>+</span></div>
+        <div class="qa-a">
+          <code>git commit</code> фиксирует снимок изменений в локальной базе данных репозитория на компьютере разработчика. <code>git push</code> передает накопленные коммиты на удаленный сервер (GitHub).
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-q" onclick="toggleQA(this)">7. Что уже работает в приложении и что добавит ЛР 2? <span>+</span></div>
+        <div class="qa-a">
+          Сейчас работает каркас приложения с типизированным заголовком, семантической версткой и заглушкой списка заданий. ЛР 2 добавит разделение на независимые компоненты, клиентскую маршрутизацию страниц и динамические свойства (props).
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Quiz -->
+    <div class="quiz-card">
+      <h3 style="font-size: 16px; color: #ffffff; margin-bottom: 8px;">Экспресс-тест к защите</h3>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Почему нельзя просто открыть <code>index.html</code> двойным щелчком мыши в проводнике вместо запуска dev/preview?</p>
+
+      <button class="quiz-opt" onclick="evalQuiz(1)">А) Браузер заблокирует файл, так как модульный синтаксис (ES Modules) и пути требуют HTTP-сервера из-за политики CORS</button>
+      <button class="quiz-opt" onclick="evalQuiz(2)">Б) Файл index.html является бинарным и не открывается обычным браузером</button>
+      <button class="quiz-opt" onclick="evalQuiz(3)">В) React работает только при наличии запущенного бэкенда на Node.js</button>
+
+      <div id="quiz-result" class="feedback-box"></div>
+    </div>
+  </div>
+
+  <script>
+    function toggleQA(el) {
+      const ans = el.nextElementSibling;
+      const span = el.querySelector('span');
+      if (ans.classList.contains('open')) {
+        ans.classList.remove('open');
+        span.textContent = '+';
+      } else {
+        ans.classList.add('open');
+        span.textContent = '−';
+      }
+    }
+
+    function evalQuiz(choice) {
+      const box = document.getElementById('quiz-result');
+      box.style.display = 'block';
+      if (choice === 1) {
+        box.style.background = 'rgba(16, 185, 129, 0.15)';
+        box.style.color = '#10b981';
+        box.style.border = '1px solid #10b981';
+        box.innerHTML = '🎯 <strong>Абсолютно верно!</strong> Браузер загружает скрипты как ES-модули (<code>type="module"</code>). При открытии через <code>file:///</code> срабатывают ограничения безопасности CORS. Сервер Vite предоставляет необходимый протокол HTTP/HTTPS.';
+      } else {
+        box.style.background = 'rgba(239, 68, 68, 0.15)';
+        box.style.color = '#ef4444';
+        box.style.border = '1px solid #ef4444';
+        box.innerHTML = '❌ <strong>Неверно.</strong> index.html — обычный текстовый HTML, а React — чисто клиентская библиотека. Проблема именно в протоколе <code>file://</code> и политиках CORS для ES-модулей.';
+      }
+    }
+  </script>
+</body>
+</html>

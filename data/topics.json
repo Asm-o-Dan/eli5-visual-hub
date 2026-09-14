@@ -1,5 +1,20 @@
 [
   {
+    "id": "lab1-react-ts-vite",
+    "title": "ЛР 1: Старт React + TypeScript + Vite",
+    "description": "Пошаговый визуальный разбор архитектуры React-приложения, Vite, TypeScript и подготовки репозитория к защите",
+    "category": "Учеба ПГУ",
+    "tags": [
+      "react",
+      "typescript",
+      "vite",
+      "git",
+      "lab1"
+    ],
+    "date": "2026-09-14",
+    "file": "artifacts/lab1-react-ts-vite.html"
+  },
+  {
     "id": "otu_lab2_laplace_ode",
     "title": "ОТУ ЛБ2: Дифференциальные уравнения и метод Лапласа",
     "description": "Интерактивный разбор решения линейных дифференциальных уравнений через преобразование Лапласа, полюса и вычеты Хевисайда (Вариант 15).",

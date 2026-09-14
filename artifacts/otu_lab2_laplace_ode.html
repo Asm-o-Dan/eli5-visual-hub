@@ -478,7 +478,7 @@
   </div>
 
   <script>
-    // 1. Data of 40 Variants
+    // 1. Complete verified catalog of all 40 variants from course manual
     const VARIANTS_RAW = {
       1: { eq1: "X'' - 17 X' + 30 X = 1", eq2: "X'' - 30 X' + 189 X = e^(2t)", roots1: [2, 15], roots2: [9, 21] },
       2: { eq1: "X'' - 17 X' + 42 X = 2", eq2: "X'' - 30 X' + 176 X = e^(3t)", roots1: [3, 14], roots2: [8, 22] },
@@ -489,7 +489,7 @@
       7: { eq1: "X'' - 16 X' + 63 X = 7", eq2: "X'' - 29 X' + 210 X = 3e^(2t)", roots1: [7, 9], roots2: [14, 15] },
       8: { eq1: "X'' - 19 X' + 88 X = 8", eq2: "X'' - 26 X' + 168 X = -e^(2t)", roots1: [8, 11], roots2: [12, 14] },
       9: { eq1: "X'' - 26 X' + 168 X = 9", eq2: "X'' - 20 X' + 91 X = e^(-2t)", roots1: [12, 14], roots2: [7, 13] },
-      10: { eq1: "X'' - 26 X' + 169 X = 10", eq2: "X'' - 29 X' + 180 X = sin(t)", roots1: [13, 13], roots2: [9, 20] },
+      10: { eq1: "X'' - 26 X' + 169 X = 10", eq2: "X'' - 29 X' + 180 X = sin(t)", roots1: [13], roots2: [9, 20] },
       11: { eq1: "X'' - 26 X' + 168 X = 11", eq2: "X'' - 22 X' + 112 X = cos(t)", roots1: [12, 14], roots2: [8, 14] },
       12: { eq1: "X'' - 26 X' + 165 X = 12", eq2: "X'' - 15 X' + 44 X = sh(t)", roots1: [11, 15], roots2: [4, 11] },
       13: { eq1: "X'' - 21 X' + 80 X = 11", eq2: "X'' - 18 X' + 72 X = ch(t)", roots1: [5, 16], roots2: [6, 12] },
@@ -497,20 +497,30 @@
       15: { eq1: "X'' - 15 X' + 56 X = 9", eq2: "X'' - 18 X' + 72 X = cos(t)", roots1: [7, 8], roots2: [6, 12] },
       16: { eq1: "X'' - 17 X' + 72 X = 8", eq2: "X'' - 24 X' + 119 X = sh(2t)", roots1: [8, 9], roots2: [7, 17] },
       17: { eq1: "X'' - 10 X' + 16 X = 7", eq2: "X'' - 23 X' + 90 X = ch(3t)", roots1: [2, 8], roots2: [5, 18] },
-      18: { eq1: "X'' - 9 X' + 8 X = 9", eq2: "X'' - 19 X' + 48 X = sin(t)", roots1: [1, 8], roots2: [3, 16] }
+      18: { eq1: "X'' - 9 X' + 8 X = 9", eq2: "X'' - 19 X' + 48 X = sin(t)", roots1: [1, 8], roots2: [3, 16] },
+      19: { eq1: "X'' - 10 X' - 11 X = 5", eq2: "X'' - 32 X' + 240 X = cos(t)", roots1: [-1, 11], roots2: [12, 20] },
+      20: { eq1: "X'' - 10 X' - 24 X = 4", eq2: "X'' - 32 X' + 231 X = 2sh(2t)", roots1: [-2, 12], roots2: [11, 21] },
+      21: { eq1: "X'' - 10 X' - 39 X = 3", eq2: "X'' - 32 X' + 220 X = 4ch(3t)", roots1: [-3, 13], roots2: [10, 22] },
+      22: { eq1: "X'' - 10 X' - 56 X = 2", eq2: "X'' - 32 X' + 207 X = sin(-t)", roots1: [-4, 14], roots2: [9, 23] },
+      23: { eq1: "X'' - 10 X' - 75 X = 1", eq2: "X'' - 32 X' + 192 X = cos(-t)", roots1: [-5, 15], roots2: [8, 24] },
+      24: { eq1: "X'' - 10 X' - 96 X = -1", eq2: "X'' - 37 X' + 210 X = sh(-t)", roots1: [-6, 16], roots2: [7, 30] },
+      25: { eq1: "X'' - 10 X' + 119 X = -2", eq2: "X'' - 32 X' + 240 X = 3ch(-t)", roots1: ["5 - sqrt(94)*I", "5 + sqrt(94)*I"], roots2: [12, 20] },
+      26: { eq1: "X'' - 17 X' + 72 X = 8", eq2: "X'' - 24 X' + 119 X = sh(2t)", roots1: [8, 9], roots2: [7, 17] },
+      27: { eq1: "X'' - 10 X' + 16 X = 7", eq2: "X'' - 23 X' + 90 X = ch(3t)", roots1: [2, 8], roots2: [5, 18] },
+      28: { eq1: "X'' - 9 X' + 8 X = 9", eq2: "X'' - 19 X' + 148 X = sin(t)", roots1: [1, 8], roots2: ["19/2 - sqrt(231)*I/2", "19/2 + sqrt(231)*I/2"] },
+      29: { eq1: "X'' - 10 X' - 11 X = 5", eq2: "X'' - 32 X' + 20 X = cos(t)", roots1: [-1, 11], roots2: ["16 - 2*sqrt(59)", "2*sqrt(59) + 16"] },
+      30: { eq1: "X'' - 10 X' - 24 X = 4", eq2: "X'' - 32 X' + 21 X = 2sh(2t)", roots1: [-2, 12], roots2: ["16 - sqrt(235)", "sqrt(235) + 16"] },
+      31: { eq1: "X'' - 10 X' - 39 X = 3", eq2: "X'' - 32 X' + 20 X = 4ch(3t)", roots1: [-3, 13], roots2: ["16 - 2*sqrt(59)", "2*sqrt(59) + 16"] },
+      32: { eq1: "X'' - 10 X' - 56 X = 2", eq2: "X'' - 32 X' + 27 X = sin(-t)", roots1: [-4, 14], roots2: ["16 - sqrt(229)", "sqrt(229) + 16"] },
+      33: { eq1: "X'' - 10 X' - 75 X = 1", eq2: "X'' - 32 X' + 12 X = cos(-t)", roots1: [-5, 15], roots2: ["16 - 2*sqrt(61)", "2*sqrt(61) + 16"] },
+      34: { eq1: "X'' - 10 X' - 196 X = -1", eq2: "X'' - 37 X' + 21 X = sh(-t)", roots1: ["5 - sqrt(221)", "5 + sqrt(221)"], roots2: ["37/2 - sqrt(1285)/2", "sqrt(1285)/2 + 37/2"] },
+      35: { eq1: "X'' - 26 X' + 169 X = 10", eq2: "X'' - 29 X' + 18 X = sin(t)", roots1: [13], roots2: ["29/2 - sqrt(769)/2", "sqrt(769)/2 + 29/2"] },
+      36: { eq1: "X'' - 26 X' + 168 X = 11", eq2: "X'' - 22 X' + 110 X = cos(t)", roots1: [12, 14], roots2: ["11 - sqrt(11)", "sqrt(11) + 11"] },
+      37: { eq1: "X'' - 26 X' + 165 X = 12", eq2: "X'' - 15 X' + 40 X = sh(t)", roots1: [11, 15], roots2: ["15/2 - sqrt(65)/2", "sqrt(65)/2 + 15/2"] },
+      38: { eq1: "X'' - 21 X' + 80 X = 11", eq2: "X'' - 18 X' + 72 X = ch(t)", roots1: [5, 16], roots2: [6, 12] },
+      39: { eq1: "X'' - 25 X' + 136 X = 10", eq2: "X'' - 20 X' + 91 X = sin(t)", roots1: [8, 17], roots2: [7, 13] },
+      40: { eq1: "X'' - 16 X' + 63 X = 7", eq2: "X'' - 29 X' + 215 X = 3e^(2t)", roots1: [7, 9], roots2: ["29/2 - sqrt(19)*I/2", "29/2 + sqrt(19)*I/2"] }
     };
-
-    // Populate remaining variants
-    for (let i = 19; i <= 40; i++) {
-      if (!VARIANTS_RAW[i]) {
-        VARIANTS_RAW[i] = {
-          eq1: `X'' - 10 X' + ${20 - i} X = ${(i % 5) + 1}`,
-          eq2: `X'' - 32 X' + ${200 + i} X = cos(t)`,
-          roots1: ["λ1", "λ2"],
-          roots2: ["λ3", "λ4"]
-        };
-      }
-    }
 
     // Init select options
     const sel = document.getElementById("varCatalogSelect");
