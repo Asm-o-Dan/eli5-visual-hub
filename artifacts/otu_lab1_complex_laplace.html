@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ELI5: Комплексные числа и операционное исчисление в ТАУ (Вариант 18)</title>
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1a2234;
+      --border-color: #243049;
+      --text-main: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #38bdf8;
+      --accent-blue: #3b82f6;
+      --accent-emerald: #10b981;
+      --accent-purple: #a855f7;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      padding-bottom: 60px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 14, 23, 0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 14px;
+      list-style: none;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      white-space: nowrap;
+      transition: color 0.15s;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent-cyan);
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .badges-row {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .badge.emerald {
+      background: rgba(16, 185, 129, 0.12);
+      color: var(--accent-emerald);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .badge.purple {
+      background: rgba(168, 85, 247, 0.12);
+      color: var(--accent-purple);
+      border-color: rgba(168, 85, 247, 0.3);
+    }
+
+    .badge.amber {
+      background: rgba(245, 158, 11, 0.12);
+      color: var(--accent-amber);
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    .hero-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #ffffff 0%, #7dd3fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      color: var(--text-secondary);
+      max-width: 700px;
+      margin: 0 auto 24px;
+      font-size: 1rem;
+    }
+
+    .hero-concept {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 18px 20px;
+      text-align: left;
+      margin-bottom: 30px;
+    }
+
+    .hero-concept h3 {
+      color: var(--accent-amber);
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sim-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .sim-panel {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .sim-form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .sim-input {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      outline: none;
+      width: 100%;
+    }
+
+    .sim-input:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    .calc-res-box {
+      background: var(--bg-surface-elevated);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .canvas-box {
+      background: #080c14;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sim-btn {
+      background: var(--accent-blue);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: background 0.15s;
+    }
+
+    .sim-btn:hover {
+      background: #2563eb;
+    }
+
+    .file-btn {
+      background: var(--bg-surface-elevated);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .file-btn:hover {
+      border-color: var(--accent-cyan);
+    }
+
+    .arch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .arch-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .arch-card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 8px;
+    }
+
+    .arch-card p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .qa-item {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .qa-question {
+      padding: 12px 16px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+
+    .qa-question:hover {
+      color: var(--accent-cyan);
+    }
+
+    .qa-answer {
+      padding: 0 16px 14px;
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      line-height: 1.6;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      display: none;
+    }
+
+    .qa-item.open .qa-answer {
+      display: block;
+    }
+
+    .qa-item.open .qa-toggle {
+      transform: rotate(180deg);
+    }
+
+    .quiz-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    .quiz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .quiz-progress {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+
+    .quiz-progress-bar {
+      height: 100%;
+      background: var(--accent-cyan);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .quiz-question-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .quiz-btn {
+      background: #0d131f;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 12px 16px;
+      border-radius: 8px;
+      text-align: left;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .quiz-btn:hover:not(:disabled) {
+      border-color: var(--accent-cyan);
+      background: #131b2c;
+    }
+
+    .quiz-btn.correct {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: var(--accent-emerald);
+      color: #6ee7b7;
+      font-weight: 600;
+    }
+
+    .quiz-btn.wrong {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: var(--accent-rose);
+      color: #fca5a5;
+    }
+
+    .quiz-expl {
+      background: rgba(56, 189, 248, 0.1);
+      border-left: 3px solid var(--accent-cyan);
+      padding: 10px 14px;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.85rem;
+      color: #bae6fd;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    code {
+      background: rgba(0,0,0,0.35);
+      color: #38bdf8;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.85em;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Sticky Nav -->
+  <nav class="top-nav">
+    <div class="nav-brand">
+      <a href="https://asm-o-dan.github.io/eli5-visual-hub/" style="display: flex; align-items: center; gap: 6px; color: #fff; text-decoration: none;">
+        <span>← Hub</span>
+      </a>
+      <span style="color: var(--border-color);">|</span>
+      <span>ОТУ ЛБ №1: Комплексные числа & Лаплас (Вариант 18)</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#concept">Интуиция ТАУ</a></li>
+      <li><a href="#sim-complex">Тренажер чисел</a></li>
+      <li><a href="#sim-laplace">Тренажер Лапласа</a></li>
+      <li><a href="#sim-poles">Полюсы и вычеты</a></li>
+      <li><a href="#variant18">Вариант 18</a></li>
+      <li><a href="#defense">Вопросы защиты</a></li>
+      <li><a href="#quiz">Тест-тренажер</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+
+    <!-- Hero Header -->
+    <header class="hero">
+      <div class="badges-row">
+        <span class="badge">Основы теории управления</span>
+        <span class="badge emerald">Лабораторная работа №1</span>
+        <span class="badge purple">Преобразование Лапласа</span>
+        <span class="badge amber">Полюсы & Вычеты</span>
+        <span class="badge">Вариант 18 (Гандапас Д.В.)</span>
+      </div>
+      <h1 class="hero-title">Математические основы теории управления</h1>
+      <p class="hero-subtitle">
+        Интерактивный тренажер и визуальный путеводитель по комплексным числам, операционному исчислению, 
+        преобразованию Лапласа, теории вычетов Коши и анализу устойчивости динамических звеньев.
+      </p>
+
+      <!-- 0.3-Second Intuition Box -->
+      <div id="concept" class="hero-concept">
+        <h3>
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+          0.3-Секундная инженерная интуиция: Зачем ТАУ комплексные числа?
+        </h3>
+        <p style="font-size: 0.95rem; color: #cbd5e1; line-height: 1.6;">
+          В реальном мире автоматические системы описываются громоздкими <b>дифференциальными уравнениями</b> во времени t. 
+          Решать их напрямую через интегралы неудобно. <b>Преобразование Лапласа</b> переносит дифференциальное уравнение 
+          в алгебраическую комплексную p-плоскость (p = σ + jω), превращая операцию дифференцирования d/dt 
+          в элементарное умножение на p.
+        </p>
+        <div style="margin-top: 14px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;">
+          <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 8px; padding: 10px 14px;">
+            <b style="color: var(--accent-emerald);">Левая полуплоскость (Re(p) &lt; 0)</b><br>
+            <span style="font-size: 0.82rem; color: #a7f3d0;">Полюсы дают затухающие экспоненты e^(-σt). Система <b>устойчива</b>.</span>
+          </div>
+          <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; padding: 10px 14px;">
+            <b style="color: var(--accent-rose);">Правая полуплоскость (Re(p) &gt; 0)</b><br>
+            <span style="font-size: 0.82rem; color: #fecdd3;">Полюсы дают расходящиеся моды e^(+σt). Система <b>неустойчива</b>! В Варианте 18 полюс p0 = +0.5 &gt; 0!</span>
+          </div>
+          <div style="background: rgba(56,189,248,0.1); border: 1px solid rgba(56,189,248,0.3); border-radius: 8px; padding: 10px 14px;">
+            <b style="color: var(--accent-cyan);">Мнимая ось (p = jω)</b><br>
+            <span style="font-size: 0.82rem; color: #bae6fd;">Чисто гармонические автоколебания с частотой ω (граница устойчивости).</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- SECTION 1: Interactive Complex Calculator (Task 1) -->
+    <section id="sim-complex" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 3v18M3 12h18"></path></svg>
+          1. Интерактивная комплексная плоскость (Задание 1)
+        </h2>
+        <span class="badge emerald">Живой Canvas-рендерер</span>
+      </div>
+
+      <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 18px;">
+        Формула (Вариант 18): <code>z = (z1 + 2*z2 - 4*z3) / z3</code>. Введите компоненты комплексных чисел или выберите пресет Варианта 18. 
+        Движок на лету рассчитает числитель, знаменатель, частное, Re, Im, модуль |z|, аргумент φ и построит вектор на плоскости.
+      </p>
+
+      <div class="sim-panel">
+        <div class="sim-form">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="sim-btn" style="background: var(--accent-amber); color: #000;" onclick="loadVariant18Data()">★ Загрузить Вариант 18</button>
+            <button class="file-btn" onclick="loadVariant1Data()">Вариант 1</button>
+            <button class="file-btn" onclick="loadVariant15Data()">Вариант 15</button>
+          </div>
+
+          <div class="form-group">
+            <label>Число z1 (Re + Im·j):</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="number" id="z1-re" class="sim-input" value="1" step="any" oninput="updateComplexSim()">
+              <input type="number" id="z1-im" class="sim-input" value="19" step="any" oninput="updateComplexSim()">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Число z2 (Re + Im·j):</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="number" id="z2-re" class="sim-input" value="1" step="any" oninput="updateComplexSim()">
+              <input type="number" id="z2-im" class="sim-input" value="-21" step="any" oninput="updateComplexSim()">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Число z3 (Re + Im·j):</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="number" id="z3-re" class="sim-input" value="3" step="any" oninput="updateComplexSim()">
+              <input type="number" id="z3-im" class="sim-input" value="2" step="any" oninput="updateComplexSim()">
+            </div>
+          </div>
+
+          <div class="calc-res-box" id="complex-result-box">
+            Загрузка расчетов...
+          </div>
+        </div>
+
+        <div class="canvas-box">
+          <canvas id="complex-canvas" width="380" height="380" style="max-width: 100%; height: auto;"></canvas>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">Комплексная плоскость: радиус-вектор z и угол аргумента φ (III квадрант)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: Laplace Simulator (Task 2) -->
+    <section id="sim-laplace" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4"></path></svg>
+          2. Преобразование Лапласа оригиналов (Задание 2)
+        </h2>
+        <span class="badge purple">L{C + A·sin(ωt) + B·e^(a·t)}</span>
+      </div>
+
+      <div class="sim-panel">
+        <div class="sim-form">
+          <div class="form-group">
+            <label>Ступенька C (L{C} = C/p):</label>
+            <input type="number" id="l-c" class="sim-input" value="1" oninput="updateLaplaceSim()">
+          </div>
+
+          <div class="form-group">
+            <label>Синус: Амплитуда A и частота ω:</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="number" id="l-a" class="sim-input" value="2" oninput="updateLaplaceSim()">
+              <input type="number" id="l-w" class="sim-input" value="1" oninput="updateLaplaceSim()">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Экспонента: Множитель B и показатель a:</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="number" id="l-b" class="sim-input" value="15" oninput="updateLaplaceSim()">
+              <input type="number" id="l-alpha" class="sim-input" value="2" oninput="updateLaplaceSim()">
+            </div>
+          </div>
+
+          <div class="calc-res-box" id="laplace-res-box">
+            Формирование изображения...
+          </div>
+        </div>
+
+        <div class="canvas-box">
+          <canvas id="laplace-canvas" width="420" height="240" style="max-width: 100%; height: auto;"></canvas>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">Временная развертка оригинального сигнала y(t) = 1 + 2sin(t) + 15e^(2t)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: Poles & Residues Simulator (Task 3) -->
+    <section id="sim-poles" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          3. Полюсы, вычеты и устойчивость (Задание 3)
+        </h2>
+        <span class="badge amber">s-Plane & Двукратный полюс (m = 2)</span>
+      </div>
+
+      <div class="sim-panel">
+        <div class="sim-form">
+          <p style="font-size: 0.88rem; color: var(--text-secondary);">
+            Функция: <code>W(p) = (6p + 2) / [(2p - 1)(4p - 2)]</code><br>
+            • Знаменатель: <code>(2p - 1)·2(2p - 1) = 8·(p - 0.5)²</code><br>
+            • Полюс: <b>p0 = 0.5 (кратность m = 2)</b><br>
+            • Вычет функции: Res[W(p), 0.5] = 3/4 = 0.75<br>
+            • Начальное значение: w(0) = 0.75
+          </p>
+
+          <div style="background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 8px; padding: 12px;">
+            <b style="color: var(--accent-rose);">⚠️ Диагноз устойчивости: СТРУКТУРНО НЕУСТОЙЧИВА</b><br>
+            <span style="font-size: 0.82rem; color: #fecdd3;">
+              Полюс p0 = +0.5 лежит в правой комплексной полуплоскости (Re &gt; 0). Моды e^(0.5t) и t·e^(0.5t) неограниченно возрастают во времени при t → ∞.
+            </span>
+          </div>
+
+          <div class="calc-res-box">
+            <b>Функция-оригинал по второй теореме разложения:</b><br>
+            <code>w(t) = (0.75 + 0.625·t) · e^(0.5·t)</code><br><br>
+            <b>Проверка начального значения:</b><br>
+            <code>w(0) = 0.75 = lim_{p→∞} p·W(p) = 6/8 = 0.75</code>
+          </div>
+        </div>
+
+        <div class="canvas-box">
+          <canvas id="transient-canvas" width="420" height="240" style="max-width: 100%; height: auto;"></canvas>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">Экспоненциально-секулярно расходящийся оригинал w(t)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: Complete Variant 18 Solution -->
+    <section id="variant18" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+          4. Итоговая сводка Варианта №18 (Гандапас Д.В.)
+        </h2>
+        <span class="badge amber">Готово к сдаче</span>
+      </div>
+
+      <div class="arch-grid">
+        <div class="arch-card">
+          <h3 style="color: var(--accent-cyan);">Задание 1: Комплексное выражение</h3>
+          <p>
+            <b>Формула:</b> z = (z1 + 2·z2 - 4·z3) / z3<br>
+            <b>Аналитический ответ:</b> z = -89/13 - j·(75/13)<br>
+            <b>Re(z):</b> -6.8462, <b>Im(z):</b> -5.7692<br>
+            <b>Модуль:</b> |z| = √(13546) / 13 ≈ 8.9529<br>
+            <b>Аргумент:</b> φ ≈ -139.88° (-2.4414 рад, III квадрант)<br>
+            <b>Показательная форма:</b> 8.9529 · e^(-j 139.88°)
+          </p>
+        </div>
+
+        <div class="arch-card">
+          <h3 style="color: var(--accent-purple);">Задание 2: Преобразование Лапласа</h3>
+          <p>
+            <b>Оригинал:</b> y(t) = 1 + 2·sin(t) + 15·e^(2t)<br>
+            <b>Изображение:</b><br>
+            <code>Y(p) = 1/p + 2/(p² + 1) + 15/(p - 2)</code><br><br>
+            <b>В виде единой дроби:</b><br>
+            <code>Y(p) = 2·(8p³ + 6p - 1) / [p(p - 2)(p² + 1)]</code><br><br>
+            Использованы линейность, табличные образы 1(t), sin(t) и теорема смещения.
+          </p>
+        </div>
+
+        <div class="arch-card">
+          <h3 style="color: var(--accent-emerald);">Задание 3: Вычеты и оригинал</h3>
+          <p>
+            <b>Изображение:</b> W(p) = (6p + 2) / [(2p - 1)(4p - 2)]<br>
+            <b>Полюс:</b> p0 = 0.5 (кратность m = 2)<br>
+            <b>Вычет функции:</b> Res[W(p), 0.5] = 0.75<br>
+            <b>Оригинал:</b> w(t) = (0.75 + 0.625t) · e^(0.5t)<br>
+            <b>Начальное значение:</b> w(0) = 0.75 = lim_{p → ∞} p·W(p)<br>
+            <b>Устойчивость:</b> неустойчиво из-за p0 = +0.5 &gt; 0.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: Official Defense Q&A -->
+    <section id="defense" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          5. Контрольные вопросы защиты (Методичка, стр. 14)
+        </h2>
+        <span class="badge emerald">9 официальных вопросов</span>
+      </div>
+
+      <div id="qa-container"></div>
+    </section>
+
+    <!-- SECTION 6: Interactive Defense Quiz -->
+    <section id="quiz" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          6. Интерактивный тест-тренажер к защите ЛБ №1
+        </h2>
+        <span class="badge purple">12 экзаменационных вопросов</span>
+      </div>
+
+      <div class="quiz-card">
+        <div class="quiz-header">
+          <span id="quiz-num" style="font-size: 0.85rem; font-weight: 700; color: var(--accent-cyan);">Вопрос 1 из 12</span>
+          <span class="badge emerald" id="quiz-score-badge">Счет: 0 / 12</span>
+        </div>
+
+        <div class="quiz-progress">
+          <div class="quiz-progress-bar" id="quiz-progress-bar"></div>
+        </div>
+
+        <div id="quiz-body">
+          <div class="quiz-question-title" id="quiz-title">Загрузка вопроса...</div>
+          <div class="quiz-options" id="quiz-options-box"></div>
+          <div class="quiz-expl" id="quiz-expl-box"></div>
+          <div style="display: flex; justify-content: flex-end;">
+            <button class="sim-btn" id="quiz-next-btn" style="display: none;" onclick="nextQuiz()">Следующий вопрос →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    const QA_DATA = [
+      {
+        "q": "1. Из каких частей состоит комплексное число?",
+        "a": "Комплексное число z = x + jy состоит из двух вещественных величин:<br>• <b>Действительная часть (Real part)</b>: обозначается Re(z) = x.<br>• <b>Мнимая часть (Imaginary part)</b>: обозначается Im(z) = y.<br>Мнимая часть умножается на <b>мнимую единицу j</b> (в ТАУ и электротехнике принято j, чтобы не путать с током i(t)), удовлетворяющую соотношению j² = -1.<br>Если Im(z) = 0, число является чисто вещественным (z = x). Если Re(z) = 0, число чисто мнимое (z = jy)."
+      },
+      {
+        "q": "2. Геометрическая интерпретация комплексного числа.",
+        "a": "Комплексное число геометрически изображается точкой на декартовой <b>комплексной плоскости</b> с координатами (x, y) или <b>радиус-вектором</b>, выходящим из начала координат (0, 0) в эту точку.<br><br>• Горизонтальная ось абсцисс — действительная ось Re.<br>• Вертикальная ось ординат — мнимая ось Im.<br>• <b>Модуль |z| = r = √(x² + y²)</b> — длина радиус-вектора.<br>• <b>Аргумент φ = arg(z)</b> — угол между положительным направлением действительной оси и радиус-вектором (в Варианте 18 точка лежит в III квадранте, поэтому φ = -π + arctg(75/89) ≈ -139.88°)."
+      },
+      {
+        "q": "3. Виды особых точек функций комплексного переменного.",
+        "a": "Изолированные особые точки аналитической функции F(p) классифицируются по виду <b>ряда Лорана</b> ∑_{n=-∞}^∞ c_n (p - p0)^n в окрестности точки p0:<br><br>1. <b>Устранимая особая точка</b>: главная часть ряда Лорана отсутствует (все cn = 0 при n < 0). Предел функции конечен.<br>2. <b>Полюс порядка m</b>: главная часть ряда Лорана содержит конечное число слагаемых c_{-m}/(p - p0)^m + ... + c_{-1}/(p - p0) (c_{-m} ≠ 0). При m = 1 полюс простой, при m > 1 — кратный (в Варианте 18 полюс p0 = 0.5 имеет кратность m = 2). В полюсе функция стремится к бесконечности.<br>3. <b>Существенно особая точка</b>: главная часть содержит бесконечное число отрицательных степеней. Предел не существует."
+      },
+      {
+        "q": "4. Понятие вычета функции (Residue).",
+        "a": "<b>Вычетом</b> аналитической функции F(p) в изолированной особой точке p0 называется коэффициент c_{-1} при первой отрицательной степени (p - p0)⁻¹ в ее лорановском разложении:<br>Res[F(p), p0] = c_{-1} = (1 / 2πj) ∮_C F(p) dp<br>где контур C ориентирован против часовой стрелки и охватывает только особую точку p0.<br>В теории управления вычеты в полюсах передаточной функции определяют амплитудные коэффициенты (веса) мод переходного процесса."
+      },
+      {
+        "q": "5. Вычисление вычета функции в полюсе 1-го порядка (простом полюсе).",
+        "a": "Для простого полюса p0 (m=1) вычет вычисляется по формуле предела:<br>Res[F(p), p0] = lim_{p → p0} (p - p0) · F(p)<br>Если функция представлена отношением F(p) = Φ(p) / Ψ(p), где Φ(p0) ≠ 0, Ψ(p0) = 0, а Ψ'(p0) ≠ 0, то по правилу Лопиталя:<br>Res[F(p), p0] = Φ(p0) / Ψ'(p0).<br><i>Примечание:</i> для кратного полюса порядка m вычет берется через производную порядка m-1."
+      },
+      {
+        "q": "6. Функция-оригинал и функция-изображение.",
+        "a": "• <b>Функция-оригинал f(t)</b>: вещественная функция времени, удовлетворяющая условиям Хевисайда:<br>  1) f(t) ≡ 0 при t < 0 (принцип физической причинности);<br>  2) f(t) кусочно-непрерывна;<br>  3) растет не быстрее экспоненты: |f(t)| ≤ M e^(s0·t).<br><br>• <b>Функция-изображение F(p)</b>: комплексная функция p = σ + jω, определяемая интегралом Лапласа F(p) = ∫₀^∞ f(t) e^(-pt) dt."
+      },
+      {
+        "q": "7. Свойство линейности преобразования Лапласа.",
+        "a": "Преобразование Лапласа является строго <b>линейным оператором</b>. Для любых констант c1, c2 и допустимых оригиналов f1(t), f2(t):<br>L{c1 f1(t) + c2 f2(t)} = c1 F1(p) + c2 F2(p)<br>Это свойство позволяет анализировать сложный входной сигнал как сумму элементарных компонент."
+      },
+      {
+        "q": "8. Свойство дифференцирования оригинала.",
+        "a": "Дифференцирование оригинала во времени сводится к умножению изображения на комплексный параметр p за вычетом начального условия:<br>L{f'(t)} = p F(p) - f(0⁺)<br>Для высших производных: L{f''(t)} = p² F(p) - p f(0⁺) - f'(0⁺).<br>При нулевых начальных условиях дифференцирование d/dt строго эквивалентно умножению на p."
+      },
+      {
+        "q": "9. Переход от изображения по Лапласу к оригиналу.",
+        "a": "Обратный переход f(t) = L⁻¹{F(p)} выполняется тремя методами:<br>1. <b>Вторая теорема разложения (по вычетам):</b> f(t) = ∑ Res[F(p) e^(pt), pk]<br>2. <b>Метод разложения на простейшие дроби:</b> представление в виде суммы A/(p - pk) и B/(p - pk)² с табличным обращением к e^(pk·t) и t·e^(pk·t).<br>3. <b>Интеграл обращения Меллина-Бромвича:</b> f(t) = (1 / 2πj) ∫_{σ-j∞}^{σ+j∞} F(p) e^(pt) dp."
+      }
+    ];
+
+    const QUIZ_DATA = [
+      {
+        "q": "Чему равен аргумент комплексного числа z = -89/13 - j*(75/13) (Вариант 18)?",
+        "options": [
+          "φ ≈ -139.88° (III квадрант)",
+          "φ ≈ +139.88° (II квадрант)",
+          "φ ≈ -40.12° (IV квадрант)",
+          "φ ≈ +40.12° (I квадрант)"
+        ],
+        "correct": 0,
+        "expl": "И действительная (x = -89/13), и мнимая (y = -75/13) части строго отрицательны. Точка лежит в III квадранте, поэтому φ = -π + arctg(75/89) ≈ -2.4414 рад ≈ -139.88°."
+      },
+      {
+        "q": "Какое изображение по Лапласу имеет функция y(t) = 1 + 2*sin(t) + 15*e^(2t) (Вариант 18)?",
+        "options": [
+          "Y(p) = 1/p + 2/(p^2 + 1) + 15/(p - 2)",
+          "Y(p) = 1/p^2 + 2p/(p^2 + 1) + 15/(p + 2)",
+          "Y(p) = 1/p + 2/(p + 1) + 15/(p - 2)",
+          "Y(p) = (18p + 1)/(p^2 + 1)"
+        ],
+        "correct": 0,
+        "expl": "L{1} = 1/p, L{sin(t)} = 1/(p^2 + 1) с множителем 2 дает 2/(p^2 + 1), L{e^(2t)} по теореме смещения дает 1/(p - 2) с множителем 15. Сумма: 1/p + 2/(p^2 + 1) + 15/(p - 2)."
+      },
+      {
+        "q": "Какую кратность имеет полюс функции W(p) = (6p + 2) / [(2p - 1)(4p - 2)] (Вариант 18)?",
+        "options": [
+          "Два простых полюса p1 = 0.5 и p2 = 0.5",
+          "Один двукратный полюс p = 0.5 (кратность m = 2)",
+          "Один простой полюс p = 1",
+          "Полюсов нет, знаменатель не равен нулю"
+        ],
+        "correct": 1,
+        "expl": "Заметим, что 4p - 2 = 2*(2p - 1). Тогда знаменатель: (2p - 1)*2*(2p - 1) = 2*(2p - 1)^2 = 8*(p - 0.5)^2. Корень p = 0.5 имеет кратность 2 (двукратный полюс)."
+      },
+      {
+        "q": "Чему равен вычет самой функции W(p) = (6p + 2)/[(2p - 1)(4p - 2)] в полюсе p = 0.5?",
+        "options": [
+          "Res = 0.75 (или 3/4)",
+          "Res = 0.625 (или 5/8)",
+          "Res = 1.0",
+          "Res = 0.5"
+        ],
+        "correct": 0,
+        "expl": "Для полюса 2-го порядка Res = lim_{p->0.5} d/dp [(p - 0.5)^2 * W(p)] = d/dp [(6p + 2)/8] = d/dp [(3p + 1)/4] = 3/4 = 0.75."
+      },
+      {
+        "q": "Устойчиво ли динамическое звено с передаточной функцией W(p) = (6p + 2)/[(2p - 1)(4p - 2)]?",
+        "options": [
+          "Устойчиво, так как мнимая часть полюса равна нулю",
+          "Неустойчиво, так как полюс p = +0.5 лежит в правой полуплоскости (Re > 0)",
+          "Нейтрально устойчиво",
+          "Устойчивость зависит от начальных условий"
+        ],
+        "correct": 1,
+        "expl": "Критерий устойчивости линейных систем требует, чтобы ВСЕ полюсы лежали строго в левой полуплоскости (Re(p) < 0). Полюс p = +0.5 > 0 лежит в правой полуплоскости, порождая расходящиеся моды e^(0.5t) и t*e^(0.5t)."
+      },
+      {
+        "q": "Какая функция-оригинал w(t) соответствует W(p) = (6p + 2)/[(2p - 1)(4p - 2)]?",
+        "options": [
+          "w(t) = (0.75 + 0.625*t) * e^(0.5*t)",
+          "w(t) = 0.75*e^(-0.5*t) + 0.625*e^(2*t)",
+          "w(t) = 3*e^(t) + 2*sin(t)",
+          "w(t) = (6 + 2t)*e^(0.5*t)"
+        ],
+        "correct": 0,
+        "expl": "По второй теореме разложения для кратного полюса w(t) = Res[W(p)*e^(pt), 0.5] = lim_{p->0.5} d/dp [((3p + 1)/4)*e^(pt)] = (3/4 + (5/8)*t)*e^(0.5t) = (0.75 + 0.625t)*e^(0.5t)."
+      },
+      {
+        "q": "Чему равно начальное значение w(0) функции-оригинала w(t)?",
+        "options": [
+          "0",
+          "0.75 (или 3/4)",
+          "0.625 (или 5/8)",
+          "Бесконечности"
+        ],
+        "correct": 1,
+        "expl": "По теореме о начальном значении: w(0) = lim_{p->oo} p*W(p) = lim_{p->oo} p*(6p+2)/(8p^2 - 8p + 2) = 6/8 = 3/4 = 0.75. Из формулы оригинала: w(0) = (0.75 + 0.625*0)*e^0 = 0.75."
+      },
+      {
+        "q": "В чем заключается вторая теорема разложения операционного исчисления?",
+        "options": [
+          "Оригинал равен интегралу свертки",
+          "Оригинал равен сумме вычетов произведения W(p)*e^(pt) во всех полюсах",
+          "Изображение равно производной от оригинала",
+          "Оригинал равен корням характеристического уравнения"
+        ],
+        "correct": 1,
+        "expl": "Вторая теорема разложения утверждает, что оригинал w(t) восстанавливается как сумма вычетов функции W(p)*e^(pt) по всем ее изолированным полюсам."
+      },
+      {
+        "q": "Чему равен модуль комплексного числа z = x + jy?",
+        "options": [
+          "|z| = x + y",
+          "|z| = x^2 + y^2",
+          "|z| = sqrt(x^2 + y^2)",
+          "|z| = arctg(y/x)"
+        ],
+        "correct": 2,
+        "expl": "Модуль комплексного числа по теореме Пифагора равен длине радиус-вектора: |z| = sqrt(x^2 + y^2)."
+      },
+      {
+        "q": "Как записывается формула Эйлера, связывающая показательную и тригонометрическую формы?",
+        "options": [
+          "e^(j*phi) = cos(phi) + j*sin(phi)",
+          "e^(j*phi) = cos(phi) - sin(phi)",
+          "e^(phi) = j*cos(phi) + sin(phi)",
+          "e^(j*phi) = tg(phi) + j"
+        ],
+        "correct": 0,
+        "expl": "Фундаментальное тождество Эйлера: e^(j*phi) = cos(phi) + j*sin(phi)."
+      },
+      {
+        "q": "Какая формула связывает оригинал и изображение при дифференцировании d/dt при нулевых начальных условиях?",
+        "options": [
+          "L{f'(t)} = F(p) / p",
+          "L{f'(t)} = p * F(p)",
+          "L{f'(t)} = F(p + 1)",
+          "L{f'(t)} = -dF/dp"
+        ],
+        "correct": 1,
+        "expl": "При нулевых начальных условиях f(0) = 0 дифференцирование оригинала f'(t) сводится к алгебраическому умножению на p: L{f'(t)} = p * F(p)."
+      },
+      {
+        "q": "Какое свойство преобразования Лапласа описывает формула L{f(t - tau)} = e^(-p*tau) * F(p)?",
+        "options": [
+          "Теорема подобия (масштабирования)",
+          "Теорема смещения в комплексной области",
+          "Теорема запаздывания во временной области",
+          "Теорема свертки"
+        ],
+        "correct": 2,
+        "expl": "Задержка сигнала во времени на величину tau (транспортное запаздывание в звеньях ТАУ) приводит к умножению его изображения на оператор запаздывания e^(-p*tau)."
+      }
+    ];
+
+    // --- Complex Canvas Simulator ---
+    function updateComplexSim() {
+      const z1r = parseFloat(document.getElementById('z1-re').value) || 0;
+      const z1i = parseFloat(document.getElementById('z1-im').value) || 0;
+      const z2r = parseFloat(document.getElementById('z2-re').value) || 0;
+      const z2i = parseFloat(document.getElementById('z2-im').value) || 0;
+      const z3r = parseFloat(document.getElementById('z3-re').value) || 0;
+      const z3i = parseFloat(document.getElementById('z3-im').value) || 0;
+
+      // Вариант 18 формула: num = z1 + 2*z2 - 4*z3
+      const numR = z1r + 2 * z2r - 4 * z3r;
+      const numI = z1i + 2 * z2i - 4 * z3i;
+
+      // den = z3
+      const denR = z3r;
+      const denI = z3i;
+
+      // z = num / den
+      const denMag2 = denR * denR + denI * denI;
+      let zR = 0, zI = 0;
+      if (denMag2 > 1e-12) {
+        zR = (numR * denR + numI * denI) / denMag2;
+        zI = (numI * denR - numR * denI) / denMag2;
+      }
+
+      const mod = Math.sqrt(zR * zR + zI * zI);
+      const argRad = Math.atan2(zI, zR);
+      const argDeg = argRad * (180 / Math.PI);
+
+      const quad = (zR >= 0 && zI >= 0) ? 'I' : (zR < 0 && zI >= 0) ? 'II' : (zR < 0 && zI < 0) ? 'III' : 'IV';
+
+      const box = document.getElementById('complex-result-box');
+      box.innerHTML = `
+        <b>Числитель (z1 + 2*z2 - 4*z3):</b> ${numR.toFixed(2)} + ${numI.toFixed(2)}j<br>
+        <b>Знаменатель (z3):</b> ${denR.toFixed(2)} + ${denI.toFixed(2)}j<br>
+        <b>Значение z:</b> <span style="color: #fff; font-weight: 700;">${zR.toFixed(4)} ${zI < 0 ? '-' : '+'} ${Math.abs(zI).toFixed(4)}j</span><br>
+        <b>Модуль |z|:</b> ${mod.toFixed(4)} | <b>Аргумент φ:</b> ${argDeg.toFixed(2)}° (${argRad.toFixed(4)} rad)<br>
+        <b>Положение:</b> Квадрант ${quad}<br>
+        <b>Показательная форма:</b> ${mod.toFixed(4)} · e^(j·${argDeg.toFixed(1)}°)
+      `;
+
+      drawComplexPlane(zR, zI, mod, argRad);
+    }
+
+    function drawComplexPlane(x, y, mod, phi) {
+      const canvas = document.getElementById('complex-canvas');
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      const cx = w / 2;
+      const cy = h / 2;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Scale
+      const maxVal = Math.max(10.0, mod * 1.3);
+      const scale = (w * 0.42) / maxVal;
+
+      // Grid
+      ctx.strokeStyle = '#1f293d';
+      ctx.lineWidth = 1;
+      for (let i = -4; i <= 4; i++) {
+        if (i === 0) continue;
+        ctx.beginPath();
+        ctx.moveTo(cx + (i * maxVal / 4) * scale, 0);
+        ctx.lineTo(cx + (i * maxVal / 4) * scale, h);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, cy - (i * maxVal / 4) * scale);
+        ctx.lineTo(w, cy - (i * maxVal / 4) * scale);
+        ctx.stroke();
+      }
+
+      // Axes
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, cy);
+      ctx.lineTo(w, cy);
+      ctx.moveTo(cx, 0);
+      ctx.lineTo(cx, h);
+      ctx.stroke();
+
+      // Axis labels
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '11px sans-serif';
+      ctx.fillText('Re', w - 20, cy - 8);
+      ctx.fillText('Im', cx + 8, 16);
+
+      // Circle of radius |z|
+      if (mod > 0.001) {
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.arc(cx, cy, mod * scale, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // Vector to (x, y)
+      const px = cx + x * scale;
+      const py = cy - y * scale;
+
+      // Arc for phi
+      if (mod > 0.001) {
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        // In canvas y is down, so angle is -phi
+        ctx.arc(cx, cy, mod * scale * 0.35, 0, -phi, phi > 0);
+        ctx.stroke();
+      }
+
+      // Vector arrow
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(px, py);
+      ctx.stroke();
+
+      // Point z
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.arc(px, py, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText(`z (${x.toFixed(2)}, ${y.toFixed(2)})`, px + 8, py - 6);
+    }
+
+    function loadVariant18Data() {
+      document.getElementById('z1-re').value = 1;
+      document.getElementById('z1-im').value = 19;
+      document.getElementById('z2-re').value = 1;
+      document.getElementById('z2-im').value = -21;
+      document.getElementById('z3-re').value = 3;
+      document.getElementById('z3-im').value = 2;
+      updateComplexSim();
+    }
+
+    function loadVariant1Data() {
+      document.getElementById('z1-re').value = 1;
+      document.getElementById('z1-im').value = 2;
+      document.getElementById('z2-re').value = 1;
+      document.getElementById('z2-im').value = -4;
+      document.getElementById('z3-re').value = 20;
+      document.getElementById('z3-im').value = 2;
+      updateComplexSim();
+    }
+
+    function loadVariant15Data() {
+      document.getElementById('z1-re').value = 1;
+      document.getElementById('z1-im').value = 16;
+      document.getElementById('z2-re').value = 1;
+      document.getElementById('z2-im').value = -18;
+      document.getElementById('z3-re').value = 6;
+      document.getElementById('z3-im').value = 2;
+      updateComplexSim();
+    }
+
+    // --- Laplace Canvas Simulator ---
+    function updateLaplaceSim() {
+      const c = parseFloat(document.getElementById('l-c').value) || 0;
+      const a = parseFloat(document.getElementById('l-a').value) || 0;
+      const w = parseFloat(document.getElementById('l-w').value) || 1;
+      const b = parseFloat(document.getElementById('l-b').value) || 0;
+      const alpha = parseFloat(document.getElementById('l-alpha').value) || 0;
+
+      const box = document.getElementById('laplace-res-box');
+      box.innerHTML = `
+        <b>Функция-оригинал:</b> y(t) = ${c} + ${a}·sin(${w}t) + ${b}·e^(${alpha}t)<br><br>
+        <b>Изображение по Лапласу Y(p):</b><br>
+        <span style="color: #fff; font-weight: 700;">Y(p) = [${c} / p] + [${a*w} / (p² + ${w*w})] + [${b} / (p - ${alpha})]</span><br><br>
+        <b>Свойства:</b> Линейность + L{1} = 1/p + L{sin(ωt)} = ω/(p²+ω²) + L{e^(at)} = 1/(p - a)
+      `;
+
+      drawSignal(c, a, w, b, alpha);
+    }
+
+    function drawSignal(c, a, w, b, alpha) {
+      const canvas = document.getElementById('laplace-canvas');
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+      const cy = height - 25; // baseline near bottom since exp dominates
+
+      ctx.clearRect(0, 0, width, height);
+
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, cy);
+      ctx.lineTo(width, cy);
+      ctx.stroke();
+
+      const tMax = 2.0;
+      const maxVal = c + a + b * Math.exp(alpha * tMax);
+      const scaleY = (height * 0.75) / Math.max(10, maxVal);
+
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      for (let i = 0; i < width; i++) {
+        const t = (i / width) * tMax;
+        const val = c + a * Math.sin(w * t) + b * Math.exp(alpha * t);
+        const y = cy - val * scaleY;
+        if (i === 0) ctx.moveTo(i, y);
+        else ctx.lineTo(i, y);
+      }
+      ctx.stroke();
+    }
+
+    // --- Transient Canvas (Task 3) ---
+    function drawTransient() {
+      const canvas = document.getElementById('transient-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const width = canvas.width;
+      const height = canvas.height;
+      const cy = height - 30; // base line near bottom since exp is positive
+
+      ctx.clearRect(0, 0, width, height);
+
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, cy);
+      ctx.lineTo(width, cy);
+      ctx.stroke();
+
+      const tMax = 4.0;
+      const maxVal = (0.75 + 0.625 * tMax) * Math.exp(0.5 * tMax); // ~24
+      const scaleY = (height * 0.75) / maxVal;
+
+      ctx.strokeStyle = '#3b82f6';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      for (let i = 0; i < width; i++) {
+        const t = (i / width) * tMax;
+        const val = (0.75 + 0.625 * t) * Math.exp(0.5 * t);
+        const y = cy - val * scaleY;
+        if (i === 0) ctx.moveTo(i, y);
+        else ctx.lineTo(i, y);
+      }
+      ctx.stroke();
+
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath();
+      ctx.arc(0, cy - 0.75 * scaleY, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = '10px sans-serif';
+      ctx.fillText('w(0)=0.75', 8, cy - 0.75 * scaleY - 6);
+    }
+
+    // --- QA & Quiz ---
+    function renderQA() {
+      const box = document.getElementById('qa-container');
+      box.innerHTML = QA_DATA.map((item, i) => `
+        <div class="qa-item ${i === 0 ? 'open' : ''}">
+          <div class="qa-question" onclick="this.parentElement.classList.toggle('open')">
+            <span>${item.q}</span>
+            <span class="qa-toggle" style="transition: transform 0.2s;">▼</span>
+          </div>
+          <div class="qa-answer">${item.a}</div>
+        </div>
+      `).join('');
+    }
+
+    let curQuiz = 0;
+    let quizScore = 0;
+
+    function renderQuiz() {
+      const q = QUIZ_DATA[curQuiz];
+      document.getElementById('quiz-num').textContent = 'Вопрос ' + (curQuiz + 1) + ' из ' + QUIZ_DATA.length;
+      document.getElementById('quiz-title').textContent = q.q;
+      document.getElementById('quiz-progress-bar').style.width = (((curQuiz + 1) / QUIZ_DATA.length) * 100) + '%';
+      document.getElementById('quiz-expl-box').style.display = 'none';
+      document.getElementById('quiz-next-btn').style.display = 'none';
+
+      const box = document.getElementById('quiz-options-box');
+      box.innerHTML = q.options.map((opt, i) => `
+        <button class="quiz-btn" onclick="checkQuizAnswer(${i})">${opt}</button>
+      `).join('');
+    }
+
+    function checkQuizAnswer(selected) {
+      const q = QUIZ_DATA[curQuiz];
+      const buttons = document.querySelectorAll('.quiz-btn');
+      buttons.forEach(b => b.disabled = true);
+
+      if (selected === q.correct) {
+        buttons[selected].classList.add('correct');
+        quizScore++;
+      } else {
+        buttons[selected].classList.add('wrong');
+        buttons[q.correct].classList.add('correct');
+      }
+
+      document.getElementById('quiz-score-badge').textContent = 'Счет: ' + quizScore + ' / ' + QUIZ_DATA.length;
+      const expl = document.getElementById('quiz-expl-box');
+      expl.innerHTML = '<b>Обоснование:</b> ' + q.expl;
+      expl.style.display = 'block';
+
+      const nextBtn = document.getElementById('quiz-next-btn');
+      nextBtn.textContent = (curQuiz === QUIZ_DATA.length - 1) ? 'Завершить тест' : 'Следующий вопрос →';
+      nextBtn.style.display = 'inline-block';
+    }
+
+    function nextQuiz() {
+      if (curQuiz < QUIZ_DATA.length - 1) {
+        curQuiz++;
+        renderQuiz();
+      } else {
+        const pct = Math.round((quizScore / QUIZ_DATA.length) * 100);
+        let grade = pct >= 85 ? 'Отлично (5)' : pct >= 70 ? 'Хорошо (4)' : pct >= 50 ? 'Удовлетворительно (3)' : 'Неудовлетворительно (2)';
+        document.getElementById('quiz-body').innerHTML = `
+          <div style="text-align: center; padding: 20px;">
+            <h3 style="color: var(--accent-cyan); font-size: 1.4rem; margin-bottom: 8px;">Тест успешно завершен!</h3>
+            <p style="font-size: 1.1rem; margin-bottom: 14px;">Ваш результат: <b>${quizScore} из ${QUIZ_DATA.length} (${pct}%)</b></p>
+            <span class="badge ${pct >= 70 ? 'emerald' : 'amber'}" style="font-size: 0.9rem; padding: 6px 14px;">Оценка: ${grade}</span>
+            <div style="margin-top: 24px;">
+              <button class="sim-btn" onclick="curQuiz=0; quizScore=0; renderQuiz();">Пройти заново</button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Init on load
+    window.addEventListener('DOMContentLoaded', () => {
+      updateComplexSim();
+      updateLaplaceSim();
+      drawTransient();
+      renderQA();
+      renderQuiz();
+    });
+  </script>
+</body>
+</html>
