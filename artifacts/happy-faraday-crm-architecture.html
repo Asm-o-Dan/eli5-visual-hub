@@ -560,10 +560,10 @@
         <div style="padding: 14px; background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
             <strong style="color: #34d399; font-size: 14px;">✅ 5. 100% Покрытие Автотестами</strong>
-            <span class="badge" style="font-size: 10px;">70/70 Тестов Пройдено</span>
+            <span class="badge" style="font-size: 10px;">118/118 Тестов Пройдено</span>
           </div>
           <p style="font-size: 13px; color: var(--muted); margin: 0;">
-            Написан полноценный mock-фреймворк среды Google Apps Script (SpreadsheetApp, Sheet, Range, Ui, Utilities, Session, UrlFetchApp) для Node.js test runner. Протестированы все краевые случаи: отмена оплат, скидки, точное разрешение дат занятий (месячные и дневные оплаты), границы месяцев, високосные годы, дубликаты, спецсимволы, чанкинг Telegram и межмодульная синхронизация.
+            Написан полноценный mock-фреймворк среды Google Apps Script (SpreadsheetApp, Sheet, Range, Ui, Utilities, Session, UrlFetchApp, LockService) для Node.js test runner. Протестированы все краевые случаи: отмена оплат, скидки, точное разрешение дат занятий (месячные и дневные оплаты), границы месяцев, високосные годы, дубликаты, спецсимволы, чанкинг Telegram, ACID транзакции, межмодульная синхронизация и полный цикл модуля «Сводка».
           </p>
         </div>
 
@@ -594,6 +594,26 @@
           </div>
           <p style="font-size: 13px; color: var(--muted); margin: 0;">
             Реализована функция <code>resolveSingleLessonColumn</code>, поддерживающая ввод номера урока (число или строка «№3», «Урок 3») или даты («дд.мм.гггг», «дд.мм», Date объект) с автоматическим интерактивным UI prompt при отсутствии свободного урока сегодня. Для тарифа «За месяц» обеспечена строгая изоляция календарных месяцев, поддержка месяцев разной длины (30 vs 31 день), високосного года (29 февраля 2024/2028), смены года (декабрь → январь) и автоматический пропуск полностью предоплаченных месяцев вперед.
+          </p>
+        </div>
+
+        <div style="padding: 14px; background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <strong style="color: #34d399; font-size: 14px;">✅ 9. ACID Транзакции, Откат и Защита от Состояния Гонки (ERR-32..34)</strong>
+            <span class="badge" style="font-size: 10px;">Решено</span>
+          </div>
+          <p style="font-size: 13px; color: var(--muted); margin: 0;">
+            Реализован двухфазный транзакционный откат (Rollback) для всех операций записи (оплаты, отмены платежей, добавление студентов, создание курсов). При сбое записи в бухгалтерский журнал все измененные ячейки возвращаются в исходное состояние, чекбоксы тарифов сохраняются для оператора, а частично созданные листы удаляются. Внедрена защита от параллельного доступа через <code>LockService.getScriptLock(15000)</code> и атомарный сброс буфера <code>SpreadsheetApp.flush()</code>.
+          </p>
+        </div>
+
+        <div style="padding: 14px; background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <strong style="color: #34d399; font-size: 14px;">✅ 10. Архитектурный Аудит и Исправление Модуля «Сводка» (ERR-S01..S14)</strong>
+            <span class="badge" style="font-size: 10px;">Решено</span>
+          </div>
+          <p style="font-size: 13px; color: var(--muted); margin: 0;">
+            Устранены критические ошибки в Apps Script проекте Сводки (Script ID: <code>1mCBfFDteWVXnc9pk5Ag7vzdA7yziOXGt9y9Tqehm6_JS9_hMNqp7b1T5</code>): ликвидирован сбой глобальной инициализации, устранен рассинхрон индексов строк учеников из-за фильтрации (ERR-S02), внедрен композитный ключ оплат ученик-курс (ERR-S04), предотвращены ложные пропуски для будущих предоплаченных занятий с проверкой дат (ERR-S05), синхронизированы все статусы посещаемости CRM (1, +, Отработано, Надо отработать, Не оплачено, Отработал) и добавлена защита от сбоев отдельных курсов. Код синхронизирован через Clasp и покрыт 25 unit/integration тестами.
           </p>
         </div>
       </div>

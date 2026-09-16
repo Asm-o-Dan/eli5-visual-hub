@@ -1,14 +1,16 @@
 [
   {
     "id": "happy-faraday-crm-architecture",
-    "title": "Happy Faraday CRM Architecture & Boost Audit",
-    "description": "Deep boost audit, test coverage, and fix roadmap for Google Apps Script CRM",
+    "title": "Happy-Faraday CRM: Архитектура, ACID Транзакции и Модуль Сводка",
+    "description": "Архитектурный аудит, двухфазный откат транзакций, синхронизация дат оплат и полный аудит модуля Сводка с покрытием 118 автотестами",
     "category": "architecture",
     "tags": [
       "crm",
       "apps-script",
-      "audit",
-      "testing"
+      "acid-transactions",
+      "svodka",
+      "testing",
+      "clasp"
     ],
     "date": "2026-09-16",
     "file": "artifacts/happy-faraday-crm-architecture.html"
