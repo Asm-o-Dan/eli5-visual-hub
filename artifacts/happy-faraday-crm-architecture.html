@@ -560,10 +560,10 @@
         <div style="padding: 14px; background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
             <strong style="color: #34d399; font-size: 14px;">✅ 5. 100% Покрытие Автотестами</strong>
-            <span class="badge" style="font-size: 10px;">118/118 Тестов Пройдено</span>
+            <span class="badge" style="font-size: 10px;">161/161 Тестов Пройдено</span>
           </div>
           <p style="font-size: 13px; color: var(--muted); margin: 0;">
-            Написан полноценный mock-фреймворк среды Google Apps Script (SpreadsheetApp, Sheet, Range, Ui, Utilities, Session, UrlFetchApp, LockService) для Node.js test runner. Протестированы все краевые случаи: отмена оплат, скидки, точное разрешение дат занятий (месячные и дневные оплаты), границы месяцев, високосные годы, дубликаты, спецсимволы, чанкинг Telegram, ACID транзакции, межмодульная синхронизация и полный цикл модуля «Сводка».
+            Написан полноценный mock-фреймворк среды Google Apps Script (SpreadsheetApp, Sheet, Range, Ui, Utilities, Session, UrlFetchApp, LockService) для Node.js test runner. Протестированы все краевые случаи: отмена оплат, скидки, точное разрешение дат занятий (месячные и дневные оплаты), границы месяцев, високосные годы, дубликаты, спецсимволы, чанкинг Telegram, ACID транзакции, межмодульная синхронизация, тикет-система Книги Менеджера, отчёты доходов и расчет KPI преподавателей.
           </p>
         </div>
 
@@ -614,6 +614,46 @@
           </div>
           <p style="font-size: 13px; color: var(--muted); margin: 0;">
             Устранены критические ошибки в Apps Script проекте Сводки (Script ID: <code>1mCBfFDteWVXnc9pk5Ag7vzdA7yziOXGt9y9Tqehm6_JS9_hMNqp7b1T5</code>): ликвидирован сбой глобальной инициализации, устранен рассинхрон индексов строк учеников из-за фильтрации (ERR-S02), внедрен композитный ключ оплат ученик-курс (ERR-S04), предотвращены ложные пропуски для будущих предоплаченных занятий с проверкой дат (ERR-S05), синхронизированы все статусы посещаемости CRM (1, +, Отработано, Надо отработать, Не оплачено, Отработал) и добавлена защита от сбоев отдельных курсов. Код синхронизирован через Clasp и покрыт 25 unit/integration тестами.
+          </p>
+        </div>
+
+        <div style="padding: 14px; background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <strong style="color: #34d399; font-size: 14px;">✅ 11. Книга Менеджера & Сквозная Тикет-Система (TicketSystem.js & TicketTriggers.js)</strong>
+            <span class="badge" style="font-size: 10px;">Внедрено в Облако</span>
+          </div>
+          <p style="font-size: 13px; color: var(--muted); margin: 0;">
+            Создана и задеплоена через Clasp система учета задач (Книга Менеджера, проект ID: <code>1ilyDS6wIDGo91lnf4WYBSJBxhxgxBWPGNzgNXBIvBx7MukYcX0mQ9h5t</code>): 13-колоночная структура листа «Тикеты», автоматическая генерация ID (T-001..), выпадающие списки статусов и 12 типовых причин закрытия, автоматическое логирование в лист «Лог», защита от дублирования открытых тикетов, преобразование номеров родителей в кликабельные Telegram-ссылки (<code>t.me/+...</code>) и триггерная синхронизация пропусков/долгов по расписанию.
+          </p>
+        </div>
+
+        <div style="padding: 14px; background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <strong style="color: #34d399; font-size: 14px;">✅ 12. Отчёт Доходов Помесячно по Группам и Возрастам (RevenueReport.js)</strong>
+            <span class="badge" style="font-size: 10px;">Внедрено в Сводку</span>
+          </div>
+          <p style="font-size: 13px; color: var(--muted); margin: 0;">
+            Разработан модуль агрегации фактических поступлений денежных средств из листа «Оплата». Формирует лист «Отчёт доходов» с двумя аналитическими таблицами (доход по направлениям и по возрастным категориям: 7-9 лет, 10-12 лет, 13+ лет) с хронологической группировкой по месяцам, формулами итогов, автоматическим построением Column/Line диаграмм и мгновенной отправкой сводки со ссылкой в Telegram.
+          </p>
+        </div>
+
+        <div style="padding: 14px; background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <strong style="color: #34d399; font-size: 14px;">✅ 13. Аналитический Калькулятор KPI Преподавателей (KPICalculator.js)</strong>
+            <span class="badge" style="font-size: 10px;">Внедрено в Сводку</span>
+          </div>
+          <p style="font-size: 13px; color: var(--muted); margin: 0;">
+            Внедрена взвешенная формула KPI на базе 7 объективных метрик: Посещаемость (25%), Удержание с учетом оттока (20%), Оплачиваемость занятий (15%), Выполнение учебного плана (15%), Отработки (10%), Наполняемость групп (10%) и Дисциплина ведения журнала (5%). Привязка преподавателей к курсам настраивается в листе «Настройки». Формируется сводный лист «KPI» с цветовой индикацией уровней («Превосходно», «Норма», «Внимание», «Критично») и расчетом среднего балла центра.
+          </p>
+        </div>
+
+        <div style="padding: 14px; background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <strong style="color: #34d399; font-size: 14px;">✅ 14. Telegram Supergroup с Маршрутизацией по Темам (Topics)</strong>
+            <span class="badge" style="font-size: 10px;">Активно</span>
+          </div>
+          <p style="font-size: 13px; color: var(--muted); margin: 0;">
+            Настроена отправка системных уведомлений в супергруппу <code>-1004350041058</code> с разделением по топикам: <code>message_thread_id: 3</code> (Тикеты и пропуски), <code>message_thread_id: 4</code> (Задолженности и оплаты), <code>message_thread_id: 5</code> (Новые заявки), <code>message_thread_id: 6</code> (Отчёты доходов и KPI).
           </p>
         </div>
       </div>
