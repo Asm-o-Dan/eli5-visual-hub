@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>ELI5: Архитектура и UX-Аудит Happy-Faraday CRM</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card: #131b2e;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #38bdf8;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-yellow: #f59e0b;
+      --accent-purple: #a855f7;
+      --accent-indigo: #6366f1;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+      background: radial-gradient(circle at 50% 0%, #1a2744 0%, var(--bg) 80%);
+      color: var(--text);
+      padding: 16px;
+      max-width: 900px;
+      margin: 0 auto 60px;
+      line-height: 1.5;
+    }
+    .header-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .back-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid var(--accent-green);
+      color: var(--accent-green);
+      padding: 3px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge.warn {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: var(--accent-red);
+      color: var(--accent-red);
+    }
+    h1 {
+      font-size: clamp(24px, 5vw, 34px);
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+    p.lead {
+      color: var(--muted);
+      font-size: 15px;
+      margin-bottom: 24px;
+    }
+
+    /* Comparison Grid */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    @media (min-width: 650px) {
+      .comparison-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .box {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    .box.bad {
+      border-left: 4px solid var(--accent-red);
+      background: linear-gradient(180deg, rgba(239, 68, 68, 0.08) 0%, var(--card) 100%);
+    }
+    .box.good {
+      border-left: 4px solid var(--accent-green);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, var(--card) 100%);
+    }
+    .box-title {
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .box ul {
+      list-style: none;
+      font-size: 13.5px;
+      color: var(--muted);
+    }
+    .box li {
+      margin-bottom: 8px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .box li::before {
+      content: "•";
+      color: var(--accent);
+      font-size: 16px;
+      line-height: 1;
+    }
+    .box.bad li::before { color: var(--accent-red); }
+    .box.good li::before { color: var(--accent-green); }
+
+    /* SVG Diagram Container */
+    .diagram-section {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-sub {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+    .svg-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 12px;
+      background: #0b1120;
+      padding: 12px;
+    }
+    svg {
+      width: 100%;
+      height: auto;
+      min-width: 680px;
+      display: block;
+    }
+
+    /* Pillars */
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+    @media (min-width: 700px) {
+      .pillars-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .pillar-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 18px;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .pillar-card:hover {
+      border-color: rgba(56, 189, 248, 0.3);
+      transform: translateY(-2px);
+    }
+    .pillar-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 13px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .pillar-card.danger .pillar-num {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--accent-red);
+    }
+    .pillar-card.warn .pillar-num {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent-yellow);
+    }
+    .pillar-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .pillar-desc {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .code-pill {
+      display: inline-block;
+      font-family: monospace;
+      font-size: 11.5px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #e2e8f0;
+    }
+
+    /* Interactive Table / Checklist */
+    .matrix-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+    .matrix-table th {
+      background: rgba(255, 255, 255, 0.04);
+      padding: 12px 16px;
+      color: var(--muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .matrix-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: top;
+    }
+    .matrix-table tr:last-child td { border-bottom: none; }
+    .status-tag {
+      display: inline-block;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .status-tag.crit { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+    .status-tag.high { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+    .status-tag.med { background: rgba(56, 189, 248, 0.2); color: #38bdf8; }
+
+    footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid var(--card-border);
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header-nav">
+    <a href="../index.html" class="back-link">← Каталог ELI5</a>
+    <span class="badge warn">System Audit: Happy-Faraday</span>
+  </header>
+
+  <main>
+    <h1>Схема Работы и UX-Аудит Happy-Faraday CRM</h1>
+    <p class="lead">
+      Google Apps Script надстройка для управления курсами, посещаемостью и платежами в Google Таблицах. Полный разбор архитектуры данных, скрытых конфликтов и точек трения пользователей.
+    </p>
+
+    <!-- Comparison Grid -->
+    <section class="comparison-grid">
+      <div class="box bad">
+        <div class="box-title">🛑 Архитектурные Ловушки & Баги</div>
+        <ul>
+          <li><strong>Капкан фокуса:</strong> Клик на чекбокс тарифа делает активной ячейку с <code>true</code>. Скрипт ищет ученика с именем "true" и падает с ошибкой.</li>
+          <li><strong>Гонка деструкции в 23:00:</strong> Вечерний пересчёт стирает статусы <code>1</code> и <code>0</code>, ослепляя Telegram-бота сверки долгов.</li>
+          <li><strong>Поломка связки F1:</strong> <code>getRichTextValue().getLinkUrl()</code> возвращает <code>null</code> для формул <code>=HYPERLINK()</code>, ломая зачисление.</li>
+          <li><strong>Разрыв ключей CRM:</strong> Зачисление пишет имя курса с датой ("Курс 07.09.26"), а биллинг — без даты ("Курс"). Реляционная связь разорвана.</li>
+        </ul>
+      </div>
+
+      <div class="box good">
+        <div class="box-title">⚡ Рекомендуемая Архитектура</div>
+        <ul>
+          <li><strong>Явный выбор ученика:</strong> Замена неявного <code>getActiveCell()</code> на выпадающий список или фиксацию строки ученика.</li>
+          <li><strong>Единый вечерний пайплайн:</strong> Объединение сверки Telegram и фиксации статусов в одну неделимую транзакцию.</li>
+          <li><strong>Прямой поиск по суффиксу:</strong> Поиск листа оплат по имени <code>sheet.getName() + SUFFIX</code> без ненадежного парсинга формулы F1.</li>
+          <li><strong>Пакетные обновления (Batch IO):</strong> Замена 7,600 единичных вызовов <code>getValue()</code> на один <code>getValues()</code> / <code>setValues()</code>.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Architecture SVG Diagram -->
+    <section class="diagram-section">
+      <div class="section-title">📐 Схема Потоков Данных (Architecture Flowchart)</div>
+      <div class="section-sub">Взаимодействие активной книги курсов, центральной базы CRM и Telegram Bot API</div>
+
+      <div class="svg-wrapper">
+        <svg viewBox="0 0 760 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Background Grid & Defs -->
+          <defs>
+            <linearGradient id="gradGroup" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#1e293b"/>
+              <stop offset="100%" stop-color="#0f172a"/>
+            </linearGradient>
+            <linearGradient id="gradPay" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#1e1b4b"/>
+              <stop offset="100%" stop-color="#0f172a"/>
+            </linearGradient>
+            <linearGradient id="gradCrm" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#064e3b"/>
+              <stop offset="100%" stop-color="#022c22"/>
+            </linearGradient>
+            <linearGradient id="gradTg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#0369a1"/>
+              <stop offset="100%" stop-color="#082f49"/>
+            </linearGradient>
+            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="6" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+            </filter>
+          </defs>
+
+          <!-- 1. Active Spreadsheet Box -->
+          <rect x="20" y="20" width="410" height="440" rx="16" fill="#0f172a" stroke="#334155" stroke-width="1.5" stroke-dasharray="4 4"/>
+          <text x="40" y="50" fill="#94a3b8" font-size="12" font-weight="700" letter-spacing="1">КНИГА ТАБЛИЦ: ГРУППЫ & ОПЕРАТОРЫ</text>
+
+          <!-- Sheet "Настройки" -->
+          <rect x="40" y="70" width="370" height="65" rx="10" fill="url(#gradGroup)" stroke="#475569" stroke-width="1.2"/>
+          <text x="55" y="94" fill="#38bdf8" font-size="13" font-weight="700">Лист "Настройки" (SettingsRepository)</text>
+          <text x="55" y="115" fill="#94a3b8" font-size="11">Колонки B (ключ) & C (значение) • SUMMARY_SHEET_ID, DATE_ROW...</text>
+
+          <!-- Sheet "Курс" -->
+          <rect x="40" y="155" width="370" height="135" rx="10" fill="url(#gradGroup)" stroke="#38bdf8" stroke-width="1.5"/>
+          <text x="55" y="180" fill="#f8fafc" font-size="13" font-weight="700">Публичный лист группы ("Робототехника Пн")</text>
+          <text x="55" y="202" fill="#cbd5e1" font-size="11.5">• A6:D11: Чекбоксы тарифов ("За месяц", "За день", "Своя")</text>
+          <text x="55" y="222" fill="#cbd5e1" font-size="11.5">• C21:C24: Форма ученика (ФИО, возраст, родитель, тел.)</text>
+          <text x="55" y="242" fill="#cbd5e1" font-size="11.5">• F5:F26: Список учеников (макс. 22 чел.)</text>
+          <text x="55" y="262" fill="#cbd5e1" font-size="11.5">• G5:AN26: Сетка посещаемости (1, 0, Первое занятие)</text>
+
+          <!-- Sheet "Курс Оплата" (Hidden) -->
+          <rect x="40" y="310" width="370" height="130" rx="10" fill="url(#gradPay)" stroke="#a855f7" stroke-width="1.2"/>
+          <text x="55" y="335" fill="#c084fc" font-size="13" font-weight="700">Скрытый лист отметок ("... Оплата")</text>
+          <text x="55" y="357" fill="#cbd5e1" font-size="11.5">• Сетка статусов: "Оплачено" / пустые ячейки</text>
+          <text x="55" y="377" fill="#cbd5e1" font-size="11.5">• Скрывается автоматически при создании через hideSheet()</text>
+          <text x="55" y="405" fill="#ef4444" font-size="11" font-weight="600">⚠️ F1: Ссылка HYPERLINK (#gid=...) — ломает AddStudent!</text>
+
+          <!-- Two-Way Arrow between Group and Payment Sheet -->
+          <path d="M 225 290 L 225 310" stroke="#a855f7" stroke-width="2"/>
+          <path d="M 235 310 L 235 290" stroke="#38bdf8" stroke-width="2"/>
+
+          <!-- 2. Central CRM Spreadsheet Box -->
+          <rect x="470" y="20" width="270" height="230" rx="16" fill="#022c22" stroke="#059669" stroke-width="1.5"/>
+          <text x="490" y="48" fill="#34d399" font-size="12" font-weight="700" letter-spacing="1">ЦЕНТРАЛЬНАЯ БАЗА CRM</text>
+          <text x="490" y="65" fill="#6ee7b7" font-size="10.5">ID: SUMMARY_SHEET_ID</text>
+
+          <!-- Sheet "Информация об учениках" -->
+          <rect x="485" y="80" width="240" height="65" rx="8" fill="#064e3b" stroke="#10b981" stroke-width="1"/>
+          <text x="498" y="102" fill="#a7f3d0" font-size="12" font-weight="700">Информация об учениках</text>
+          <text x="498" y="122" fill="#6ee7b7" font-size="10.5">ФИО, Возраст, Тел., Курсы</text>
+          <text x="498" y="137" fill="#f87171" font-size="10">⚠️ Курс: "Имя + Дата"</text>
+
+          <!-- Sheet "Оплата" -->
+          <rect x="485" y="155" width="240" height="80" rx="8" fill="#064e3b" stroke="#10b981" stroke-width="1"/>
+          <text x="498" y="177" fill="#a7f3d0" font-size="12" font-weight="700">Лист "Оплата" (Журнал)</text>
+          <text x="498" y="196" fill="#6ee7b7" font-size="10.5">Ученик, Внесенная сумма, Баланс</text>
+          <text x="498" y="213" fill="#6ee7b7" font-size="10.5">Col E+: Логи + JSON Note {cols:[]}</text>
+          <text x="498" y="228" fill="#f87171" font-size="10">⚠️ Курс: просто "Имя"</text>
+
+          <!-- 3. Telegram Box -->
+          <rect x="470" y="270" width="270" height="190" rx="16" fill="#082f49" stroke="#0284c7" stroke-width="1.5"/>
+          <text x="490" y="298" fill="#38bdf8" font-size="12" font-weight="700" letter-spacing="1">TELEGRAM BOT NOTIFIER</text>
+
+          <rect x="485" y="315" width="240" height="130" rx="8" fill="url(#gradTg)" stroke="#0369a1" stroke-width="1"/>
+          <text x="498" y="338" fill="#bae6fd" font-size="12" font-weight="700">Сверка посещений за сегодня</text>
+          <text x="498" y="358" fill="#e0f2fe" font-size="11">🔁 Оплачено, но 0 (пропуск)</text>
+          <text x="498" y="376" fill="#e0f2fe" font-size="11">⚠️ Пришли, но не оплачено</text>
+          <text x="498" y="398" fill="#f87171" font-size="10.5" font-weight="700">💥 ГОНКА С ВЕЧЕРНИМ ДЖОБОМ</text>
+          <text x="498" y="415" fill="#fca5a5" font-size="10">23:00 стирает 1 и 0 до отчёта!</text>
+          <text x="498" y="432" fill="#fca5a5" font-size="10">Ключ бота зашит в код (утечка)</text>
+
+          <!-- Connecting Arrows -->
+          <path d="M 410 210 Q 440 210 470 120" stroke="#10b981" stroke-width="2" stroke-dasharray="4 4" fill="none"/>
+          <path d="M 410 240 Q 440 240 470 190" stroke="#38bdf8" stroke-width="2" fill="none"/>
+          <path d="M 410 370 Q 440 370 470 370" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 4" fill="none"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- 4 Critical Deep-Dive Pillars -->
+    <section class="section-title">🔍 4 Архитектурных и UX Конфликта</section>
+    <div class="section-sub">Критический анализ причин отказов, зависаний и потери данных</div>
+
+    <section class="pillars-grid">
+      <!-- Pillar 1 -->
+      <div class="pillar-card danger">
+        <div class="pillar-num">1</div>
+        <div class="pillar-title">Ловушка Фокуса: Смерть Ученика "true"</div>
+        <div class="pillar-desc">
+          В <span class="code-pill">processPaymentFromUI</span> имя ученика берется не из формы, а из <span class="code-pill">sheet.getActiveCell().getValue()</span>. Когда оператор кликает на чекбокс тарифа в A6:D11, активной ячейкой становится сам чекбокс! Значение ячейки — булево <span class="code-pill">true</span>. Скрипт ищет на листе ученика по имени <strong>"true"</strong> и выбрасывает ошибку. Требуется ювелирный повторный клик на имя перед нажатием кнопки.
+        </div>
+      </div>
+
+      <!-- Pillar 2 -->
+      <div class="pillar-card danger">
+        <div class="pillar-num">2</div>
+        <div class="pillar-title">Война Скриптов в 23:00 (Data Race)</div>
+        <div class="pillar-desc">
+          Вечерний триггер <span class="code-pill">processEveningAttendance</span> проходит по всей сетке и перезаписывает <code>1</code> на «Отработано», а <code>0</code> на «Надо отработать». Если бот <span class="code-pill">Телеграм.js</span> запускается после него, он проверяет <code>status === '1' || status === '0'</code>, находит ровно 0 совпадений и <strong>вообще ничего не шлет в Telegram</strong>. Данные о должниках полностью теряются.
+        </div>
+      </div>
+
+      <!-- Pillar 3 -->
+      <div class="pillar-card warn">
+        <div class="pillar-num">3</div>
+        <div class="pillar-title">Авария F1: HYPERLINK vs RichText</div>
+        <div class="pillar-desc">
+          <span class="code-pill">CreateNewCourse.js</span> прописывает в ячейку F1 формулу <span class="code-pill">=HYPERLINK("#gid=...")</span>. Но <span class="code-pill">AddStudentToCourse.js</span> пытается прочитать её через <span class="code-pill">getRichTextValue().getLinkUrl()</span>. Для формул этот метод возвращает <code>null</code>! Следующая же строчка <code>url.match(...)</code> аварийно падает с <code>TypeError</code>, блокируя добавление учеников.
+        </div>
+      </div>
+
+      <!-- Pillar 4 -->
+      <div class="pillar-card warn">
+        <div class="pillar-num">4</div>
+        <div class="pillar-title">Разрыв Реляционной Схемы CRM</div>
+        <div class="pillar-desc">
+          В центральной базе CRM (<span class="code-pill">SUMMARY_SHEET_ID</span>) хранятся две таблицы. Лист «Информация об учениках» записывает курс как <code>Имя + Дата</code> ("Робототехника 07.09.26"), а лист «Оплата» записывает курс как просто <code>Имя</code> ("Робототехника"). Их невозможно сопоставить SQL-запросом или ВПР/XLOOKUP из-за рассинхрона строковых ключей.
+        </div>
+      </div>
+    </section>
+
+    <!-- UX Friction Audit Table -->
+    <section class="matrix-card">
+      <div style="padding: 16px 20px; border-bottom: 1px solid var(--card-border);">
+        <h3 style="font-size: 16px; font-weight: 700;">Реестр UX-Барьеров и Эргономического Трения</h3>
+      </div>
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th>Сценарий</th>
+            <th>Фактическое Поведение Кода</th>
+            <th>Последствие для Пользователя</th>
+            <th>Приоритет</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Проведение оплаты</strong></td>
+            <td>Клик на чекбокс перехватывает фокус. Скрипт требует активную ячейку на ФИО.</td>
+            <td>Оператор получает ошибку «Ученик 'true' не найден», паникует и не понимает причину.</td>
+            <td><span class="status-tag crit">Критический</span></td>
+          </tr>
+          <tr>
+            <td><strong>Зачисление ученика</strong></td>
+            <td>В коде оставлены отладочные <code>alert(url)</code> и <code>alert(parentName)</code>.</td>
+            <td>Оператор обязан нажать кнопку «ОК» 3–4 раза на каждого зачисляемого ребенка.</td>
+            <td><span class="status-tag high">Высокий</span></td>
+          </tr>
+          <tr>
+            <td><strong>Лимит на 22 ученика</strong></td>
+            <td>Диапазон жестко зашит в коде как <code>F5:F26</code> без динамического расширения.</td>
+            <td>При попытке добавить 23-го ученика скрипт блокирует запись без предложения создать подгруппу.</td>
+            <td><span class="status-tag high">Высокий</span></td>
+          </tr>
+          <tr>
+            <td><strong>Предоплата за месяц</strong></td>
+            <td>Фильтрация занятий по <code>c.date.getMonth() === now.getMonth()</code>.</td>
+            <td>Невозможно оплатить занятия следующего месяца в конце текущего (например, 28 августа на сентябрь).</td>
+            <td><span class="status-tag high">Высокий</span></td>
+          </tr>
+          <tr>
+            <td><strong>Вечерний пересчет</strong></td>
+            <td>Поэлементный <code>getValue()</code> / <code>setValue()</code> в тройном цикле (7600+ вызовов).</td>
+            <td>Скрипт зависает и падает по 6-минутному таймауту Google Apps Script, разрушая данные.</td>
+            <td><span class="status-tag crit">Критический</span></td>
+          </tr>
+          <tr>
+            <td><strong>Утечка секретов</strong></td>
+            <td>Токен бота и Chat ID зашиты константами в открытом исходном коде.</td>
+            <td>Угроза безопасности: любой редактор таблицы имеет полный контроль над Telegram-ботом.</td>
+            <td><span class="status-tag crit">Критический</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Engineering Recommendations -->
+    <section class="diagram-section">
+      <div class="section-title">🛠 План Оздоровления (Technical Remediation)</div>
+      <div class="section-sub">Конкретные шаги по устранению дефектов в коде проекта</div>
+      <div style="font-size: 13.5px; color: var(--muted); line-height: 1.7;">
+        <p>1. <strong>Исправление SettingsRepository:</strong> Удалить исполняемый <code>console.log</code> со строки 64. Исправить JSDoc или константы колонок B/C.</p>
+        <p>2. <strong>Устранение капкана фокуса:</strong> Ввести в интерфейс ячейку выбора ученика (например, выпадающий список в F21) либо запоминать выбранную строку при помощи триггера <code>onSelectionChange</code>.</p>
+        <p>3. <strong>Починка AddStudentToCourse:</strong> Удалить парсинг F1 ссылки через regex; находить лист оплаты стандартным вызовом <code>getSheetByName(name + SUFFIX)</code>. Убрать мусорные <code>ui.alert()</code>.</p>
+        <p>4. <strong>Синхронизация Telegram и Evening Job:</strong> Объединить их в единый запускаемый сценарий: сначала сбор должников и отправка отчёта в Telegram, затем пакетный перевод статусов в архивные через <code>setValues()</code>.</p>
+        <p>5. <strong>Унификация ключа курса:</strong> Привести поле «Курс» в обоих листах центральной базы к единому формату (без суффикса даты или со строгой связкой ID).</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Happy-Faraday GAS CRM Architecture & UX Explainer • Visual Hub Artifact
+  </footer>
+
+</body>
+</html>

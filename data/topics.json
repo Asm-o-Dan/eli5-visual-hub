@@ -1,5 +1,21 @@
 [
   {
+    "id": "happy-faraday-crm-architecture",
+    "title": "Архитектура и UX-Аудит Happy-Faraday CRM",
+    "description": "Интерактивный разбор архитектуры, капканов фокуса и гонок данных в Google Таблицах",
+    "category": "Architecture",
+    "tags": [
+      "GAS",
+      "GoogleSheets",
+      "CRM",
+      "UX",
+      "Architecture",
+      "ELI5"
+    ],
+    "date": "2026-09-16",
+    "file": "artifacts/happy-faraday-crm-architecture.html"
+  },
+  {
     "id": "requirements-lec1-fundamentals",
     "title": "Инженерия требований: Понятие, 3 уровня Вигерса, FURPS+ (Лекция 1)",
     "description": "Визуальный разбор лекции №1: случай Спаркл Старлайт, 3 уровня требований (Бизнес, Пользователь, Функции), модель FURPS+, законы внедрения АИС и стандарты IEEE vs ГОСТ.",
