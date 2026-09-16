@@ -1,16 +1,14 @@
 [
   {
     "id": "happy-faraday-crm-architecture",
-    "title": "Архитектура и UX-Аудит Happy-Faraday CRM",
-    "description": "Интерактивный разбор архитектуры, капканов фокуса и гонок данных в Google Таблицах",
-    "category": "Architecture",
+    "title": "Happy Faraday CRM Architecture & Boost Audit",
+    "description": "Deep boost audit, test coverage, and fix roadmap for Google Apps Script CRM",
+    "category": "architecture",
     "tags": [
-      "GAS",
-      "GoogleSheets",
-      "CRM",
-      "UX",
-      "Architecture",
-      "ELI5"
+      "crm",
+      "apps-script",
+      "audit",
+      "testing"
     ],
     "date": "2026-09-16",
     "file": "artifacts/happy-faraday-crm-architecture.html"
