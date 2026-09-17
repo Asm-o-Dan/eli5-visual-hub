@@ -1,5 +1,20 @@
 [
   {
+    "id": "mid1-scientific-research-methodology",
+    "title": "Методология научных исследований: Научный аппарат и статья (МИД1)",
+    "description": "Интерактивное руководство: перевод реального проекта (DrugsEngine) в научный аппарат, формулу гипотезы и статью IMRAD по ГОСТ",
+    "category": "Research",
+    "tags": [
+      "МИД1",
+      "Методология",
+      "IMRAD",
+      "DrugsEngine",
+      "Гипотеза"
+    ],
+    "date": "2026-09-17",
+    "file": "artifacts/mid1-scientific-research-methodology.html"
+  },
+  {
     "id": "happy-faraday-crm-architecture",
     "title": "Happy-Faraday CRM: Архитектура, ACID Транзакции и Модуль Сводка",
     "description": "Архитектурный аудит, двухфазный откат транзакций, синхронизация дат оплат и полный аудит модуля Сводка с покрытием 118 автотестами",

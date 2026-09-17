@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>МИД1: Методология научных исследований и подготовка статьи — ELI5 Visual Guide</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card: #131b2e;
+      --card-hover: #1c2742;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-purple: #a855f7;
+      --accent-amber: #f59e0b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --code-bg: #0b1120;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+      background: radial-gradient(circle at 50% 0%, #151f38 0%, var(--bg) 80%);
+      color: var(--text);
+      padding: 16px;
+      max-width: 980px;
+      margin: 0 auto 60px;
+      line-height: 1.55;
+    }
+
+    .header-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .back-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .badge-course {
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 4px 12px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 24px 12px 28px;
+    }
+    .hero h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #fff 40%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      color: var(--muted);
+      font-size: 15px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .rule-card {
+      background: linear-gradient(145deg, rgba(56, 189, 248, 0.08), rgba(168, 85, 247, 0.05));
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    }
+    .rule-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .box {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 18px;
+    }
+    .box.bad { border-left: 4px solid var(--accent-red); }
+    .box.good { border-left: 4px solid var(--accent-green); }
+    .box-title {
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .box.bad .box-title { color: #fca5a5; }
+    .box.good .box-title { color: #86efac; }
+    .box ul { list-style: none; }
+    .box li {
+      font-size: 13.5px;
+      margin-bottom: 8px;
+      position: relative;
+      padding-left: 18px;
+      color: #cbd5e1;
+    }
+    .box.bad li::before { content: "✕"; position: absolute; left: 0; color: var(--accent-red); }
+    .box.good li::before { content: "✓"; position: absolute; left: 0; color: var(--accent-green); }
+
+    .svg-container {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 28px;
+      overflow-x: auto;
+    }
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+    }
+    .section-title span { color: var(--accent); }
+
+    .sim-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 28px;
+    }
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .btn {
+      background: #1e293b;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: #334155; }
+    .btn.active {
+      background: var(--accent);
+      color: #04101e;
+      border-color: var(--accent);
+    }
+
+    .output-box {
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 14px;
+      font-family: monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .input-textarea {
+      width: 100%;
+      height: 110px;
+      background: var(--code-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 12px;
+      color: var(--text);
+      font-size: 14px;
+      resize: vertical;
+      margin-bottom: 8px;
+      outline: none;
+    }
+    .input-textarea:focus { border-color: var(--accent); }
+    .char-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .char-badge.ok { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); border: 1px solid var(--accent-green); }
+    .char-badge.warn { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); border: 1px solid var(--accent-red); }
+
+    .quiz-item {
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .quiz-q {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 10px;
+      color: #f1f5f9;
+    }
+    .quiz-opt {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: #1e293b;
+      border: 1px solid var(--card-border);
+      padding: 8px 12px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      color: #cbd5e1;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .quiz-opt:hover { background: #334155; }
+    .quiz-opt.correct { background: rgba(16, 185, 129, 0.25); border-color: var(--accent-green); color: #a7f3d0; }
+    .quiz-opt.incorrect { background: rgba(239, 68, 68, 0.25); border-color: var(--accent-red); color: #fecaca; }
+    .quiz-expl {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--accent);
+      display: none;
+      padding: 8px;
+      background: rgba(56, 189, 248, 0.08);
+      border-radius: 6px;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .footer a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <div class="header-nav">
+    <a href="../index.html" class="back-link">← В Каталог ELI5 Hub</a>
+    <span class="badge-course">МИД1 • 3 КУРС ПИ</span>
+  </div>
+
+  <!-- Hero Header -->
+  <div class="hero">
+    <h1>Методология научных исследований</h1>
+    <p>Интерактивное руководство по ПЗ №1 и №2: от инженерного проекта (DrugsEngine) к строгому научному аппарату, проверяемой гипотезе и публикации по ГОСТ</p>
+  </div>
+
+  <!-- 0.3s Rule Card -->
+  <div class="rule-card">
+    <div class="rule-header">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+      <span>0.3-Секундная ментальная модель: Анатомия исследования</span>
+    </div>
+    <p style="font-size:13.5px; color:#cbd5e1; margin-bottom:12px;">
+      Научная работа отличается от инженерной разработки наличием <strong>проверяемой закономерности</strong> и строгого понятийного каркаса. Инженер создает систему; ученый выявляет инвариант и доказывает гипотезу.
+    </p>
+    <div style="display:flex; flex-wrap:wrap; gap:8px;">
+      <span style="background:#1e293b; padding:4px 10px; border-radius:6px; font-size:12px; border:1px solid #38bdf8;">🎯 Проблема: Противоречие в практике</span>
+      <span style="background:#1e293b; padding:4px 10px; border-radius:6px; font-size:12px; border:1px solid #a855f7;">🌐 Объект: Процесс в целом</span>
+      <span style="background:#1e293b; padding:4px 10px; border-radius:6px; font-size:12px; border:1px solid #10b981;">🔬 Предмет: Конкретный алгоритм</span>
+      <span style="background:#1e293b; padding:4px 10px; border-radius:6px; font-size:12px; border:1px solid #f59e0b;">💡 Гипотеза: Если... То... За счет...</span>
+    </div>
+  </div>
+
+  <!-- SVG Architecture Flow -->
+  <div class="svg-container">
+    <div class="section-title"><span>01.</span> Конвейер научного цикла (от эмпирики к теории)</div>
+    <svg viewBox="0 0 860 210" width="100%" height="auto" style="overflow:visible;">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8"/>
+        </marker>
+        <linearGradient id="gradBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#1e293b"/>
+          <stop offset="100%" stop-color="#0f172a"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Step 1 -->
+      <g transform="translate(10, 20)">
+        <rect width="180" height="80" rx="10" fill="url(#gradBlue)" stroke="#ef4444" stroke-width="1.5"/>
+        <text x="90" y="32" fill="#f87171" font-size="12" font-weight="bold" text-anchor="middle">1. ЭМПИРИЧЕСКИЙ СБОЙ</text>
+        <text x="90" y="52" fill="#cbd5e1" font-size="11" text-anchor="middle">Векторный поиск путает</text>
+        <text x="90" y="68" fill="#fca5a5" font-size="11" font-weight="bold" text-anchor="middle">5 мг vs 500 мг (Cosine &gt; 0.96)</text>
+      </g>
+      <line x1="190" y1="60" x2="220" y2="60" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+
+      <!-- Step 2 -->
+      <g transform="translate(225, 20)">
+        <rect width="180" height="80" rx="10" fill="url(#gradBlue)" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="90" y="32" fill="#fbbf24" font-size="12" font-weight="bold" text-anchor="middle">2. ПОСТАНОВКА ПРОБЛЕМЫ</text>
+        <text x="90" y="52" fill="#cbd5e1" font-size="11" text-anchor="middle">Противоречие: Семантика</text>
+        <text x="90" y="68" fill="#fde68a" font-size="11" font-weight="bold" text-anchor="middle">vs Числовая точность</text>
+      </g>
+      <line x1="405" y1="60" x2="435" y2="60" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+
+      <!-- Step 3 -->
+      <g transform="translate(440, 20)">
+        <rect width="180" height="80" rx="10" fill="url(#gradBlue)" stroke="#a855f7" stroke-width="1.5"/>
+        <text x="90" y="32" fill="#c084fc" font-size="12" font-weight="bold" text-anchor="middle">3. ГИПОТЕЗА &amp; МЕТОД</text>
+        <text x="90" y="52" fill="#cbd5e1" font-size="11" text-anchor="middle">RRF (k=60) + СИ Нормализатор</text>
+        <text x="90" y="68" fill="#e9d5ff" font-size="11" font-weight="bold" text-anchor="middle">(целочисленные мкг / мкл)</text>
+      </g>
+      <line x1="620" y1="60" x2="650" y2="60" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+
+      <!-- Step 4 -->
+      <g transform="translate(655, 20)">
+        <rect width="195" height="80" rx="10" fill="url(#gradBlue)" stroke="#10b981" stroke-width="1.5"/>
+        <text x="97" y="32" fill="#34d399" font-size="12" font-weight="bold" text-anchor="middle">4. ВЕРИФИКАЦИЯ &amp; ПУБЛИКАЦИЯ</text>
+        <text x="97" y="52" fill="#cbd5e1" font-size="11" text-anchor="middle">Эксперимент на 12.5k поз.</text>
+        <text x="97" y="68" fill="#6ee7b7" font-size="11" font-weight="bold" text-anchor="middle">MRR +21.4% • Статья IMRAD</text>
+      </g>
+
+      <!-- Bottom Legend -->
+      <path d="M 100 100 L 100 135 L 750 135 L 750 100" fill="none" stroke="rgba(255,255,255,0.15)" stroke-dasharray="4"/>
+      <text x="425" y="155" fill="#94a3b8" font-size="12" text-anchor="middle">Движение от эмпирии к теоретическому моделированию и обратно к проверяющей практике</text>
+    </svg>
+  </div>
+
+  <!-- Comparison Grid -->
+  <div class="section-title"><span>02.</span> Типичные студенческие ошибки vs Академический эталон</div>
+  <div class="grid-2">
+    <div class="box bad">
+      <div class="box-title">
+        <span>Типичные антипаттерны в отчетах</span>
+      </div>
+      <ul>
+        <li><strong>Путаница объекта и предмета:</strong> «Объект — алгоритм BM25, предмет — поиск в аптеке» (на самом деле наоборот!).</li>
+        <li><strong>Декларативная гипотеза без механизма:</strong> «Мы сделаем программу, и поиск станет лучше» (нет условий, метрик и причинно-следственной связи).</li>
+        <li><strong>Раздутая аннотация:</strong> текст на 3 страницы с листингами вместо 300-500 знаков лаконичной сути.</li>
+        <li><strong>Игнорирование ГОСТ ссылок:</strong> ссылки на Википедию или ссылки без года издания, тома и страниц.</li>
+      </ul>
+    </div>
+    <div class="box good">
+      <div class="box-title">
+        <span>Эталонный исследовательский каркас (ПЗ №1-2)</span>
+      </div>
+      <ul>
+        <li><strong>Объект шире предмета:</strong> Объект — весь процесс поиска в фармации; Предмет — алгоритмическая связка RRF + СИ-нормализатор.</li>
+        <li><strong>Трехчастная формула гипотезы:</strong> «ЕСЛИ [метод] ... ТО [измеримый эффект +20% MRR] ... ЗА СЧЕТ ТОГО, ЧТО [механизм исключения коллизий]».</li>
+        <li><strong>Калиброванная аннотация:</strong> ровно 420 знаков по ГОСТ (проблема, предложенный метод, ключевая цифра результата).</li>
+        <li><strong>Библиография по ГОСТ Р 7.0.5-2008:</strong> классические первоисточники (Robertson, Cormack, ГФ XIV РФ).</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Interactive Simulator: The Real Problem in DrugsEngine -->
+  <div class="sim-card">
+    <div class="section-title"><span>03.</span> Интерактивный симулятор: Векторная коллизия vs Гибридный RRF</div>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:14px;">
+      Попробуйте выполнить поисковый запрос <code>«Парацетамол 500 мг»</code> в двух режимах и посмотрите, почему чистый векторный нейропоиск опасен для медицины без детерминированного СИ-нормализатора.
+    </p>
+
+    <div class="btn-group">
+      <button class="btn active" id="btnDense" onclick="setMode('dense')">1. Чистый векторный поиск (Dense Qdrant)</button>
+      <button class="btn" id="btnHybrid" onclick="setMode('hybrid')">2. Гибрид (BM25 + Dense RRF k=60 + СИ)</button>
+    </div>
+
+    <div class="output-box" id="simOutput">
+      <!-- Injected via JS -->
+    </div>
+  </div>
+
+  <!-- Interactive Abstract Word Counter -->
+  <div class="sim-card">
+    <div class="section-title"><span>04.</span> Интерактивный валидатор аннотации (300–500 знаков)</div>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:12px;">
+      Согласно ГОСТ и методичке ПЗ №1, объем аннотации должен строго укладываться в диапазон 300–500 печатных знаков. Редактируйте текст ниже:
+    </p>
+    <textarea class="input-textarea" id="abstractText" oninput="checkAbstract()">В работе исследуется проблема точности поиска медицинских препаратов в распределенных базах данных. Предложен гибридный алгоритм ранжирования на базе векторного поиска Qdrant и лексического алгоритма BM25 с агрегацией оценок через Reciprocal Rank Fusion (k=60). Реализован модуль нормализации дозировок в канонические единицы СИ. Эксперименты подтвердили рост MRR на 21.4% и полное устранение коллизий дозировок разных порядков.</textarea>
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <span id="charCountBadge" class="char-badge ok">Символов: 420 / 300-500 (Идеально для ВАК)</span>
+      <button class="btn" onclick="resetAbstract()" style="padding:4px 10px; font-size:11px;">Сброс к эталону</button>
+    </div>
+  </div>
+
+  <!-- Interactive Defense Quiz -->
+  <div class="sim-card">
+    <div class="section-title"><span>05.</span> Интерактивный экзаменатор к защите (4 ключевых вопроса)</div>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:16px;">
+      Контрольные вопросы преподавателя на защите ПЗ №1 и №2. Проверьте свою готовность:
+    </p>
+
+    <!-- Q1 -->
+    <div class="quiz-item">
+      <div class="quiz-q">1. В чем строгое методологическое отличие объекта исследования от предмета?</div>
+      <button class="quiz-opt" onclick="answerQuiz(this, false, 1)">Объект — это алгоритм или код программы, а предмет — это предметная область.</button>
+      <button class="quiz-opt" onclick="answerQuiz(this, true, 1)">Объект — это изучаемый процесс или система в целом; предмет — конкретные связи и алгоритмы внутри объекта.</button>
+      <button class="quiz-opt" onclick="answerQuiz(this, false, 1)">Объект и предмет являются полными синонимами в технических науках.</button>
+      <div class="quiz-expl" id="q-expl-1">Верно! Объект всегда шире предмета. В нашем случае: Объект — процесс информационного поиска в фармации, а Предмет — алгоритмическая модель RRF и СИ-нормализатор.</div>
+    </div>
+
+    <!-- Q2 -->
+    <div class="quiz-item">
+      <div class="quiz-q">2. Что такое нулевая гипотеза (H0) в экспериментальном исследовании?</div>
+      <button class="quiz-opt" onclick="answerQuiz(this, true, 2)">Предположение об отсутствии статистической зависимости между исследуемыми факторами.</button>
+      <button class="quiz-opt" onclick="answerQuiz(this, false, 2)">Гипотеза, которая не имеет численных значений в формулировке.</button>
+      <button class="quiz-opt" onclick="answerQuiz(this, false, 2)">Предварительный черновик гипотезы до согласования с научным руководителем.</button>
+      <div class="quiz-expl" id="q-expl-2">Верно! Нулевая гипотеза H0 постулирует, что новый алгоритм не дает статистически значимого улучшения относительно базового решения (baseline).</div>
+    </div>
+
+    <!-- Q3 -->
+    <div class="quiz-item">
+      <div class="quiz-q">3. Каковы четыре стандартных этапа формулирования задач научного исследования?</div>
+      <button class="quiz-opt" onclick="answerQuiz(this, true, 3)">1: Теоретико-методологический анализ; 2: Анализ текущего состояния; 3: Моделирование; 4: Эксперимент и практика.</button>
+      <button class="quiz-opt" onclick="answerQuiz(this, false, 3)">1: Запуск IDE; 2: Написание кода; 3: Тестирование; 4: Релиз в GitHub.</button>
+      <button class="quiz-opt" onclick="answerQuiz(this, false, 3)">1: Выбор темы; 2: Поиск спонсоров; 3: Написание отчета; 4: Защита.</button>
+      <div class="quiz-expl" id="q-expl-3">Точно! Любое классическое исследование строится строго по этой 4-этапной академической цепочке.</div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="quiz-item">
+      <div class="quiz-q">4. Какое количество ключевых слов и какой длины рекомендуются для статьи?</div>
+      <button class="quiz-opt" onclick="answerQuiz(this, false, 4)">10-15 слов, без ограничений по длине фразы.</button>
+      <button class="quiz-opt" onclick="answerQuiz(this, true, 4)">5-7 терминов, причем внутри ключевой фразы должно быть не более 3 слов.</button>
+      <button class="quiz-opt" onclick="answerQuiz(this, false, 4)">Ровно 1 ключевое слово, совпадающее с названием статьи.</button>
+      <div class="quiz-expl" id="q-expl-4">Правильно! По методичке ПЗ №1: 5-7 ключевых терминов, фразы длиной не более 3 слов для корректной индексации базами РИНЦ/Scopus.</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    Разработано для хранилища знаний <a href="#">Obsidian-Mind</a> &amp; <a href="https://github.com/Asm-o-Dan/eli5-visual-hub">ELI5 Visual Hub</a> • 2026
+  </div>
+
+  <script>
+    function setMode(mode) {
+      document.getElementById('btnDense').classList.toggle('active', mode === 'dense');
+      document.getElementById('btnHybrid').classList.toggle('active', mode === 'hybrid');
+
+      const out = document.getElementById('simOutput');
+      if (mode === 'dense') {
+        out.innerHTML = `
+<span style="color:#f87171;">🔴 РЕЖИМ: Чистый векторный поиск (BGE-M3 Dense Embeddings в Qdrant)</span>
+Запрос: "Парацетамол 500 мг таб №20"
+Vector Similarity (Cosine):
+  [1] Парацетамол 5 мг (детский сироп)       — Cosine: 0.982  <span style="color:#ef4444;">⚠️ ФАТАЛЬНАЯ КОЛЛИЗИЯ ДОЗИРОВКИ (x100 ошибка)</span>
+  [2] Парацетамол 50 мг (капсулы)            — Cosine: 0.967  <span style="color:#ef4444;">⚠️ КОЛЛИЗИЯ ДОЗИРОВКИ</span>
+  [3] Парацетамол 500 мг (таблетки)          — Cosine: 0.951  (Правильный препарат вытеснен на 3-е место!)
+  [4] Панадол 500 мг (растворимый)           — Cosine: 0.940  (Синоним найден, но ранжирование нарушено)
+
+Итог: Precision@1 = 0.0, MRR = 0.33. Высокий риск медицинской ошибки!
+        `;
+      } else {
+        out.innerHTML = `
+<span style="color:#34d399;">🟢 РЕЖИМ: Гибридный конвейер (Qdrant Dense + BM25 Sparse via RRF k=60 + СИ Normalizer)</span>
+Запрос: "Парацетамол 500 мг таб №20"
+Пайплайн предобработки:
+  • Нормализация дозировки: 500 мг ➔ 500 000 мкг (целочисленный инвариант СИ)
+  • Лексический BM25 скор: строгие совпадения "500 мг" получают максимальный вес
+  • Reciprocal Rank Fusion: Score = 1/(60 + r_dense) + 1/(60 + r_bm25)
+
+Результат ранжирования:
+  [1] Парацетамол 500 мг таб №20 (Фармстандарт) — RRF: 0.0328 (Rank 1 BM25 + Rank 3 Dense)  <span style="color:#10b981;">✓ 100% СОВПАДЕНИЕ</span>
+  [2] Панадол 500 мг таб (GSK, синоним)         — RRF: 0.0294 (Rank 4 Dense + Rank 2 BM25)  <span style="color:#10b981;">✓ ВАЛИДНЫЙ АНАЛОГ</span>
+  -- [ФИЛЬТР СИ]: Препараты 5 мг и 50 мг отсечены по несовпадению базиса дозировки (мкг) --
+
+Итог: Precision@1 = 1.0, MRR = 1.0, Latency = 38 мс. Полная клиническая безопасность!
+        `;
+      }
+    }
+    setMode('dense');
+
+    function checkAbstract() {
+      const txt = document.getElementById('abstractText').value;
+      const len = txt.length;
+      const badge = document.getElementById('charCountBadge');
+      if (len >= 300 && len <= 500) {
+        badge.className = 'char-badge ok';
+        badge.innerText = `Символов: ${len} / 300-500 (Идеально для ВАК/РИНЦ)`;
+      } else {
+        badge.className = 'char-badge warn';
+        badge.innerText = `Символов: ${len} / 300-500 (Выход за границы стандарта!)`;
+      }
+    }
+
+    function resetAbstract() {
+      document.getElementById('abstractText').value = "В работе исследуется проблема точности поиска медицинских препаратов в распределенных базах данных. Предложен гибридный алгоритм ранжирования на базе векторного поиска Qdrant и лексического алгоритма BM25 с агрегацией оценок через Reciprocal Rank Fusion (k=60). Реализован модуль нормализации дозировок в канонические единицы СИ. Эксперименты подтвердили рост MRR на 21.4% и полное устранение коллизий дозировок разных порядков.";
+      checkAbstract();
+    }
+
+    function answerQuiz(btn, isCorrect, qNum) {
+      const parent = btn.parentElement;
+      const opts = parent.querySelectorAll('.quiz-opt');
+      opts.forEach(o => {
+        o.disabled = true;
+        o.style.cursor = 'default';
+      });
+      if (isCorrect) {
+        btn.classList.add('correct');
+      } else {
+        btn.classList.add('incorrect');
+      }
+      const expl = document.getElementById('q-expl-' + qNum);
+      if (expl) expl.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
