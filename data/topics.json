@@ -1,5 +1,20 @@
 [
   {
+    "id": "oii-lab1-sql-analytics",
+    "title": "Основы ИИ: Лабораторная №1 (SQL и Northwind)",
+    "description": "Визуальный эксплейнер реляционной базы Northwind, формулы выручки со скидками и разбор 5 задач Варианта №2",
+    "category": "Основы ИИ",
+    "tags": [
+      "sql",
+      "sqlite",
+      "northwind",
+      "pandas",
+      "data-analysis"
+    ],
+    "date": "2026-09-18",
+    "file": "artifacts/oii-lab1-sql-analytics.html"
+  },
+  {
     "id": "mid1-scientific-research-methodology",
     "title": "Методология научных исследований: Научный аппарат и статья (МИД1)",
     "description": "Интерактивное руководство: перевод реального проекта (DrugsEngine) в научный аппарат, формулу гипотезы и статью IMRAD по ГОСТ",
