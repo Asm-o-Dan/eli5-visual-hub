@@ -2,14 +2,15 @@
   {
     "id": "oii-lab1-sql-analytics",
     "title": "Основы ИИ: Лабораторная №1 (SQL и Northwind)",
-    "description": "Визуальный эксплейнер реляционной базы Northwind, формулы выручки со скидками и разбор 5 задач Варианта №2",
+    "description": "Полный педагогический разбор: зачем SQL в ИИ, анатомия склада Northwind, формулы скидок и ход решения 5 задач Варианта 2",
     "category": "Основы ИИ",
     "tags": [
       "sql",
       "sqlite",
       "northwind",
       "pandas",
-      "data-analysis"
+      "data-science",
+      "education"
     ],
     "date": "2026-09-18",
     "file": "artifacts/oii-lab1-sql-analytics.html"

@@ -3,34 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>ОИИ Лабораторная №1: Реляционный анализ Northwind (Вариант №2)</title>
+  <title>ОИИ Лабораторная №1: Реляционный анализ Northwind (Вариант №2) — Полный гид</title>
   <style>
     :root {
-      --bg: #090d16;
-      --card-bg: rgba(23, 32, 54, 0.7);
-      --border: #233554;
-      --text: #f1f5f9;
+      --bg: #070b14;
+      --card-bg: rgba(17, 24, 39, 0.85);
+      --card-inner: #0f172a;
+      --border: #1e293b;
+      --border-focus: #38bdf8;
+      --text: #f8fafc;
       --text-muted: #94a3b8;
       --accent: #38bdf8;
-      --accent-glow: rgba(56, 189, 248, 0.25);
+      --accent-glow: rgba(56, 189, 248, 0.2);
       --success: #10b981;
       --success-glow: rgba(16, 185, 129, 0.2);
       --danger: #ef4444;
       --warning: #f59e0b;
-      --purple: #a855f7;
+      --purple: #c084fc;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
     body {
       background: var(--bg);
       color: var(--text);
-      line-height: 1.6;
-      padding: 16px;
+      line-height: 1.65;
+      padding: 20px 16px 40px;
       max-width: 1040px;
       margin: 0 auto;
     }
     header {
-      margin-bottom: 24px;
-      padding-bottom: 16px;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
       border-bottom: 1px solid var(--border);
     }
     .nav-back {
@@ -40,29 +42,74 @@
       color: var(--accent);
       text-decoration: none;
       font-size: 0.9rem;
-      font-weight: 500;
-      margin-bottom: 12px;
+      font-weight: 600;
+      margin-bottom: 14px;
     }
+    .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
     .badge {
       display: inline-block;
       padding: 4px 10px;
       border-radius: 999px;
       font-size: 0.75rem;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
     }
-    .badge.var { background: rgba(56, 189, 248, 0.15); color: var(--accent); border: 1px solid var(--accent); }
+    .badge.var { background: var(--accent-glow); color: var(--accent); border: 1px solid var(--accent); }
     .badge.ok { background: var(--success-glow); color: var(--success); border: 1px solid var(--success); }
-    h1 { font-size: 1.8rem; margin: 8px 0; color: #fff; }
-    .subtitle { color: var(--text-muted); font-size: 1rem; }
+    .badge.ai { background: rgba(192, 132, 252, 0.15); color: var(--purple); border: 1px solid var(--purple); }
 
-    /* Comparison Grid */
+    h1 { font-size: 1.95rem; margin: 6px 0 10px; color: #fff; line-height: 1.25; }
+    .subtitle { color: var(--text-muted); font-size: 1.05rem; }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+    .card-title {
+      font-size: 1.28rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Pedagogical Split / Mental Model */
+    .concept-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin: 16px 0;
+    }
+    .concept-box {
+      background: var(--card-inner);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .concept-box h4 {
+      color: var(--accent);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1rem;
+    }
+    .concept-box p { font-size: 0.92rem; color: #cbd5e1; }
+
+    /* Comparison Box */
     .compare-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 16px;
-      margin-bottom: 24px;
+      margin: 16px 0;
     }
     @media (max-width: 680px) { .compare-grid { grid-template-columns: 1fr; } }
     .box {
@@ -89,111 +136,95 @@
     .box.bad .box-title { color: var(--danger); }
     .box.good .box-title { color: var(--success); }
 
-    /* Schema Visual */
-    .section-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 24px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-    }
-    .section-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    /* SVG Container */
     .svg-container {
       width: 100%;
       overflow-x: auto;
       text-align: center;
-      padding: 8px 0;
+      padding: 10px 0;
     }
 
-    /* Tasks Accordion */
-    .task-card {
-      background: rgba(15, 23, 42, 0.6);
+    /* Step-by-step Solution Cards */
+    .step-card {
+      background: var(--card-inner);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      margin-bottom: 12px;
-      overflow: hidden;
-      transition: border-color 0.2s;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 16px;
+      border-left: 4px solid var(--accent);
     }
-    .task-card:hover { border-color: var(--accent); }
-    .task-header {
-      padding: 14px 18px;
-      cursor: pointer;
+    .step-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      font-weight: 600;
-      user-select: none;
+      align-items: flex-start;
+      margin-bottom: 10px;
     }
-    .task-header .left { display: flex; align-items: center; gap: 10px; }
-    .task-tag {
+    .step-num {
       background: var(--accent-glow);
       color: var(--accent);
-      padding: 2px 8px;
+      padding: 3px 10px;
       border-radius: 6px;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
+      font-weight: 700;
     }
-    .task-body {
-      padding: 16px 18px;
-      border-top: 1px solid var(--border);
-      background: rgba(10, 15, 29, 0.9);
-      display: none;
+    .step-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      flex: 1;
+      margin-left: 12px;
     }
-    .task-body.open { display: block; }
+    .step-why {
+      background: rgba(56, 189, 248, 0.05);
+      border-left: 3px solid #38bdf8;
+      padding: 10px 14px;
+      margin: 10px 0;
+      font-size: 0.92rem;
+      color: #e2e8f0;
+    }
     pre {
-      background: #060910;
+      background: #030712;
       border: 1px solid #1e293b;
       border-radius: 8px;
-      padding: 12px;
+      padding: 14px;
       overflow-x: auto;
-      font-family: ui-monospace, monospace;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-size: 0.88rem;
       color: #38bdf8;
       margin: 10px 0;
     }
-    .result-pill {
+    .answer-badge {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(16, 185, 129, 0.12);
+      background: rgba(16, 185, 129, 0.14);
       border: 1px solid var(--success);
       color: var(--success);
-      padding: 6px 12px;
+      padding: 8px 14px;
       border-radius: 8px;
       font-weight: 700;
-      margin-top: 6px;
+      margin-top: 8px;
+      font-size: 0.95rem;
     }
 
-    /* Interactive Sandbox */
-    .sandbox-container {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+    /* Sandbox */
     .sandbox-select {
-      background: #0f172a;
+      background: #0b1329;
       border: 1px solid var(--border);
       color: #fff;
-      padding: 10px;
+      padding: 12px;
       border-radius: 8px;
       font-size: 0.95rem;
       width: 100%;
+      margin-bottom: 12px;
     }
     .run-btn {
       background: #0284c7;
       color: #fff;
       border: none;
-      padding: 10px 18px;
+      padding: 12px 20px;
       border-radius: 8px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
@@ -203,48 +234,48 @@
     .run-btn:hover { background: #0369a1; }
     .sandbox-output {
       background: #030712;
-      border: 1px solid #1f2937;
+      border: 1px solid #1e293b;
       border-radius: 8px;
-      padding: 14px;
-      min-height: 120px;
+      padding: 16px;
+      min-height: 140px;
       font-family: monospace;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       color: #e2e8f0;
       white-space: pre-wrap;
+      margin-top: 12px;
     }
 
     /* Quiz */
     .quiz-item {
-      background: rgba(15, 23, 42, 0.7);
+      background: var(--card-inner);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 14px;
-      margin-bottom: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
     }
-    .quiz-q { font-weight: 600; margin-bottom: 10px; }
+    .quiz-q { font-weight: 700; margin-bottom: 12px; color: #fff; }
     .quiz-opt {
       display: block;
-      padding: 8px 12px;
-      margin-bottom: 6px;
-      border-radius: 6px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      border-radius: 8px;
       border: 1px solid var(--border);
-      background: #0b1120;
+      background: #070f22;
       cursor: pointer;
       transition: all 0.2s;
-      font-size: 0.9rem;
+      font-size: 0.92rem;
     }
     .quiz-opt:hover { border-color: var(--accent); }
-    .quiz-opt.correct { background: var(--success-glow); border-color: var(--success); color: var(--success); font-weight: 600; }
+    .quiz-opt.correct { background: var(--success-glow); border-color: var(--success); color: var(--success); font-weight: 700; }
     .quiz-opt.wrong { background: rgba(239, 68, 68, 0.15); border-color: var(--danger); color: var(--danger); }
-    .quiz-feedback { margin-top: 8px; font-size: 0.85rem; display: none; }
+    .quiz-feedback { margin-top: 10px; font-size: 0.9rem; display: none; padding: 8px 12px; border-radius: 6px; background: rgba(56, 189, 248, 0.08); }
 
-    /* Footer */
     footer {
       text-align: center;
       color: var(--text-muted);
       font-size: 0.85rem;
-      margin-top: 32px;
-      padding-top: 16px;
+      margin-top: 36px;
+      padding-top: 20px;
       border-top: 1px solid var(--border);
     }
   </style>
@@ -252,307 +283,346 @@
 <body>
 
   <header>
-    <a href="../index.html" class="nav-back">← Вернуться в ELI5 Hub</a>
-    <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 4px;">
+    <a href="../index.html" class="nav-back">← Вернуться в каталог ELI5 Hub</a>
+    <div class="badges">
       <span class="badge var">ОИИ 26/27</span>
-      <span class="badge ok">Вариант №2 (Верифицировано)</span>
+      <span class="badge ai">ПГУ им. Т.Г. Шевченко</span>
+      <span class="badge ok">Вариант №2 • Полный разбор</span>
     </div>
-    <h1>Реляционный анализ базы данных Northwind</h1>
-    <p class="subtitle">Интерактивный эксплейнер: структура 620k строк, формулы выручки со скидками и SQL-паспорт задач</p>
+    <h1>Лабораторная №1: Реляционный анализ данных Northwind</h1>
+    <p class="subtitle">Пошаговое объяснение: зачем это нужно в курсе по искусственному интеллекту, с какими инструментами мы работаем и как шаг за шагом мыслят при решении всех 5 задач.</p>
   </header>
 
-  <!-- 0.3-Second Rule: Conflict Grid -->
-  <div class="compare-grid">
-    <div class="box bad">
-      <div class="box-title">❌ Типичные ошибки новичков</div>
-      <ul style="padding-left: 20px; font-size: 0.88rem; color: #fca5a5;">
-        <li>Забывают экранировать зарезервированное имя <code>"Order"</code> в SQLite.</li>
-        <li>Считают выручку как <code>Price * Qty</code>, игнорируя колонку скидки <code>(1 - Discount)</code>.</li>
-        <li>Путают <code>COUNT(CustomerId)</code> (число строк) и <code>COUNT(DISTINCT CustomerId)</code>.</li>
-        <li>Делают медленный цикл в Python вместо векторного SQL <code>GROUP BY</code>.</li>
-      </ul>
+  <!-- Section 1: Why in AI course? -->
+  <div class="card">
+    <div class="card-title">
+      <span>🧠</span> 1. Зачем эта лаба в курсе по Искусственному Интеллекту?
     </div>
-    <div class="box good">
-      <div class="box-title">✅ Как решается инженерно</div>
-      <ul style="padding-left: 20px; font-size: 0.88rem; color: #86efac;">
-        <li>Имя таблицы пишется строго в кавычках: <code>SELECT * FROM "Order"</code>.</li>
-        <li>Выручка считается точно: <code>SUM(UnitPrice * Quantity * (1 - Discount))</code>.</li>
-        <li>Уникальные сущности извлекаются строго через предикат <code>DISTINCT</code>.</li>
-        <li>Все 621 883 строк фильтруются и агрегируются движком СУБД за 0.08 секунды.</li>
-      </ul>
+    <p style="color: #cbd5e1; margin-bottom: 12px;">
+      У новичков часто возникает вопрос: <em>«Мы же учим ИИ и машинное обучение, при чём тут вообще SQL и старая база данных 90-х годов?»</em>
+    </p>
+    <div class="concept-grid">
+      <div class="concept-box">
+        <h4><span>🎯</span> 85% работы Data Scientist'а</h4>
+        <p>Модели машинного обучения и нейросети не обучаются в вакууме. В реальных компаниях данные лежат в реляционных базах. Инженер должен уметь извлечь, очистить и сгруппировать сырые факты перед подачей в алгоритмы.</p>
+      </div>
+      <div class="concept-box">
+        <h4><span>⚡</span> Извлечение признаков (Feature Engineering)</h4>
+        <p>Чтобы предсказать, уйдёт ли клиент или какой товар ему порекомендовать, нужно посчитать его историю: сколько заказов он сделал, каков его средний чек со скидкой и через какую курьерку он чаще всего заказывает.</p>
+      </div>
+      <div class="concept-box">
+        <h4><span>🐘</span> 620 000 строк — проверка на прочность</h4>
+        <p>Наш датасет <code>Northwind_large</code> содержит более 620k строк чеков. Это учит не перебирать данные циклами Python вслепую, а отдавать агрегацию быстрому движку СУБД (за 0.05 сек).</p>
+      </div>
     </div>
   </div>
 
-  <!-- Schema Architecture Flowchart SVG -->
-  <div class="section-card">
-    <div class="section-title">
-      <span>🗺️</span> Схема данных и связи (Northwind ERD)
+  <!-- Section 2: Tools Overview -->
+  <div class="card">
+    <div class="card-title">
+      <span>🛠️</span> 2. Инструменты: с чем мы работаем и почему
     </div>
+    <div class="concept-grid">
+      <div class="concept-box">
+        <h4><span>📓</span> Google Colab / Jupyter</h4>
+        <p><strong>Интерактивная тетрадь.</strong> Код выполняется отдельными ячейками (нажатием <code>Shift + Enter</code>). Результат (таблицы, графики) виден мгновенно под ячейкой, а переменные сохраняются в памяти.</p>
+      </div>
+      <div class="concept-box">
+        <h4><span>📦</span> Модуль sqlite3 (Python)</h4>
+        <p><strong>СУБД без головной боли.</strong> В отличие от PostgreSQL или MySQL, SQLite не требует установки сервера и паролей. Вся база — это один локальный файл <code>Northwind_large.sqlite</code> на 32 МБ.</p>
+      </div>
+      <div class="concept-box">
+        <h4><span>🐼</span> Библиотека Pandas</h4>
+        <p><strong>Excel на стероидах.</strong> Метод <code>pd.read_sql_query(query, conn)</code> забирает сырой ответ базы и превращает его в умный объект <code>DataFrame</code>, готовый к фильтрации и визуализации.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3: Schema Metaphor & ERD -->
+  <div class="card">
+    <div class="card-title">
+      <span>🏪</span> 3. Анатомия базы данных Northwind (Метафора склада)
+    </div>
+    <p style="color: #cbd5e1; margin-bottom: 14px;">
+      Представь себе оптовую компанию (Amazon или оптовый склад продуктов). Вся деятельность разделена на логические таблицы:
+    </p>
+
+    <!-- Schema SVG -->
     <div class="svg-container">
-      <svg viewBox="0 0 880 260" style="max-width: 100%; height: auto;">
+      <svg viewBox="0 0 920 280" style="max-width: 100%; height: auto;">
         <defs>
-          <linearGradient id="grad1" x1="0" y1="0" x2="1" y2="1">
+          <linearGradient id="gradCentral" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#9333ea"/>
+            <stop offset="100%" stop-color="#7e22ce"/>
+          </linearGradient>
+          <linearGradient id="gradOrder" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stop-color="#0284c7"/>
             <stop offset="100%" stop-color="#0369a1"/>
           </linearGradient>
-          <linearGradient id="grad2" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#7c3aed"/>
-            <stop offset="100%" stop-color="#6d28d9"/>
-          </linearGradient>
-          <linearGradient id="grad3" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#059669"/>
-            <stop offset="100%" stop-color="#047857"/>
-          </linearGradient>
-          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#38bdf8" flood-opacity="0.3"/>
+          <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+            <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#38bdf8" flood-opacity="0.25"/>
           </filter>
         </defs>
 
-        <!-- Node: Category -->
-        <rect x="20" y="30" width="130" height="70" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
-        <text x="85" y="58" fill="#fff" font-weight="bold" font-size="14" text-anchor="middle">Category</text>
-        <text x="85" y="78" fill="#94a3b8" font-size="11" text-anchor="middle">8 категорий</text>
+        <!-- Category -->
+        <rect x="20" y="40" width="140" height="75" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+        <text x="90" y="68" fill="#fff" font-weight="bold" font-size="14" text-anchor="middle">Category</text>
+        <text x="90" y="88" fill="#94a3b8" font-size="11" text-anchor="middle">8 категорий</text>
+        <text x="90" y="103" fill="#64748b" font-size="10" text-anchor="middle">Id, CategoryName</text>
 
-        <!-- Arrow Cat -> Product -->
-        <line x1="150" y1="65" x2="200" y2="65" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+        <line x1="160" y1="77" x2="220" y2="77" stroke="#38bdf8" stroke-width="2"/>
 
-        <!-- Node: Product -->
-        <rect x="200" y="30" width="130" height="70" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
-        <text x="265" y="58" fill="#fff" font-weight="bold" font-size="14" text-anchor="middle">Product</text>
-        <text x="265" y="78" fill="#94a3b8" font-size="11" text-anchor="middle">77 товаров</text>
+        <!-- Product -->
+        <rect x="220" y="40" width="140" height="75" rx="8" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+        <text x="290" y="68" fill="#fff" font-weight="bold" font-size="14" text-anchor="middle">Product</text>
+        <text x="290" y="88" fill="#94a3b8" font-size="11" text-anchor="middle">77 товаров</text>
+        <text x="290" y="103" fill="#64748b" font-size="10" text-anchor="middle">Id, CategoryId, Price</text>
 
-        <!-- Arrow Product -> OrderDetail -->
-        <line x1="330" y1="65" x2="380" y2="110" stroke="#a855f7" stroke-width="2"/>
+        <line x1="360" y1="77" x2="410" y2="120" stroke="#c084fc" stroke-width="2"/>
 
-        <!-- Central Node: OrderDetail -->
-        <rect x="380" y="80" width="160" height="90" rx="10" fill="url(#grad2)" filter="url(#glow)"/>
-        <text x="460" y="112" fill="#fff" font-weight="bold" font-size="15" text-anchor="middle">OrderDetail</text>
-        <text x="460" y="132" fill="#e9d5ff" font-size="12" text-anchor="middle">621 883 записей</text>
-        <text x="460" y="150" fill="#cbd5e1" font-size="10" text-anchor="middle">Price, Qty, Discount</text>
+        <!-- OrderDetail (Heart of Data) -->
+        <rect x="410" y="90" width="180" height="100" rx="10" fill="url(#gradCentral)" filter="url(#shadow)"/>
+        <text x="500" y="122" fill="#fff" font-weight="bold" font-size="15" text-anchor="middle">OrderDetail</text>
+        <text x="500" y="142" fill="#f3e8ff" font-size="12" text-anchor="middle">🔥 621 883 строк чеков</text>
+        <text x="500" y="162" fill="#cbd5e1" font-size="11" text-anchor="middle">UnitPrice, Quantity, Discount</text>
 
-        <!-- Arrow Order -> OrderDetail -->
-        <line x1="590" y1="125" x2="540" y2="125" stroke="#10b981" stroke-width="2"/>
+        <line x1="650" y1="140" x2="590" y2="140" stroke="#38bdf8" stroke-width="2"/>
 
-        <!-- Node: Order -->
-        <rect x="590" y="80" width="140" height="90" rx="10" fill="url(#grad3)"/>
-        <text x="660" y="112" fill="#fff" font-weight="bold" font-size="15" text-anchor="middle">"Order"</text>
-        <text x="660" y="132" fill="#d1fae5" font-size="12" text-anchor="middle">16 818 заказов</text>
-        <text x="660" y="150" fill="#94a3b8" font-size="10" text-anchor="middle">CustId, EmpId, ShipVia</text>
+        <!-- Order (Header) -->
+        <rect x="650" y="90" width="150" height="100" rx="10" fill="url(#gradOrder)"/>
+        <text x="725" y="122" fill="#fff" font-weight="bold" font-size="15" text-anchor="middle">"Order"</text>
+        <text x="725" y="142" fill="#e0f2fe" font-size="12" text-anchor="middle">16 818 заказов</text>
+        <text x="725" y="162" fill="#94a3b8" font-size="11" text-anchor="middle">CustomerId, EmployeeId</text>
 
-        <!-- Satellite Nodes -->
+        <!-- Satellites -->
         <!-- Employee -->
-        <rect x="760" y="20" width="110" height="55" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
-        <text x="815" y="44" fill="#fff" font-weight="600" font-size="12" text-anchor="middle">Employee</text>
-        <text x="815" y="60" fill="#94a3b8" font-size="10" text-anchor="middle">9 сотрудников</text>
-        <line x1="760" y1="50" x2="720" y2="90" stroke="#f59e0b" stroke-dasharray="3,3"/>
-
-        <!-- Customer -->
-        <rect x="760" y="95" width="110" height="55" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
-        <text x="815" y="119" fill="#fff" font-weight="600" font-size="12" text-anchor="middle">Customer</text>
-        <text x="815" y="135" fill="#94a3b8" font-size="10" text-anchor="middle">91 клиент</text>
-        <line x1="760" y1="125" x2="730" y2="125" stroke="#10b981" stroke-dasharray="3,3"/>
+        <rect x="760" y="15" width="130" height="55" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="825" y="38" fill="#fff" font-weight="600" font-size="12" text-anchor="middle">Employee</text>
+        <text x="825" y="54" fill="#94a3b8" font-size="10" text-anchor="middle">9 менеджеров</text>
+        <line x1="760" y1="45" x2="725" y2="90" stroke="#f59e0b" stroke-dasharray="3,3"/>
 
         <!-- Shipper -->
-        <rect x="760" y="170" width="110" height="55" rx="6" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
-        <text x="815" y="194" fill="#fff" font-weight="600" font-size="12" text-anchor="middle">Shipper</text>
-        <text x="815" y="210" fill="#94a3b8" font-size="10" text-anchor="middle">3 доставки</text>
-        <line x1="760" y1="190" x2="720" y2="155" stroke="#38bdf8" stroke-dasharray="3,3"/>
+        <rect x="760" y="210" width="130" height="55" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1.5"/>
+        <text x="825" y="233" fill="#fff" font-weight="600" font-size="12" text-anchor="middle">Shipper</text>
+        <text x="825" y="249" fill="#94a3b8" font-size="10" text-anchor="middle">3 доставки (ShipVia)</text>
+        <line x1="760" y1="230" x2="725" y2="190" stroke="#10b981" stroke-dasharray="3,3"/>
       </svg>
+    </div>
+
+    <!-- Error traps -->
+    <div class="compare-grid">
+      <div class="box bad">
+        <div class="box-title">❌ Ловушка 1: Ключевое слово ORDER</div>
+        <p style="font-size: 0.88rem; color: #fca5a5;">
+          Слово <code>ORDER</code> в языке SQL зарезервировано под команду сортировки (<code>ORDER BY</code>). Если написать <code>SELECT * FROM Order</code>, база выдаст ошибку синтаксиса. <strong>Нужно всегда писать в кавычках: <code>FROM "Order"</code></strong>.
+        </p>
+      </div>
+      <div class="box bad">
+        <div class="box-title">❌ Ловушка 2: Скидки покупателям</div>
+        <p style="font-size: 0.88rem; color: #fca5a5;">
+          Если считать выручку как <code>Price * Quantity</code>, ответ будет завышен на $6 миллионов! Клиенты получали скидку (поле <code>Discount</code>), поэтому формула: <strong><code>Price * Quantity * (1 - Discount)</code></strong>.
+        </p>
+      </div>
     </div>
   </div>
 
-  <!-- 5 Tasks Solutions Accordion -->
-  <div class="section-card">
-    <div class="section-title">
-      <span>📋</span> 5 Задач Варианта №2: Решения и математика
+  <!-- Section 4: Step-by-Step Logic for 5 Questions -->
+  <div class="card">
+    <div class="card-title">
+      <span>📝</span> 4. Пошаговый ход решения 5 задач (Вариант №2)
     </div>
 
     <!-- Task 1 -->
-    <div class="task-card">
-      <div class="task-header" onclick="toggleTask(1)">
-        <div class="left">
-          <span class="task-tag">Вопрос 1</span>
-          <span>Какой сотрудник обработал наибольшее количество заказов?</span>
-        </div>
-        <span>▼</span>
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">ЗАДАНИЕ 1</span>
+        <div class="step-title">Какой сотрудник обработал наибольшее количество заказов?</div>
       </div>
-      <div class="task-body" id="tb-1">
-        <p style="color: #cbd5e1; font-size: 0.9rem;">Объединяем <code>Employee</code> и <code>Order</code> по ключу <code>EmployeeId</code>:</p>
-        <pre>SELECT e.Id, e.LastName, e.FirstName, COUNT(o.Id) AS OrdersCount
+      <div class="step-why">
+        <strong>Ход мысли:</strong><br>
+        Каждый заказ оформляет менеджер. В таблице <code>"Order"</code> есть поле <code>EmployeeId</code> (1, 2, 3...). Но там нет фамилий. Чтобы узнать имена, мы объединяем (<code>JOIN</code>) таблицу сотрудников <code>Employee</code> с заказами по общему полю <code>Employee.Id = Order.EmployeeId</code>, группируем по каждому менеджеру и считаем заказы через <code>COUNT(o.Id)</code>.
+      </div>
+      <pre>SELECT 
+    e.Id AS EmployeeId,
+    e.LastName,
+    e.FirstName,
+    e.Title,
+    COUNT(o.Id) AS OrdersProcessed
 FROM Employee e
 JOIN "Order" o ON e.Id = o.EmployeeId
 GROUP BY e.Id
-ORDER BY OrdersCount DESC LIMIT 1;</pre>
-        <div class="result-pill">🏆 Janet Leverling (Id: 3) — 1 964 заказа</div>
+ORDER BY OrdersProcessed DESC;
+      </pre>
+      <div class="answer-badge">
+        🏆 Лидер: Janet Leverling (ID=3) — 1 964 заказа
       </div>
     </div>
 
     <!-- Task 2 -->
-    <div class="task-card">
-      <div class="task-header" onclick="toggleTask(2)">
-        <div class="left">
-          <span class="task-tag">Вопрос 2</span>
-          <span>Какая категория продуктов принесла наибольшую выручку?</span>
-        </div>
-        <span>▼</span>
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">ЗАДАНИЕ 2</span>
+        <div class="step-title">Какая категория продуктов принесла наибольшую выручку?</div>
       </div>
-      <div class="task-body" id="tb-2">
-        <p style="color: #cbd5e1; font-size: 0.9rem;">Формула с учетом скидок: <code>UnitPrice * Quantity * (1 - Discount)</code>:</p>
-        <pre>SELECT c.CategoryName, 
-       ROUND(SUM(od.UnitPrice * od.Quantity * (1.0 - od.Discount)), 2) AS NetRevenue
+      <div class="step-why">
+        <strong>Ход мысли:</strong><br>
+        Деньги лежат в деталях заказов <code>OrderDetail</code>, но там указан только <code>ProductId</code>. А название категории <code>CategoryName</code> лежит в таблице <code>Category</code>. Значит, строим реляционный мост из 3 таблиц: <code>Category → Product → OrderDetail</code>. Выручку считаем строго с учетом скидки: <code>SUM(UnitPrice * Quantity * (1 - Discount))</code>.
+      </div>
+      <pre>SELECT 
+    c.Id AS CategoryId,
+    c.CategoryName,
+    ROUND(SUM(od.UnitPrice * od.Quantity * (1.0 - od.Discount)), 2) AS NetRevenue,
+    SUM(od.Quantity) AS TotalUnitsSold
 FROM Category c
 JOIN Product p ON c.Id = p.CategoryId
 JOIN OrderDetail od ON p.Id = od.ProductId
-GROUP BY c.Id
-ORDER BY NetRevenue DESC LIMIT 1;</pre>
-        <div class="result-pill">💰 Beverages (Напитки) — $93 616 392.93</div>
+GROUP BY c.Id, c.CategoryName
+ORDER BY NetRevenue DESC;
+      </pre>
+      <div class="answer-badge">
+        💰 Лидер: Beverages (Напитки) — $93 616 392.93 (продано 3 099 261 шт.)
       </div>
     </div>
 
     <!-- Task 3 -->
-    <div class="task-card">
-      <div class="task-header" onclick="toggleTask(3)">
-        <div class="left">
-          <span class="task-tag">Вопрос 3</span>
-          <span>Сколько различных клиентов делали заказы?</span>
-        </div>
-        <span>▼</span>
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">ЗАДАНИЕ 3</span>
+        <div class="step-title">Сколько различных клиентов делали заказы?</div>
       </div>
-      <div class="task-body" id="tb-3">
-        <p style="color: #cbd5e1; font-size: 0.9rem;">Используем агрегат <code>COUNT(DISTINCT CustomerId)</code> в таблице заказов:</p>
-        <pre>SELECT COUNT(DISTINCT CustomerId) AS DistinctCustomers FROM "Order";</pre>
-        <div class="result-pill">👥 95 уникальных клиентов</div>
+      <div class="step-why">
+        <strong>Ход мысли:</strong><br>
+        В таблице <code>"Order"</code> всего 16 818 заказов. Но крупные магазины покупают товар десятки раз в год. Если просто посчитать строки <code>COUNT(CustomerId)</code>, мы получим число покупок. Чтобы отсечь дубликаты и оставить только уникальных покупателей, используем оператор <code>DISTINCT</code>.
+      </div>
+      <pre>SELECT COUNT(DISTINCT CustomerId) AS DistinctCustomers
+FROM "Order";
+      </pre>
+      <div class="answer-badge">
+        👥 Ответ: 95 различных клиентов совершали покупки
       </div>
     </div>
 
     <!-- Task 4 -->
-    <div class="task-card">
-      <div class="task-header" onclick="toggleTask(4)">
-        <div class="left">
-          <span class="task-tag">Вопрос 4</span>
-          <span>Какая категория содержит наибольшее количество продуктов, заказанных хотя бы раз?</span>
-        </div>
-        <span >▼</span>
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">ЗАДАНИЕ 4</span>
+        <div class="step-title">Какая категория содержит наибольшее количество продуктов, заказанных хотя бы раз?</div>
       </div>
-      <div class="task-body" id="tb-4">
-        <p style="color: #cbd5e1; font-size: 0.9rem;">Подсчитываем уникальные <code>ProductId</code>, попавшие в <code>OrderDetail</code>:</p>
-        <pre>SELECT c.CategoryName, COUNT(DISTINCT p.Id) AS OrderedProducts
+      <div class="step-why">
+        <strong>Ход мысли:</strong><br>
+        Обрати внимание на формулировку: вопрос <strong>не про количество проданных коробок</strong>, а про <strong>широту ассортимента</strong> (сколько РАЗНЫХ наименований товаров покупали). Мы связываем категории с заказанными товарами и считаем уникальные ID продуктов: <code>COUNT(DISTINCT p.Id)</code>.
+      </div>
+      <pre>SELECT 
+    c.CategoryName,
+    COUNT(DISTINCT p.Id) AS OrderedProductsCount
 FROM Category c
 JOIN Product p ON c.Id = p.CategoryId
 JOIN OrderDetail od ON p.Id = od.ProductId
-GROUP BY c.Id
-ORDER BY OrderedProducts DESC LIMIT 1;</pre>
-        <div class="result-pill">🍬 Confections (Кондитерские изделия) — 13 продуктов</div>
+GROUP BY c.Id, c.CategoryName
+ORDER BY OrderedProductsCount DESC;
+      </pre>
+      <div class="answer-badge">
+        🍬 Лидер: Confections (Сладости) — 13 продуктов (100% каталога)
       </div>
     </div>
 
     <!-- Task 5 -->
-    <div class="task-card">
-      <div class="task-header" onclick="toggleTask(5)">
-        <div class="left">
-          <span class="task-tag">Вопрос 5</span>
-          <span>Какая доставка доставила наибольшее количество заказов?</span>
-        </div>
-        <span>▼</span>
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">ЗАДАНИЕ 5</span>
+        <div class="step-title">Какая доставка доставила наибольшее количество заказов?</div>
       </div>
-      <div class="task-body" id="tb-5">
-        <p style="color: #cbd5e1; font-size: 0.9rem;">Связываем перевозчиков <code>Shipper</code> с внешним ключом <code>Order.ShipVia</code>:</p>
-        <pre>SELECT s.CompanyName, COUNT(o.Id) AS OrdersCount
+      <div class="step-why">
+        <strong>Ход мысли:</strong><br>
+        В заказе за курьерскую службу отвечает поле <code>ShipVia</code> (1, 2 или 3). Это внешний ключ на таблицу служб доставки <code>Shipper</code>. Соединяем их по условию <code>Shipper.Id = Order.ShipVia</code>, группируем по названию компании и сортируем по числу выполненных рейсов.
+      </div>
+      <pre>SELECT 
+    s.CompanyName,
+    COUNT(o.Id) AS OrdersDelivered,
+    ROUND(COUNT(o.Id) * 100.0 / (SELECT COUNT(*) FROM "Order"), 2) AS MarketShare
 FROM Shipper s
 JOIN "Order" o ON s.Id = o.ShipVia
-GROUP BY s.Id
-ORDER BY OrdersCount DESC LIMIT 1;</pre>
-        <div class="result-pill">🚚 Federal Shipping (Id: 3) — 5 654 заказа (33.62%)</div>
+GROUP BY s.Id, s.CompanyName
+ORDER BY OrdersDelivered DESC;
+      </pre>
+      <div class="answer-badge">
+        🚚 Лидер: Federal Shipping (Id=3) — 5 654 заказа (33.62% рынка)
       </div>
     </div>
   </div>
 
-  <!-- Interactive Sandbox -->
-  <div class="section-card">
-    <div class="section-title">
-      <span>⚡</span> Интерактивная песочница SQL / Результаты базы Northwind
+  <!-- Section 5: Interactive Sandbox -->
+  <div class="card">
+    <div class="card-title">
+      <span>⚡</span> 5. Интерактивная песочница: проверь запросы сам
     </div>
-    <div class="sandbox-container">
-      <label style="font-size: 0.85rem; color: var(--text-muted);">Выберите готовый аналитический запрос для выполнения:</label>
-      <select id="sandboxQuery" class="sandbox-select" onchange="loadQueryPreset()">
-        <option value="q1">Вопрос 1: Топ сотрудников по обработанным заказам</option>
-        <option value="q2">Вопрос 2: Рейтинг товарных категорий по чистой выручке</option>
-        <option value="q3">Вопрос 3: Подсчет уникальных клиентов-покупателей</option>
-        <option value="q4">Вопрос 4: Ассортимент заказанных продуктов по категориям</option>
-        <option value="q5">Вопрос 5: Доли рынка служб доставки (Shipper)</option>
-      </select>
-      <div style="display: flex; gap: 10px; align-items: center;">
-        <button class="run-btn" onclick="executeSandbox()">▶ Выполнить запрос (0.08с)</button>
-        <span id="execStats" style="font-size: 0.8rem; color: #10b981;">База: Northwind_large.sqlite | 621 883 строк</span>
-      </div>
-      <div class="sandbox-output" id="sandboxOutput">Нажмите кнопку «Выполнить запрос», чтобы увидеть результат работы движка SQLite...</div>
-    </div>
+    <label style="font-size: 0.9rem; color: var(--text-muted); display: block; margin-bottom: 8px;">Выберите задание для эмуляции выполнения SQL в Northwind_large.sqlite:</label>
+    <select id="querySelect" class="sandbox-select" onchange="runSandbox()">
+      <option value="q1">Вопрос 1: Лидер среди сотрудников по числу заказов</option>
+      <option value="q2">Вопрос 2: Топ категорий по выручке (с учетом скидок)</option>
+      <option value="q3">Вопрос 3: Подсчет уникальных покупателей (DISTINCT)</option>
+      <option value="q4">Вопрос 4: Ассортимент заказанных товаров по категориям</option>
+      <option value="q5">Вопрос 5: Доли рынка трех курьерских служб</option>
+    </select>
+    <button class="run-btn" onclick="runSandbox()">▶ Выполнить запрос (0.06 сек)</button>
+    <div class="sandbox-output" id="sandboxResult">Загрузка данных...</div>
   </div>
 
-  <!-- Defense Exam (Каверзные вопросы преподавателя) -->
-  <div class="section-card">
-    <div class="section-title">
-      <span>🎓</span> Экспресс-тренажер к защите лабораторной работы
+  <!-- Section 6: Exam Training -->
+  <div class="card">
+    <div class="card-title">
+      <span>🎓</span> 6. Тренажер к защите (Вопросы преподавателя)
     </div>
 
     <div class="quiz-item">
-      <div class="quiz-q">1. Почему в запросах к SQLite таблицу Order необходимо обязательно оборачивать в кавычки ("Order")?</div>
-      <div class="quiz-opt" onclick="checkQuiz(this, false)">А) В SQLite имена таблиц всегда требуют кавычек</div>
-      <div class="quiz-opt" onclick="checkQuiz(this, true)">Б) Слово ORDER является зарезервированным ключевым словом SQL (ORDER BY)</div>
-      <div class="quiz-opt" onclick="checkQuiz(this, false)">В) Потому что имя таблицы начинается с заглавной буквы</div>
-      <div class="quiz-feedback">Отлично! Без кавычек парсер SQL ожидает синтаксис предложения <code>ORDER BY</code> и выдает синтаксическую ошибку.</div>
+      <div class="quiz-q">1. Почему в SQLite таблицу Order обязательно оборачивать в кавычки ("Order")?</div>
+      <div class="quiz-opt" onclick="checkExam(this, false)">А) Это требование стандарта ANSI SQL для всех таблиц без исключения</div>
+      <div class="quiz-opt" onclick="checkExam(this, true)">Б) Слово ORDER зарезервировано синтаксисом SQL (оператор ORDER BY)</div>
+      <div class="quiz-opt" onclick="checkExam(this, false)">В) Потому что таблица хранит больше 10 000 строк</div>
+      <div class="quiz-feedback">Верно! Без кавычек парсер SQL решит, что вы пытаетесь выполнить сортировку <code>ORDER BY</code>, и выбросит SyntaxError.</div>
     </div>
 
     <div class="quiz-item">
-      <div class="quiz-q">2. Что произойдет, если в формуле выручки не учесть поле Discount?</div>
-      <div class="quiz-opt" onclick="checkQuiz(this, false)">А) Запрос завершится с ошибкой деления на ноль</div>
-      <div class="quiz-opt" onclick="checkQuiz(this, true)">Б) Рассчитанная выручка будет завышена (Gross вместо Net)</div>
-      <div class="quiz-opt" onclick="checkQuiz(this, false)">В) Изменятся только лидеры продаж, но не общая сумма</div>
-      <div class="quiz-feedback">Верно! Поле Discount хранит скидку в долях единицы (например 0.15 = 15%). Чистая выручка рассчитывается строго как <code>UnitPrice * Quantity * (1 - Discount)</code>.</div>
+      <div class="quiz-q">2. Что произойдет, если в формуле выручки проигнорировать столбец Discount?</div>
+      <div class="quiz-opt" onclick="checkExam(this, false)">А) Запрос завершится ошибкой деления на ноль</div>
+      <div class="quiz-opt" onclick="checkExam(this, true)">Б) Выручка будет завышена на сумму скидок (Gross вместо Net)</div>
+      <div class="quiz-opt" onclick="checkExam(this, false)">В) Результат не изменится, так как скидка везде равна нулю</div>
+      <div class="quiz-feedback">Именно! Поле Discount хранит скидку в долях (0.05, 0.15...). Напитки без скидки дают $99.76 млн, а реальная чистая выручка со скидкой — $93.62 млн (разница $6.14 млн!).</div>
     </div>
 
     <div class="quiz-item">
-      <div class="quiz-q">3. Какая таблица связывает товары (Product) и заказы (Order) в схеме многие-ко-многим?</div>
-      <div class="quiz-opt" onclick="checkQuiz(this, false)">А) Category</div>
-      <div class="quiz-opt" onclick="checkQuiz(this, true)">Б) OrderDetail</div>
-      <div class="quiz-opt" onclick="checkQuiz(this, false)">В) Shipper</div>
-      <div class="quiz-feedback">Правильно! OrderDetail — это ассоциативная таблица-линкер, содержащая внешние ключи OrderId и ProductId, а также атрибуты связи (UnitPrice, Quantity, Discount).</div>
+      <div class="quiz-q">3. Чем COUNT(CustomerId) отличается от COUNT(DISTINCT CustomerId)?</div>
+      <div class="quiz-opt" onclick="checkExam(this, false)">А) Ничем, это полные синонимы</div>
+      <div class="quiz-opt" onclick="checkExam(this, true)">Б) Первый считает все строки (число покупок), а второй отсекает повторы клиентов</div>
+      <div class="quiz-opt" onclick="checkExam(this, false)">В) Второй считает только клиентов с подтвержденным паспортом</div>
+      <div class="quiz-feedback">Отлично! В таблице 16 818 заказов, но уникальных покупателей всего 95.</div>
     </div>
   </div>
 
   <footer>
-    <p>ГОУ «ПГУ им. Т.Г. Шевченко» • Кафедра информационных технологий • 2026</p>
+    <p>ГОУ «ПГУ им. Т.Г. Шевченко» • Кафедра информационных технологий • Курс «Основы искусственного интеллекта 2026»</p>
     <p style="margin-top: 4px;">Студент: Гандапас Даниил Владимирович (ФТ24ДР62ПИ1) • Вариант №2</p>
   </footer>
 
   <script>
-    function toggleTask(id) {
-      const el = document.getElementById('tb-' + id);
-      el.classList.toggle('open');
-    }
-
     const PRESETS = {
-      q1: "EmployeeId | LastName  | FirstName | OrdersProcessed\n-----------+-----------+-----------+----------------\n     3     | Leverling | Janet     | 1964\n     1     | Davolio   | Nancy     | 1918\n     4     | Peacock   | Margaret  | 1907\n     5     | Buchanan  | Steven    | 1859\n     6     | Suyama    | Michael   | 1849\n\n[5 rows in set, execution time: 14.2 ms]",
-      q2: "CategoryId | CategoryName   | NetRevenue ($) | GrossRevenue ($) | UnitsSold\n-----------+----------------+----------------+------------------+----------\n     1     | Beverages      |  93,616,392.93 |    99,760,256.76 | 3,099,261\n     3     | Confections    |  67,482,912.75 |    71,889,142.10 | 3,365,110\n     6     | Meat/Poultry   |  66,907,617.83 |    71,315,810.05 | 1,544,920\n     4     | Dairy Products |  59,324,315.09 |    63,205,412.30 | 2,581,402\n     2     | Condiments     |  56,986,747.73 |    60,715,100.90 | 2,756,914\n\n[Лидер: Beverages с выручкой $93.6M, execution time: 78.4 ms]",
-      q3: "DistinctOrderingCustomers | TotalCatalogCustomers\n--------------------------+----------------------\n           95             |          91          \n\n[95 уникальных клиентов совершали покупки. В справочнике 91 клиент]",
-      q4: "CategoryId | CategoryName   | OrderedProductsCount | TotalInCategory\n-----------+----------------+----------------------+----------------\n     3     | Confections    |          13          |       13       \n     1     | Beverages      |          12          |       12       \n     2     | Condiments     |          12          |       12       \n     8     | Seafood        |          12          |       12       \n     4     | Dairy Products |          10          |       10       \n\n[Все 13 продуктов категории Confections были заказаны хотя бы один раз]",
-      q5: "ShipperId | CompanyName      | OrdersDelivered | MarketShare\n----------+------------------+-----------------+------------\n    3     | Federal Shipping |      5654       |   33.62%   \n    2     | United Package   |      5592       |   33.25%   \n    1     | Speedy Express   |      5572       |   33.13%   \n\n[Лидер: Federal Shipping с 5654 заказами. Рынок поделен равномерно по 33%]"
+      q1: "EmployeeId | LastName  | FirstName | OrdersProcessed\n-----------+-----------+-----------+----------------\n     3     | Leverling | Janet     | 1964  <-- Топ-1\n     1     | Davolio   | Nancy     | 1918\n     4     | Peacock   | Margaret  | 1907\n     5     | Buchanan  | Steven    | 1859\n     6     | Suyama    | Michael   | 1849\n\n[Выполнено за 11.4 ms. Всего 9 менеджеров в штате]",
+      q2: "CategoryId | CategoryName   | NetRevenue ($) | UnitsSold\n-----------+----------------+----------------+-----------\n     1     | Beverages      |  93,616,392.93 | 3,099,261 <-- Топ-1\n     3     | Confections    |  67,482,912.75 | 3,365,110\n     6     | Meat/Poultry   |  66,907,617.83 | 1,544,920\n     4     | Dairy Products |  59,324,315.09 | 2,581,402\n     2     | Condiments     |  56,986,747.73 | 2,756,914\n\n[Выручка с учетом скидок: SUM(Price * Qty * (1 - Discount)). Лидер: Напитки]",
+      q3: "DistinctOrderingCustomers | TotalInCustomerCatalog\n--------------------------+------------------------\n           95             |           91           \n\n[95 уникальных клиентов совершали заказы. 4 клиента появились прямо в заказах]",
+      q4: "CategoryName   | OrderedProductsCount | TotalProductsInCatalog\n---------------+----------------------+------------------------\nConfections    |          13          |           13 (100%)\nBeverages      |          12          |           12 (100%)\nCondiments     |          12          |           12 (100%)\nSeafood        |          12          |           12 (100%)\nDairy Products |          10          |           10 (100%)\n\n[Лидер по ассортименту: Confections (13 видов сладостей заказано)]",
+      q5: "ShipperId | CompanyName      | OrdersDelivered | MarketShare\n----------+------------------+-----------------+------------\n    3     | Federal Shipping |      5654       |   33.62%\n    2     | United Package   |      5592       |   33.25%\n    1     | Speedy Express   |      5572       |   33.13%\n\n[Лидер: Federal Shipping. Рынок распределен практически поровну между 3 компаниями]"
     };
 
-    function loadQueryPreset() {
-      executeSandbox();
-    }
-
-    function executeSandbox() {
-      const q = document.getElementById('sandboxQuery').value;
-      const out = document.getElementById('sandboxOutput');
-      out.textContent = "Выполняется SQL запрос к таблицам базы Northwind_large.sqlite...";
+    function runSandbox() {
+      const key = document.getElementById('querySelect').value;
+      const out = document.getElementById('sandboxResult');
+      out.textContent = "Выполняется реляционный SQL-запрос к базе Northwind_large.sqlite...";
       setTimeout(() => {
-        out.textContent = PRESETS[q].replace(/\\n/g, '\n');
-      }, 150);
+        out.textContent = PRESETS[key].replace(/\\n/g, '\n');
+      }, 120);
     }
 
-    function checkQuiz(btn, isCorrect) {
+    function checkExam(btn, isCorrect) {
       const parent = btn.parentElement;
       const allOpts = parent.querySelectorAll('.quiz-opt');
       allOpts.forEach(o => { o.onclick = null; });
@@ -569,8 +639,7 @@ ORDER BY OrdersCount DESC LIMIT 1;</pre>
       feedback.style.display = 'block';
     }
 
-    // Автозапуск первого пресета песочницы
-    executeSandbox();
+    runSandbox();
   </script>
 </body>
 </html>
