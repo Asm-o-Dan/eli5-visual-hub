@@ -1,5 +1,21 @@
 [
   {
+    "id": "room-migration-integrity-hash-hotfix",
+    "title": "Room Database Integrity Hash Crash & MIGRATION_4_5 Hotfix",
+    "description": "Постмортем инцидента на Poco M7: почему Room падал с Expected identity hash mismatch и как устроена миграция MIGRATION_4_5",
+    "category": "Architecture",
+    "tags": [
+      "Android",
+      "Room",
+      "SQLite",
+      "Migrations",
+      "Hotfix",
+      "Poco M7"
+    ],
+    "date": "2026-10-01",
+    "file": "artifacts/room-migration-integrity-hash-hotfix.html"
+  },
+  {
     "id": "oii-lab1-sql-analytics",
     "title": "Основы ИИ: Лабораторная №1 (SQL и Northwind)",
     "description": "Полный педагогический разбор: зачем SQL в ИИ, анатомия склада Northwind, формулы скидок и ход решения 5 задач Варианта 2",
