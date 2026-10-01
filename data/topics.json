@@ -1,5 +1,21 @@
 [
   {
+    "id": "npc-architecture-eli5",
+    "title": "NPC: Архитектура Конвейера Уведомлений",
+    "description": "Как устроена Android-система сквозного парсинга банковских пушей: 16 модулей, zero-alloc VM, seqlock кольцо и динамическая индукция шаблонов.",
+    "category": "Architecture",
+    "tags": [
+      "android",
+      "architecture",
+      "pipeline",
+      "zero-alloc",
+      "kotlin",
+      "seqlock"
+    ],
+    "date": "2026-10-01",
+    "file": "artifacts/npc-architecture-eli5.html"
+  },
+  {
     "id": "room-migration-integrity-hash-hotfix",
     "title": "Room Database Integrity Hash Crash & MIGRATION_4_5 Hotfix",
     "description": "Постмортем инцидента на Poco M7: почему Room падал с Expected identity hash mismatch и как устроена миграция MIGRATION_4_5",
