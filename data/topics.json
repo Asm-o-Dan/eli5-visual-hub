@@ -1,5 +1,24 @@
 [
   {
+    "id": "os_lab4_sed_join",
+    "title": "ОС ЛБ4: Фильтрация данных (sed, join, конвейеры)",
+    "description": "Полная теория sed (Pattern vs Hold space), join без awk, IPC pipefs ядра Linux, интерактивный тренажер, 15 вариантов и тест защиты",
+    "category": "Операционные системы",
+    "tags": [
+      "linux",
+      "sed",
+      "join",
+      "bash",
+      "pipelines",
+      "moodle",
+      "simulator",
+      "variants",
+      "defense"
+    ],
+    "date": "2026-10-05",
+    "file": "artifacts/os_lab4_sed_join.html"
+  },
+  {
     "id": "studyflow-lab4-http-tags-lifecycle",
     "title": "StudyFlow: Сетевой справочник по HTTP и Жизненный цикл React",
     "description": "Визуальное объяснение Fetch API, runtime-валидации типов (isTag/parseTags), AbortController и изолированного черновика формы",
@@ -188,23 +207,6 @@
     ],
     "date": "2026-09-14",
     "file": "artifacts/eli5_visual.html"
-  },
-  {
-    "id": "os_lab4_sed_join",
-    "title": "ОС ЛБ4: Фильтрация данных (sed, join, конвейеры)",
-    "description": "Полная теория sed (Pattern vs Hold space), join без awk, IPC pipefs ядра Linux, тренажер и 15 вариантов",
-    "category": "Операционные системы",
-    "tags": [
-      "linux",
-      "sed",
-      "join",
-      "bash",
-      "pipelines",
-      "moodle",
-      "simulator"
-    ],
-    "date": "2026-09-14",
-    "file": "artifacts/os_lab4_sed_join.html"
   },
   {
     "id": "requirements-interviewing-lab1",

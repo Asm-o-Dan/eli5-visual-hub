@@ -584,6 +584,150 @@
     .styled-table tr:nth-child(even) {
       background: rgba(255, 255, 255, 0.02);
     }
+  
+    /* --- Enhanced Styles for Sections 4, 5, 6, 7 --- */
+    .sim-line {
+      display: flex;
+      align-items: baseline;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      transition: background 0.15s;
+    }
+    .sim-line:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .sim-line.modified {
+      background: rgba(16, 185, 129, 0.12);
+      border-left: 3px solid var(--accent-emerald);
+    }
+    .sim-ln {
+      color: var(--text-muted);
+      width: 34px;
+      min-width: 34px;
+      text-align: right;
+      margin-right: 12px;
+      user-select: none;
+      font-size: 0.74rem;
+    }
+    .sim-badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      margin-right: 8px;
+      background: rgba(16, 185, 129, 0.25);
+      color: var(--accent-emerald);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+    .sim-badge.empty {
+      visibility: hidden;
+      width: 0;
+      padding: 0;
+      margin: 0;
+      border: none;
+    }
+    .sim-text {
+      color: #cbd5e1;
+      white-space: pre-wrap;
+      word-break: break-all;
+      flex: 1;
+    }
+    .sim-line.modified .sim-text {
+      color: #a7f3d0;
+      font-weight: 600;
+    }
+    .sim-error-box {
+      display: none;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .toast {
+      background: #1e293b;
+      border: 1px solid var(--border-color);
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: auto;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .toast.success {
+      border-color: rgba(16, 185, 129, 0.5);
+      background: #064e3b;
+    }
+    .toast.error {
+      border-color: rgba(239, 68, 68, 0.5);
+      background: #7f1d1d;
+    }
+    .var-tab-btn.passed {
+      border-color: rgba(16, 185, 129, 0.5);
+      color: var(--accent-emerald);
+    }
+    .var-tab-btn.passed.active {
+      background: var(--accent-emerald);
+      color: #000;
+      font-weight: 700;
+    }
+    .opt-bullet {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-right: 12px;
+      color: var(--accent-cyan);
+      flex-shrink: 0;
+    }
+    .quiz-btn {
+      display: flex;
+      align-items: center;
+    }
+    .mobile-only {
+      display: none;
+    }
+    @media (max-width: 768px) {
+      .mobile-only {
+        display: block;
+      }
+      .variant-nav {
+        display: none !important;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -856,14 +1000,15 @@
       </div>
     </section>
 
-    <!-- SECTION 2: Interactive Terminal Simulator -->
+    
+    <!-- SECTION 4: Interactive Terminal Simulator -->
     <section id="simulator" class="section-card">
       <div class="section-header">
         <h2 class="section-title">
           <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
           4. Интерактивная песочница sed & конвейеров
         </h2>
-        <span class="badge emerald">● Движок эмуляции активен</span>
+        <span class="badge emerald">● Движок эмуляции активен (GNU sed 4.9)</span>
       </div>
 
       <div class="terminal-container">
@@ -874,16 +1019,16 @@
             <span class="dot green"></span>
           </div>
           <div style="font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #94a3b8;">
-            bash — GNU sed 4.9 in-browser stream simulator
+            bash — GNU sed stream editor in-browser engine
           </div>
-          <div style="font-size: 0.75rem; color: var(--accent-cyan);">UTF-8 / LC_ALL=C</div>
+          <div style="font-size: 0.75rem; color: var(--accent-cyan);">POSIX ERE / LC_ALL=C</div>
         </div>
 
         <div class="terminal-body">
           <div class="sim-controls">
-            <!-- File Selector Row -->
+            <!-- Row 1: File & Preset Select -->
             <div class="input-row">
-              <span style="font-size: 0.82rem; color: var(--text-secondary);">Входной файл:</span>
+              <span style="font-size: 0.82rem; color: var(--text-secondary); min-width: 90px;">Входной файл:</span>
               <select id="sim-file-select" class="file-btn" onchange="runSedSimulation()" style="outline: none;">
                 <option value="query1.txt">query1.txt (Служащие: 30 строк)</option>
                 <option value="query2.txt">query2.txt (Покупатели: 31 строка)</option>
@@ -892,62 +1037,100 @@
                 <option value="query5.txt">query5.txt (Позиции заказов: 108 строк)</option>
               </select>
 
-              <label style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-secondary); margin-left: 12px; cursor: pointer;">
-                <input type="checkbox" id="sim-flag-n" onchange="runSedSimulation()"> Флаг -n (тихий режим)
+              <span style="font-size: 0.82rem; color: var(--text-secondary); margin-left: 10px;">Пресет:</span>
+              <select id="sim-preset-dropdown" class="file-btn" onchange="onPresetDropdownSelect(this)" style="outline: none; max-width: 340px;">
+                <option value="">-- Быстрый выбор из 15 вариантов --</option>
+                <option value="query3.txt|||s/^[^!]+!([^!]+)![^!]+![^!]+!(.*)/\1 | \2/|||false">★ Вар. 15 (Ваш): Извлечение названия и даты (query3.txt)</option>
+                <option value="query3.txt|||/GUIDE/d|||false">✓ Вар. 3 (Сдан): Удаление строк по шаблону /GUIDE/d (query3.txt)</option>
+                <option value="query1.txt|||s/.$/*/|||false">Вар. 1: Замена последнего символа s/.$/*/ (query1.txt)</option>
+                <option value="query1.txt|||=|||false">Вар. 2: Нумерация строк (=) (query1.txt)</option>
+                <option value="query2.txt|||s/:/|/g|||false">Вар. 5: Замена разделителя s/:/|/g (query2.txt)</option>
+                <option value="query1.txt|||/[1-9][0-9]{3}$/p|||true">Вар. 6: Фильтр 4-значного оклада (-n + p) (query1.txt)</option>
+                <option value="query3.txt|||=|||false">Вар. 7: Добавление номера в конец строки (query3.txt)</option>
+                <option value="query1.txt|||s/^([[:graph:]]+)(.*[[:space:]])([[:graph:]]+)$/\3\2\1/|||false">Вар. 8: Перестановка слов (swap) (query1.txt)</option>
+                <option value="query4.txt|||/ [1-9][0-9]{0,3}$/d|||false">Вар. 9: Удаление чисел &lt; 20000 (query4.txt)</option>
+                <option value="query2.txt|||s/^[^:]+:([^:]+):[^:]+:[^:]+:([^:]+):.*/\1 | Страна: \2/|||false">Вар. 10: Форматирование компании и страны (query2.txt)</option>
+                <option value="query3.txt|||s/!/\t/g|||false">Вар. 11: Замена ! на табуляцию (query3.txt)</option>
+                <option value="query1.txt|||/CLERK/d|||false">Вар. 12: Удаление должности CLERK (query1.txt)</option>
+                <option value="query4.txt|||/JAN-24/G|||false">Вар. 13: Вставка пустой строки после даты /JAN-24/G (query4.txt)</option>
+                <option value="query1.txt|||s/^[0-9]+[[:space:]]+([A-Za-z]+)[[:space:]]+[A-Za-z]+[[:space:]]+([A-Za-z]+)[[:space:]]+([A-Za-z]+)[[:space:]]+([A-Za-z]+)[[:space:]]+([A-Za-z-]+)[[:space:]]+.*/\1_\2 \3 \4/|||false">Вар. 14: Слияние полей в одно (query1.txt)</option>
+              </select>
+            </div>
+
+            <!-- Row 2: Mode flags -->
+            <div class="input-row" style="margin-top: -4px;">
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-secondary); cursor: pointer;">
+                <input type="checkbox" id="sim-flag-n" onchange="runSedSimulation()"> Флаг <code>-n</code> (тихий режим / quiet)
               </label>
 
-              <label style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-secondary); margin-left: 12px; cursor: pointer;">
-                <input type="checkbox" id="sim-diff-view" checked onchange="runSedSimulation()"> Подсветка изменений
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-secondary); margin-left: 14px; cursor: pointer;">
+                <input type="checkbox" id="sim-diff-view" checked onchange="runSedSimulation()"> Подсветка изменений (MOD)
+              </label>
+
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-secondary); margin-left: 14px; cursor: pointer;">
+                <input type="checkbox" id="sim-only-diff" onchange="runSedSimulation()"> Только измененные строки
               </label>
             </div>
 
-            <!-- Command Input Row -->
+            <!-- Row 3: Command input -->
             <div class="input-row">
               <span class="cmd-prompt">student@linux:~$ sed -E</span>
-              <input type="text" id="sim-cmd-input" class="sim-input" value="s/!/ | /g" placeholder="Введите команду sed (например: s/:/|/g или /CLERK/d)..." oninput="runSedSimulation()">
+              <input type="text" id="sim-cmd-input" class="sim-input" value="s/^[^!]+!([^!]+)![^!]+![^!]+!(.*)/\1 | \2/" placeholder="Введите команду sed (например: s/:/|/g или /CLERK/d)..." oninput="runSedSimulation()">
               <button class="sim-btn" onclick="runSedSimulation()">Выполнить</button>
+              <button class="btn-action" onclick="copySimulatorOutput()">📋 Копировать вывод</button>
+              <button class="btn-action" onclick="resetSimulator()">Сброс</button>
             </div>
 
-            <!-- Quick Presets -->
+            <!-- Preset pills for 1-click access -->
             <div class="preset-pills">
-              <span style="font-size: 0.75rem; color: var(--text-muted); align-self: center;">Готовые пресеты:</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted); align-self: center;">Быстрые пресеты:</span>
+              <span class="pill" style="border-color: var(--accent-amber); color: var(--accent-amber);" onclick="loadPreset('query3.txt', 's/^[^!]+!([^!]+)![^!]+![^!]+!(.*)/\\1 | \\2/', false)">★ Вар 15 (Ваш)</span>
+              <span class="pill" style="border-color: var(--accent-emerald); color: var(--accent-emerald);" onclick="loadPreset('query3.txt', '/GUIDE/d', false)">✓ Вар 3 (Сдан)</span>
               <span class="pill" onclick="loadPreset('query1.txt', 's/.$/*/', false)">Вар 1: s/.$/*/</span>
-              <span class="pill" onclick="loadPreset('query1.txt', '=', false)">Вар 2: Нумерация строк (=)</span>
-              <span class="pill" onclick="loadPreset('query3.txt', '/GUIDE/d', false)">Вар 3: /GUIDE/d</span>
+              <span class="pill" onclick="loadPreset('query1.txt', '=', false)">Вар 2: Нумерация (=)</span>
               <span class="pill" onclick="loadPreset('query2.txt', 's/:/|/g', false)">Вар 5: s/:/|/g</span>
-              <span class="pill" onclick="loadPreset('query1.txt', '/[1-9][0-9]3$/p', true)">Вар 6: 4-значный оклад (-n + p)</span>
-              <span class="pill" onclick="loadPreset('query1.txt', 's/^([[:graph:]]+)(.*[[:space:]])([[:graph:]]+)$/\3\2\1/', false)">Вар 8: Swap слов (\3\2\1)</span>
+              <span class="pill" onclick="loadPreset('query1.txt', '/[1-9][0-9]{3}$/p', true)">Вар 6: -n + p</span>
               <span class="pill" onclick="loadPreset('query1.txt', '/CLERK/d', false)">Вар 12: /CLERK/d</span>
-              <span class="pill" onclick="loadPreset('query3.txt', 's/^[^!]+!([^!]+)![^!]+![^!]+!(.*)/\1 | \2/', false)">Вар 15: Название и дата</span>
+              <span class="pill" onclick="loadPreset('query4.txt', '/JAN-24/G', false)">Вар 13: /JAN-24/G</span>
             </div>
           </div>
+
+          <!-- Error Message Banner -->
+          <div id="sim-error-box" class="sim-error-box"></div>
 
           <!-- Terminal Output Screen -->
           <div class="terminal-output" id="sim-output-screen"></div>
 
-          <!-- Live Status Bar -->
+          <!-- Status Bar -->
           <div class="status-bar">
             <span id="sim-lines-count">Обработано: 0 строк</span>
             <span id="sim-diff-count">Изменено: 0 строк</span>
-            <span>Статус: 0 (EXIT_SUCCESS)</span>
+            <span style="color: var(--accent-emerald);">Код возврата: 0 (EXIT_SUCCESS)</span>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- SECTION 3: All 15 Variants Explorer -->
+    <!-- SECTION 5: All 15 Variants Explorer -->
     <section id="variants" class="section-card">
       <div class="section-header">
         <h2 class="section-title">
           <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-          5. Решебник всех 15 вариантов (Задания 1 и 2)
+          5. База всех 15 вариантов (Задания 1 и 2)
         </h2>
-        <span class="badge amber">Кафедра ИТ: проверено на реальных датасетах</span>
+        <span class="badge amber">Кафедра ИТ: проверено на реальных датасетах query1..5.txt</span>
       </div>
 
       <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 16px;">
-        Выберите номер своего варианта. Для каждого задания представлена рабочая команда, подробное теоретическое объяснение регулярных выражений и конвейеров, а также верифицированный результат на файлах <code>query1.txt</code> ... <code>query5.txt</code>.
+        Выберите номер своего варианта. Для каждого варианта представлен полный комплект: <b>Задание 1 (потоковый sed)</b> и <b>Задание 2 (многозвенный join без awk)</b>, разбор синтаксиса для устной защиты и реальный верифицированный вывод.
       </p>
+
+      <!-- Mobile dropdown for small screens -->
+      <div style="margin-bottom: 14px;" class="mobile-only">
+        <select id="mobile-variant-select" class="file-btn" style="width: 100%; padding: 10px;" onchange="selectVariant(parseInt(this.value))">
+          <!-- Populated by JS -->
+        </select>
+      </div>
 
       <!-- Variants Nav Tabs -->
       <div class="variant-nav" id="var-tab-bar">
@@ -960,34 +1143,46 @@
       </div>
     </section>
 
-    <!-- SECTION 4: Official Defense Questions & Answers -->
+    <!-- SECTION 6: Official Defense Questions & Answers -->
     <section id="defense" class="section-card">
       <div class="section-header">
         <h2 class="section-title">
           <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
           6. Ответы на контрольные вопросы к защите лабораторной работы
         </h2>
-        <span class="badge emerald">8 детальных ответов</span>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-action" onclick="expandAllQA(true)">[+] Раскрыть все</button>
+          <button class="btn-action" onclick="expandAllQA(false)">[-] Свернуть все</button>
+        </div>
       </div>
 
-      <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 20px;">
-        Официальный список контрольных вопросов преподавателя (Шмелёва А.В.) с исчерпывающими инженерными ответами, разбором системных вызовов ядра Linux и примерами команд. Кликните по вопросу для раскрытия.
+      <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 16px;">
+        Официальный список вопросов к защите лабораторной работы преподавателя (Шмелёва А.В.). Содержит исчерпывающие инженерные ответы, системные вызовы ядра Linux (open, pipe, write, lseek) и готовые 30-секундные формулировки для сдачи.
       </p>
+
+      <!-- Search Filter Bar -->
+      <div style="margin-bottom: 20px;">
+        <input type="text" id="qa-search-input" class="sim-input" style="width: 100%; padding: 10px 14px;" placeholder="🔍 Быстрый поиск по вопросам (например: pipefs, O_TRUNC, O_APPEND, join, awk, SIGPIPE, PIPE_BUF)..." oninput="filterQA(this.value)">
+      </div>
 
       <div id="qa-list">
         <!-- Rendered by JS -->
       </div>
     </section>
 
-    <!-- SECTION 5: Interactive Defense Quiz -->
+    <!-- SECTION 7: Interactive Defense Quiz -->
     <section id="quiz" class="section-card">
       <div class="section-header">
         <h2 class="section-title">
           <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
           7. Инженерный тренажер защиты (12 тестовых вопросов)
         </h2>
-        <div style="font-size: 0.85rem; color: var(--accent-cyan);" id="quiz-score-badge">Счет: 0 / 12</div>
+        <div style="font-size: 0.9rem; font-weight: 700; color: var(--accent-cyan);" id="quiz-score-badge">Счет: 0 / 12</div>
       </div>
+
+      <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 16px;">
+        Проверьте свои знания перед устной защитой у преподавателя. Вопросы охватывают архитектуру sed (буферы Pattern и Hold space), алгоритм Sort-Merge в join, конвейеры ядра Linux и обход ограничений на awk.
+      </p>
 
       <div class="quiz-card">
         <div class="quiz-progress">
@@ -1008,6 +1203,9 @@
 
   </div>
 
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
   <!-- Embedded Datasets & Client Logic -->
   <script>
     const REAL_FILES = {"query1.txt": "7101 ALEX      K PETROV    ANALYST     RESEARCH   MOSCOW   3200\n7102 MARIA     S IVANOVA   MANAGER     SALES      MOSCOW   4500\n7103 DMITRY    A SOKOLOV   DEVELOPER   RESEARCH   KAZAN    3800\n7104 ELENA     V KOZLOVA   CLERK       ACCOUNTING MOSCOW   1800\n7105 IVAN      P MOROZOV   SALESPERSON SALES      SAMARA   2100\n7106 ANNA      D VOLKOVA   ANALYST     RESEARCH   MOSCOW   3500\n7107 SERGEY    N NOVIKOV   MANAGER     OPERATIONS MOSCOW   4200\n7108 OLGA      R FEDOROVA  SALESPERSON SALES      KAZAN    2000\n7109 PAVEL     M LEBEDEV   DEVELOPER   RESEARCH   MOSCOW   4000\n7110 NATALIA   A SMIRNOVA  CLERK       SALES      SAMARA   1600\n7111 ROMAN     G ORLOV     SALESPERSON SALES      MOSCOW   2200\n7112 TATIANA   V POPOVA    STAFF       OPERATIONS KAZAN    2400\n7113 ANDREY    S KUZNETSOV MANAGER     RESEARCH   MOSCOW   5000\n7114 YULIA     I MIKHAILOVA ANALYST    RESEARCH   MOSCOW   3600\n7115 NIKITA    D ZAKHAROV  DEVELOPER   RESEARCH   KAZAN    3700\n7116 EKATERINA P SOROKINA  SALESPERSON SALES      SAMARA   2100\n7117 MAXIM     A VOLKOV    MANAGER     SALES      MOSCOW   4800\n7118 IRINA     V BOGDANOVA CLERK       ACCOUNTING MOSCOW   1700\n7119 ARTEM     N BELOV     SALESPERSON SALES      KAZAN    2000\n7120 VALERIA   S TSVETKOVA STAFF       OPERATIONS SAMARA   2300\n7121 KONSTANTIN O FROLOV   ANALYST     RESEARCH   MOSCOW   3400\n7122 VICTORIA  A GOLUBEVA  CLERK       SALES      MOSCOW   1500\n7123 DENIS     M KARPOV    DEVELOPER   RESEARCH   KAZAN    3900\n7124 LUDMILA   R VORONOVA  MANAGER     ACCOUNTING MOSCOW   4600\n7125 ALEXEY    T STEPANOV  PRESIDENT   ACCOUNTING MOSCOW   9000\n7126 SOFIA     G NIKIFOROVA CLERK      RESEARCH   SAMARA   1600\n7127 IGOR      V MAKAROV   SALESPERSON SALES      MOSCOW   2200\n7128 POLINA    D KOLESNIKOVA ANALYST   RESEARCH   KAZAN    3300\n7129 GEORGY    S TIKHONOV  CLERK       ACCOUNTING MOSCOW   1800\n7130 DARIA     N KULIKOVA  CLERK       SALES      SAMARA   1500\n", "query2.txt": "300:TECHNO CITY              :12 LENINA ST.          :MOSCOW         :RU:101000:4951234567:15000\n301:DIGITAL STORE            :45 MIRA AVE.           :MOSCOW         :RU:129090:4957654321:12000\n302:GADGET WORLD             :8 TVERSKAYA ST.        :MOSCOW         :RU:125009:4959876543:10000\n303:SMART ELECTRONICS        :22 ARBAT ST.           :MOSCOW         :RU:119002:4952345678:8000\n304:TECH HUB                 :100 NEVSKY AVE.        :SAINT-PETERSBURG:RU:191025:8123456789:12000\n305:BYTE SHOP                :33 SADOVAYA ST.        :SAINT-PETERSBURG:RU:190000:8129876543:9000\n306:FUTURE TECH              :15 VOSSTANIYA ST.      :SAINT-PETERSBURG:RU:191014:8127654321:7000\n307:DIGI PRO                 :5 LENINA AVE.          :KAZAN          :RU:420111:8432345678:6000\n308:CLICK STORE              :48 BAUMANA ST.         :KAZAN          :RU:420015:8439876543:5000\n309:PIXEL MARKET             :3 MOLODEZHNAYA ST.     :MINSK          :BY:220012:375172345678:4000\n310:TECH ZONE                :18 POBEDY AVE.         :MINSK          :BY:220035:375173456789:8000\n311:CYBERNET                 :7 NEZAVISIMOSTI AVE.   :MINSK          :BY:220030:375174567890:6000\n312:MEGA DIGITAL             :14 SURHANDARYA ST.     :TASHKENT       :UZ:100000:998712345678:5000\n313:NOVA TECH                :24 AMIR TEMUR AVE.     :TASHKENT       :UZ:100084:998713456789:9000\n314:ROBO STORE               :36 BUNYODKOR AVE.      :TASHKENT       :UZ:100043:998714567890:7000\n315:ELECTRON PLUS            :12 PUSHKIN ST.         :ALMATY         :KZ:050000:77012345678:6000\n316:DIGITAL HUB              :44 ABAY AVE.           :ALMATY         :KZ:050010:77013456789:8000\n317:SMART CITY TECH          :8 SATPAEV ST.          :ALMATY         :KZ:050040:77014567890:7000\n318:IT CORNER                :22 DOSTYK AVE.         :ASTANA         :KZ:010000:77015678901:5000\n319:PC WORLD                 :3 MANGILIK EL AVE.     :ASTANA         :KZ:010008:77016789012:10000\n320:GEAR UP                  :17 QABANBAY BATYR AVE. :ASTANA         :KZ:010003:77017890123:8000\n321:TECH POINT               :55 RUSTAVELI AVE.      :TBILISI        :GE:380005:99532123456:6000\n322:MICROLAB                 :8 KOSTAVA ST.          :TBILISI        :GE:380008:99532234567:5000\n323:VOSTOK TECH              :30 CHAVCHAVADZE AVE.   :TBILISI        :GE:380079:99532345678:4000\n324:BYTE BAZAAR              :14 ISTIQLOL ST.        :BAKU           :AZ:1001:994122345678:7000\n325:CORE SYSTEMS             :7 NIZAMI ST.           :BAKU           :AZ:1000:994123456789:9000\n326:VOLTAGE                  :21 RASHID BEHBUDOV ST. :BAKU           :AZ:1014:994124567890:6000\n327:INFOTECH                 :3 DERIBASIVSKA ST.     :ODESSA         :UA:650000:380482345678:5000\n328:DIGITAL LAB              :18 KHRESHCHATYK ST.    :KYIV           :UA:01001:380443456789:8000\n329:TECHNO HUB               :9 NURMAGAMBETOV ST.    :SHYMKENT       :KZ:160000:77218901234:4000\n330:PRIME GADGETS            :44 ISMOIL SOMONI AVE.  :DUSHANBE       :TJ:734001:992372345678:3000\n", "query3.txt": "201001!LOGITECH WIRELESS MOUSE     !2800  !2240  !01-MAR-22\n201002!LOGITECH GAMING MOUSE       !5500  !4400  !01-MAR-22\n201003!LOGITECH TRACKBALL PRO      !7200  !5760  !15-APR-22\n202001!DEFENDER WIRED KEYBOARD     !1200  !960   !01-JAN-22\n202002!DEFENDER GAMING KEYBOARD    !3800  !3040  !01-JAN-22\n202003!OKLICK MECHANICAL KEYBOARD  !6500  !5200  !10-FEB-23\n203001!SAMSUNG 27\" MONITOR FHD     !18000 !14400 !01-JUN-22\n203002!SAMSUNG 32\" MONITOR QHD     !28000 !22400 !01-JUN-22\n203003!LG ULTRAWIDE 34\" MONITOR    !42000 !33600 !15-MAY-23\n204001!ASUS GAMING HEADSET         !4500  !3600  !01-APR-22\n204002!HYPERx CLOUD II HEADSET     !8900  !7120  !01-APR-22\n205001!LOGITECH WEBCAM HD 1080P    !3200  !2560  !01-SEP-22\n205002!RAZER STREAMING WEBCAM 4K   !9800  !7840  !20-NOV-22\n206001!TP-LINK GIGABIT SWITCH 8P   !2100  !1680  !01-FEB-23\n206002!TP-LINK WIFI ROUTER AX3000  !5600  !4480  !15-MAR-23\n207001!SANDISK SSD 480GB           !4200  !3360  !01-JAN-23\n207002!SAMSUNG SSD 1TB             !7800  !6240  !01-JAN-23\n207003!WD EXTERNAL HDD 2TB         !5500  !4400  !15-FEB-23\n208001!KINGSTON RAM DDR4 16GB      !3600  !2880  !01-MAR-23\n208002!CRUCIAL RAM DDR5 32GB       !8400  !6720  !01-MAY-23\n209001!POWERCOM UPS 650VA          !4800  !3840  !01-APR-22\n209002!APC UPS 1500VA              !12000 !9600  !10-JUN-22\n210001!RH: \"LINUX ДЛЯ НАЧИНАЮЩИХ\" !890   !712   !05-SEP-23\n210002!RH: \"СЕТИ И ПРОТОКОЛЫ\"     !1200  !960   !05-SEP-23\n210003!RH: \"PYTHON НА ПРАКТИКЕ\"   !950   !760   !10-OCT-23\n", "query4.txt": "801 PETROV    300 12-JAN-24 48600\n802 IVANOVA   301 15-JAN-24 32400\n803 SOKOLOV   302 18-JAN-24 27800\n804 KOZLOVA   303 20-JAN-24 15200\n805 MOROZOV   304 22-JAN-24 56700\n806 VOLKOVA   305 25-JAN-24 18900\n807 NOVIKOV   306 28-JAN-24 41200\n808 FEDOROVA  307 01-FEB-24 12600\n809 LEBEDEV   308 03-FEB-24 22400\n810 SMIRNOVA  309 05-FEB-24 9800\n811 ORLOV     310 07-FEB-24 34500\n812 POPOVA    311 10-FEB-24 17600\n813 KUZNETSOV 312 12-FEB-24 62800\n814 MIKHAILOVA 313 14-FEB-24 28900\n815 ZAKHAROV  314 16-FEB-24 19400\n816 SOROKINA  315 19-FEB-24 44100\n817 VOLKOV    316 21-FEB-24 33700\n818 BOGDANOVA 317 23-FEB-24 15800\n819 BELOV     318 25-FEB-24 21300\n820 TSVETKOVA 319 27-FEB-24 57200\n821 FROLOV    320 01-MAR-24 38600\n822 GOLUBEVA  321 04-MAR-24 12400\n823 KARPOV    300 06-MAR-24 46800\n824 VORONOVA  301 08-MAR-24 29100\n825 STEPANOV  302 11-MAR-24 74500\n826 NIKIFOROVA 303 13-MAR-24 16200\n827 MAKAROV   304 15-MAR-24 53400\n828 KOLESNIKOVA 305 18-MAR-24 24700\n829 TIKHONOV  306 20-MAR-24 31800\n830 KULIKOVA  307 22-MAR-24 18300\n831 PETROV    308 25-MAR-24 42600\n832 IVANOVA   309 27-MAR-24 27900\n833 SOKOLOV   310 29-MAR-24 61200\n834 MOROZOV   311 01-APR-24 35400\n835 VOLKOV    312 03-APR-24 19700\n836 KUZNETSOV 313 05-APR-24 88300\n837 ORLOV     314 08-APR-24 23100\n", "query5.txt": "1  801 201001 2750  5    13750\n2  801 202001 1180  10   11800\n3  801 203001 17800 1    17800\n4  801 210001 870   6    5220\n1  802 201002 5400  3    16200\n2  802 204001 4400  2    8800\n3  802 205001 3150  2    6300\n4  802 210002 1180  1    1180\n1  803 206001 2050  2    4100\n2  803 206002 5500  1    5500\n3  803 207001 4150  4    16600\n1  804 208001 3550  2    7100\n2  804 210003 935   8    7480\n1  805 203002 27600 1    27600\n2  805 201002 5400  2    10800\n3  805 204002 8750  2    17500\n4  805 210001 870   1    870\n1  806 207002 7700  1    7700\n2  806 208001 3550  3    10650\n1  807 203003 41500 1    41500\n1  808 201001 2750  3    8250\n2  808 209001 4700  1    4700\n1  809 202002 3750  4    15000\n2  809 210002 1180  6    7080\n1  810 205001 3150  2    6300\n2  810 210003 935   4    3740\n1  811 207003 5400  4    21600\n2  811 208002 8300  1    8300\n3  811 209001 4700  1    4700\n1  812 201002 5400  1    5400\n2  812 204001 4400  3    13200\n1  813 203002 27600 1    27600\n2  813 203001 17800 1    17800\n3  813 208002 8300  2    16600\n4  813 210001 870   1    870\n1  814 202003 6400  2    12800\n2  814 206002 5500  3    16500\n1  815 207001 4150  2    8300\n2  815 209001 4700  2    9400\n3  815 210003 935   2    1870\n1  816 203003 41500 1    41500\n2  816 201002 5400  1    5400\n1  817 204002 8750  2    17500\n2  817 208001 3550  4    14200\n3  817 210002 1180  2    2360\n1  818 201001 2750  3    8250\n2  818 202001 1180  6    7080\n1  819 207002 7700  1    7700\n2  819 209002 11800 1    11800\n3  819 210001 870   2    1740\n1  820 203002 27600 2    55200\n1  821 207003 5400  3    16200\n2  821 208002 8300  2    16600\n3  821 210003 935   6    5610\n1  822 201001 2750  4    11000\n2  822 210002 1180  1    1180\n1  823 203001 17800 1    17800\n2  823 202002 3750  5    18750\n3  823 204001 4400  2    8800\n1  824 207001 4150  4    16600\n2  824 209001 4700  2    9400\n3  824 210001 870   3    2610\n1  825 203003 41500 1    41500\n2  825 203002 27600 1    27600\n3  825 204002 8750  1    8750\n1  826 201001 2750  5    13750\n2  826 210003 935   2    1870\n1  827 207002 7700  4    30800\n2  827 208002 8300  2    16600\n3  827 210002 1180  5    5900\n1  828 202002 3750  3    11250\n2  828 209001 4700  3    14100\n1  829 205001 3150  6    18900\n2  829 206001 2050  4    8200\n3  829 210001 870   5    4350\n1  830 201002 5400  2    10800\n2  830 210003 935   8    7480\n1  831 203001 17800 1    17800\n2  831 202003 6400  3    19200\n3  831 208001 3550  2    7100\n1  832 207003 5400  3    16200\n2  832 209002 11800 1    11800\n1  833 203002 27600 1    27600\n2  833 204002 8750  1    8750\n3  833 208002 8300  3    24900\n1  834 201002 5400  4    21600\n2  834 206002 5500  2    11000\n3  834 210002 1180  2    2360\n1  835 207001 4150  2    8300\n2  835 209001 4700  2    9400\n1  836 203003 41500 1    41500\n2  836 203002 27600 1    27600\n3  836 208002 8300  1    8300\n4  836 210001 870   12   10440\n1  837 202002 3750  4    15000\n2  837 205001 3150  2    6300\n3  837 210003 935   2    1870\n1  838 201001 2750  3    8250\n2  838 204002 8750  2    17500\n3  838 210001 870   5    4350\n1  839 203001 17800 1    17800\n2  839 207002 7700  2    15400\n1  840 202002 3750  6    22500\n2  840 209002 11800 1    11800\n3  840 210003 935   4    3740\n1  841 208002 8300  2    16600\n2  841 206001 2050  3    6150\n3  841 201002 5400  1    5400"};
@@ -1015,318 +1213,801 @@
     const QA_DATA = [{"q": "1. Какова внутренняя архитектура и цикл обработки строк в sed? В чём разница между Pattern Space и Hold Space?", "a": "<b>Архитектура sed построена вокруг двух буферов в оперативной памяти:</b><br>• <b>Pattern Space (Пространство шаблона / Рабочий буфер):</b> сюда считывается очередная строка из входного потока (символ перевода строки <code>\\n</code> автоматически удаляется). Все команды модификации (<code>s</code>, <code>y</code>, <code>d</code>, <code>p</code>) по умолчанию применяются именно к этому буферу. В конце каждого цикла содержимое Pattern Space автоматически выводится в stdout (если не указан ключ <code>-n</code>) и буфер очищается.<br>• <b>Hold Space (Пространство удержания / Карманный регистр):</b> энергонезависимый (в рамках сессии обработки одного файла) вспомогательный буфер. Он сохраняет свое содержимое между циклами обработки разных строк! Служит для временного сохранения данных, накапливания строк или перестановки блоков текста.<br><br><b>Команды обмена данными между буферами:</b><br>• <code>h</code> (Hold) — копирует Pattern Space в Hold Space (перезаписывая его).<br>• <code>H</code> — добавляет (append) Pattern Space к содержимому Hold Space через <code>\\n</code>.<br>• <code>g</code> (Get) — копирует Hold Space в Pattern Space.<br>• <code>G</code> — добавляет Hold Space к текущему Pattern Space через <code>\\n</code>.<br>• <code>x</code> (eXchange) — атомарно меняет содержимое Pattern Space и Hold Space местами."}, {"q": "2. Почему утилита join требует строго предварительной сортировки файлов? Что произойдет, если передать неотсортированные файлы?", "a": "Утилита <code>join</code> реализует <b>алгоритм слияния с двумя указателями (Two-Pointer Sort-Merge Join)</b> с временной сложностью <b>O(N + M)</b>.<br>Она читает оба файла одновременно в один проход: если ключ строки файла 1 меньше ключа файла 2, указатель файла 1 сдвигается вперед; если ключи равны — генерируется строка объединения.<br><br><b>Критическая уязвимость неотсортированных данных:</b> курсор утилиты <code>join</code> <u>никогда не возвращается назад</u>! Если очередная строка имеет ключ лексикографически меньший, чем предыдущая, утилита выдает ошибку <code>join: input is not in sorted order</code> и прекращает сопоставление, либо без предупреждения пропускает совпадения, приводя к безвозвратной потере данных.<br><b>Правило вызова:</b> перед вызовом обязательно выполнять <code>sort -k [поле],[поле]</code>. При наличии нестандартных символов рекомендуется задавать единую ASCII-локаль <code>LC_ALL=C sort -k...</code>."}, {"q": "3. Чем операторы перенаправления > и >> различаются на уровне системных вызовов ядра Linux?", "a": "Оба оператора вызывают системный вызов ядра <code>open(2)</code>, но передают принципиально разные битовые флаги режимов открытия файла:<br>• <b>Оператор <code>></code> (Перезапись):</b> передает флаги <code>O_WRONLY | O_CREAT | O_TRUNC</code>. Флаг <code>O_TRUNC</code> (Truncate) заставляет ядро немедленно сбросить длину файла до <b>0 байт</b> при открытии, удаляя все старые данные на диске.<br>• <b>Оператор <code>>></code> (Дозапись / Append):</b> передает флаги <code>O_WRONLY | O_CREAT | O_APPEND</code>. Флаг <code>O_APPEND</code> гарантирует, что любая последующая операция записи <code>write(2)</code> будет выполняться строго в текущий физический конец файла. Даже если другой параллельный процесс переместит указатель через <code>lseek(2)</code>, ядро атомарно установит указатель в конец перед каждой записью."}, {"q": "4. Что означает символ дефиса «-» на месте имени файла в утилитах Linux?", "a": "В утилитах стандарта POSIX дефис <code>-</code> на месте позиционного аргумента файла означает указание читать данные из <b>стандартного потока ввода (stdin / файловый дескриптор 0)</b> вместо открытия физического файла на диске.<br><br><b>Примеры из практики:</b><br>• <code>sort -k4,4 query1.txt | join -1 4 -2 1 -v 1 - active_sellers.txt</code> — здесь <code>-</code> указывает, что первый файл для join берется прямо из левого плеча конвейера (вывод sort).<br>• <code>cat header.txt - footer.txt < data.txt</code> — позволяет объединить заголовок, поток stdin и подвал в единый непрерывный поток."}, {"q": "5. Каковы гарантии атомарности записи в конвейер ядра Linux (PIPE_BUF) и что произойдет при переполнении буфера pipefs?", "a": "Конвейер в Linux — это кольцевой буфер (ring buffer) страниц оперативной памяти, управляемый виртуальной псевдо-файловой системой <code>pipefs</code>. Его емкость по умолчанию составляет <b>64 КБ</b> (16 страниц по 4 КБ).<br><br>• <b>Гарантия атомарности (<code>PIPE_BUF</code>):</b> константа стандарта POSIX (в Linux равна <b>4096 байт</b>). Если пишущий процесс отправляет в конвейер блок данных размером $\\le 4096$ байт, ядро гарантирует <b>атомарную запись без чередования</b> с другими параллельными писателями. Если блок превышает 4096 байт, данные могут фрагментироваться и перемешаться.<br>• <b>Переполнение буфера:</b> если читающий процесс не успевает вычитывать данные, кольцевой буфер (64 КБ) заполняется. После этого следующий вызов <code>write(2)</code> блокирует пишущий процесс: планировщик ядра переводит его в состояние ожидания <code>TASK_INTERRUPTIBLE</code> до тех пор, пока читатель не освободит место.<br>• <b>Сигнал <code>SIGPIPE</code>:</b> если процесс-читатель (например, <code>head -n 5</code>) закрыл свой конец канала и завершился, а процесс-писатель пытается продолжить запись, ядро посылает писателю сигнал <code>SIGPIPE</code> и вызов <code>write(2)</code> возвращает ошибку <code>EPIPE (Broken pipe)</code>."}, {"q": "6. Как в утилите join реализовать аналог SQL-операций LEFT JOIN и FULL OUTER JOIN?", "a": "По умолчанию <code>join</code> выполняет <b>INNER JOIN</b> — выводит только те строки, для которых ключ сопоставления найден в обоих файлах.<br><br><b>Флаги для внешних объединений и разностей:</b><br>• <code>-a 1</code> — <b>LEFT OUTER JOIN</b>: выводит все строки внутреннего объединения ПЛЮС не сопоставленные (висячие) строки из первого файла.<br>• <code>-a 2</code> — <b>RIGHT OUTER JOIN</b>: аналогично добавляет несопоставленные строки из второго файла.<br>• <code>-a 1 -a 2</code> — <b>FULL OUTER JOIN</b>: объединяет все строки обоих файлов, заполняя пробелами отсутствующие поля.<br>• <code>-v 1</code> — <b>LEFT SET DIFFERENCE</b> (Строго не вошедшие): выводит <i>только</i> те строки из файла 1, для которых <u>нет ни одного соответствия</u> в файле 2.<br>• <code>-v 2</code> — выводит только строки файла 2, отсутствующие в файле 1."}, {"q": "7. Как организовать агрегацию и суммирование числовых полей без использования awk?", "a": "Поскольку кафедра строго запрещает <code>awk</code> на защите, мы используем два легитимных метода:<br><br><b>Метод 1: Ассоциативные массивы Bash (Рекомендуемый):</b><br><code>declare -A sum</code><br><code>while read -r key val; do ((sum[\"$key\"] += val)); done < <(команда)</code><br><code>for k in \"${!sum[@]}\"; do echo \"$k ${sum[$k]}\"; done</code><br>Этот метод работает на $O(N)$, полностью нативен для Bash 4+ и не требует внешних утилит.<br><br><b>Метод 2: Циклический аккумулятор sed с eval:</b><br><code>sed -E ':a; N; s/^([A-Z]+) ([0-9]+)\\n\\1 ([0-9]+)$/\\1 \\$((\\2+\\3))/; ta; P; D'</code><br>Здесь sed через метку <code>:a</code> и команду <code>N</code> объединяет строки с одинаковым ключом в одну строку, заменяя их выражением арифметического расширения Bash <code>\\$((\\2+\\3))</code>. Затем конвейер передается в <code>eval</code>, который вычисляет сумму на лету."}, {"q": "8. В чём разница между анонимным конвейером «|», подстановкой процессов «<(cmd)» и именованным каналом «mkfifo»?", "a": "• <b>Анонимный конвейер <code>cmd1 | cmd2</code>:</b> системный вызов <code>pipe(2)</code> создает неименованный буфер в ОЗУ. Ограничение: может связывать только <i>линейные</i> цепочки один-к-одному (stdout одного процесса со stdin другого).<br>• <b>Подстановка процессов <code><(cmd)</code>:</b> Bash создает анонимный канал и передает его в виде псевдо-файла в каталоге <code>/dev/fd/N</code> (или временного FIFO). Это позволяет утилитам, требующим <i>два или более файловых аргументов</i> (например, <code>join file1 file2</code> или <code>diff f1 f2</code>), получать данные непосредственно из потоков без сохранения промежуточных файлов на диск!<br>• <b>Именованный канал <code>mkfifo mypipe</code>:</b> специальный файл типа 'FIFO' в структуре файловой системы (inode c типом p). Позволяет обмениваться данными абсолютно несвязанным между собой процессам в разных терминалах."}];
     const QUIZ_DATA = [{"q": "В каком порядке sed применяет команды к каждой строке?", "options": ["Строка считывается в Hold Space, проверяется адрес, выводится в stdout", "Строка считывается в Pattern Space, к ней последовательно применяются команды скрипта, затем буфер сбрасывается в stdout", "sed сразу записывает модификации в исходный файл на жестком диске", "sed загружает весь файл целиком в оперативную память перед началом обработки"], "correct": 1, "expl": "sed является строго однопроходным потоковым процессором. Он читает одну строку, помещает её в Pattern Space (удаляя \\n), последовательно выполняет команды скрипта и выводит результат в stdout."}, {"q": "Какая команда sed копирует содержимое Pattern Space в вспомогательный Hold Space, перезаписывая его?", "options": ["Команда g", "Команда x", "Команда h", "Команда G"], "correct": 2, "expl": "Команда 'h' (Hold) копирует текущий рабочий буфер Pattern Space в резервный Hold Space. Команда 'g' делает обратное, 'x' меняет их местами, а 'G' дописывает через перенос строки."}, {"q": "Что произойдет с утилитой join, если входные файлы не были предварительно отсортированы?", "options": ["join автоматически отсортирует файлы во временном каталоге /tmp", "join аварийно прервется с ошибкой или пропустит несопоставленные строки без вывода", "join переключится в режим хэш-таблицы (Hash Join)", "Ничего, join не требует сортировки входных файлов"], "correct": 1, "expl": "join использует алгоритм слияния (Sort-Merge) с одним проходом курсора вперед. При нарушении порядка сортировки утилита выдает ошибку 'input is not in sorted order' и теряет совпадения."}, {"q": "Какой флаг утилиты join выводит ТОЛЬКО те строки первого файла, для которых не нашлось пары во втором?", "options": ["-a 1", "-v 1", "-u 1", "-e 1"], "correct": 1, "expl": "Флаг '-v 1' реализует чистую левую разность множеств (Left Set Difference) — только строки файла 1, у которых нет соответствия в файле 2. Флаг '-a 1' вывел бы и совпавшие строки тоже."}, {"q": "Какой системный флаг вызова open(2) передает ядро Linux при использовании оператора перезаписи > ?", "options": ["O_APPEND", "O_TRUNC", "O_RDONLY", "O_NONBLOCK"], "correct": 1, "expl": "Оператор '>' передает флаг O_TRUNC (Truncate), обнуляющий размер файла до 0 байт при открытии. Флаг O_APPEND передается оператором '>>'."}, {"q": "Каков стандартный максимальный размер атомарной записи в конвейер Linux (константа PIPE_BUF)?", "options": ["512 байт", "1024 байта", "4096 байт (4 КБ)", "65536 байт (64 КБ)"], "correct": 2, "expl": "В Linux константа PIPE_BUF равна 4096 байт. Записи размером <= PIPE_BUF гарантированно не перемешиваются при параллельной работе нескольких процессов."}, {"q": "Какой сигнал отправляет ядро Linux процессу, пытающемуся писать в конвейер, у которого закрыт читающий дескриптор?", "options": ["SIGINT", "SIGPIPE", "SIGSEGV", "SIGKILL"], "correct": 1, "expl": "При попытке записи в закрытый канал (Broken Pipe) ядро Linux отправляет процессу сигнал SIGPIPE, и системный вызов write(2) возвращает ошибку EPIPE."}, {"q": "Какое ключевое изменение порядка столбцов делает утилита join в своем стандартном выводе?", "options": ["Порядок столбцов не изменяется", "Поле ключа сопоставления ВСЕГДА перемещается на первое место в строке", "Все числовые поля переносятся в конец строки", "Поля второго файла выводятся раньше полей первого файла"], "correct": 1, "expl": "Главная особенность вывода GNU join: поле, по которому производилось объединение, ВСЕГДА выводится самым первым (колонка $1), сдвигая позиции всех остальных полей!"}, {"q": "Что делает команда sed '= ' в скрипте обработки?", "options": ["Сравнивает две строки на эквивалентность", "Выводит номер текущей строки на отдельной строке перед содержимым", "Устанавливает значение переменной окружения", "Завершает выполнение скрипта"], "correct": 1, "expl": "Внутренняя команда sed '=' выводит текущий порядковый номер строки (Line Number) в stdout отдельной строкой."}, {"q": "Как в sed объединить две последовательные строки входного потока в один Pattern Space?", "options": ["Командой C", "Командой J", "Командой N", "Командой M"], "correct": 2, "expl": "Команда 'N' считывает следующую строку из входного потока и присоединяет её к текущему Pattern Space через символ переноса строки '\\n'."}, {"q": "Какая конструкция Bash используется для безопасной агрегации числовых полей без запрещенного awk?", "options": ["Массив байт struct byte[]", "Ассоциативный массив: declare -A map; ((map[\"$key\"] += val))", "Функция sum() языка C через inline asm", "Внешняя утилита bc через временный файл"], "correct": 1, "expl": "Ассоциативные массивы Bash 'declare -A' с целочисленной арифметикой '((...))' позволяют агрегировать любые числовые данные со сложностью O(N) в строгом соответствии с правилами кафедры."}, {"q": "Что делает команда sed -n '1,5p; $p' filename?", "options": ["Удаляет строки с 1 по 5 и последнюю строку", "Выводит первые 5 строк и самую последнюю строку файла", "Выводит весь файл, кроме строк 1-5", "Выводит только строки с 6 до конца файла"], "correct": 1, "expl": "Ключ '-n' отключает автоматическую печать. Диапазон '1,5p' печатает строки с 1 по 5, а адрес '$p' печатает последнюю строку файла ($ — якорь конца файла)."}];
 
-    // HTML Escape Helper
-    function escapeHtml(str) {
-      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+// ==========================================
+// ELI5 Visual Explainer Runtime Engine
+// OS Lab 4: sed, join, pipelines, and defense drill
+// ==========================================
+
+// Global state
+let currentActiveVariantId = 15;
+let curQuiz = 0;
+let quizScore = 0;
+let quizAnswered = false;
+
+// --- Helper: HTML Escape ---
+function escapeHtml(str) {
+  if (typeof str !== 'string') return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// --- Toast Notification System ---
+function showToast(message, type = 'info') {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+  const icon = type === 'success' ? '✓ ' : type === 'error' ? '⚠️ ' : 'ℹ️ ';
+  toast.innerHTML = '<span>' + icon + '</span><span>' + escapeHtml(message) + '</span>';
+
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('show');
+  }, 10);
+
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => {
+      if (toast.parentElement) toast.parentElement.removeChild(toast);
+    }, 300);
+  }, 2600);
+}
+
+// --- Dataset Quick Peek ---
+function showDatasetPeek(fname) {
+  document.querySelectorAll('.dataset-btns .file-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.includes(fname));
+  });
+
+  const descMap = {
+    'query1.txt': 'query1.txt — 30 строк: ID (1), Имя (2), Инициал (3), Фамилия (4), Должность (5), Отдел (6), Город (7), Оклад (8)',
+    'query2.txt': 'query2.txt — 31 строка (разделитель ":"): Код (1), Название (2), Адрес (3), Город (4), Страна (5), Индекс (6), Телефон (7), Лимит (8)',
+    'query3.txt': 'query3.txt — 25 строк (разделитель "!"): Код товара (1), Название (2), Макс. цена (3), Мин. цена (4), Дата введения (5)',
+    'query4.txt': 'query4.txt — 37 строк: Номер заказа (1), Фамилия продавца (2), Код покупателя (3), Дата (4), Сумма заказа (5)',
+    'query5.txt': 'query5.txt — 108 строк: № пункта (1), № заказа (2), Код товара (3), Цена продажи (4), Количество (5), Итого (6)'
+  };
+
+  const descElem = document.getElementById('dataset-desc');
+  if (descElem) descElem.textContent = descMap[fname] || fname;
+
+  const content = (typeof REAL_FILES !== 'undefined' && REAL_FILES[fname]) ? REAL_FILES[fname] : '';
+  const lines = content.trim().split('\n');
+  const preview = lines.slice(0, 10).join('\n');
+  const prevElem = document.getElementById('dataset-preview');
+  if (prevElem) {
+    prevElem.textContent = preview + (lines.length > 10 ? '\n... (всего ' + lines.length + ' строк)' : '');
+  }
+}
+
+// ==========================================
+// SECTION 4: In-Browser sed Simulation Engine
+// ==========================================
+
+// Preprocess POSIX regex character classes to JavaScript RegExp equivalents
+function preprocessSedRegex(pattern) {
+  if (!pattern) return '';
+  return pattern
+    .replace(/\[:space:\]/g, '\\s')
+    .replace(/\[:graph:\]/g, '\\S')
+    .replace(/\[:digit:\]/g, '\\d')
+    .replace(/\[:alpha:\]/g, '[a-zA-Z]')
+    .replace(/\[:alnum:\]/g, '[a-zA-Z0-9]')
+    .replace(/\[:upper:\]/g, '[A-Z]')
+    .replace(/\[:lower:\]/g, '[a-z]')
+    .replace(/\[:punct:\]/g, '[!-/:-@\\[-`{-~]');
+}
+
+// Parse a single sed substitution command with any single-character delimiter
+// Format: s<delim><pattern><delim><replacement><delim>[flags]
+function parseSedSubCommand(cmd) {
+  if (!cmd.startsWith('s') || cmd.length < 4) return null;
+  const delim = cmd[1];
+  if (/[a-zA-Z0-9\\]/.test(delim)) return null;
+
+  let pattern = '';
+  let rep = '';
+  let flags = '';
+  let part = 1; // 1: pattern, 2: rep, 3: flags
+  let escaped = false;
+
+  for (let i = 2; i < cmd.length; i++) {
+    const ch = cmd[i];
+    if (escaped) {
+      if (part === 1) pattern += ch;
+      else if (part === 2) rep += ch;
+      else flags += ch;
+      escaped = false;
+      continue;
     }
 
-    // Dataset Quick Peek
-    function showDatasetPeek(fname) {
-      document.querySelectorAll('.dataset-btns .file-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.textContent.includes(fname));
-      });
-
-      const descMap = {
-        'query1.txt': 'query1.txt — 30 строк: ID (1), Имя (2), Инициал (3), Фамилия (4), Должность (5), Отдел (6), Город (7), Оклад (8)',
-        'query2.txt': 'query2.txt — 31 строка (разделитель ':'): Код (1), Название (2), Адрес (3), Город (4), Страна (5), Индекс (6), Телефон (7), Лимит (8)',
-        'query3.txt': 'query3.txt — 25 строк (разделитель '!'): Код товара (1), Название (2), Макс. цена (3), Мин. цена (4), Дата введения (5)',
-        'query4.txt': 'query4.txt — 37 строк: Номер заказа (1), Фамилия продавца (2), Код покупателя (3), Дата (4), Сумма заказа (5)',
-        'query5.txt': 'query5.txt — 108 строк: № пункта (1), № заказа (2), Код товара (3), Цена продажи (4), Количество (5), Итого (6)'
-      };
-
-      document.getElementById('dataset-desc').textContent = descMap[fname] || fname;
-      const lines = (REAL_FILES[fname] || '').trim().split('\n').slice(0, 10).join('\n');
-      document.getElementById('dataset-preview').textContent = lines + '\n... (всего ' + (REAL_FILES[fname].trim().split('\n').length) + ' строк)';
+    if (ch === '\\') {
+      if (part === 1) pattern += ch;
+      else if (part === 2) rep += ch;
+      escaped = true;
+      continue;
     }
 
-    // In-Browser sed Simulation Engine
-    function runSedSimulation() {
-      const file = document.getElementById('sim-file-select').value;
-      const cmdRaw = document.getElementById('sim-cmd-input').value.trim();
-      const quiet = document.getElementById('sim-flag-n').checked;
-      const highlight = document.getElementById('sim-diff-view').checked;
-      const rawText = REAL_FILES[file] || '';
-      const lines = rawText.trim().split('\n');
+    if (ch === delim) {
+      part++;
+      continue;
+    }
 
-      let outputLines = [];
-      let diffCount = 0;
+    if (part === 1) pattern += ch;
+    else if (part === 2) rep += ch;
+    else flags += ch;
+  }
 
-      // Handle simple sed command simulation
-      // s/regex/replacement/flags
-      const sMatch = cmdRaw.match(/^s\/([^\/]*)\/([^\/]*)\/(.*)$/);
-      // /regex/d
-      const dMatch = cmdRaw.match(/^\/([^\/]+)\/d$/);
-      // /regex/p
-      const pMatch = cmdRaw.match(/^\/([^\/]+)\/p$/);
-      // = (line numbering)
-      const numMatch = (cmdRaw === '=');
+  if (part < 3) return null;
+  return { pattern, rep, flags };
+}
 
-      lines.forEach((line, idx) => {
-        let out = line;
-        let modified = false;
-        let shouldPrint = !quiet;
+// Main sed simulation runner
+function runSedSimulation() {
+  const fileElem = document.getElementById('sim-file-select');
+  const cmdElem = document.getElementById('sim-cmd-input');
+  const quietElem = document.getElementById('sim-flag-n');
+  const highlightElem = document.getElementById('sim-diff-view');
+  const onlyDiffElem = document.getElementById('sim-only-diff');
+  const screenElem = document.getElementById('sim-output-screen');
+  const errorElem = document.getElementById('sim-error-box');
 
-        if (numMatch) {
-          outputLines.push((idx + 1) + '\n' + line);
-          diffCount++;
-          return;
+  if (!fileElem || !cmdElem || !screenElem) return;
+
+  const file = fileElem.value;
+  const cmdRaw = cmdElem.value.trim();
+  const quiet = quietElem ? quietElem.checked : false;
+  const highlight = highlightElem ? highlightElem.checked : true;
+  const onlyDiff = onlyDiffElem ? onlyDiffElem.checked : false;
+
+  const rawText = (typeof REAL_FILES !== 'undefined' && REAL_FILES[file]) ? REAL_FILES[file] : '';
+  const lines = rawText.trim().split('\n');
+
+  // Hide previous errors
+  if (errorElem) {
+    errorElem.style.display = 'none';
+    errorElem.textContent = '';
+  }
+
+  let outputEntries = [];
+  let diffCount = 0;
+
+  // Split multiple commands separated by semicolon or newline (simple split)
+  const rawSubCmds = cmdRaw.split(/;|\n/).map(s => s.trim()).filter(Boolean);
+
+  try {
+    lines.forEach((line, idx) => {
+      let currentLine = line;
+      let lineModified = false;
+      let shouldPrint = !quiet;
+      let lineDeleted = false;
+      let extraLinesBefore = [];
+      let extraLinesAfter = [];
+
+      for (const cmd of (rawSubCmds.length > 0 ? rawSubCmds : [''])) {
+        if (!cmd) continue;
+
+        // Command: = (output line number)
+        if (cmd === '=') {
+          extraLinesBefore.push(String(idx + 1));
+          lineModified = true;
+          continue;
         }
 
+        // Address: /regex/=
+        const lineNumMatch = cmd.match(/^\/(.+)\/=$/);
+        if (lineNumMatch) {
+          const re = new RegExp(preprocessSedRegex(lineNumMatch[1]));
+          if (re.test(currentLine)) {
+            extraLinesBefore.push(String(idx + 1));
+            lineModified = true;
+          }
+          continue;
+        }
+
+        // Command: /regex/d (delete line)
+        const dMatch = cmd.match(/^\/(.+)\/d$/);
         if (dMatch) {
-          try {
-            const re = new RegExp(dMatch[1]);
-            if (re.test(line)) {
-              diffCount++;
-              return; // Deleted!
-            }
-          } catch(e) {}
+          const re = new RegExp(preprocessSedRegex(dMatch[1]));
+          if (re.test(currentLine)) {
+            lineDeleted = true;
+            lineModified = true;
+            break;
+          }
+          continue;
         }
 
+        // Line number delete: Nd or N,Md or $d
+        const ndMatch = cmd.match(/^(\d+|\$),?(\d+|\$)?d$/);
+        if (ndMatch) {
+          const start = ndMatch[1] === '$' ? lines.length : parseInt(ndMatch[1], 10);
+          const end = ndMatch[2] ? (ndMatch[2] === '$' ? lines.length : parseInt(ndMatch[2], 10)) : start;
+          const curNo = idx + 1;
+          if (curNo >= start && curNo <= end) {
+            lineDeleted = true;
+            lineModified = true;
+            break;
+          }
+          continue;
+        }
+
+        // Command: /regex/p (print match)
+        const pMatch = cmd.match(/^\/(.+)\/p$/);
         if (pMatch) {
-          try {
-            const re = new RegExp(pMatch[1]);
-            if (re.test(line)) {
+          const re = new RegExp(preprocessSedRegex(pMatch[1]));
+          if (re.test(currentLine)) {
+            shouldPrint = true;
+          }
+          continue;
+        }
+
+        // Line number print: Np or N,Mp or $p
+        const npMatch = cmd.match(/^(\d+|\$),?(\d+|\$)?p$/);
+        if (npMatch) {
+          const start = npMatch[1] === '$' ? lines.length : parseInt(npMatch[1], 10);
+          const end = npMatch[2] ? (npMatch[2] === '$' ? lines.length : parseInt(npMatch[2], 10)) : start;
+          const curNo = idx + 1;
+          if (curNo >= start && curNo <= end) {
+            shouldPrint = true;
+          }
+          continue;
+        }
+
+        // Command: /pattern/G or G (append blank line/newline)
+        if (cmd === 'G' || cmd.endsWith('/G')) {
+          let matchesG = true;
+          if (cmd.startsWith('/') && cmd.endsWith('/G')) {
+            const patternG = cmd.slice(1, -2);
+            matchesG = new RegExp(preprocessSedRegex(patternG)).test(currentLine);
+          }
+          if (matchesG) {
+            extraLinesAfter.push('');
+            lineModified = true;
+          }
+          continue;
+        }
+
+        // Substitution: s/old/new/flags
+        const subParsed = parseSedSubCommand(cmd);
+        if (subParsed) {
+          const processedPattern = preprocessSedRegex(subParsed.pattern);
+          const jsFlags = subParsed.flags.includes('g') ? 'g' : '';
+          const re = new RegExp(processedPattern, jsFlags + (subParsed.flags.includes('i') ? 'i' : ''));
+
+          // Convert sed backreferences \1..\9 to JS $1..$9 and whole match & to $&
+          let rep = subParsed.rep
+            .replace(/\\([1-9])/g, '$$$1')
+            .replace(/(^|[^\\])&/g, '$1$$&');
+
+          const nextVal = currentLine.replace(re, rep);
+          if (nextVal !== currentLine) {
+            currentLine = nextVal;
+            lineModified = true;
+            if (subParsed.flags.includes('p')) {
               shouldPrint = true;
             }
-          } catch(e) {}
-        }
-
-        if (sMatch) {
-          try {
-            const pattern = sMatch[1];
-            let rep = sMatch[2];
-            const flags = sMatch[3] || '';
-            const jsFlags = flags.includes('g') ? 'g' : '';
-            const re = new RegExp(pattern, jsFlags);
-            
-            // Convert sed backreferences \1, \2 to JS $1, $2
-            rep = rep.replace(/\\([0-9])/g, '$$$1');
-
-            const replaced = line.replace(re, rep);
-            if (replaced !== line) {
-              out = replaced;
-              modified = true;
-              diffCount++;
-            }
-            if (flags.includes('p') && modified) {
-              shouldPrint = true;
-            }
-          } catch(e) {
-            out = line + ' [Синтаксическая ошибка: ' + e.message + ']';
           }
+          continue;
         }
-
-        if (shouldPrint) {
-          if (highlight && modified) {
-            outputLines.push('→ ' + out);
-          } else {
-            outputLines.push('  ' + out);
-          }
-        }
-      });
-
-      const screen = document.getElementById('sim-output-screen');
-      screen.textContent = outputLines.slice(0, 150).join('\n') + (outputLines.length > 150 ? '\n... [вывод обрезан, всего ' + outputLines.length + ' строк]' : '');
-      document.getElementById('sim-lines-count').textContent = 'Обработано строк: ' + lines.length + ' (выведено: ' + outputLines.length + ')';
-      document.getElementById('sim-diff-count').textContent = 'Изменено строк: ' + diffCount;
-    }
-
-    function loadPreset(fname, cmd, quiet) {
-      document.getElementById('sim-file-select').value = fname;
-      document.getElementById('sim-cmd-input').value = cmd;
-      document.getElementById('sim-flag-n').checked = quiet;
-      runSedSimulation();
-      document.getElementById('simulator').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    // Render Variants
-    function renderVariantsNav() {
-      const nav = document.getElementById('var-tab-bar');
-      nav.innerHTML = VARIANTS_DATA.map(v => `
-        <button class="var-tab-btn ${v.id === 15 ? 'star' : ''} ${v.id === 15 ? 'active' : ''}" onclick="selectVariant(${v.id})">
-          ${v.id === 15 ? '★ Вар. 15 (Ваш)' : 'Вариант ' + v.id}
-        </button>
-      `).join('');
-
-      selectVariant(15); // Default to user's variant 15!
-    }
-
-    function selectVariant(id) {
-      document.querySelectorAll('.var-tab-btn').forEach((btn, idx) => {
-        btn.classList.toggle('active', (idx + 1) === id);
-      });
-
-      const v = VARIANTS_DATA.find(x => x.id === id);
-      if (!v) return;
-
-      const container = document.getElementById('active-var-container');
-      container.innerHTML = `
-        <div style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
-          <h3 style="font-size: 1.3rem; font-weight: 800; color: ${v.id === 15 ? 'var(--accent-amber)' : '#fff'};">${v.title}</h3>
-          <span style="font-size: 0.8rem; color: var(--text-muted);">2 лабораторных задания</span>
-        </div>
-
-        <!-- Task 1 -->
-        <div class="variant-card">
-          <div class="task-header">
-            <div>
-              <span class="badge">Задание 1: sed & фильтрация</span>
-              <span class="task-title" style="margin-left: 8px;">${escapeHtml(v.task1.desc)}</span>
-            </div>
-            <span style="font-family: 'Fira Code', monospace; font-size: 0.8rem; color: var(--accent-cyan);">${v.task1.file}</span>
-          </div>
-
-          <div class="code-box">
-            <pre><code>${escapeHtml(v.task1.cmd)}</code></pre>
-            <div class="code-actions">
-              <button class="btn-action" onclick="loadPreset('${v.task1.file}', '${v.task1.sim_cmd.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', false)">▶ Запустить в песочнице</button>
-              <button class="btn-action" onclick="copyToClipboard('${v.task1.cmd.replace(/\n/g, ' ').replace(/'/g, "\\'")}')">📋 Скопировать команду</button>
-            </div>
-          </div>
-
-          <div style="font-size: 0.86rem; color: #94a3b8; margin: 8px 0;">
-            <b>Разбор команды:</b> ${v.task1.theory}
-          </div>
-
-          <div style="font-size: 0.8rem; font-weight: 600; color: var(--accent-emerald); margin-top: 10px;">Результат на реальных данных:</div>
-          <div class="output-preview">${escapeHtml(v.task1.output)}</div>
-        </div>
-
-        <!-- Task 2 -->
-        <div class="variant-card">
-          <div class="task-header">
-            <div>
-              <span class="badge purple">Задание 2: join & конвейеры (Без awk)</span>
-              <span class="task-title" style="margin-left: 8px;">${escapeHtml(v.task2.desc)}</span>
-            </div>
-            <span style="font-family: 'Fira Code', monospace; font-size: 0.8rem; color: var(--accent-purple);">Реляционное слияние</span>
-          </div>
-
-          <div class="code-box">
-            <pre><code>${escapeHtml(v.task2.cmd)}</code></pre>
-            <div class="code-actions">
-              <button class="btn-action" onclick="copyToClipboard('${v.task2.cmd.replace(/\n/g, ' && ').replace(/'/g, "\\'")}')">📋 Скопировать Bash-конвейер</button>
-            </div>
-          </div>
-
-          <div style="font-size: 0.86rem; color: #94a3b8; margin: 8px 0;">
-            <b>Схема связывания:</b> ${v.task2.theory}
-          </div>
-
-          <div style="font-size: 0.8rem; font-weight: 600; color: var(--accent-emerald); margin-top: 10px;">Результат на реальных данных:</div>
-          <div class="output-preview">${escapeHtml(v.task2.output)}</div>
-        </div>
-      `;
-    }
-
-    function copyToClipboard(text) {
-      navigator.clipboard.writeText(text).then(() => {
-        alert('Команда успешно скопирована в буфер обмена!');
-      }).catch(() => {
-        prompt('Скопируйте команду вручную:', text);
-      });
-    }
-
-    // Render QA Accordions
-    function renderQA() {
-      const list = document.getElementById('qa-list');
-      list.innerHTML = QA_DATA.map((item, idx) => `
-        <div class="qa-item ${idx === 0 ? 'open' : ''}">
-          <div class="qa-question" onclick="this.parentElement.classList.toggle('open')">
-            <span>${item.q}</span>
-            <span class="qa-toggle" style="transition: transform 0.2s;">▼</span>
-          </div>
-          <div class="qa-answer">${item.a}</div>
-        </div>
-      `).join('');
-    }
-
-    // Interactive Quiz Engine
-    let curQuiz = 0;
-    let quizScore = 0;
-
-    function renderQuiz() {
-      const q = QUIZ_DATA[curQuiz];
-      document.getElementById('quiz-num').textContent = 'Вопрос ' + (curQuiz + 1) + ' из ' + QUIZ_DATA.length;
-      document.getElementById('quiz-title').textContent = q.q;
-      document.getElementById('quiz-progress-bar').style.width = (((curQuiz + 1) / QUIZ_DATA.length) * 100) + '%';
-      document.getElementById('quiz-expl-box').style.display = 'none';
-      document.getElementById('quiz-next-btn').style.display = 'none';
-
-      const box = document.getElementById('quiz-options-box');
-      box.innerHTML = q.options.map((opt, i) => `
-        <button class="quiz-btn" onclick="checkQuizAnswer(${i})">${escapeHtml(opt)}</button>
-      `).join('');
-    }
-
-    function checkQuizAnswer(selected) {
-      const q = QUIZ_DATA[curQuiz];
-      const buttons = document.querySelectorAll('.quiz-btn');
-      buttons.forEach(b => b.disabled = true);
-
-      if (selected === q.correct) {
-        buttons[selected].classList.add('correct');
-        quizScore++;
-      } else {
-        buttons[selected].classList.add('wrong');
-        buttons[q.correct].classList.add('correct');
       }
 
-      document.getElementById('quiz-score-badge').textContent = 'Счет: ' + quizScore + ' / ' + QUIZ_DATA.length;
-      const expl = document.getElementById('quiz-expl-box');
-      expl.innerHTML = '<b>Обоснование:</b> ' + q.expl;
-      expl.style.display = 'block';
+      if (lineDeleted) {
+        diffCount++;
+        return;
+      }
 
-      const nextBtn = document.getElementById('quiz-next-btn');
-      nextBtn.textContent = (curQuiz === QUIZ_DATA.length - 1) ? 'Завершить тестирование' : 'Следующий вопрос →';
-      nextBtn.style.display = 'inline-block';
-    }
+      if (lineModified) {
+        diffCount++;
+      }
 
-    function nextQuiz() {
-      if (curQuiz < QUIZ_DATA.length - 1) {
-        curQuiz++;
-        renderQuiz();
-      } else {
-        const pct = Math.round((quizScore / QUIZ_DATA.length) * 100);
-        let grade = pct >= 85 ? 'Отлично (5)' : pct >= 70 ? 'Хорошо (4)' : pct >= 50 ? 'Удовлетворительно (3)' : 'Неудовлетворительно (2)';
-        document.getElementById('quiz-body').innerHTML = `
-          <div style="text-align: center; padding: 28px 0;">
-            <div style="font-size: 3.5rem; margin-bottom: 12px;">🏆</div>
-            <h3 style="font-size: 1.6rem; margin-bottom: 10px; color: #fff;">Тест защиты завершен!</h3>
-            <p style="color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 24px;">
-              Ваш результат: <b>${quizScore} из ${QUIZ_DATA.length} (${pct}%)</b><br>
-              Рекомендуемая оценка: <span style="color: var(--accent-emerald); font-weight: 700; font-size: 1.2rem;">${grade}</span>
-            </p>
-            <button class="sim-btn" onclick="resetQuiz()">Пройти еще раз</button>
+      if (shouldPrint) {
+        if (!onlyDiff || lineModified) {
+          for (const b of extraLinesBefore) {
+            outputEntries.push({ text: b, modified: true, lineNo: idx + 1 });
+          }
+          outputEntries.push({ text: currentLine, modified: lineModified, lineNo: idx + 1 });
+          for (const a of extraLinesAfter) {
+            outputEntries.push({ text: a, modified: true, lineNo: idx + 1 });
+          }
+        }
+      }
+    });
+
+    // Render output with high-tech styling
+    if (outputEntries.length === 0) {
+      screenElem.innerHTML = '<div style="color: var(--text-muted); padding: 12px; font-style: italic;">[Пустой вывод — ни одна строка не прошла условия фильтрации]</div>';
+    } else {
+      const sliceLimit = 200;
+      const displayEntries = outputEntries.slice(0, sliceLimit);
+
+      const html = displayEntries.map(entry => {
+        const isMod = highlight && entry.modified;
+        const lineClass = isMod ? 'sim-line modified' : 'sim-line';
+        const badge = isMod ? '<span class="sim-badge">MOD</span>' : '<span class="sim-badge empty"></span>';
+        return `
+          <div class="${lineClass}">
+            <span class="sim-ln">${entry.lineNo}</span>
+            ${badge}
+            <span class="sim-text">${escapeHtml(entry.text)}</span>
           </div>
         `;
-      }
+      }).join('');
+
+      const truncatedNotice = outputEntries.length > sliceLimit
+        ? `<div style="color: var(--accent-amber); padding: 8px 12px; font-size: 0.75rem; border-top: 1px dashed var(--border-color);">... [Вывод обрезан: показано ${sliceLimit} из ${outputEntries.length} строк]</div>`
+        : '';
+
+      screenElem.innerHTML = html + truncatedNotice;
     }
 
-    function resetQuiz() {
-      curQuiz = 0;
-      quizScore = 0;
-      document.getElementById('quiz-score-badge').textContent = 'Счет: 0 / ' + QUIZ_DATA.length;
-      document.getElementById('quiz-body').innerHTML = `
-        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px;" id="quiz-num">Вопрос 1 из 12</div>
-        <div class="quiz-q-title" id="quiz-title">Загрузка...</div>
-        <div class="quiz-options" id="quiz-options-box"></div>
-        <div class="quiz-expl" id="quiz-expl-box"></div>
-        <div style="display: flex; justify-content: flex-end;">
-          <button class="sim-btn" id="quiz-next-btn" style="display: none;" onclick="nextQuiz()">Следующий вопрос →</button>
+    // Update status counters
+    const countElem = document.getElementById('sim-lines-count');
+    if (countElem) {
+      countElem.textContent = 'Строк в файле: ' + lines.length + ' (в выводе: ' + outputEntries.length + ')';
+    }
+    const diffElem = document.getElementById('sim-diff-count');
+    if (diffElem) {
+      diffElem.textContent = 'Изменено строк: ' + diffCount;
+    }
+
+  } catch (err) {
+    if (errorElem) {
+      errorElem.style.display = 'block';
+      errorElem.innerHTML = '<b>Ошибка синтаксиса sed / RegExp:</b> ' + escapeHtml(err.message);
+    }
+    screenElem.innerHTML = '<div style="color: var(--accent-rose); padding: 12px;">⚠️ Ошибка выполнения команды sed. Проверьте правильность регулярного выражения и флагов.</div>';
+  }
+}
+
+// Preset Loader
+function loadPreset(fname, cmd, quiet) {
+  const fileElem = document.getElementById('sim-file-select');
+  const cmdElem = document.getElementById('sim-cmd-input');
+  const quietElem = document.getElementById('sim-flag-n');
+
+  if (fileElem) fileElem.value = fname;
+  if (cmdElem) cmdElem.value = cmd;
+  if (quietElem) quietElem.checked = quiet;
+
+  showDatasetPeek(fname);
+  runSedSimulation();
+
+  const simElem = document.getElementById('simulator');
+  if (simElem) {
+    simElem.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  showToast('Пресет загружен: ' + fname + ' → ' + cmd, 'success');
+}
+
+// Preset Dropdown Handler
+function onPresetDropdownSelect(selectElem) {
+  const val = selectElem.value;
+  if (!val) return;
+  const parts = val.split('|||');
+  if (parts.length >= 3) {
+    loadPreset(parts[0], parts[1], parts[2] === 'true');
+  }
+}
+
+// Copy Simulator Output
+function copySimulatorOutput() {
+  const lines = [];
+  document.querySelectorAll('#sim-output-screen .sim-text').forEach(el => {
+    lines.push(el.textContent);
+  });
+  const text = lines.join('\n');
+  if (!text) {
+    showToast('Вывод пуст — нечего копировать', 'error');
+    return;
+  }
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Вывод терминала успешно скопирован в буфер!', 'success');
+  }).catch(() => {
+    prompt('Скопируйте текст вручную:', text);
+  });
+}
+
+// Reset Simulator
+function resetSimulator() {
+  loadPreset('query1.txt', 's/.$/*/', false);
+}
+
+// ==========================================
+// SECTION 5: Variants Database Engine
+// ==========================================
+
+function renderVariantsNav() {
+  const nav = document.getElementById('var-tab-bar');
+  if (!nav || typeof VARIANTS_DATA === 'undefined') return;
+
+  nav.innerHTML = VARIANTS_DATA.map(v => {
+    const isV15 = v.id === 15;
+    const isV3 = v.id === 3;
+    let badgeText = 'Вар. ' + v.id;
+    let extraClass = '';
+    if (isV15) {
+      badgeText = '★ Вар. 15 (Ваш)';
+      extraClass = 'star';
+    } else if (isV3) {
+      badgeText = '✓ Вар. 3 (Сдан)';
+      extraClass = 'passed';
+    }
+
+    return `
+      <button class="var-tab-btn ${extraClass} ${v.id === currentActiveVariantId ? 'active' : ''}" 
+              id="var-btn-${v.id}"
+              onclick="selectVariant(${v.id})">
+        ${badgeText}
+      </button>
+    `;
+  }).join('');
+
+  // Also populate mobile selector
+  const mobileSelect = document.getElementById('mobile-variant-select');
+  if (mobileSelect) {
+    mobileSelect.innerHTML = VARIANTS_DATA.map(v => {
+      const isV15 = v.id === 15;
+      const isV3 = v.id === 3;
+      const label = isV15 ? '★ Вариант 15 (Ваш вариант кафедры)' : (isV3 ? '✓ Вариант 3 (Сдан преподу)' : 'Вариант №' + v.id);
+      return `<option value="${v.id}" ${v.id === currentActiveVariantId ? 'selected' : ''}>${label}</option>`;
+    }).join('');
+  }
+
+  selectVariant(currentActiveVariantId);
+}
+
+function selectVariant(id) {
+  currentActiveVariantId = id;
+
+  document.querySelectorAll('.var-tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  const activeBtn = document.getElementById('var-btn-' + id);
+  if (activeBtn) activeBtn.classList.add('active');
+
+  const mobileSelect = document.getElementById('mobile-variant-select');
+  if (mobileSelect) mobileSelect.value = id;
+
+  if (typeof VARIANTS_DATA === 'undefined') return;
+  const v = VARIANTS_DATA.find(x => x.id === id);
+  if (!v) return;
+
+  const container = document.getElementById('active-var-container');
+  if (!container) return;
+
+  const prevId = id > 1 ? id - 1 : 15;
+  const nextId = id < 15 ? id + 1 : 1;
+
+  container.innerHTML = `
+    <!-- Top Variant Header & Quick Nav -->
+    <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; background: var(--bg-surface-elevated); padding: 14px 18px; border-radius: 10px; border: 1px solid var(--border-color);">
+      <div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <h3 style="font-size: 1.35rem; font-weight: 800; color: ${v.id === 15 ? 'var(--accent-amber)' : (v.id === 3 ? 'var(--accent-emerald)' : '#fff')};">
+            ${escapeHtml(v.title)}
+          </h3>
+          ${v.id === 15 ? '<span class="badge amber">Ваш утвержденный вариант</span>' : ''}
+          ${v.id === 3 ? '<span class="badge emerald">Сдан и защищен</span>' : ''}
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">
+          Полный комплект решений: Задание 1 (sed) + Задание 2 (join/конвейеры без awk)
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <button class="btn-action" onclick="selectVariant(${prevId})">← Вар. ${prevId}</button>
+        <button class="btn-action" onclick="selectVariant(${nextId})">Вар. ${nextId} →</button>
+      </div>
+    </div>
+
+    <!-- Task 1 Card -->
+    <div class="variant-card">
+      <div class="task-header">
+        <div>
+          <span class="badge">Задание 1: sed & фильтрация</span>
+          <span class="task-title" style="margin-left: 8px;">${escapeHtml(v.task1.desc)}</span>
+        </div>
+        <span style="font-family: 'Fira Code', monospace; font-size: 0.82rem; color: var(--accent-cyan);">${escapeHtml(v.task1.file)}</span>
+      </div>
+
+      <div class="code-box">
+        <pre><code id="code-t1-${v.id}">${escapeHtml(v.task1.cmd)}</code></pre>
+        <div class="code-actions">
+          <button class="btn-action" onclick="runVariantInSimulator(${v.id})">▶ Запустить в песочнице sed</button>
+          <button class="btn-action" id="copy-btn-t1-${v.id}" onclick="copyVariantCommand(${v.id}, 1)">📋 Скопировать команду</button>
+        </div>
+      </div>
+
+      <div style="background: rgba(56, 189, 248, 0.05); border-left: 3px solid var(--accent-cyan); padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 0.86rem; color: #cbd5e1;">
+        <b style="color: var(--accent-cyan);">Разбор команды для защиты:</b> ${escapeHtml(v.task1.theory)}
+      </div>
+
+      <div style="font-size: 0.8rem; font-weight: 600; color: var(--accent-emerald); margin-top: 14px;">Верифицированный результат на реальных данных:</div>
+      <div class="output-preview">${escapeHtml(v.task1.output)}</div>
+    </div>
+
+    <!-- Task 2 Card -->
+    <div class="variant-card">
+      <div class="task-header">
+        <div>
+          <span class="badge purple">Задание 2: join & конвейеры (Категорически без awk)</span>
+          <span class="task-title" style="margin-left: 8px;">${escapeHtml(v.task2.desc)}</span>
+        </div>
+        <span style="font-family: 'Fira Code', monospace; font-size: 0.82rem; color: var(--accent-purple);">Реляционное слияние</span>
+      </div>
+
+      <div class="code-box">
+        <pre><code id="code-t2-${v.id}">${escapeHtml(v.task2.cmd)}</code></pre>
+        <div class="code-actions">
+          <button class="btn-action" id="copy-btn-t2-${v.id}" onclick="copyVariantCommand(${v.id}, 2)">📋 Скопировать Bash-конвейер</button>
+        </div>
+      </div>
+
+      <div style="background: rgba(168, 85, 247, 0.05); border-left: 3px solid var(--accent-purple); padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: 0.86rem; color: #cbd5e1;">
+        <b style="color: var(--accent-purple);">Архитектурная схема и обоснование:</b> ${escapeHtml(v.task2.theory)}
+      </div>
+
+      <div style="font-size: 0.8rem; font-weight: 600; color: var(--accent-emerald); margin-top: 14px;">Верифицированный результат на реальных данных:</div>
+      <div class="output-preview">${escapeHtml(v.task2.output)}</div>
+    </div>
+  `;
+}
+
+// Send Variant Task 1 directly into the live simulator
+function runVariantInSimulator(varId) {
+  if (typeof VARIANTS_DATA === 'undefined') return;
+  const v = VARIANTS_DATA.find(x => x.id === varId);
+  if (!v || !v.task1) return;
+
+  const quiet = v.task1.cmd.includes('-n');
+  loadPreset(v.task1.file, v.task1.sim_cmd, quiet);
+}
+
+// Robust copy command without inline quoting issues
+function copyVariantCommand(varId, taskNum) {
+  if (typeof VARIANTS_DATA === 'undefined') return;
+  const v = VARIANTS_DATA.find(x => x.id === varId);
+  if (!v) return;
+
+  const cmd = taskNum === 1 ? v.task1.cmd : v.task2.cmd;
+  const btnId = `copy-btn-t${taskNum}-${varId}`;
+  const btn = document.getElementById(btnId);
+
+  navigator.clipboard.writeText(cmd).then(() => {
+    showToast(`Команда для Задания ${taskNum} (Вариант ${varId}) скопирована!`, 'success');
+    if (btn) {
+      const origText = btn.textContent;
+      btn.textContent = '✓ Скопировано!';
+      setTimeout(() => { btn.textContent = origText; }, 2000);
+    }
+  }).catch(() => {
+    prompt('Скопируйте команду вручную:', cmd);
+  });
+}
+
+// ==========================================
+// SECTION 6: Official Defense Q&A Engine
+// ==========================================
+
+function renderQA(filterText = '') {
+  const list = document.getElementById('qa-list');
+  if (!list || typeof QA_DATA === 'undefined') return;
+
+  const lowerFilter = filterText.trim().toLowerCase();
+
+  const filtered = QA_DATA.filter(item => {
+    if (!lowerFilter) return true;
+    return item.q.toLowerCase().includes(lowerFilter) || item.a.toLowerCase().includes(lowerFilter);
+  });
+
+  if (filtered.length === 0) {
+    list.innerHTML = `
+      <div style="text-align: center; padding: 32px; color: var(--text-muted); background: var(--bg-surface-elevated); border-radius: 8px;">
+        По запросу «${escapeHtml(filterText)}» вопросов не найдено.<br>
+        <button class="btn-action" style="margin-top: 10px;" onclick="document.getElementById('qa-search-input').value=''; renderQA();">Сбросить поиск</button>
+      </div>
+    `;
+    return;
+  }
+
+  list.innerHTML = filtered.map((item, idx) => {
+    return `
+      <div class="qa-item ${(!lowerFilter && idx === 0) ? 'open' : (lowerFilter ? 'open' : '')}" id="qa-item-${idx}">
+        <div class="qa-question" onclick="this.parentElement.classList.toggle('open')">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="badge" style="font-size: 0.72rem;">Вопрос ${idx + 1}</span>
+            <span>${item.q}</span>
+          </div>
+          <span class="qa-toggle">▼</span>
+        </div>
+        <div class="qa-answer">${item.a}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function filterQA(val) {
+  renderQA(val);
+}
+
+function expandAllQA(open) {
+  document.querySelectorAll('.qa-item').forEach(item => {
+    item.classList.toggle('open', open);
+  });
+}
+
+// ==========================================
+// SECTION 7: Interactive Defense Quiz Engine
+// ==========================================
+
+function renderQuiz() {
+  if (typeof QUIZ_DATA === 'undefined' || QUIZ_DATA.length === 0) return;
+  const q = QUIZ_DATA[curQuiz];
+  quizAnswered = false;
+
+  const numElem = document.getElementById('quiz-num');
+  if (numElem) numElem.textContent = 'Вопрос ' + (curQuiz + 1) + ' из ' + QUIZ_DATA.length;
+
+  const titleElem = document.getElementById('quiz-title');
+  if (titleElem) titleElem.textContent = q.q;
+
+  const barElem = document.getElementById('quiz-progress-bar');
+  if (barElem) {
+    barElem.style.width = (((curQuiz + 1) / QUIZ_DATA.length) * 100) + '%';
+  }
+
+  const explElem = document.getElementById('quiz-expl-box');
+  if (explElem) explElem.style.display = 'none';
+
+  const nextBtn = document.getElementById('quiz-next-btn');
+  if (nextBtn) nextBtn.style.display = 'none';
+
+  const box = document.getElementById('quiz-options-box');
+  if (box) {
+    box.innerHTML = q.options.map((opt, i) => `
+      <button class="quiz-btn" onclick="checkQuizAnswer(${i})" id="quiz-opt-${i}">
+        <span class="opt-bullet">${String.fromCharCode(65 + i)}</span>
+        <span>${escapeHtml(opt)}</span>
+      </button>
+    `).join('');
+  }
+}
+
+function checkQuizAnswer(selected) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+
+  if (typeof QUIZ_DATA === 'undefined') return;
+  const q = QUIZ_DATA[curQuiz];
+  const buttons = document.querySelectorAll('.quiz-btn');
+  buttons.forEach(b => { b.disabled = true; });
+
+  const selectedBtn = document.getElementById('quiz-opt-' + selected);
+  const correctBtn = document.getElementById('quiz-opt-' + q.correct);
+
+  if (selected === q.correct) {
+    if (selectedBtn) selectedBtn.classList.add('correct');
+    quizScore++;
+    showToast('Правильно! +1 балл', 'success');
+  } else {
+    if (selectedBtn) selectedBtn.classList.add('wrong');
+    if (correctBtn) correctBtn.classList.add('correct');
+    showToast('Неверно. Правильный ответ подсвечен зеленым', 'error');
+  }
+
+  const badgeElem = document.getElementById('quiz-score-badge');
+  if (badgeElem) {
+    badgeElem.textContent = 'Счет: ' + quizScore + ' / ' + QUIZ_DATA.length;
+  }
+
+  const expl = document.getElementById('quiz-expl-box');
+  if (expl) {
+    expl.innerHTML = '<b>💡 Инженерное обоснование:</b> ' + q.expl;
+    expl.style.display = 'block';
+  }
+
+  const nextBtn = document.getElementById('quiz-next-btn');
+  if (nextBtn) {
+    nextBtn.textContent = (curQuiz === QUIZ_DATA.length - 1) ? 'Завершить тестирование 🏁' : 'Следующий вопрос →';
+    nextBtn.style.display = 'inline-block';
+  }
+}
+
+function nextQuiz() {
+  if (typeof QUIZ_DATA === 'undefined') return;
+
+  if (curQuiz < QUIZ_DATA.length - 1) {
+    curQuiz++;
+    renderQuiz();
+  } else {
+    // Show summary screen
+    const pct = Math.round((quizScore / QUIZ_DATA.length) * 100);
+    let grade = 'Неудовлетворительно (2)';
+    let gradeColor = 'var(--accent-rose)';
+    let emoji = '📚';
+
+    if (pct >= 85) {
+      grade = 'Отлично (5) — Полная готовность к защите!';
+      gradeColor = 'var(--accent-emerald)';
+      emoji = '🏆';
+    } else if (pct >= 70) {
+      grade = 'Хорошо (4) — Твердое понимание материала';
+      gradeColor = 'var(--accent-cyan)';
+      emoji = '🥈';
+    } else if (pct >= 50) {
+      grade = 'Удовлетворительно (3) — Рекомендуется повторить вопросы';
+      gradeColor = 'var(--accent-amber)';
+      emoji = '🥉';
+    }
+
+    const quizBody = document.getElementById('quiz-body');
+    if (quizBody) {
+      quizBody.innerHTML = `
+        <div style="text-align: center; padding: 32px 16px;">
+          <div style="font-size: 3.8rem; margin-bottom: 14px;">${emoji}</div>
+          <h3 style="font-size: 1.7rem; margin-bottom: 12px; color: #fff;">Тестирование защиты завершено!</h3>
+          <p style="color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 24px; line-height: 1.6;">
+            Ваш итоговый счет: <b style="color: #fff; font-size: 1.3rem;">${quizScore} из ${QUIZ_DATA.length} (${pct}%)</b><br>
+            Оценка кафедры: <span style="color: ${gradeColor}; font-weight: 800; font-size: 1.25rem;">${grade}</span>
+          </p>
+
+          <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+            <button class="sim-btn" onclick="resetQuiz()">🔄 Пройти тест заново</button>
+            <button class="btn-action" style="padding: 10px 18px;" onclick="document.getElementById('defense').scrollIntoView({behavior: 'smooth'})">📖 Повторить вопросы защиты</button>
+            <button class="btn-action" style="padding: 10px 18px;" onclick="document.getElementById('variants').scrollIntoView({behavior: 'smooth'})">🔍 Посмотреть свой вариант №15</button>
+          </div>
         </div>
       `;
-      renderQuiz();
     }
+  }
+}
 
-    // Initialization
-    window.addEventListener('DOMContentLoaded', () => {
-      showDatasetPeek('query1.txt');
-      runSedSimulation();
-      renderVariantsNav();
-      renderQA();
-      renderQuiz();
-    });
+function resetQuiz() {
+  curQuiz = 0;
+  quizScore = 0;
+  quizAnswered = false;
+
+  const badgeElem = document.getElementById('quiz-score-badge');
+  if (badgeElem && typeof QUIZ_DATA !== 'undefined') {
+    badgeElem.textContent = 'Счет: 0 / ' + QUIZ_DATA.length;
+  }
+
+  const quizBody = document.getElementById('quiz-body');
+  if (quizBody) {
+    quizBody.innerHTML = `
+      <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px;" id="quiz-num">Вопрос 1 из 12</div>
+      <div class="quiz-q-title" id="quiz-title">Загрузка...</div>
+      <div class="quiz-options" id="quiz-options-box"></div>
+      <div class="quiz-expl" id="quiz-expl-box"></div>
+      <div style="display: flex; justify-content: flex-end;">
+        <button class="sim-btn" id="quiz-next-btn" style="display: none;" onclick="nextQuiz()">Следующий вопрос →</button>
+      </div>
+    `;
+  }
+  renderQuiz();
+}
+
+// ==========================================
+// Initialization on Page Load
+// ==========================================
+
+window.addEventListener('DOMContentLoaded', () => {
+  showDatasetPeek('query1.txt');
+  runSedSimulation();
+  renderVariantsNav();
+  renderQA();
+  renderQuiz();
+});
+
   </script>
 </body>
 </html>
