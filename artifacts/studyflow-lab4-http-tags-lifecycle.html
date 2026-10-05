@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>ELI5: Сетевой справочник, Runtime-типы и Жизненный цикл в React</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card: #131b2e;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #38bdf8;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --accent-yellow: #f59e0b;
+      --accent-purple: #a855f7;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      max-width: 860px;
+      margin: 0 auto 60px;
+      line-height: 1.5;
+    }
+    .header-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .back-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 3px 10px;
+      border-radius: 999px;
+      letter-spacing: 0.03em;
+    }
+    h1 {
+      font-size: clamp(22px, 5vw, 30px);
+      font-weight: 800;
+      margin-bottom: 10px;
+      line-height: 1.25;
+      background: linear-gradient(135deg, #ffffff 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p.lead {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    /* Comparison grid */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    @media (min-width: 640px) {
+      .comparison-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .box {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 18px;
+    }
+    .box.bad {
+      border-left: 4px solid var(--accent-red);
+      background: linear-gradient(180deg, rgba(239, 68, 68, 0.06) 0%, var(--card) 100%);
+    }
+    .box.good {
+      border-left: 4px solid var(--accent-green);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, var(--card) 100%);
+    }
+    .box-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .box.bad .box-title { color: var(--accent-red); }
+    .box.good .box-title { color: var(--accent-green); }
+    .box ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 13.5px;
+      color: #cbd5e1;
+    }
+    .box li { display: flex; align-items: flex-start; gap: 8px; }
+
+    /* SVG Diagram container */
+    .diagram-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .svg-container {
+      width: 100%;
+      overflow-x: auto;
+    }
+    svg { display: block; width: 100%; height: auto; min-width: 600px; }
+
+    /* Pillars */
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    @media (min-width: 640px) {
+      .pillars-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .pillar-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .pillar-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 13px;
+    }
+    .pillar-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+    .pillar-text {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* Simulator */
+    .sim-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .sim-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .sim-btn {
+      padding: 8px 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      color: #e2e8f0;
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+    .sim-btn:hover, .sim-btn.active {
+      background: var(--accent);
+      color: #0b0f19;
+      border-color: var(--accent);
+    }
+    .sim-screen {
+      background: #070a13;
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 16px;
+      font-family: ui-monospace, monospace;
+      font-size: 13px;
+    }
+    .sim-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    /* Accordion FAQ */
+    .accordion-item {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .accordion-header {
+      padding: 14px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: transparent;
+      border: none;
+      width: 100%;
+      color: #e2e8f0;
+      text-align: left;
+    }
+    .accordion-content {
+      padding: 0 18px 16px;
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.6;
+      display: none;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+      padding-top: 12px;
+    }
+    .accordion-item.open .accordion-content { display: block; }
+    .accordion-item.open .accordion-header { color: var(--accent); }
+    .arrow { transition: transform 0.2s ease; }
+    .accordion-item.open .arrow { transform: rotate(180deg); }
+  </style>
+</head>
+<body>
+
+  <div class="header-nav">
+    <a href="../index.html" class="back-link">← Все схемы хаба</a>
+    <span class="badge">StudyFlow • ЛР 4</span>
+  </div>
+
+  <h1>Сетевой справочник по HTTP: Жизненный цикл и Runtime-типы</h1>
+  <p class="lead">
+    Разбираем на пальцах переход от статических данных к реальному асинхронному протоколу HTTP: как связать Fetch API с интерфейсом React, защититься от поломок сети и почему TypeScript не защищает вас во время исполнения.
+  </p>
+
+  <!-- Блок: Конфликт / Проблема vs Решение -->
+  <div class="comparison-grid">
+    <div class="box bad">
+      <div class="box-title">❌ Иллюзия типов (Как делают новички)</div>
+      <ul>
+        <li>❌ <code>import tags from './tags.json'</code> — нет сетевого обмена, данные намертво вшиты в бандл.</li>
+        <li>❌ <code>data as Tag[]</code> — самообман: при 404 или HTML-ошибке приложение упадёт в белый экран.</li>
+        <li>❌ <code>useEffect</code> без очистки — утечки памяти и ошибка <em>Can't perform a state update on an unmounted component</em>.</li>
+        <li>❌ Ошибка сети сбрасывает введённый черновик пользователя.</li>
+      </ul>
+    </div>
+    <div class="box good">
+      <div class="box-title">✅ Промышленный подход (ЛР 4)</div>
+      <ul>
+        <li>✅ Реальный <code>GET /demo/tags.json</code> через <code>fetch()</code> с проверкой <code>response.ok</code>.</li>
+        <li>✅ Runtime-валидация: <code>isTag</code> и <code>parseTags</code> проверяют структуру до передачи в стейт.</li>
+        <li>✅ <code>AbortController</code> + <code>active=false</code> отменяют запрос при размонтировании формы.</li>
+        <li>✅ Черновик формы изолирован: кнопка «Повторить» перезапрашивает теги, не стирая поля.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- SVG Архитектура (0.3-Second Rule) -->
+  <div class="diagram-card">
+    <div class="card-title">📡 Архитектурный конвейер сетевой загрузки</div>
+    <div class="svg-container">
+      <svg viewBox="0 0 760 210">
+        <defs>
+          <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#1e293b"/>
+            <stop offset="100%" stop-color="#0f172a"/>
+          </linearGradient>
+          <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+            <polygon points="0 0, 8 3, 0 6" fill="#38bdf8"/>
+          </marker>
+        </defs>
+
+        <!-- Node 1: Public JSON -->
+        <rect x="20" y="30" width="150" height="70" rx="10" fill="url(#bgGrad)" stroke="#38bdf8" stroke-width="1.5"/>
+        <text x="95" y="58" text-anchor="middle" font-size="13" font-weight="700" fill="#38bdf8">Vite Public Server</text>
+        <text x="95" y="78" text-anchor="middle" font-size="11" fill="#94a3b8">/demo/tags.json</text>
+        <text x="95" y="90" text-anchor="middle" font-size="9" fill="#64748b">(HTTP GET, 200 OK)</text>
+
+        <!-- Arrow 1 -->
+        <line x1="170" y1="65" x2="220" y2="65" stroke="#38bdf8" stroke-width="2" marker-end="url(#arr)"/>
+        <text x="195" y="55" text-anchor="middle" font-size="10" fill="#38bdf8">fetch()</text>
+
+        <!-- Node 2: HTTP Service -->
+        <rect x="220" y="30" width="150" height="70" rx="10" fill="url(#bgGrad)" stroke="#a855f7" stroke-width="1.5"/>
+        <text x="295" y="58" text-anchor="middle" font-size="13" font-weight="700" fill="#a855f7">services/tags.ts</text>
+        <text x="295" y="78" text-anchor="middle" font-size="11" fill="#cbd5e1">response.ok ?</text>
+        <text x="295" y="90" text-anchor="middle" font-size="9" fill="#94a3b8">cache: 'no-store'</text>
+
+        <!-- Arrow 2 -->
+        <line x1="370" y1="65" x2="420" y2="65" stroke="#38bdf8" stroke-width="2" marker-end="url(#arr)"/>
+        <text x="395" y="55" text-anchor="middle" font-size="10" fill="#38bdf8">JSON</text>
+
+        <!-- Node 3: Validation Guard -->
+        <rect x="420" y="30" width="150" height="70" rx="10" fill="url(#bgGrad)" stroke="#10b981" stroke-width="1.5"/>
+        <text x="495" y="58" text-anchor="middle" font-size="13" font-weight="700" fill="#10b981">parseTags & isTag</text>
+        <text x="495" y="78" text-anchor="middle" font-size="11" fill="#cbd5e1">Runtime Guard</text>
+        <text x="495" y="90" text-anchor="middle" font-size="9" fill="#6ee7b7">id unique via Set</text>
+
+        <!-- Arrow 3 -->
+        <line x1="570" y1="65" x2="620" y2="65" stroke="#38bdf8" stroke-width="2" marker-end="url(#arr)"/>
+        <text x="595" y="55" text-anchor="middle" font-size="10" fill="#38bdf8">Tag[]</text>
+
+        <!-- Node 4: React UI -->
+        <rect x="620" y="30" width="120" height="70" rx="10" fill="url(#bgGrad)" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="680" y="58" text-anchor="middle" font-size="13" font-weight="700" fill="#f59e0b">TaskForm</text>
+        <text x="680" y="78" text-anchor="middle" font-size="11" fill="#cbd5e1">&lt;select&gt;</text>
+        <text x="680" y="90" text-anchor="middle" font-size="9" fill="#fde68a">disabled={!canSave}</text>
+
+        <!-- Lifeline & AbortController -->
+        <path d="M 295 100 L 295 160 L 680 160 L 680 100" fill="none" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4"/>
+        <text x="490" y="152" text-anchor="middle" font-size="11" fill="#ef4444">cleanup: controller.abort() & active=false</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- 3 Ключевых столпа -->
+  <div class="pillars-grid">
+    <div class="pillar-card">
+      <div class="pillar-num">1</div>
+      <div class="pillar-title">Type Guard vs 'as'</div>
+      <div class="pillar-text">
+        <code>as Tag[]</code> существует только для редактора VS Code. В браузере его стирает Babel/Vite. Функция <code>isTag()</code> проверяет реальные байты в рантайме.
+      </div>
+    </div>
+    <div class="pillar-card">
+      <div class="pillar-num">2</div>
+      <div class="pillar-title">AbortController</div>
+      <div class="pillar-text">
+        Если юзер за 0.1 секунды открыл и закрыл форму — браузер физически отменяет HTTP-пакет, а флаг <code>active=false</code> блокирует попытку обновить стейт мёртвого экрана.
+      </div>
+    </div>
+    <div class="pillar-card">
+      <div class="pillar-num">3</div>
+      <div class="pillar-title">Изоляция черновика</div>
+      <div class="pillar-text">
+        Сетевой запрос живёт в <code>useTags</code>, а текст задачи — в <code>draft</code>. При ошибке сети черновик не стирается, кнопка «Повторить» перезапускает только сеть.
+      </div>
+    </div>
+  </div>
+
+  <!-- Интерактивный симулятор состояний -->
+  <div class="sim-card">
+    <div class="card-title">🧪 Интерактивный симулятор ответов сервера</div>
+    <p style="font-size: 13px; color: var(--muted); margin-bottom: 14px;">
+      Кликни по сценарию, чтобы увидеть, как отработает наш конвейер:
+    </p>
+    <div class="sim-controls">
+      <button class="sim-btn active" onclick="simulate('ok')">🟢 200 OK (Норма)</button>
+      <button class="sim-btn" onclick="simulate('404')">🔴 404 Not Found</button>
+      <button class="sim-btn" onclick="simulate('invalid')">⚠️ Битая структура</button>
+      <button class="sim-btn" onclick="simulate('empty')">⚪ Пустой массив []</button>
+      <button class="sim-btn" onclick="simulate('offline')">📵 Режим Offline</button>
+    </div>
+    <div class="sim-screen" id="sim-screen">
+      <div class="sim-status" style="color: #10b981;">● Статус: SUCCESS (200 OK)</div>
+      <div style="color: #94a3b8; margin-bottom: 8px;">[GET /demo/tags.json] → получено 5 элементов. parseTags: проверка пройдена.</div>
+      <div style="color: #38bdf8;">Селектор: [Лабораторная, Практика, Семинар, Курсовая работа, Экзамен]</div>
+      <div style="color: #10b981; margin-top: 6px;">Кнопка «Сохранить»: АКТИВНА (canSave = true)</div>
+    </div>
+  </div>
+
+  <!-- Контрольные вопросы с ответами -->
+  <div class="card-title" style="margin-top: 30px;">🎓 Шпаргалка для защиты (Вопросы Бричага Д.В.)</div>
+
+  <div class="accordion-item">
+    <button class="accordion-header" onclick="toggleAcc(this)">
+      1. Чем запрос к JSON из public отличается от его импорта в TypeScript?
+      <span class="arrow">▼</span>
+    </button>
+    <div class="accordion-content">
+      Импорт в TypeScript компилируется сборщиком прямо в JS-файл (синхронно, без сети). Запрос к файлу из public через fetch — это настоящий асинхронный HTTP-запрос в браузере с заголовками, статусами (200/404) и возможностью отмены.
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <button class="accordion-header" onclick="toggleAcc(this)">
+      2. Почему после fetch нужно обязательно проверить response.ok?
+      <span class="arrow">▼</span>
+    </button>
+    <div class="accordion-content">
+      fetch() отклоняет промис ТОЛЬКО при физическом падении сети. Если сервер вернул 404 или 500, fetch считает это успешным обменом. Проверка response.ok выбрасывает ошибку, предотвращая разбор HTML-страницы ошибки как JSON.
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <button class="accordion-header" onclick="toggleAcc(this)">
+      3. Почему 'as Tag[]' не проверяет данные сервера?
+      <span class="arrow">▼</span>
+    </button>
+    <div class="accordion-content">
+      Конструкция 'as' существует только во время компиляции TypeScript и полностью удаляется при сборке. В рантайме браузера она не выполняет никаких проверок. Реальную валидацию делают User-Defined Type Guard (isTag) и функция parseTags.
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <button class="accordion-header" onclick="toggleAcc(this)">
+      4. Что делает очистка useEffect при уходе со страницы?
+      <span class="arrow">▼</span>
+    </button>
+    <div class="accordion-content">
+      Она вызывает controller.abort(), прерывая HTTP-запрос на уровне браузера, и устанавливает active = false, гарантируя, что завершившийся промис не попытается обновить стейт уже уничтоженного компонента формы.
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <button class="accordion-header" onclick="toggleAcc(this)">
+      5. Почему в задаче хранится id справочника, а в селекторе показывается name?
+      <span class="arrow">▼</span>
+    </button>
+    <div class="accordion-content">
+      Это принцип нормализации данных. ID ('lab') — постоянный компактный ключ для связей. Название ('Лабораторная') может измениться в справочнике (перевод, исправление опечатки), но связи и записи в базе при этом не сломаются.
+    </div>
+  </div>
+
+  <script>
+    function toggleAcc(btn) {
+      btn.parentElement.classList.toggle('open');
+    }
+
+    function simulate(type) {
+      document.querySelectorAll('.sim-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      const s = document.getElementById('sim-screen');
+      if (type === 'ok') {
+        s.innerHTML = `
+          <div class="sim-status" style="color: #10b981;">● Статус: SUCCESS (200 OK)</div>
+          <div style="color: #94a3b8; margin-bottom: 8px;">[GET /demo/tags.json] → получено 5 элементов. parseTags: проверка пройдена.</div>
+          <div style="color: #38bdf8;">Селектор: [Лабораторная, Практика, Семинар, Курсовая работа, Экзамен]</div>
+          <div style="color: #10b981; margin-top: 6px;">Кнопка «Сохранить»: АКТИВНА (canSave = true)</div>
+        `;
+      } else if (type === '404') {
+        s.innerHTML = `
+          <div class="sim-status" style="color: #ef4444;">● Статус: ERROR (HTTP 404 Not Found)</div>
+          <div style="color: #94a3b8; margin-bottom: 8px;">response.ok === false → выброшена ошибка "Не удалось загрузить теги: HTTP 404".</div>
+          <div style="color: #ef4444;">Интерфейс: Сообщение об ошибке + кнопка [🔄 Повторить]. Черновик СОХРАНЁН.</div>
+          <div style="color: #f59e0b; margin-top: 6px;">Кнопка «Сохранить»: ЗАБЛОКИРОВАНА (disabled={!canSave})</div>
+        `;
+      } else if (type === 'invalid') {
+        s.innerHTML = `
+          <div class="sim-status" style="color: #f59e0b;">● Статус: RUNTIME TYPE ERROR</div>
+          <div style="color: #94a3b8; margin-bottom: 8px;">parseTags: обнаружен объект без 'id' или повторяющийся id. Выброшено исключение.</div>
+          <div style="color: #f59e0b;">Интерфейс: Ошибка структуры справочника. Приложение НЕ упало в белый экран!</div>
+          <div style="color: #ef4444; margin-top: 6px;">Кнопка «Сохранить»: ЗАБЛОКИРОВАНА</div>
+        `;
+      } else if (type === 'empty') {
+        s.innerHTML = `
+          <div class="sim-status" style="color: #f59e0b;">● Статус: EMPTY DATA ([])</div>
+          <div style="color: #94a3b8; margin-bottom: 8px;">Сервер вернул [], parseTags признал ответ корректным, но тегов нет.</div>
+          <div style="color: #e2e8f0;">Интерфейс: "Тегов пока нет. Сохранение недоступно." + [🔄 Повторить]</div>
+          <div style="color: #ef4444; margin-top: 6px;">Кнопка «Сохранить»: ЗАБЛОКИРОВАНА (tags.length === 0)</div>
+        `;
+      } else if (type === 'offline') {
+        s.innerHTML = `
+          <div class="sim-status" style="color: #ef4444;">● Статус: NETWORK FAILURE (Offline)</div>
+          <div style="color: #94a3b8; margin-bottom: 8px;">fetch() отклонил Promise (Failed to fetch). Сработал блок catch.</div>
+          <div style="color: #ef4444;">Интерфейс: "Не удалось загрузить справочник" + [🔄 Повторить].</div>
+          <div style="color: #10b981; margin-top: 6px;">Пользователь продолжает вводить название задачи — черновик НЕ стирается!</div>
+        `;
+      }
+    }
+  </script>
+</body>
+</html>
