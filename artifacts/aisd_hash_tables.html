@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ELI5: Хэш-таблицы, коллизии и открытая адресация</title>
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1a2234;
+      --border-color: #243049;
+      --text-main: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #38bdf8;
+      --accent-blue: #3b82f6;
+      --accent-emerald: #10b981;
+      --accent-purple: #a855f7;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --code-bg: #06090f;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 14, 23, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #fff;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 14px;
+      list-style: none;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent-cyan); text-decoration: none; }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px 20px;
+    }
+
+    .hero {
+      padding: 32px 0 24px 0;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 32px;
+    }
+
+    .badges-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--accent-cyan);
+    }
+    .badge.emerald { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); color: var(--accent-emerald); }
+    .badge.purple { background: rgba(168, 85, 247, 0.1); border-color: rgba(168, 85, 247, 0.3); color: var(--accent-purple); }
+    .badge.amber { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3); color: var(--accent-amber); }
+
+    h1.hero-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #ffffff 0%, #7dd3fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      max-width: 860px;
+      margin-bottom: 20px;
+    }
+
+    .section-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 36px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Comparison Box (Conflict Grid) */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 768px) {
+      .compare-grid { grid-template-columns: 1fr; }
+    }
+
+    .box-bad {
+      background: rgba(244, 63, 94, 0.08);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      border-radius: 12px;
+      padding: 18px;
+    }
+    .box-bad h4 {
+      color: var(--accent-rose);
+      font-size: 1.05rem;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .box-good {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 12px;
+      padding: 18px;
+    }
+    .box-good h4 {
+      color: var(--accent-emerald);
+      font-size: 1.05rem;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Interactive Simulator */
+    .sim-controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      background: var(--bg-surface-elevated);
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 20px;
+    }
+
+    .sim-input {
+      background: #0d121f;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: #fff;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .sim-input:focus { border-color: var(--accent-cyan); }
+
+    .sim-btn {
+      background: var(--accent-blue);
+      border: none;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .sim-btn:hover { background: #2563eb; }
+    .sim-btn.danger { background: #dc2626; }
+    .sim-btn.danger:hover { background: #b91c1c; }
+
+    /* Visual Table Grid */
+    .table-view {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .cell-row {
+      display: flex;
+      align-items: center;
+      background: #070a10;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .cell-row.probed {
+      border-color: var(--accent-amber);
+      background: rgba(245, 158, 11, 0.1);
+    }
+    .cell-row.match {
+      border-color: var(--accent-emerald);
+      background: rgba(16, 185, 129, 0.15);
+    }
+
+    .cell-idx {
+      width: 45px;
+      color: var(--accent-cyan);
+      font-weight: 700;
+    }
+
+    .cell-val {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .item-pill {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--accent-blue);
+      color: #93c5fd;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .item-pill.deleted {
+      background: rgba(244, 63, 94, 0.15);
+      border-color: var(--accent-rose);
+      color: var(--accent-rose);
+      text-decoration: line-through;
+    }
+
+    /* QA Accordion */
+    .qa-item {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .qa-question {
+      padding: 14px 18px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .qa-question:hover { background: rgba(255, 255, 255, 0.02); }
+
+    .qa-answer {
+      padding: 0 18px 16px 18px;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 12px;
+      display: none;
+    }
+    .qa-item.open .qa-answer { display: block; }
+    .qa-item.open .qa-toggle { transform: rotate(180deg); }
+
+    /* Quiz */
+    .quiz-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .quiz-progress {
+      height: 6px;
+      background: var(--border-color);
+      border-radius: 4px;
+      margin-bottom: 18px;
+      overflow: hidden;
+    }
+    .quiz-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-emerald));
+      width: 10%;
+      transition: width 0.3s;
+    }
+
+    .quiz-q-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .quiz-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: var(--text-main);
+      text-align: left;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      transition: all 0.2s;
+    }
+    .quiz-btn:hover:not(:disabled) {
+      border-color: var(--accent-cyan);
+      background: rgba(56, 189, 248, 0.05);
+    }
+    .quiz-btn.correct {
+      background: rgba(16, 185, 129, 0.2) !important;
+      border-color: var(--accent-emerald) !important;
+      color: #fff !important;
+    }
+    .quiz-btn.wrong {
+      background: rgba(239, 68, 68, 0.2) !important;
+      border-color: var(--accent-rose) !important;
+      color: #fff !important;
+    }
+
+    .opt-bullet {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-right: 12px;
+      color: var(--accent-cyan);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .quiz-expl {
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      color: #bae6fd;
+      margin-bottom: 16px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Sticky Nav -->
+  <nav class="top-nav">
+    <div class="nav-brand">
+      <svg width="22" height="22" fill="none" stroke="#38bdf8" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+      <span>ELI5 Hub • АиСД: Хэш-таблицы</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="../index.html">← В каталог Hub</a></li>
+      <li><a href="#conflict">Прямая vs Хэш</a></li>
+      <li><a href="#simulator">Симулятор</a></li>
+      <li><a href="#clustering">Кластеризация</a></li>
+      <li><a href="#defense">Защита</a></li>
+      <li><a href="#quiz">Тест</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+
+    <!-- HERO -->
+    <header class="hero">
+      <div class="badges-row">
+        <span class="badge">Кафедра ИТ • ПГУ им. Т.Г. Шевченко</span>
+        <span class="badge emerald">Курс: Типы и структуры данных</span>
+        <span class="badge purple">Лектор: Тягульская Л.А.</span>
+        <span class="badge amber">Интерактивный симулятор O(1)</span>
+      </div>
+
+      <h1 class="hero-title">Хэш-таблицы, Коллизии и Открытая Адресация</h1>
+      <p class="hero-subtitle">
+        Как сжать бесконечный универсум ключей в компактную оперативную память, почему возникают коллизии по принципу Дирихле, как линейное пробирование создаёт кластеры-убийцы производительности, и зачем нужны «надгробные маркеры» (Tombstones).
+      </p>
+    </header>
+
+    <!-- SECTION 1: CONFLICT -->
+    <section id="conflict" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1"></path><path d="M18 8h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4"></path></svg>
+          1. Фундаментальный конфликт: Прямая адресация vs Хэширование
+        </h2>
+        <span class="badge rose" style="color: var(--accent-rose); border-color: rgba(244,63,94,0.3); background: rgba(244,63,94,0.1);">OOM-катастрофа</span>
+      </div>
+
+      <div class="compare-grid">
+        <div class="box-bad">
+          <h4>❌ Прямая адресация (Direct Addressing)</h4>
+          <p style="font-size: 0.88rem; color: #cbd5e1; margin-bottom: 8px;">
+            Индекс массива строго равен значению ключа: <code>T[Key] = Value</code>.
+          </p>
+          <ul style="font-size: 0.85rem; color: var(--text-secondary); padding-left: 20px;">
+            <li>Если ключ — номер паспорта (9 цифр), нужен массив на <b>1 000 000 000 ячеек</b> (~64 ГБ ОЗУ)!</li>
+            <li>Если в базе всего 10 000 студентов, <b>99.999% памяти пустует</b>.</li>
+            <li>Строковые ключи (email, ФИО) напрямую использовать физически невозможно.</li>
+          </ul>
+        </div>
+
+        <div class="box-good">
+          <h4>✅ Хэш-таблица (Hash Table)</h4>
+          <p style="font-size: 0.88rem; color: #cbd5e1; margin-bottom: 8px;">
+            Хэш-функция сжимает гигантский ключ в диапазон таблицы: <code>h(k) = k mod m</code>.
+          </p>
+          <ul style="font-size: 0.85rem; color: var(--text-secondary); padding-left: 20px;">
+            <li>Память строго пропорциональна числу записей: массив на $m = 13$ или $1000$ ячеек.</li>
+            <li>Среднее время поиска остаётся <b>O(1)</b> (константным)!</li>
+            <li><b>Плата:</b> неизбежные коллизии ($h(k_1) = h(k_2)$), требующие стратегий разрешения.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- SVG Mental Model -->
+      <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; overflow-x: auto;">
+        <svg viewBox="0 0 850 200" style="width: 100%; min-width: 700px; height: auto;">
+          <!-- Universe -->
+          <rect x="20" y="30" width="160" height="140" rx="10" fill="#1e293b" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4"/>
+          <text x="100" y="55" fill="#94a3b8" font-size="11" font-weight="700" text-anchor="middle">УНИВЕРСУМ КЛЮЧЕЙ U</text>
+          <text x="100" y="85" fill="#f1f5f9" font-size="12" text-anchor="middle">Паспорт 98124912</text>
+          <text x="100" y="115" fill="#f1f5f9" font-size="12" text-anchor="middle">ИНН 7701239102</text>
+          <text x="100" y="145" fill="#f1f5f9" font-size="12" text-anchor="middle">Email: dan@spsu.ru</text>
+
+          <!-- Hash Function -->
+          <path d="M 185 100 L 320 100" stroke="#38bdf8" stroke-width="2.5" marker-end="url(#arrow)"/>
+          <rect x="320" y="50" width="160" height="100" rx="10" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+          <text x="400" y="85" fill="#38bdf8" font-size="14" font-weight="800" text-anchor="middle">h(k) = k mod m</text>
+          <text x="400" y="110" fill="#94a3b8" font-size="10" text-anchor="middle">Детерминированное сжатие</text>
+          <text x="400" y="130" fill="#10b981" font-size="10" text-anchor="middle">Коэффициент α = n / m</text>
+
+          <!-- Buckets Array -->
+          <path d="M 485 100 L 610 100" stroke="#10b981" stroke-width="2.5"/>
+          <g transform="translate(610, 20)">
+            <rect x="0" y="0" width="200" height="26" fill="#1e293b" stroke="#334155"/>
+            <text x="15" y="18" fill="#38bdf8" font-size="11" font-family="monospace">0: [ ]</text>
+            <rect x="0" y="26" width="200" height="26" fill="#1e293b" stroke="#334155"/>
+            <text x="15" y="44" fill="#38bdf8" font-size="11" font-family="monospace">1: [ Ключ A ]</text>
+            <rect x="0" y="52" width="200" height="26" fill="rgba(245,158,11,0.2)" stroke="#f59e0b" stroke-width="1.5"/>
+            <text x="15" y="70" fill="#f59e0b" font-size="11" font-weight="700" font-family="monospace">2: КОЛЛИЗИЯ! A & B</text>
+            <rect x="0" y="78" width="200" height="26" fill="#1e293b" stroke="#334155"/>
+            <text x="15" y="96" fill="#38bdf8" font-size="11" font-family="monospace">3: [ ]</text>
+            <rect x="0" y="104" width="200" height="26" fill="#1e293b" stroke="#334155"/>
+            <text x="15" y="122" fill="#38bdf8" font-size="11" font-family="monospace">4: [ Ключ C ]</text>
+            <rect x="0" y="130" width="200" height="26" fill="#1e293b" stroke="#334155"/>
+            <text x="15" y="148" fill="#64748b" font-size="11" font-family="monospace">... m-1 ячеек</text>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <!-- SECTION 2: LIVE SIMULATOR -->
+    <section id="simulator" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          2. Интерактивный симулятор Хэш-таблицы (Тренажёр)
+        </h2>
+        <span class="badge emerald">● Моделирование в реальном времени</span>
+      </div>
+
+      <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 16px;">
+        Выберите алгоритм разрешения коллизий, вводите числовые ключи и наблюдайте траекторию зондирования ячеек, возникновение первичной кластеризации и работу маркеров удаления.
+      </p>
+
+      <div class="sim-controls">
+        <div>
+          <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Метод разрешения коллизий:</span>
+          <select id="sim-mode" class="sim-input" onchange="resetSim()">
+            <option value="chaining">1. Метод цепочек (Separate Chaining)</option>
+            <option value="linear" selected>2. Линейное пробирование (Linear Probing: +1)</option>
+            <option value="quadratic">3. Квадратичное пробирование (+i²)</option>
+            <option value="double">4. Двойное хэширование (Double Hashing: h2=1+(k mod 10))</option>
+          </select>
+        </div>
+
+        <div>
+          <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Размер таблицы (m):</span>
+          <select id="sim-size" class="sim-input" onchange="resetSim()">
+            <option value="7">m = 7 (простое)</option>
+            <option value="11" selected>m = 11 (простое)</option>
+            <option value="13">m = 13 (простое)</option>
+            <option value="8">m = 8 (степень двойки 2³, плохой выбор)</option>
+          </select>
+        </div>
+
+        <div>
+          <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Ключ (целое число):</span>
+          <input type="number" id="sim-key" class="sim-input" style="width: 120px;" value="25" placeholder="Ключ...">
+        </div>
+
+        <div style="align-self: flex-end; display: flex; gap: 8px;">
+          <button class="sim-btn" onclick="simInsert()">➕ Вставить</button>
+          <button class="sim-btn" style="background: var(--accent-emerald);" onclick="simFind()">🔍 Найти</button>
+          <button class="sim-btn danger" onclick="simDelete()">🗑️ Удалить</button>
+          <button class="sim-btn" style="background: var(--bg-surface);" onclick="resetSim()">Сброс</button>
+        </div>
+      </div>
+
+      <!-- Quick Preset Buttons -->
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+        <span style="font-size: 0.8rem; color: var(--text-muted); align-self: center;">Готовые тестовые наборы:</span>
+        <button class="sim-btn" style="padding: 4px 10px; font-size: 0.78rem;" onclick="loadPreset([12, 23, 34, 45])">Коллизии по mod 11 (12, 23, 34, 45)</button>
+        <button class="sim-btn" style="padding: 4px 10px; font-size: 0.78rem;" onclick="loadPreset([10, 21, 32, 43, 54])">Первичный кластер-снежок</button>
+        <button class="sim-btn" style="padding: 4px 10px; font-size: 0.78rem;" onclick="loadTombstoneDemo()">Демо бага удаления (Tombstone)</button>
+      </div>
+
+      <!-- Live Log / Feedback Banner -->
+      <div id="sim-feedback" style="background: #0d121f; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 16px; font-family: 'Fira Code', monospace; font-size: 0.85rem; color: #38bdf8; margin-bottom: 20px;">
+        Готов к работе. Введите ключ и нажмите «Вставить».
+      </div>
+
+      <!-- Visual Hash Table -->
+      <div class="table-view" id="table-display"></div>
+
+      <!-- Status Bar -->
+      <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);">
+        <span id="sim-stats">Элементов: 0 / 11 | Коэффициент заполнения α: 0.00</span>
+        <span id="sim-probes-stat">Сделано проб при последней операции: 0</span>
+      </div>
+    </section>
+
+    <!-- SECTION 3: CLUSTERING BREAKDOWN -->
+    <section id="clustering" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+          3. Анатомия Кластеризации и Аномалия Tombstone
+        </h2>
+        <span class="badge purple">Теория Дональда Кнута</span>
+      </div>
+
+      <div class="compare-grid">
+        <div style="background: var(--bg-surface-elevated); padding: 18px; border-radius: 10px; border: 1px solid var(--border-color);">
+          <h4 style="color: var(--accent-amber); margin-bottom: 10px;">❄️ Первичная кластеризация (Линейное пробирование)</h4>
+          <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.55;">
+            Когда ячейки занимаются подряд (например, ячейки 3, 4, 5, 6), они формируют <b>сплошной непрерывный блок</b>. Любой новый ключ, чей хэш попадает в <i>любую</i> точку этого блока, принудительно двигается в его конец, <b>увеличивая размер кластера еще на 1</b>!
+          </p>
+          <div style="background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 6px; font-family: monospace; font-size: 0.8rem; color: #fde68a; margin-top: 10px;">
+            P(попадания в кластер длины L) = (L + 1) / m
+          </div>
+        </div>
+
+        <div style="background: var(--bg-surface-elevated); padding: 18px; border-radius: 10px; border: 1px solid var(--border-color);">
+          <h4 style="color: var(--accent-rose); margin-bottom: 10px;">🪦 Аномалия Удаления (Почему нельзя просто стереть)</h4>
+          <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.55;">
+            Пустая ячейка служит <b>терминатором поиска</b>: встретив пустоту, алгоритм решает, что ключа в таблице нет. Если стереть элемент в середине кластера (записать NULL), цепочка зондирования <b>ложно оборвется</b>, и элементы, вставленные позже, станут невидимыми при поиске!
+          </p>
+          <div style="background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 6px; font-family: monospace; font-size: 0.8rem; color: #fca5a5; margin-top: 10px;">
+            Решение: маркер DELETED (Tombstone) — обход идет сквозь него!
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: DEFENSE DRILL -->
+    <section id="defense" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          4. 30-секундные ответы для экзамена и защиты
+        </h2>
+        <span class="badge emerald">Вопросы Тягульской Л.А.</span>
+      </div>
+
+      <div class="qa-item open">
+        <div class="qa-question" onclick="this.parentElement.classList.toggle('open')">
+          <span>1. В чём разница между первичной и вторичной кластеризацией?</span>
+          <span class="qa-toggle">▼</span>
+        </div>
+        <div class="qa-answer">
+          <b>Первичная кластеризация</b> возникает при линейном пробировании ($+1$): занятые ячейки склеиваются в длинные сплошные блоки, которые растут как снежный ком, так как ключи с <i>разными</i> начальными хэшами наталкиваются на один и тот же блок.<br>
+          <b>Вторичная кластеризация</b> возникает при квадратичном пробировании ($+i^2$): сплошных блоков нет, но все ключи с <i>одинаковым</i> начальным хэшем следуют абсолютно идентичной последовательности проб.<br>
+          <b>Двойное хэширование</b> устраняет обе проблемы, так как шаг смещения $h_2(k)$ зависит от самого ключа.
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="this.parentElement.classList.toggle('open')">
+          <span>2. Почему размер таблицы m обязан быть простым числом при методе деления?</span>
+          <span class="qa-toggle">▼</span>
+        </div>
+        <div class="qa-answer">
+          Если выбрать $m = 2^p$, операция $k mod 2^p$ просто извлекает $p$ младших двоичных разрядов ключа. Все старшие разряды полностью игнорируются! Если данные имеют общие префиксы или кратны степени двойки, они попадут в одни и те же ячейки, вызвав лавину коллизий. Простое число $m$ гарантирует, что остаток зависит от всех бит ключа.
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="this.parentElement.classList.toggle('open')">
+          <span>3. Что произойдет при удалении элемента из открытой адресации без надгробия?</span>
+          <span class="qa-toggle">▼</span>
+        </div>
+        <div class="qa-answer">
+          Поиск в открытой адресации останавливается при первой встрече свободной ячейки. Если элемент $B$ был смещен вправо из-за коллизии с элементом $A$, то зануление ячейки $A$ разорвет цепочку проб. Поиск элемента $B$ наткнется на пустоту на месте $A$ и ложно вернет <code>NOT_FOUND</code>, хотя элемент физически существует в таблице. Маркер <code>DELETED</code> позволяет поиску проходить насквозь.
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: QUIZ -->
+    <section id="quiz" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+          5. Инженерный тест на знание Хэш-таблиц (10 вопросов)
+        </h2>
+        <div style="font-size: 0.9rem; font-weight: 700; color: var(--accent-cyan);" id="quiz-score-badge">Счет: 0 / 10</div>
+      </div>
+
+      <div class="quiz-card">
+        <div class="quiz-progress">
+          <div class="quiz-progress-fill" id="quiz-progress-bar"></div>
+        </div>
+
+        <div id="quiz-body">
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px;" id="quiz-num">Вопрос 1 из 10</div>
+          <div class="quiz-q-title" id="quiz-title">Загрузка...</div>
+          <div class="quiz-options" id="quiz-options-box"></div>
+          <div class="quiz-expl" id="quiz-expl-box"></div>
+          <div style="display: flex; justify-content: flex-end;">
+            <button class="sim-btn" id="quiz-next-btn" style="display: none;" onclick="nextQuiz()">Следующий вопрос →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // In-browser Simulator Logic
+    let table = [];
+    let currentM = 11;
+    let currentMode = 'linear';
+
+    function initTable() {
+      currentM = parseInt(document.getElementById('sim-size').value, 10);
+      currentMode = document.getElementById('sim-mode').value;
+      table = [];
+      for (let i = 0; i < currentM; i++) {
+        if (currentMode === 'chaining') {
+          table.push({ type: 'chain', items: [] });
+        } else {
+          table.push({ status: 'empty', key: null });
+        }
+      }
+      renderTable();
+      updateStats(0);
+    }
+
+    function resetSim() {
+      initTable();
+      setFeedback('Таблица сброшена в исходное состояние.');
+    }
+
+    function setFeedback(msg, isErr=false) {
+      const fb = document.getElementById('sim-feedback');
+      fb.style.color = isErr ? 'var(--accent-rose)' : 'var(--accent-cyan)';
+      fb.textContent = msg;
+    }
+
+    function h1(k, m) { return ((k % m) + m) % m; }
+    function h2(k, m) { return 1 + (((k % (m - 1)) + (m - 1)) % (m - 1)); }
+
+    function simInsert() {
+      const keyVal = parseInt(document.getElementById('sim-key').value, 10);
+      if (isNaN(keyVal)) { setFeedback('Введите корректное числовое значение ключа!', true); return; }
+
+      let probes = 0;
+      clearHighlights();
+
+      if (currentMode === 'chaining') {
+        const idx = h1(keyVal, currentM);
+        highlightCell(idx, 'match');
+        if (!table[idx].items.includes(keyVal)) {
+          table[idx].items.push(keyVal);
+          setFeedback(`Ключ ${keyVal} добавлен в цепочку корзины ${idx} (h = ${keyVal} mod ${currentM} = ${idx}).`);
+        } else {
+          setFeedback(`Ключ ${keyVal} уже присутствует в корзине ${idx}.`);
+        }
+        probes = 1;
+      } else {
+        // Open addressing
+        let inserted = false;
+        let firstDeletedIdx = -1;
+
+        for (let i = 0; i < currentM; i++) {
+          probes++;
+          let idx = 0;
+          if (currentMode === 'linear') {
+            idx = (h1(keyVal, currentM) + i) % currentM;
+          } else if (currentMode === 'quadratic') {
+            idx = (h1(keyVal, currentM) + i * i) % currentM;
+          } else if (currentMode === 'double') {
+            idx = (h1(keyVal, currentM) + i * h2(keyVal, currentM)) % currentM;
+          }
+
+          highlightCell(idx, 'probed');
+
+          if (table[idx].status === 'occupied' && table[idx].key === keyVal) {
+            setFeedback(`Ключ ${keyVal} уже есть в ячейке ${idx} (проб: ${probes}).`);
+            inserted = true;
+            break;
+          }
+
+          if (table[idx].status === 'deleted' && firstDeletedIdx === -1) {
+            firstDeletedIdx = idx;
+          }
+
+          if (table[idx].status === 'empty') {
+            const targetIdx = firstDeletedIdx !== -1 ? firstDeletedIdx : idx;
+            table[targetIdx] = { status: 'occupied', key: keyVal };
+            highlightCell(targetIdx, 'match');
+            setFeedback(`Ключ ${keyVal} успешно вставлен в ячейку ${targetIdx} (попытка #${i+1}, проб: ${probes}).`);
+            inserted = true;
+            break;
+          }
+        }
+
+        if (!inserted && firstDeletedIdx !== -1) {
+          table[firstDeletedIdx] = { status: 'occupied', key: keyVal };
+          highlightCell(firstDeletedIdx, 'match');
+          setFeedback(`Ключ ${keyVal} переиспользовал надгробие в ячейке ${firstDeletedIdx} (проб: ${probes}).`);
+          inserted = true;
+        }
+
+        if (!inserted) {
+          setFeedback(`Ошибка: Хэш-таблица переполнена! (Load factor α = 1.0)`, true);
+        }
+      }
+
+      renderTable();
+      updateStats(probes);
+    }
+
+    function simFind() {
+      const keyVal = parseInt(document.getElementById('sim-key').value, 10);
+      if (isNaN(keyVal)) { setFeedback('Введите числовой ключ для поиска!', true); return; }
+
+      let probes = 0;
+      clearHighlights();
+
+      if (currentMode === 'chaining') {
+        const idx = h1(keyVal, currentM);
+        highlightCell(idx, 'probed');
+        probes = 1;
+        if (table[idx].items.includes(keyVal)) {
+          highlightCell(idx, 'match');
+          setFeedback(`Ключ ${keyVal} НАЙДЕН в корзине ${idx} (длина цепочки: ${table[idx].items.length}).`);
+        } else {
+          setFeedback(`Ключ ${keyVal} НЕ НАЙДЕН в корзине ${idx}.`, true);
+        }
+      } else {
+        let found = false;
+        for (let i = 0; i < currentM; i++) {
+          probes++;
+          let idx = 0;
+          if (currentMode === 'linear') {
+            idx = (h1(keyVal, currentM) + i) % currentM;
+          } else if (currentMode === 'quadratic') {
+            idx = (h1(keyVal, currentM) + i * i) % currentM;
+          } else if (currentMode === 'double') {
+            idx = (h1(keyVal, currentM) + i * h2(keyVal, currentM)) % currentM;
+          }
+
+          highlightCell(idx, 'probed');
+
+          if (table[idx].status === 'occupied' && table[idx].key === keyVal) {
+            highlightCell(idx, 'match');
+            setFeedback(`Ключ ${keyVal} НАЙДЕН в ячейке ${idx} после ${probes} проб!`);
+            found = true;
+            break;
+          }
+
+          if (table[idx].status === 'empty') {
+            setFeedback(`Ключ ${keyVal} НЕ НАЙДЕН! Поиск оборвался на пустой ячейке ${idx} (проб: ${probes}).`, true);
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          setFeedback(`Ключ ${keyVal} НЕ НАЙДЕН (осмотрена вся таблица, ${probes} проб).`, true);
+        }
+      }
+      updateStats(probes);
+    }
+
+    function simDelete() {
+      const keyVal = parseInt(document.getElementById('sim-key').value, 10);
+      if (isNaN(keyVal)) { setFeedback('Введите числовой ключ для удаления!', true); return; }
+
+      let probes = 0;
+      clearHighlights();
+
+      if (currentMode === 'chaining') {
+        const idx = h1(keyVal, currentM);
+        probes = 1;
+        const pos = table[idx].items.indexOf(keyVal);
+        if (pos !== -1) {
+          table[idx].items.splice(pos, 1);
+          highlightCell(idx, 'match');
+          setFeedback(`Ключ ${keyVal} удален из корзины ${idx}.`);
+        } else {
+          setFeedback(`Ключ ${keyVal} не найден для удаления.`, true);
+        }
+      } else {
+        let found = false;
+        for (let i = 0; i < currentM; i++) {
+          probes++;
+          let idx = 0;
+          if (currentMode === 'linear') {
+            idx = (h1(keyVal, currentM) + i) % currentM;
+          } else if (currentMode === 'quadratic') {
+            idx = (h1(keyVal, currentM) + i * i) % currentM;
+          } else if (currentMode === 'double') {
+            idx = (h1(keyVal, currentM) + i * h2(keyVal, currentM)) % currentM;
+          }
+
+          if (table[idx].status === 'occupied' && table[idx].key === keyVal) {
+            table[idx] = { status: 'deleted', key: null };
+            highlightCell(idx, 'match');
+            setFeedback(`Ключ ${keyVal} удален! В ячейку ${idx} установлен маркер TOMBSTONE (DELETED).`);
+            found = true;
+            break;
+          }
+
+          if (table[idx].status === 'empty') {
+            setFeedback(`Ключ ${keyVal} не найден для удаления (пустая ячейка ${idx}).`, true);
+            found = true;
+            break;
+          }
+        }
+      }
+      renderTable();
+      updateStats(probes);
+    }
+
+    function highlightCell(idx, cls) {
+      const row = document.getElementById('cell-' + idx);
+      if (row) row.classList.add(cls);
+    }
+
+    function clearHighlights() {
+      document.querySelectorAll('.cell-row').forEach(r => {
+        r.classList.remove('probed', 'match');
+      });
+    }
+
+    function renderTable() {
+      const container = document.getElementById('table-display');
+      container.innerHTML = table.map((cell, idx) => {
+        let contentHtml = '';
+        if (currentMode === 'chaining') {
+          if (cell.items.length === 0) {
+            contentHtml = '<span style="color: var(--text-muted); font-style: italic;">[пусто / NULL]</span>';
+          } else {
+            contentHtml = cell.items.map(k => `<span class="item-pill">🔑 ${k}</span>`).join(' ➔ ');
+          }
+        } else {
+          if (cell.status === 'empty') {
+            contentHtml = '<span style="color: var(--text-muted); font-style: italic;">[EMPTY]</span>';
+          } else if (cell.status === 'deleted') {
+            contentHtml = '<span class="item-pill deleted">🪦 DELETED (Tombstone)</span>';
+          } else {
+            contentHtml = `<span class="item-pill">🔑 ${cell.key}</span>`;
+          }
+        }
+
+        return `
+          <div class="cell-row" id="cell-${idx}">
+            <div class="cell-idx">[${idx}]</div>
+            <div class="cell-val">${contentHtml}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateStats(probes) {
+      let count = 0;
+      if (currentMode === 'chaining') {
+        table.forEach(c => count += c.items.length);
+      } else {
+        table.forEach(c => { if (c.status === 'occupied') count++; });
+      }
+      const alpha = (count / currentM).toFixed(2);
+      document.getElementById('sim-stats').textContent = `Элементов: ${count} / ${currentM} | Коэффициент заполнения α: ${alpha}`;
+      document.getElementById('sim-probes-stat').textContent = `Сделано проб при последней операции: ${probes}`;
+    }
+
+    function loadPreset(arr) {
+      resetSim();
+      arr.forEach(k => {
+        document.getElementById('sim-key').value = k;
+        simInsert();
+      });
+    }
+
+    function loadTombstoneDemo() {
+      // Linear mode
+      document.getElementById('sim-mode').value = 'linear';
+      document.getElementById('sim-size').value = '11';
+      initTable();
+      // Insert 12 (h=1) and 23 (h=1 -> probes to 2)
+      document.getElementById('sim-key').value = 12; simInsert();
+      document.getElementById('sim-key').value = 23; simInsert();
+      setFeedback('Вставлены 12 (в [1]) и 23 (в [2] из-за коллизии). Теперь удалите 12, а затем выполните поиск 23!');
+    }
+
+    // 10-Question Comprehensive Quiz Data
+    const QUIZ_DATA = [
+      {
+        q: "Какова главная причина отказа от таблиц с прямой адресацией в пользу хэш-таблиц?",
+        options: [
+          "Прямая адресация работает значительно медленнее хэш-таблиц",
+          "Прямая адресация требует объема памяти, пропорционального размеру всего универсума ключей |U|",
+          "Прямая адресация не поддерживает числовые целочисленные ключи",
+          "Прямая адресация приводит к коллизиям по принципу Дирихле"
+        ],
+        correct: 1,
+        expl: "Если универсум ключей огромен (например, 9-значные паспорта), прямая адресация требует 10^9 ячеек памяти (~64 ГБ), даже если мы храним всего 100 элементов. Хэш-таблица масштабируется по числу реально хранимых записей m."
+      },
+      {
+        q: "Почему при методе деления h(k) = k mod m размер таблицы m рекомендуется выбирать простым числом?",
+        options: [
+          "Простые числа занимают меньше байт в регистрах процессора",
+          "При степени двойки m = 2^p хэш зависит только от p младших бит, игнорируя старшие разряды ключа",
+          "Простые числа гарантируют полное отсутствие коллизий при любых ключах",
+          "Операция остатка от деления не работает с составными числами"
+        ],
+        correct: 1,
+        expl: "При m = 2^p операция mod оставляет только p младших бит. Все элементы с одинаковыми младшими битами попадут в одну ячейку. Простое число гарантирует распределение по всем разрядам ключа."
+      },
+      {
+        q: "В чём состоит патология первичной кластеризации при линейном пробировании?",
+        options: [
+          "Ключи случайным образом удаляются из памяти при заполнении",
+          "Смежные занятые ячейки склеиваются в длинные блоки, лавинообразно притягивая к себе новые коллизии",
+          "Списки в ячейках превышают допустимый предел длины",
+          "Хэш-функция начинает возвращать отрицательные индексы"
+        ],
+        correct: 1,
+        expl: "Вероятность попадания ключа в кластер длины L равна (L+1)/m. Длинные блоки растут быстрее коротких, притягивая ключи с разными начальными хэшами."
+      },
+      {
+        q: "Зачем в открытой адресации используется специальный маркер DELETED (Tombstone)?",
+        options: [
+          "Для шифрования конфиденциальных данных пользователя",
+          "Чтобы поиск не обрывался ложно при встрече ячейки, из которой был удален промежуточный элемент",
+          "Для запрета записи новых элементов в данную позицию",
+          "Для запуска автоматического освобождения кучи (Garbage Collection)"
+        ],
+        correct: 1,
+        expl: "Поиск завершается при первой пустой ячейке (EMPTY). Если занулить ячейку при удалении, цепочка проб разорвется, и элементы, вставленные глубже из-за коллизий, станут невидимыми для поиска."
+      },
+      {
+        q: "Какое обязательное математическое требование предъявляется к шагу h2(k) при двойном хэшировании?",
+        options: [
+          "Значение h2(k) должно быть строго больше размера таблицы m",
+          "Значение h2(k) обязано быть взаимно простым с размером таблицы m (НОД = 1)",
+          "Значение h2(k) должно равняться единице для всех ключей",
+          "Значение h2(k) должно быть четным числом"
+        ],
+        correct: 1,
+        expl: "Если h2(k) и m имеют общий делитель d > 1, алгоритм обойдет только m/d ячеек и замкнется в бесконечный цикл, не проверив остальные свободные ячейки таблицы."
+      },
+      {
+        q: "Чему равно среднее время успешного поиска в хэш-таблице с методом цепочек при простом равномерном хэшировании?",
+        options: [
+          "O(n)",
+          "O(log n)",
+          "Θ(1 + α), где α = n/m",
+          "O(n^2)"
+        ],
+        correct: 2,
+        expl: "Время складывается из O(1) на вычисление хэша и перехода к корзине, плюс просмотр половины цепочки списка длиной α = n/m, то есть Θ(1 + α)."
+      },
+      {
+        q: "Может ли коэффициент заполнения α превышать 1.0 в открытой адресации?",
+        options: [
+          "Да, при квадратичном пробировании",
+          "Нет, так как все элементы хранятся непосредственно в ячейках таблицы размера m",
+          "Да, если размер таблицы выбран простым числом",
+          "Да, если используются надгробные маркеры"
+        ],
+        correct: 1,
+        expl: "В открытой адресации в каждой ячейке хранится максимум 1 элемент, поэтому число элементов n <= m, и α = n/m <= 1. В методе цепочек α может быть сколь угодно большим."
+      },
+      {
+        q: "Что такое вторичная кластеризация при квадратичном пробировании?",
+        options: [
+          "Объединение элементов с разными хэшами в сплошной блок ячеек",
+          "Одинаковая траектория зондирования у всех ключей, имеющих равный начальный хэш h'(k)",
+          "Утечка оперативной памяти из-за выделения связных списков",
+          "Переполнение таблицы при коэффициенте заполнения α = 0.5"
+        ],
+        correct: 1,
+        expl: "При квадратичном пробировании h(k, i) = (h'(k) + c1*i + c2*i^2) mod m. Если h'(k1) == h'(k2), их траектории абсолютно идентичны на всех шагах i."
+      },
+      {
+        q: "Что происходит при динамическом рехэшировании (Rehashing)?",
+        options: [
+          "Таблица просто очищается, удаляя все старые элементы",
+          "Выделяется новый массив большего размера (обычно ~2m), и все элементы заново вставляются через пересчет хэшей",
+          "Коэффициент заполнения уменьшается за счет сжатия данных алгоритмом gzip",
+          "Удаляются только элементы, помеченные маркером DELETED, без изменения размера"
+        ],
+        correct: 1,
+        expl: "При превышении порога α > 0.7 выделяется новый массив размера ~2m (ближайшее простое число), и каждый активный элемент перехэшируется в новую таблицу."
+      },
+      {
+        q: "Какой метод хэш-функций рекомендовал Дональд Кнут на основе золотого сечения?",
+        options: [
+          "Метод деления на число 10^9 + 7",
+          "Метод умножения с константой A = (sqrt(5) - 1) / 2 ≈ 0.6180339887",
+          "Побитовое сложение XOR всех байт строки",
+          "Квадратичное суммирование четных разрядов"
+        ],
+        correct: 1,
+        expl: "Дональд Кнут доказал в 'Искусстве программирования', что константа золотого сечения A = (sqrt(5)-1)/2 обеспечивает наиболее равномерное распределение остатков дробной части при умножении."
+      }
+    ];
+
+    let curQuiz = 0;
+    let quizScore = 0;
+    let quizAnswered = false;
+
+    function renderQuiz() {
+      const q = QUIZ_DATA[curQuiz];
+      quizAnswered = false;
+      document.getElementById('quiz-num').textContent = `Вопрос ${curQuiz + 1} из ${QUIZ_DATA.length}`;
+      document.getElementById('quiz-title').textContent = q.q;
+      document.getElementById('quiz-progress-bar').style.width = `${((curQuiz + 1) / QUIZ_DATA.length) * 100}%`;
+      document.getElementById('quiz-expl-box').style.display = 'none';
+      document.getElementById('quiz-next-btn').style.display = 'none';
+
+      const box = document.getElementById('quiz-options-box');
+      box.innerHTML = q.options.map((opt, i) => `
+        <button class="quiz-btn" onclick="checkQuizAnswer(${i})" id="q-opt-${i}">
+          <span class="opt-bullet">${String.fromCharCode(65 + i)}</span>
+          <span>${opt}</span>
+        </button>
+      `).join('');
+    }
+
+    function checkQuizAnswer(selected) {
+      if (quizAnswered) return;
+      quizAnswered = true;
+      const q = QUIZ_DATA[curQuiz];
+      const buttons = document.querySelectorAll('.quiz-btn');
+      buttons.forEach(b => b.disabled = true);
+
+      if (selected === q.correct) {
+        document.getElementById(`q-opt-${selected}`).classList.add('correct');
+        quizScore++;
+      } else {
+        document.getElementById(`q-opt-${selected}`).classList.add('wrong');
+        document.getElementById(`q-opt-${q.correct}`).classList.add('correct');
+      }
+
+      document.getElementById('quiz-score-badge').textContent = `Счет: ${quizScore} / ${QUIZ_DATA.length}`;
+      const expl = document.getElementById('quiz-expl-box');
+      expl.innerHTML = `<b>💡 Инженерное обоснование:</b> ${q.expl}`;
+      expl.style.display = 'block';
+
+      const nextBtn = document.getElementById('quiz-next-btn');
+      nextBtn.textContent = (curQuiz === QUIZ_DATA.length - 1) ? 'Завершить тестирование 🏁' : 'Следующий вопрос →';
+      nextBtn.style.display = 'inline-block';
+    }
+
+    function nextQuiz() {
+      if (curQuiz < QUIZ_DATA.length - 1) {
+        curQuiz++;
+        renderQuiz();
+      } else {
+        const pct = Math.round((quizScore / QUIZ_DATA.length) * 100);
+        let grade = pct >= 85 ? 'Отлично (5)' : pct >= 70 ? 'Хорошо (4)' : pct >= 50 ? 'Удовлетворительно (3)' : 'Неудовлетворительно (2)';
+        document.getElementById('quiz-body').innerHTML = `
+          <div style="text-align: center; padding: 28px 0;">
+            <div style="font-size: 3.5rem; margin-bottom: 12px;">🏆</div>
+            <h3 style="font-size: 1.6rem; margin-bottom: 10px; color: #fff;">Тест по Хэш-таблицам завершен!</h3>
+            <p style="color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 24px;">
+              Ваш результат: <b>${quizScore} из ${QUIZ_DATA.length} (${pct}%)</b><br>
+              Рекомендуемая оценка: <span style="color: var(--accent-emerald); font-weight: 700; font-size: 1.25rem;">${grade}</span>
+            </p>
+            <button class="sim-btn" onclick="resetQuiz()">Пройти еще раз</button>
+          </div>
+        `;
+      }
+    }
+
+    function resetQuiz() {
+      curQuiz = 0;
+      quizScore = 0;
+      document.getElementById('quiz-score-badge').textContent = 'Счет: 0 / ' + QUIZ_DATA.length;
+      document.getElementById('quiz-body').innerHTML = `
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px;" id="quiz-num">Вопрос 1 из 10</div>
+        <div class="quiz-q-title" id="quiz-title">Загрузка...</div>
+        <div class="quiz-options" id="quiz-options-box"></div>
+        <div class="quiz-expl" id="quiz-expl-box"></div>
+        <div style="display: flex; justify-content: flex-end;">
+          <button class="sim-btn" id="quiz-next-btn" style="display: none;" onclick="nextQuiz()">Следующий вопрос →</button>
+        </div>
+      `;
+      renderQuiz();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initTable();
+      renderQuiz();
+    });
+  </script>
+</body>
+</html>
