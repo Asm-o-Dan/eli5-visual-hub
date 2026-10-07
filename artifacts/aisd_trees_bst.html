@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ELI5: Деревья, BST и Турнирная сортировка</title>
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1a2234;
+      --border-color: #243049;
+      --text-main: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #38bdf8;
+      --accent-blue: #3b82f6;
+      --accent-emerald: #10b981;
+      --accent-purple: #a855f7;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --code-bg: #06090f;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 14, 23, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #fff;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 14px;
+      list-style: none;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent-cyan); text-decoration: none; }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px 20px;
+    }
+
+    .hero {
+      padding: 32px 0 24px 0;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 32px;
+    }
+
+    .badges-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--accent-cyan);
+    }
+    .badge.emerald { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); color: var(--accent-emerald); }
+    .badge.purple { background: rgba(168, 85, 247, 0.1); border-color: rgba(168, 85, 247, 0.3); color: var(--accent-purple); }
+    .badge.amber { background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3); color: var(--accent-amber); }
+
+    h1.hero-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #ffffff 0%, #a7f3d0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      max-width: 860px;
+      margin-bottom: 20px;
+    }
+
+    .section-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 36px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 14px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Comparison Box */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 768px) {
+      .compare-grid { grid-template-columns: 1fr; }
+    }
+
+    .box-bad {
+      background: rgba(244, 63, 94, 0.08);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      border-radius: 12px;
+      padding: 18px;
+    }
+    .box-bad h4 {
+      color: var(--accent-rose);
+      font-size: 1.05rem;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .box-good {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 12px;
+      padding: 18px;
+    }
+    .box-good h4 {
+      color: var(--accent-emerald);
+      font-size: 1.05rem;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Interactive Simulator */
+    .sim-controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      background: var(--bg-surface-elevated);
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      margin-bottom: 20px;
+    }
+
+    .sim-input {
+      background: #0d121f;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: #fff;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .sim-input:focus { border-color: var(--accent-cyan); }
+
+    .sim-btn {
+      background: var(--accent-blue);
+      border: none;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .sim-btn:hover { background: #2563eb; }
+    .sim-btn.danger { background: #dc2626; }
+    .sim-btn.danger:hover { background: #b91c1c; }
+    .sim-btn.success { background: #10b981; }
+    .sim-btn.success:hover { background: #059669; }
+
+    /* SVG Canvas */
+    .tree-canvas-container {
+      background: #06090f;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      overflow-x: auto;
+      text-align: center;
+      min-height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Traversal Output */
+    .traversal-box {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.88rem;
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Tournament Tree Bracket */
+    .bracket-view {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: #070a10;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    /* QA Accordion */
+    .qa-item {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .qa-question {
+      padding: 14px 18px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .qa-question:hover { background: rgba(255, 255, 255, 0.02); }
+
+    .qa-answer {
+      padding: 0 18px 16px 18px;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 12px;
+      display: none;
+    }
+    .qa-item.open .qa-answer { display: block; }
+    .qa-item.open .qa-toggle { transform: rotate(180deg); }
+
+    /* Quiz */
+    .quiz-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .quiz-progress {
+      height: 6px;
+      background: var(--border-color);
+      border-radius: 4px;
+      margin-bottom: 18px;
+      overflow: hidden;
+    }
+    .quiz-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-emerald), var(--accent-cyan));
+      width: 10%;
+      transition: width 0.3s;
+    }
+
+    .quiz-q-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .quiz-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: var(--text-main);
+      text-align: left;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      transition: all 0.2s;
+    }
+    .quiz-btn:hover:not(:disabled) {
+      border-color: var(--accent-cyan);
+      background: rgba(56, 189, 248, 0.05);
+    }
+    .quiz-btn.correct {
+      background: rgba(16, 185, 129, 0.2) !important;
+      border-color: var(--accent-emerald) !important;
+      color: #fff !important;
+    }
+    .quiz-btn.wrong {
+      background: rgba(239, 68, 68, 0.2) !important;
+      border-color: var(--accent-rose) !important;
+      color: #fff !important;
+    }
+
+    .opt-bullet {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-right: 12px;
+      color: var(--accent-emerald);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .quiz-expl {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      color: #a7f3d0;
+      margin-bottom: 16px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Sticky Nav -->
+  <nav class="top-nav">
+    <div class="nav-brand">
+      <svg width="22" height="22" fill="none" stroke="#10b981" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="5" r="3"></circle><circle cx="5" cy="19" r="3"></circle><circle cx="19" cy="19" r="3"></circle><line x1="12" y1="8" x2="5" y2="16"></line><line x1="12" y1="8" x2="19" y2="16"></line></svg>
+      <span>ELI5 Hub • АиСД: Деревья & BST</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="../index.html">← В каталог Hub</a></li>
+      <li><a href="#anatomy">Топология дерева</a></li>
+      <li><a href="#simulator">BST Тренажёр</a></li>
+      <li><a href="#tournament">Турнирная сортировка</a></li>
+      <li><a href="#defense">Защита</a></li>
+      <li><a href="#quiz">Тест</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+
+    <!-- HERO -->
+    <header class="hero">
+      <div class="badges-row">
+        <span class="badge">Кафедра ИТ • ПГУ им. Т.Г. Шевченко</span>
+        <span class="badge emerald">Курс: Типы и структуры данных</span>
+        <span class="badge purple">Лектор: Тягульская Л.А.</span>
+        <span class="badge amber">Интерактивный тренажер O(log n)</span>
+      </div>
+
+      <h1 class="hero-title">Деревья, BST и Турнирная Сортировка</h1>
+      <p class="hero-subtitle">
+        Почему путь от корня к любой вершине обязан быть строго единственным, как инвариант двоичного дерева поиска гарантирует сортировку за линейное время при In-Order обходе, и как турнирная сетка сортирует $n$ элементов за $O(n \log n)$.
+      </p>
+    </header>
+
+    <!-- SECTION 1: TOPOLOGY & ANATOMY -->
+    <section id="anatomy" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          1. Анатомия Дерева: Строгие определения теории графов
+        </h2>
+        <span class="badge emerald">Теорема о единственности пути</span>
+      </div>
+
+      <div class="compare-grid">
+        <div class="box-bad">
+          <h4>❌ Не является деревом (Решётка / Граф)</h4>
+          <p style="font-size: 0.88rem; color: #cbd5e1; margin-bottom: 8px;">
+            Если к вершине существует <b>более одного пути</b> из корня.
+          </p>
+          <ul style="font-size: 0.85rem; color: var(--text-secondary); padding-left: 20px;">
+            <li>Наличие циклов разрушает отношение иерархического подчинения.</li>
+            <li>Пример лектора: перекрёстные браки в генеалогическом древе Габсбургов превращают дерево предков в циклическую решётку.</li>
+            <li>Алгоритмы рекурсивного обхода зацикливаются и приводят к переполнению стека (Stack Overflow).</li>
+          </ul>
+        </div>
+
+        <div class="box-good">
+          <h4>✅ Строгое дерево (Rooted Tree)</h4>
+          <p style="font-size: 0.88rem; color: #cbd5e1; margin-bottom: 8px;">
+            Связный ациклический ориентированный граф с уникальным корнем.
+          </p>
+          <ul style="font-size: 0.85rem; color: var(--text-secondary); padding-left: 20px;">
+            <li><b>Корень (Root):</b> узел, в который входит ровно <b>0 дуг</b>.</li>
+            <li><b>Все остальные узлы:</b> входит <b>строго 1 дуга</b> от родителя!</li>
+            <li><b>Листья (Leaves):</b> узлы с 0 потомков.</li>
+            <li><b>Путь:</b> от корня до любой вершины существует <b>строго один путь</b>!</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: INTERACTIVE BST SIMULATOR -->
+    <section id="simulator" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          2. Интерактивный симулятор Двоичного дерева поиска (BST)
+        </h2>
+        <span class="badge emerald">● Инвариант: Left &lt; Node &lt; Right</span>
+      </div>
+
+      <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 16px;">
+        Добавляйте и удаляйте узлы, запускайте различные виды обходов (In-order, Pre-order, Post-order) и наблюдайте автоматическое выравнивание и сортировку.
+      </p>
+
+      <div class="sim-controls">
+        <div>
+          <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">Значение ключа:</span>
+          <input type="number" id="bst-key-input" class="sim-input" style="width: 130px;" value="15" placeholder="Ключ...">
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="sim-btn success" onclick="bstInsertAction()">➕ Вставить узел</button>
+          <button class="sim-btn danger" onclick="bstDeleteAction()">🗑️ Удалить узел</button>
+          <button class="sim-btn" onclick="bstSearchAction()">🔍 Найти узел</button>
+          <button class="sim-btn" style="background: var(--bg-surface);" onclick="resetBST()">Сброс</button>
+        </div>
+
+        <div style="border-left: 1px solid var(--border-color); padding-left: 14px; display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="sim-btn" style="background: var(--accent-purple);" onclick="runTraversal('inorder')">▶ In-Order (Сортировка)</button>
+          <button class="sim-btn" style="background: var(--accent-blue);" onclick="runTraversal('preorder')">Pre-Order</button>
+          <button class="sim-btn" style="background: var(--accent-amber);" onclick="runTraversal('postorder')">Post-Order</button>
+        </div>
+      </div>
+
+      <!-- Quick Preset Buttons -->
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+        <span style="font-size: 0.8rem; color: var(--text-muted); align-self: center;">Готовые деревья:</span>
+        <button class="sim-btn" style="padding: 4px 10px; font-size: 0.78rem;" onclick="loadBstPreset([50, 30, 70, 20, 40, 60, 80])">Идеально сбалансированное (7 узлов)</button>
+        <button class="sim-btn" style="padding: 4px 10px; font-size: 0.78rem;" onclick="loadBstPreset([10, 20, 30, 40, 50])">Вырожденное в список (Худший случай O(n))</button>
+        <button class="sim-btn" style="padding: 4px 10px; font-size: 0.78rem;" onclick="loadBstPreset([8, 3, 10, 1, 6, 14, 4, 7, 13])">Дерево из лекции Тягульской Л.А.</button>
+      </div>
+
+      <!-- Canvas for SVG rendering -->
+      <div class="tree-canvas-container" id="tree-container">
+        <!-- SVG dynamically rendered -->
+      </div>
+
+      <!-- Traversal output bar -->
+      <div class="traversal-box" id="traversal-display">
+        <span style="color: var(--accent-cyan); font-weight: 700;">Обход не запущен.</span>
+        <span style="color: var(--text-muted);">Нажмите кнопку «In-Order», чтобы получить отсортированную последовательность.</span>
+      </div>
+    </section>
+
+    <!-- SECTION 3: TOURNAMENT TREE SORT -->
+    <section id="tournament" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H7"></path><path d="M14 14.66V17c0 .55.45 1 1 1h2"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2z"></path></svg>
+          3. Турнирная сортировка (Tournament Tree Sort)
+        </h2>
+        <span class="badge amber">Алгоритмическая сложность: O(n log n)</span>
+      </div>
+
+      <p style="color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 16px;">
+        Алгоритм, разобранный на доске лектором: числа размещаются в листьях турнирной сетки. Победитель (минимум) поднимается в корень. Затем минимум извлекается, заменяется на $\infty$, и пересчитывается путь длины $\log n$.
+      </p>
+
+      <div class="sim-controls">
+        <button class="sim-btn success" onclick="tournStep()">Шаг: Извлечь минимум в корень (➔ ∞)</button>
+        <button class="sim-btn" style="background: var(--bg-surface);" onclick="resetTournament()">Сбросить турнир</button>
+        <div style="font-size: 0.85rem; color: var(--accent-cyan); align-self: center;" id="tourn-status">
+          Турнир готов. Нажмите «Шаг», чтобы извлечь первый элемент.
+        </div>
+      </div>
+
+      <div class="bracket-view" id="tournament-bracket">
+        <!-- Dynamically rendered bracket -->
+      </div>
+
+      <div class="traversal-box" style="margin-top: 14px;">
+        <span style="color: var(--accent-emerald); font-weight: 700;">Отсортированный результат:</span>
+        <span id="tourn-sorted-out" style="color: #fff; font-weight: 800;">[ ]</span>
+      </div>
+    </section>
+
+    <!-- SECTION 4: DEFENSE DRILL -->
+    <section id="defense" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          4. 30-секундные ответы для экзамена и защиты
+        </h2>
+        <span class="badge emerald">Вопросы Тягульской Л.А.</span>
+      </div>
+
+      <div class="qa-item open">
+        <div class="qa-question" onclick="this.parentElement.classList.toggle('open')">
+          <span>1. Какой обход бинарного дерева поиска выдает отсортированный массив и почему?</span>
+          <span class="qa-toggle">▼</span>
+        </div>
+        <div class="qa-answer">
+          Симметричный центрированный обход (<b>In-Order</b>: Левое поддерево $	o$ Корень $	o$ Правое поддерево).<br>
+          По определению инварианта BST, все ключи левого поддерева строго меньше текущего узла, а правого — строго больше. Рекурсивное посещение в порядке $L < P < R$ гарантированно извлекает элементы в порядке строгого возрастания за линейное время <b>Θ(n)</b>, так как каждый узел посещается ровно один раз.
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="this.parentElement.classList.toggle('open')">
+          <span>2. В чём преимущество Турнирной сортировки перед простым поиском минимума?</span>
+          <span class="qa-toggle">▼</span>
+        </div>
+        <div class="qa-answer">
+          Простой поиск минимума в массиве требует $n-1$ сравнений, и для $n$ элементов суммарно дает $O(n^2)$.<br>
+          В Турнирной сортировке после нахождения первого минимума мы заменяем победителя на $\infty$ и пересчитываем <b>только один путь от листа до корня</b>! Длина пути равна высоте дерева $\lceil \log_2 n ceil$. Нахождение каждого последующего минимума требует всего <b>log n</b> сравнений, обеспечивая общую сложность <b>O(n log n)</b>.
+        </div>
+      </div>
+
+      <div class="qa-item">
+        <div class="qa-question" onclick="this.parentElement.classList.toggle('open')">
+          <span>3. Что происходит с BST при вставке элементов, уже отсортированных по возрастанию?</span>
+          <span class="qa-toggle">▼</span>
+        </div>
+        <div class="qa-answer">
+          Дерево <b>вырождается в односвязный список</b>! Каждый новый элемент больше предыдущего и добавляется в правое поддерево. Высота дерева становится равной $h = n$, а сложность поиска, вставки и удаления деградирует из логарифмической $O(\log n)$ в худший случай <b>O(n)</b>. Для предотвращения этого используют самобалансирующиеся деревья (АВЛ или Красно-чёрные).
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: QUIZ -->
+    <section id="quiz" class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+          5. Инженерный тест на знание Деревьев & BST (10 вопросов)
+        </h2>
+        <div style="font-size: 0.9rem; font-weight: 700; color: var(--accent-emerald);" id="quiz-score-badge">Счет: 0 / 10</div>
+      </div>
+
+      <div class="quiz-card">
+        <div class="quiz-progress">
+          <div class="quiz-progress-fill" id="quiz-progress-bar"></div>
+        </div>
+
+        <div id="quiz-body">
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px;" id="quiz-num">Вопрос 1 из 10</div>
+          <div class="quiz-q-title" id="quiz-title">Загрузка...</div>
+          <div class="quiz-options" id="quiz-options-box"></div>
+          <div class="quiz-expl" id="quiz-expl-box"></div>
+          <div style="display: flex; justify-content: flex-end;">
+            <button class="sim-btn success" id="quiz-next-btn" style="display: none;" onclick="nextQuiz()">Следующий вопрос →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // --- Binary Search Tree (BST) Engine ---
+    class BSTNode {
+      constructor(val) {
+        this.val = val;
+        this.left = null;
+        this.right = null;
+      }
+    }
+
+    let bstRoot = null;
+
+    function bstInsert(root, val) {
+      if (!root) return new BSTNode(val);
+      if (val < root.val) root.left = bstInsert(root.left, val);
+      else if (val > root.val) root.right = bstInsert(root.right, val);
+      return root;
+    }
+
+    function bstDelete(root, val) {
+      if (!root) return null;
+      if (val < root.val) root.left = bstDelete(root.left, val);
+      else if (val > root.val) root.right = bstDelete(root.right, val);
+      else {
+        // Node with only one child or no child
+        if (!root.left) return root.right;
+        if (!root.right) return root.left;
+        // Node with two children: get inorder successor
+        let cur = root.right;
+        while (cur.left) cur = cur.left;
+        root.val = cur.val;
+        root.right = bstDelete(root.right, cur.val);
+      }
+      return root;
+    }
+
+    function bstInsertAction() {
+      const v = parseInt(document.getElementById('bst-key-input').value, 10);
+      if (isNaN(v)) return;
+      bstRoot = bstInsert(bstRoot, v);
+      renderTreeSVG();
+    }
+
+    function bstDeleteAction() {
+      const v = parseInt(document.getElementById('bst-key-input').value, 10);
+      if (isNaN(v)) return;
+      bstRoot = bstDelete(bstRoot, v);
+      renderTreeSVG();
+    }
+
+    function bstSearchAction() {
+      const v = parseInt(document.getElementById('bst-key-input').value, 10);
+      if (isNaN(v)) return;
+      let cur = bstRoot;
+      let path = [];
+      while (cur) {
+        path.push(cur.val);
+        if (v === cur.val) break;
+        if (v < cur.val) cur = cur.left;
+        else cur = cur.right;
+      }
+      const found = cur !== null;
+      const display = document.getElementById('traversal-display');
+      display.innerHTML = `
+        <span style="color: ${found ? 'var(--accent-emerald)' : 'var(--accent-rose)'}; font-weight: 700;">
+          Поиск ключа ${v}: ${found ? 'НАЙДЕН! ✓' : 'НЕ НАЙДЕН ✗'}
+        </span>
+        <span style="color: var(--text-secondary);">Траектория поиска: [ ${path.join(' ➔ ')} ]</span>
+      `;
+    }
+
+    function resetBST() {
+      bstRoot = null;
+      renderTreeSVG();
+      document.getElementById('traversal-display').innerHTML = '<span style="color: var(--text-muted);">Дерево очищено.</span>';
+    }
+
+    function loadBstPreset(arr) {
+      bstRoot = null;
+      arr.forEach(v => bstRoot = bstInsert(bstRoot, v));
+      renderTreeSVG();
+      runTraversal('inorder');
+    }
+
+    // --- Traversals ---
+    function runTraversal(type) {
+      if (!bstRoot) return;
+      let result = [];
+      if (type === 'inorder') {
+        function inOrder(n) {
+          if (!n) return;
+          inOrder(n.left);
+          result.push(n.val);
+          inOrder(n.right);
+        }
+        inOrder(bstRoot);
+        document.getElementById('traversal-display').innerHTML = `
+          <span style="color: var(--accent-emerald); font-weight: 700;">In-Order Обход (Сортировка):</span>
+          <span style="color: #fff; font-weight: 800;">[ ${result.join(' ➔ ')} ]</span>
+          <span style="color: var(--text-muted); font-size: 0.8rem;">(Строго отсортировано за линейное время Θ(n))</span>
+        `;
+      } else if (type === 'preorder') {
+        function preOrder(n) {
+          if (!n) return;
+          result.push(n.val);
+          preOrder(n.left);
+          preOrder(n.right);
+        }
+        preOrder(bstRoot);
+        document.getElementById('traversal-display').innerHTML = `
+          <span style="color: var(--accent-blue); font-weight: 700;">Pre-Order Обход (Корень ➔ L ➔ R):</span>
+          <span style="color: #fff; font-weight: 800;">[ ${result.join(' ➔ ')} ]</span>
+        `;
+      } else if (type === 'postorder') {
+        function postOrder(n) {
+          if (!n) return;
+          postOrder(n.left);
+          postOrder(n.right);
+          result.push(n.val);
+        }
+        postOrder(bstRoot);
+        document.getElementById('traversal-display').innerHTML = `
+          <span style="color: var(--accent-amber); font-weight: 700;">Post-Order Обход (L ➔ R ➔ Корень):</span>
+          <span style="color: #fff; font-weight: 800;">[ ${result.join(' ➔ ')} ]</span>
+        `;
+      }
+    }
+
+    // --- SVG Tree Visualizer ---
+    function renderTreeSVG() {
+      const container = document.getElementById('tree-container');
+      if (!bstRoot) {
+        container.innerHTML = '<span style="color: var(--text-muted); font-style: italic;">[Дерево пусто. Добавьте узел или выберите готовый пресет]</span>';
+        return;
+      }
+
+      // Compute positions
+      let nodeCoords = [];
+      let edges = [];
+
+      function layout(node, depth, leftBound, rightBound) {
+        if (!node) return null;
+        const x = (leftBound + rightBound) / 2;
+        const y = 40 + depth * 60;
+        const curId = nodeCoords.length;
+        nodeCoords.push({ val: node.val, x, y });
+
+        if (node.left) {
+          const lId = layout(node.left, depth + 1, leftBound, x);
+          if (lId !== null) edges.push({ x1: x, y1: y, x2: nodeCoords[lId].x, y2: nodeCoords[lId].y });
+        }
+        if (node.right) {
+          const rId = layout(node.right, depth + 1, x, rightBound);
+          if (rId !== null) edges.push({ x1: x, y1: y, x2: nodeCoords[rId].x, y2: nodeCoords[rId].y });
+        }
+        return curId;
+      }
+
+      layout(bstRoot, 0, 20, 880);
+
+      const maxDepth = Math.max(...nodeCoords.map(n => n.y));
+      const svgHeight = Math.max(260, maxDepth + 50);
+
+      let svgHtml = `<svg viewBox="0 0 900 ${svgHeight}" style="width: 100%; min-width: 600px; height: auto;">`;
+
+      // Edges
+      edges.forEach(e => {
+        svgHtml += `<line x1="${e.x1}" y1="${e.y1}" x2="${e.x2}" y2="${e.y2}" stroke="#334155" stroke-width="2"/>`;
+      });
+
+      // Nodes
+      nodeCoords.forEach(n => {
+        svgHtml += `
+          <circle cx="${n.x}" cy="${n.y}" r="18" fill="#1e293b" stroke="#10b981" stroke-width="2.5"/>
+          <text x="${n.x}" y="${n.y + 5}" fill="#f1f5f9" font-size="12" font-weight="700" text-anchor="middle" font-family="monospace">${n.val}</text>
+        `;
+      });
+
+      svgHtml += `</svg>`;
+      container.innerHTML = svgHtml;
+    }
+
+    // --- Tournament Tree Sort Engine ---
+    let tournLeaves = [7, 2, 9, 1, 5, 4, 8, 3];
+    let tournSorted = [];
+    let tournTree = [];
+
+    function buildTournament() {
+      // 8 leaves -> 15 nodes total (1-indexed, 1 is root)
+      tournTree = new Array(16).fill(null);
+      // Leaves at 8..15
+      for (let i = 0; i < 8; i++) {
+        tournTree[8 + i] = tournLeaves[i];
+      }
+      // Inner nodes
+      for (let i = 7; i >= 1; i--) {
+        const l = tournTree[2 * i];
+        const r = tournTree[2 * i + 1];
+        tournTree[i] = Math.min(l, r);
+      }
+    }
+
+    function resetTournament() {
+      tournLeaves = [7, 2, 9, 1, 5, 4, 8, 3];
+      tournSorted = [];
+      buildTournament();
+      renderTournament();
+      document.getElementById('tourn-status').textContent = 'Турнир готов. Нажмите «Шаг», чтобы извлечь первый элемент.';
+      document.getElementById('tourn-sorted-out').textContent = '[ ]';
+    }
+
+    function tournStep() {
+      const minVal = tournTree[1];
+      if (minVal === Infinity) {
+        document.getElementById('tourn-status').textContent = 'Сортировка завершена! Все элементы извлечены.';
+        return;
+      }
+
+      tournSorted.push(minVal);
+
+      // Find which leaf held minVal
+      let leafIdx = -1;
+      for (let i = 8; i <= 15; i++) {
+        if (tournTree[i] === minVal) {
+          leafIdx = i;
+          break;
+        }
+      }
+
+      // Replace with Infinity
+      tournTree[leafIdx] = Infinity;
+
+      // Replay up to root (log n steps)
+      let cur = Math.floor(leafIdx / 2);
+      while (cur >= 1) {
+        tournTree[cur] = Math.min(tournTree[2 * cur], tournTree[2 * cur + 1]);
+        cur = Math.floor(cur / 2);
+      }
+
+      document.getElementById('tourn-status').textContent = `Извлечен минимум: ${minVal} (заменен на ∞). Пересчитан путь до корня!`;
+      document.getElementById('tourn-sorted-out').textContent = `[ ${tournSorted.join(', ')} ]`;
+      renderTournament();
+    }
+
+    function renderTournament() {
+      const container = document.getElementById('tournament-bracket');
+      let html = '<div style="display: flex; justify-content: space-around; align-items: center; gap: 8px;">';
+
+      // Level 0: Root
+      const fmt = (v) => v === Infinity ? '∞' : v;
+      html += `
+        <div style="text-align: center;">
+          <div style="font-size: 0.72rem; color: var(--accent-amber); margin-bottom: 4px;">КОРЕНЬ (Победитель)</div>
+          <div style="background: rgba(245,158,11,0.2); border: 2px solid var(--accent-amber); padding: 8px 18px; border-radius: 8px; font-weight: 800; font-family: monospace; font-size: 1.1rem; color: #fff;">
+            ${fmt(tournTree[1])}
+          </div>
+        </div>
+      `;
+
+      html += '</div>';
+
+      // SVG visual bracket
+      html += `
+        <div style="background: #06090f; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 0.8rem; text-align: center; color: #cbd5e1;">
+          Уровень 1 (Полуфинал): [ ${fmt(tournTree[2])} ] vs [ ${fmt(tournTree[3])} ]<br>
+          Уровень 2 (Четвертьфинал): [ ${fmt(tournTree[4])} | ${fmt(tournTree[5])} ] vs [ ${fmt(tournTree[6])} | ${fmt(tournTree[7])} ]<br>
+          Уровень 3 (Листья / Вход): [ ${tournTree.slice(8, 16).map(fmt).join(' , ')} ]
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    // --- 10-Question Comprehensive Quiz Data ---
+    const QUIZ_DATA = [
+      {
+        q: "Какое свойство полустепени захода вершин строго определяет дерево в теории графов?",
+        options: [
+          "В каждую вершину графа входит не менее двух ребер",
+          "В корень входит 0 дуг, а во все остальные вершины дерева — строго 1 дуга",
+          "Полустепень захода всех вершин равна полустепени исхода",
+          "В корень входит 1 дуга от самого себя (петля)"
+        ],
+        correct: 1,
+        expl: "В корень не входит ни одной дуги (indegree = 0), а в каждый узел (кроме корня) входит строго одна дуга (indegree = 1). Это гарантирует отсутствие циклов и единственность пути от корня к любому узлу."
+      },
+      {
+        q: "В чём заключается инвариант Двоичного дерева поиска (BST) для узла X с ключом K?",
+        options: [
+          "Все ключи в левом поддереве строго меньше K, а в правом поддереве — строго больше K",
+          "Высота левого поддерева равна высоте правого поддерева",
+          "Число узлов в левом поддереве должно быть четным",
+          "Корень всегда содержит максимальный элемент массива"
+        ],
+        correct: 0,
+        expl: "Для любого узла X: все ключи в левом поддереве < key(X), а в правом поддереве > key(X). Именно это свойство позволяет выполнять бинарный поиск за O(h)."
+      },
+      {
+        q: "Какой обход BST гарантированно выводит ключи в порядке строгого возрастания?",
+        options: [
+          "Pre-Order (Прямой: Корень -> Левый -> Правый)",
+          "In-Order (Симметричный: Левый -> Корень -> Правый)",
+          "Post-Order (Обратный: Левый -> Правый -> Корень)",
+          "Level-Order (Обход в ширину по уровням)"
+        ],
+        correct: 1,
+        expl: "In-Order обход рекурсивно посещает левое поддерево (где все элементы меньше), затем текущий корень, затем правое поддерево (где все больше), извлекая элементы отсортированными за Θ(n)."
+      },
+      {
+        q: "Что происходит со временем поиска в BST при вставке элементов в отсортированном порядке?",
+        options: [
+          "Время поиска ускоряется до O(1)",
+          "Дерево вырождается в связный список, и время поиска деградирует до O(n)",
+          "Дерево автоматически балансируется по алгоритму Дейкстры",
+          "Глубина дерева остается равной log2 n"
+        ],
+        correct: 1,
+        expl: "При вставке отсортированных данных каждый следующий элемент добавляется только направо. Дерево превращается в список высоты n, теряя логарифмическую эффективность."
+      },
+      {
+        q: "Какова временная сложность извлечения одного минимального элемента в Турнирной сортировке?",
+        options: [
+          "O(n)",
+          "O(1)",
+          "Θ(log n)",
+          "O(n^2)"
+        ],
+        correct: 2,
+        expl: "После извлечения минимума из корня значение в листе заменяется на ∞, и пересчитывается только один путь от листа до корня длиной log2 n."
+      },
+      {
+        q: "Какова общая временная сложность Турнирной сортировки для массива из n элементов?",
+        options: [
+          "O(n^2)",
+          "O(n log n)",
+          "O(n)",
+          "O(log n)"
+        ],
+        correct: 1,
+        expl: "Построение сетки требует O(n), а извлечение n элементов требует n * O(log n), что дает итоговую строгую сложность O(n log n)."
+      },
+      {
+        q: "Каковы свойства листьев в Деревьях арифметических выражений (Expression Trees)?",
+        options: [
+          "Листья хранят операции сложения и умножения",
+          "Листья хранят строго операнды (переменные или константы)",
+          "Листья всегда хранят тригонометрические функции",
+          "Листья хранят приоритеты скобок"
+        ],
+        correct: 1,
+        expl: "В деревьях выражений листья являются операндами (A, B, C), а внутренние узлы дерева — операциями (+, *, sin)."
+      },
+      {
+        q: "Что такое высота дерева?",
+        options: [
+          "Количество узлов в самом нижнем ряду",
+          "Наибольшая глубина (длина пути от корня) среди всех листьев дерева",
+          "Суммарное число ребер дерева",
+          "Количество листьев дерева"
+        ],
+        correct: 1,
+        expl: "Высота дерева определяется как максимальное расстояние (число ребер) от корня до самого удаленного листа."
+      },
+      {
+        q: "Для чего чаще всего применяется Post-Order обход (Обратный: Левый -> Правый -> Корень)?",
+        options: [
+          "Для удаления дерева (освобождения памяти) и вычисления обратной польской записи",
+          "Для печати отсортированного списка ключей",
+          "Для поиска минимального элемента",
+          "Для клонирования структуры корня"
+        ],
+        correct: 0,
+        expl: "В Post-Order обходе потомки посещаются до родителя, что идеально подходит для безопасного освобождения памяти снизу вверх и вычисления операций в польской нотации."
+      },
+      {
+        q: "Сколько ребер содержит любое дерево из n вершин?",
+        options: [
+          "n ребер",
+          "n - 1 ребер",
+          "n + 1 ребер",
+          "2n ребер"
+        ],
+        correct: 1,
+        expl: "Так как в каждую вершину, кроме корня, входит ровно одно ребро, общее число ребер в любом дереве строго равно n - 1."
+      }
+    ];
+
+    let curQuiz = 0;
+    let quizScore = 0;
+    let quizAnswered = false;
+
+    function renderQuiz() {
+      const q = QUIZ_DATA[curQuiz];
+      quizAnswered = false;
+      document.getElementById('quiz-num').textContent = `Вопрос ${curQuiz + 1} из ${QUIZ_DATA.length}`;
+      document.getElementById('quiz-title').textContent = q.q;
+      document.getElementById('quiz-progress-bar').style.width = `${((curQuiz + 1) / QUIZ_DATA.length) * 100}%`;
+      document.getElementById('quiz-expl-box').style.display = 'none';
+      document.getElementById('quiz-next-btn').style.display = 'none';
+
+      const box = document.getElementById('quiz-options-box');
+      box.innerHTML = q.options.map((opt, i) => `
+        <button class="quiz-btn" onclick="checkQuizAnswer(${i})" id="q-opt-${i}">
+          <span class="opt-bullet">${String.fromCharCode(65 + i)}</span>
+          <span>${opt}</span>
+        </button>
+      `).join('');
+    }
+
+    function checkQuizAnswer(selected) {
+      if (quizAnswered) return;
+      quizAnswered = true;
+      const q = QUIZ_DATA[curQuiz];
+      const buttons = document.querySelectorAll('.quiz-btn');
+      buttons.forEach(b => b.disabled = true);
+
+      if (selected === q.correct) {
+        document.getElementById(`q-opt-${selected}`).classList.add('correct');
+        quizScore++;
+      } else {
+        document.getElementById(`q-opt-${selected}`).classList.add('wrong');
+        document.getElementById(`q-opt-${q.correct}`).classList.add('correct');
+      }
+
+      document.getElementById('quiz-score-badge').textContent = `Счет: ${quizScore} / ${QUIZ_DATA.length}`;
+      const expl = document.getElementById('quiz-expl-box');
+      expl.innerHTML = `<b>💡 Инженерное обоснование:</b> ${q.expl}`;
+      expl.style.display = 'block';
+
+      const nextBtn = document.getElementById('quiz-next-btn');
+      nextBtn.textContent = (curQuiz === QUIZ_DATA.length - 1) ? 'Завершить тестирование 🏁' : 'Следующий вопрос →';
+      nextBtn.style.display = 'inline-block';
+    }
+
+    function nextQuiz() {
+      if (curQuiz < QUIZ_DATA.length - 1) {
+        curQuiz++;
+        renderQuiz();
+      } else {
+        const pct = Math.round((quizScore / QUIZ_DATA.length) * 100);
+        let grade = pct >= 85 ? 'Отлично (5)' : pct >= 70 ? 'Хорошо (4)' : pct >= 50 ? 'Удовлетворительно (3)' : 'Неудовлетворительно (2)';
+        document.getElementById('quiz-body').innerHTML = `
+          <div style="text-align: center; padding: 28px 0;">
+            <div style="font-size: 3.5rem; margin-bottom: 12px;">🏆</div>
+            <h3 style="font-size: 1.6rem; margin-bottom: 10px; color: #fff;">Тест по Деревьям & BST завершен!</h3>
+            <p style="color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 24px;">
+              Ваш результат: <b>${quizScore} из ${QUIZ_DATA.length} (${pct}%)</b><br>
+              Рекомендуемая оценка: <span style="color: var(--accent-emerald); font-weight: 700; font-size: 1.25rem;">${grade}</span>
+            </p>
+            <button class="sim-btn success" onclick="resetQuiz()">Пройти еще раз</button>
+          </div>
+        `;
+      }
+    }
+
+    function resetQuiz() {
+      curQuiz = 0;
+      quizScore = 0;
+      document.getElementById('quiz-score-badge').textContent = 'Счет: 0 / ' + QUIZ_DATA.length;
+      document.getElementById('quiz-body').innerHTML = `
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px;" id="quiz-num">Вопрос 1 из 10</div>
+        <div class="quiz-q-title" id="quiz-title">Загрузка...</div>
+        <div class="quiz-options" id="quiz-options-box"></div>
+        <div class="quiz-expl" id="quiz-expl-box"></div>
+        <div style="display: flex; justify-content: flex-end;">
+          <button class="sim-btn success" id="quiz-next-btn" style="display: none;" onclick="nextQuiz()">Следующий вопрос →</button>
+        </div>
+      `;
+      renderQuiz();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadBstPreset([50, 30, 70, 20, 40, 60, 80]);
+      resetTournament();
+      renderQuiz();
+    });
+  </script>
+</body>
+</html>
