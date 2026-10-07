@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ELI5: Методы исследовательской деятельности</title>
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1a2234;
+      --border-color: #243049;
+      --text-main: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #38bdf8;
+      --accent-blue: #3b82f6;
+      --accent-emerald: #10b981;
+      --accent-purple: #a855f7;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --code-bg: #06090f;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 14, 23, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-brand {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 16px;
+      font-size: 0.88rem;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--accent-cyan);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 2.1rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      margin-bottom: 24px;
+    }
+
+    .section-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .feature-box {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .feature-box h4 {
+      color: var(--accent-cyan);
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+
+    .feature-box p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .callout-exam {
+      background: rgba(245, 158, 11, 0.08);
+      border-left: 4px solid var(--accent-amber);
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 20px 0;
+    }
+
+    .callout-exam h4 {
+      color: var(--accent-amber);
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+    }
+
+    .callout-exam p {
+      font-size: 0.88rem;
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    /* Interactive Matrix Simulator */
+    .sim-panel {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 18px;
+    }
+
+    .step-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+
+    .step-tab {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .step-tab.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+    }
+
+    .interactive-display {
+      background: #070b12;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      min-height: 180px;
+    }
+
+    .slider-group {
+      margin: 18px 0;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.88rem;
+      margin-bottom: 8px;
+    }
+
+    input[type=range] {
+      width: 100%;
+      height: 6px;
+      background: var(--border-color);
+      border-radius: 3px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      cursor: pointer;
+    }
+
+    .btn-action {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-action:hover {
+      background: var(--border-color);
+    }
+    .btn-action.active {
+      background: var(--accent-blue);
+      border-color: var(--accent-cyan);
+      color: #fff;
+    }
+
+    /* Quiz Container */
+    .quiz-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .quiz-q {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+      color: var(--text-main);
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .quiz-opt {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quiz-opt:hover:not(:disabled) {
+      border-color: var(--accent-cyan);
+      color: var(--text-main);
+    }
+    .quiz-opt.correct {
+      background: rgba(16, 185, 129, 0.15) !important;
+      border-color: var(--accent-emerald) !important;
+      color: var(--text-main) !important;
+      font-weight: 600;
+    }
+    .quiz-opt.wrong {
+      background: rgba(244, 63, 94, 0.15) !important;
+      border-color: var(--accent-rose) !important;
+      color: var(--accent-rose) !important;
+    }
+
+    .quiz-exp {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.84rem;
+      line-height: 1.45;
+      background: #0a0e17;
+      border: 1px solid var(--border-color);
+    }
+
+    /* Bottom sticky nav */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 14, 23, 0.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border-color);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 99;
+    }
+    .bottom-bar a {
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .bottom-bar a.active {
+      color: var(--accent-cyan);
+      font-weight: 700;
+    }
+
+    @media (max-width: 640px) {
+      h1 { font-size: 1.6rem; }
+      .section-card { padding: 16px; }
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="top-nav">
+    <div class="nav-brand">
+      <span>🔬</span> ELI5 Visual Hub • ПГУ им. Шевченко
+    </div>
+    <div class="nav-links">
+      <a href="https://asm-o-dan.github.io/eli5-visual-hub/">Все курсы</a>
+      <a href="https://asm-o-dan.github.io/eli5-visual-hub/artifacts/aisd_hash_tables.html">Хэш-таблицы</a>
+      <a href="https://asm-o-dan.github.io/eli5-visual-hub/artifacts/aisd_trees_bst.html">Деревья / BST</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="hero-badge">Лекционный курс • Запись 6</div>
+    <h1>Методы исследовательской деятельности</h1>
+    <p class="hero-desc">
+      Интерактивный путеводитель по научному познанию, уровням исследования, абстрагированию, идеализации и гипотетико-дедуктивному методу для IT-инженеров.
+    </p>
+
+    <!-- SECTION 1: Философские принципы -->
+    <div class="section-card" id="principles">
+      <div class="section-title">
+        <span>🧭</span> 1. Фундаментальные принципы научного познания
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.92rem;">
+        Любое исследование в области программной инженерии опирается на диалектическую методологию:
+      </p>
+      <div class="grid-2">
+        <div class="feature-box">
+          <h4>⚖️ Объективность</h4>
+          <p>Рассмотрение предмета на основе реальной инженерной практики и законов природы, а не субъективных домыслов или рекламы технологий.</p>
+        </div>
+        <div class="feature-box">
+          <h4>🌐 Всесторонность</h4>
+          <p>Оценка программного продукта с технических, алгоритмических, экономических позиций и со стороны пользователя (UI/UX).</p>
+        </div>
+        <div class="feature-box">
+          <h4>🎯 Конкретность</h4>
+          <p>Учет контекста среды выполнения, аппаратных ограничений и специфических условий («нет абстрактной скорости алгоритма, есть скорость на конкретном типе данных»).</p>
+        </div>
+        <div class="feature-box">
+          <h4>🕰️ Историзм</h4>
+          <p>Анализ эволюции системы: реконструкция прошлых архитектурных решений (post-mortem) и научное предвидение будущих модификаций.</p>
+        </div>
+      </div>
+
+      <div class="callout-exam">
+        <h4>История из лекции (Провал на 500 млн евро):</h4>
+        <p>
+          Лектор приводит классический кейс крупной немецкой корпорации, которая в течение 7 лет переписывала работающую систему логистики на "новый модный стек". Новая система не учла тонких нюансов предметной области, принесла 500 млн евро убытков, и компании пришлось вернуться к доработанной старой системе. Мораль: принцип историзма и преемственности спасает проекты!
+        </p>
+      </div>
+    </div>
+
+    <!-- SECTION 2: Интерактивный симулятор уровней абстракции -->
+    <div class="section-card" id="abstraction">
+      <div class="section-title">
+        <span>🎚️</span> 2. Интерактивная лаборатория: Абстрагирование vs Идеализация
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.92rem;">
+        Перемещайте ползунок, чтобы увидеть, как инженер-исследователь отсекает физическую сложность, переходя от физического кремния к предельной идеализации:
+      </p>
+
+      <div class="sim-panel">
+        <div class="slider-group">
+          <div class="slider-header">
+            <span style="font-weight: 600; color: var(--accent-cyan);">Уровень рассмотрения:</span>
+            <span id="abstraction-level-name" style="color: var(--accent-amber); font-weight: 700;">Уровень 2: Алгоритмический (Абстракция)</span>
+          </div>
+          <input type="range" id="abstraction-slider" min="0" max="3" value="2" oninput="updateAbstractionLevel(this.value)">
+        </div>
+
+        <div class="interactive-display" id="abstraction-display">
+          <!-- Filled by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: Общелогические методы (Анализ, Синтез, Индукция, Дедукция) -->
+    <div class="section-card" id="logic-methods">
+      <div class="section-title">
+        <span>🧩</span> 3. Общелогические методы исследования
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.92rem;">
+        Нажмите на метод, чтобы раскрыть его математическую суть и пример применения в разработке ПО:
+      </p>
+
+      <div class="step-tabs">
+        <button class="step-tab active" onclick="showMethod('analysis', this)">Анализ vs Синтез</button>
+        <button class="step-tab" onclick="showMethod('deduction', this)">Индукция vs Дедукция</button>
+        <button class="step-tab" onclick="showMethod('hypo', this)">Гипотетико-дедуктивный метод</button>
+        <button class="step-tab" onclick="showMethod('modeling', this)">Моделирование и аналогия</button>
+      </div>
+
+      <div class="interactive-display" id="method-display">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+
+    <!-- SECTION 4: Блиц-подготовка к устному зачету/экзамену -->
+    <div class="section-card" id="defense">
+      <div class="section-title">
+        <span>⚡</span> 4. 30-секундные ответы на каверзные вопросы преподавателя
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        <div class="feature-box">
+          <h4 style="color: var(--accent-amber);">В чем разница между абстрагированием и идеализацией?</h4>
+          <p>
+            <strong>Ответ:</strong> <em>Абстрагирование</em> отвлекается от несущественных свойств реально существующего предмета (например, игнорируем цвет корпуса сервера при замере RPS). <em>Идеализация</em> конструирует мысленный объект, которого в природе вообще не существует (например, бесконечная оперативная память или машина Тьюринга).
+          </p>
+        </div>
+
+        <div class="feature-box">
+          <h4 style="color: var(--accent-amber);">Почему 1000 успешных тестов не доказывают правильность программы?</h4>
+          <p>
+            <strong>Ответ:</strong> Тестирование основано на <em>неполной индукции</em> (проверка частных случаев). Как сформулировал Дейкстра, тестирование может показать наличие ошибок, но не их отсутствие. Строгое доказательство возможно только дедуктивными методами (формальная верификация, математическая индукция инвариантов).
+          </p>
+        </div>
+
+        <div class="feature-box">
+          <h4 style="color: var(--accent-amber);">Что такое конструктивизация в научном абстрагировании?</h4>
+          <p>
+            <strong>Ответ:</strong> Конструктивизация — это огрубление размытых понятий реального мира и фиксация четких дискретных границ и типов данных (например, формализация нечеткого требования «система должна быстро отвечать» в строгое математическое условие «latency p99 &le; 50ms»).
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 5: Тест самопроверки -->
+    <div class="section-card" id="quiz">
+      <div class="section-title">
+        <span>📝</span> 5. Проверка знаний (10 экзаменационных вопросов)
+      </div>
+      <div id="quiz-container">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bottom-bar">
+    <a href="#principles" class="active"><span>🧭</span>Принципы</a>
+    <a href="#abstraction"><span>🎚️</span>Абстракция</a>
+    <a href="#logic-methods"><span>🧩</span>Методы</a>
+    <a href="#defense"><span>⚡</span>Блиц-ответы</a>
+    <a href="#quiz"><span>📝</span>Тест</a>
+  </div>
+
+  <script>
+    // Abstraction Levels data
+    const abstractionData = [
+      {
+        level: 0,
+        title: "Уровень 0: Физический (Кремний и электродинамика)",
+        desc: "Реальное физическое устройство: электроны в транзисторах, тепловыделение, паразитная емкость шины, космические лучи вызывают bit-flips.",
+        focus: "Точные физические законы Ома и Максвелла.",
+        isolated: "Логический смысл алгоритмов отсутствует.",
+        badge: "Эмпирическая физическая реальность"
+      },
+      {
+        level: 1,
+        title: "Уровень 1: Архитектурный (Аппаратно-зависимый)",
+        desc: "Ассемблер, регистры процессора, L1/L2/L3 кэши, разрядность шины данных, задержки оперативной памяти DDR5 (CAS latency).",
+        focus: "Минимизация cache-misses и ветвлений конвейера (branch misprediction).",
+        isolated: "Физические микротоки заменены логическими 0 и 1.",
+        badge: "Архитектура ЭВМ"
+      },
+      {
+        level: 2,
+        title: "Уровень 2: Алгоритмический (Абстрактные типы данных)",
+        desc: "Алгоритмы и структуры данных: Big-O нотация O(n log n), бинарные деревья, хэш-таблицы. Аппаратная платформа полностью абстрагирована.",
+        focus: "Инварианты структуры данных и асимптотическое число шагов.",
+        isolated: "Тактовая частота, архитектура x86/ARM и язык программирования.",
+        badge: "Научное абстрагирование (АиСД)"
+      },
+      {
+        level: 3,
+        title: "Уровень 3: Предельная идеализация (Машина Тьюринга / RAM)",
+        desc: "Математическая модель вычислений с потенциально бесконечной лентой и бесконечной памятью. Объекты идеализированы до предельных сущностей.",
+        focus: "Теория вычислимости и алгоритмической разрешимости (проблема остановки Halting Problem).",
+        isolated: "Конечность физической вселенной, памяти и времени.",
+        badge: "Чистая научная идеализация"
+      }
+    ];
+
+    function updateAbstractionLevel(val) {
+      const data = abstractionData[val];
+      document.getElementById('abstraction-level-name').textContent = data.title;
+      document.getElementById('abstraction-display').innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <h3 style="color:var(--accent-cyan); font-size:1.1rem;">${data.title}</h3>
+          <span style="background:rgba(56,189,248,0.15); color:var(--accent-cyan); padding:2px 8px; border-radius:4px; font-size:0.75rem; font-weight:700;">${data.badge}</span>
+        </div>
+        <p style="color:var(--text-main); font-size:0.92rem; margin-bottom:12px;">${data.desc}</p>
+        <div style="background:rgba(0,0,0,0.3); border-left:3px solid var(--accent-emerald); padding:8px 12px; margin-bottom:8px; font-size:0.85rem;">
+          <strong style="color:var(--accent-emerald);">Что удерживается в фокусе:</strong> ${data.focus}
+        </div>
+        <div style="background:rgba(0,0,0,0.3); border-left:3px solid var(--accent-rose); padding:8px 12px; font-size:0.85rem;">
+          <strong style="color:var(--accent-rose);">Что изолируется / отбрасывается:</strong> ${data.isolated}
+        </div>
+      `;
+    }
+
+    const methodsData = {
+      analysis: `
+        <h3 style="color:var(--accent-cyan); margin-bottom:8px;">Анализ и Синтез: Диалектическое единство</h3>
+        <p style="font-size:0.9rem; margin-bottom:10px;">
+          <strong>Анализ:</strong> Мысленное расчленение сложного монолита на микросервисы, слои архитектуры или отдельные функции для детального исследования каждого модуля.
+        </p>
+        <p style="font-size:0.9rem; margin-bottom:12px;">
+          <strong>Синтез:</strong> Интеграция модулей в единую работающую систему. В результате синтеза возникает <em>эмерджентность (системный эффект)</em>: целое обладает свойствами, которыми не обладает ни одна из его частей по отдельности!
+        </p>
+        <div style="background:rgba(56,189,248,0.1); border:1px solid var(--border-color); border-radius:6px; padding:10px; font-size:0.85rem; color:var(--accent-cyan);">
+          ⚠️ Предостережение из лекции: Чрезмерный анализ («паралич анализа») ведет к потере системных связей. Всегда дополняйте декомпозицию синтезом.
+        </div>
+      `,
+      deduction: `
+        <h3 style="color:var(--accent-cyan); margin-bottom:8px;">Индукция vs Дедукция</h3>
+        <p style="font-size:0.9rem; margin-bottom:10px;">
+          <strong>Индукция (От частного к общему):</strong> Наблюдаем: запрос 1 выполнился за 5мс, запрос 2 — за 6мс... Делаем вероятностный вывод: «Система всегда отвечает за &le; 10мс». Индукция дает <em>правдоподобное</em>, но не гарантированное знание.
+        </p>
+        <p style="font-size:0.9rem; margin-bottom:12px;">
+          <strong>Дедукция (От общего к частному):</strong> Опираясь на закон: «Хеш-таблица с открытой адресацией при &alpha; &ge; 1 переполняется». Следствие для нашего сервиса: «Если число записей превысит размер буфера, вставка завершится ошибкой». Дедукция дает <em>достоверное истинное</em> следствие при истинности исходных посылок!
+        </p>
+      `,
+      hypo: `
+        <h3 style="color:var(--accent-cyan); margin-bottom:8px;">Гипотетико-дедуктивный метод</h3>
+        <p style="font-size:0.9rem; margin-bottom:8px;">Основной рабочий метод современной науки и прикладной инженерии:</p>
+        <ol style="padding-left:20px; font-size:0.88rem; line-height:1.6; color:var(--text-main);">
+          <li><strong>Фиксация проблемы:</strong> Сервер под нагрузкой теряет 3% запросов.</li>
+          <li><strong>Выдвижение гипотезы (H):</strong> «Причина в блокировке пула потоков при обращении к внешней СУБД».</li>
+          <li><strong>Дедуктивный вывод следствий (E):</strong> «Если H верна, то увеличение таймаута приведет к росту очереди, а переход на асинхронный non-blocking драйвер устранит потери».</li>
+          <li><strong>Экспериментальная проверка:</strong> Проведение нагрузочного тестирования и статистическая валидация.</li>
+        </ol>
+      `,
+      modeling: `
+        <h3 style="color:var(--accent-cyan); margin-bottom:8px;">Моделирование и Метод Аналогии</h3>
+        <p style="font-size:0.9rem; margin-bottom:10px;">
+          <strong>Моделирование:</strong> Замена реального сложного или опасного объекта его аналогом (математической формулой, имитационной компьютерной моделью в SimPy/AnyLogic или цифровым двойником).
+        </p>
+        <p style="font-size:0.9rem;">
+          <strong>Аналогия:</strong> Перенос известных принципов из одной области в другую. Например, перенос биологической эволюции в генетические алгоритмы оптимизации или физического отжига металлов в алгоритм Simulated Annealing.
+        </p>
+      `
+    };
+
+    function showMethod(type, btn) {
+      document.querySelectorAll('.step-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('method-display').innerHTML = methodsData[type];
+    }
+
+    // Quiz Questions (10 questions)
+    const quizData = [
+      {
+        q: "1. Чем идеализация принципиально отличается от обычного научного абстрагирования?",
+        opts: [
+          "Идеализация конструирует мысленные предельные объекты, не существующие в природе",
+          "Абстрагирование применяется только в математике, а идеализация — в биологии",
+          "Идеализация никогда не используется при исследовании программных систем",
+          "Абстрагирование требует проведения натурного дорогостоящего эксперимента"
+        ],
+        c: 0,
+        exp: "Абстрагирование отвлекается от реальных свойств, а идеализация строит предельные мысленные концепты (абсолютно черное тело, бесконечная лента Тьюринга)."
+      },
+      {
+        q: "2. Какой метод научного познания заключается в мысленном расчленении сложного объекта на части?",
+        opts: [
+          "Научный анализ",
+          "Научный синтез",
+          "Метод аналогии",
+          "Дедуктивный вывод"
+        ],
+        c: 0,
+        exp: "Анализ разделяет целое на элементы для раздельного изучения, в то время как синтез объединяет их обратно."
+      },
+      {
+        q: "3. В чем сущность принципа объективности в научном исследовании?",
+        opts: [
+          "Изучение объекта на основе реальной практики и объективных законов развития",
+          "Опора на субъективное мнение наиболее авторитетного профессора кафедры",
+          "Отказ от проведения любых математических расчетов в пользу интуиции",
+          "Использование только зарубежных источников литературы не старше одного года"
+        ],
+        c: 0,
+        exp: "Принцип объективности требует рассматривать предмет познания как объективную реальность, исходя из практики и закономерностей."
+      },
+      {
+        q: "4. Что утверждает афоризм Эдсгера Дейкстры о тестировании программного обеспечения?",
+        opts: [
+          "Тестирование показывает наличие ошибок в коде, но не их отсутствие",
+          "Тестирование гарантирует 100% отсутствие критических багов в релизе",
+          "Тестирование является чисто дедуктивным формальным доказательством",
+          "Тестирование полностью заменяет необходимость теоретического анализа"
+        ],
+        c: 0,
+        exp: "Тестирование основано на неполной индукции: даже миллион успешных тестов не доказывают, что миллион первый не упадет."
+      },
+      {
+        q: "5. Какой логический метод переносит свойства изученного объекта на неизвестный объект по сходству?",
+        opts: [
+          "Метод умозаключения по аналогии",
+          "Метод математической индукции",
+          "Метод идеализации и пределов",
+          "Аксиоматический метод вывода"
+        ],
+        c: 0,
+        exp: "Аналогия заключает о наличии признака у объекта на основе его сходства в других признаках с моделью-образцом."
+      },
+      {
+        q: "6. Что такое гипотетико-дедуктивный метод в научном познании?",
+        opts: [
+          "Выдвижение гипотезы, дедуктивный вывод следствий и их экспериментальная проверка",
+          "Накопление случайных эмпирических фактов без теоретического плана",
+          "Отказ от выдвижения любых гипотез в пользу чистого описания явлений",
+          "Доказательство теоремы методом исключения противоположных утверждений"
+        ],
+        c: 0,
+        exp: "Гипотетико-дедуктивный метод строит проверяемые следствия из гипотезы и верифицирует их контролируемым экспериментом."
+      },
+      {
+        q: "7. Что представляет собой 'конструктивизация' как разновидность абстрагирования?",
+        opts: [
+          "Огрубление размытых понятий и задание четких границ и пределов изменения переменных",
+          "Построение материального макета здания из деревянных конструкций",
+          "Запрет на использование любых абстрактных понятий в научной статье",
+          "Переход от исходного кода программы к машинному бинарному файлу"
+        ],
+        c: 0,
+        exp: "Конструктивизация огрубляет неопределенность реального мира, задавая дискретные математические границы."
+      },
+      {
+        q: "8. Какой логический метод гарантирует строго достоверный вывод при истинности исходных посылок?",
+        opts: [
+          "Дедукция (дедуктивный вывод)",
+          "Неполная индукция фактов",
+          "Случайная догадка инженера",
+          "Опрос мнений пользователей"
+        ],
+        c: 0,
+        exp: "Дедуктивный вывод логически необходим: если правила и аксиомы истинны, частное следствие обязано быть истинным."
+      },
+      {
+        q: "9. Что является примером 'абстракции потенциальной осуществимости' в computer science?",
+        opts: [
+          "Допущение бесконечной ленты машины Тьюринга при исследовании алгоритмов",
+          "Покупка дополнительной планки оперативной памяти для ноутбука разработчика",
+          "Ограничение размера массива константой ровно в 1024 элемента в коде",
+          "Использование микроконтроллера Arduino с 2 килобайтами памяти"
+        ],
+        c: 0,
+        exp: "Абстракция потенциальной осуществимости отвлекается от практической конечности ресурсов времени и памяти."
+      },
+      {
+        q: "10. В чем главная опасность чрезмерного обособленного анализа без последующего синтеза?",
+        opts: [
+          "Теряется целостное представление и системные эмерджентные свойства объекта",
+          "Программа начинает работать слишком быстро и перегревает процессор",
+          "Количество строк исходного кода уменьшается до нуля",
+          "Университет аннулирует результаты курсовой работы студента"
+        ],
+        c: 0,
+        exp: "Анализ без синтеза дробит предмет на изолированные детали, уничтожая системное качество целого."
+      }
+    ];
+
+    function renderQuiz() {
+      const container = document.getElementById('quiz-container');
+      container.innerHTML = '';
+      quizData.forEach((item, qIdx) => {
+        const card = document.createElement('div');
+        card.className = 'quiz-card';
+        card.innerHTML = `
+          <div class="quiz-q">${item.q}</div>
+          <div class="quiz-options" id="quiz-opts-${qIdx}"></div>
+          <div class="quiz-exp" id="quiz-exp-${qIdx}"></div>
+        `;
+        container.appendChild(card);
+
+        const optsBox = card.querySelector(`#quiz-opts-${qIdx}`);
+        const expBox = card.querySelector(`#quiz-exp-${qIdx}`);
+
+        item.opts.forEach((optText, oIdx) => {
+          const btn = document.createElement('button');
+          btn.className = 'quiz-opt';
+          btn.textContent = optText;
+          btn.onclick = () => {
+            const allBtns = optsBox.querySelectorAll('.quiz-opt');
+            allBtns.forEach(b => b.disabled = true);
+
+            if (oIdx === item.c) {
+              btn.classList.add('correct');
+              expBox.style.color = 'var(--accent-emerald)';
+              expBox.innerHTML = `✓ <strong>Верно!</strong> ${item.exp}`;
+            } else {
+              btn.classList.add('wrong');
+              allBtns[item.c].classList.add('correct');
+              expBox.style.color = 'var(--accent-rose)';
+              expBox.innerHTML = `✕ <strong>Неверно.</strong> ${item.exp}`;
+            }
+            expBox.style.display = 'block';
+          };
+          optsBox.appendChild(btn);
+        });
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      updateAbstractionLevel(2);
+      showMethod('analysis', document.querySelector('.step-tab'));
+      renderQuiz();
+    });
+  </script>
+</body>
+</html>
