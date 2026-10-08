@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ELI5: АВЛ-деревья и повороты балансировки</title>
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1a2234;
+      --border-color: #243049;
+      --text-main: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #38bdf8;
+      --accent-blue: #3b82f6;
+      --accent-emerald: #10b981;
+      --accent-purple: #a855f7;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --code-bg: #06090f;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 14, 23, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-brand {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--accent-cyan);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 2.1rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      margin-bottom: 24px;
+    }
+
+    .section-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .feature-box {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .feature-box h4 {
+      color: var(--accent-cyan);
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+
+    .feature-box p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .callout-exam {
+      background: rgba(245, 158, 11, 0.08);
+      border-left: 4px solid var(--accent-amber);
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 20px 0;
+    }
+
+    .callout-exam h4 {
+      color: var(--accent-amber);
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+    }
+
+    .callout-exam p {
+      font-size: 0.88rem;
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    /* Simulator styles */
+    .sim-box {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 18px;
+    }
+
+    .sim-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    input[type=number] {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      outline: none;
+      width: 140px;
+    }
+    input[type=number]:focus { border-color: var(--accent-cyan); }
+
+    .btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: var(--border-color); }
+    .btn.primary { background: #166534; border-color: #22c55e; color: #fff; }
+    .btn.primary:hover { background: #15803d; }
+    .btn.danger { background: rgba(244, 63, 94, 0.15); border-color: rgba(244, 63, 94, 0.4); color: var(--accent-rose); }
+
+    .tree-canvas {
+      background: #070b12;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      min-height: 280px;
+      position: relative;
+      overflow-x: auto;
+      padding: 10px;
+    }
+
+    .log-box {
+      background: #090d13;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 14px;
+      min-height: 44px;
+    }
+
+    /* Quiz styles */
+    .quiz-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .quiz-q {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+    }
+
+    .quiz-opts {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .quiz-opt {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quiz-opt:hover:not(:disabled) {
+      border-color: var(--accent-cyan);
+      color: var(--text-main);
+    }
+    .quiz-opt.correct {
+      background: rgba(16, 185, 129, 0.15) !important;
+      border-color: var(--accent-emerald) !important;
+      color: var(--text-main) !important;
+      font-weight: 600;
+    }
+    .quiz-opt.wrong {
+      background: rgba(244, 63, 94, 0.15) !important;
+      border-color: var(--accent-rose) !important;
+      color: var(--accent-rose) !important;
+    }
+    .quiz-exp {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.84rem;
+      line-height: 1.45;
+      background: #0a0e17;
+      border: 1px solid var(--border-color);
+    }
+
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 14, 23, 0.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border-color);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 99;
+    }
+    .bottom-bar a {
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .bottom-bar a.active {
+      color: var(--accent-cyan);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="top-nav">
+    <div class="nav-brand">
+      <span>🌲</span> ELI5 Visual Hub • ПГУ им. Шевченко
+    </div>
+    <div style="font-size: 0.88rem; display: flex; gap: 14px;">
+      <a href="https://asm-o-dan.github.io/eli5-visual-hub/">Все курсы</a>
+      <a href="https://asm-o-dan.github.io/eli5-visual-hub/artifacts/aisd_trees_bst.html">Деревья BST</a>
+      <a href="https://asm-o-dan.github.io/eli5-visual-hub/artifacts/aisd_hash_tables.html">Хэш-таблицы</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="hero-badge">Лекция АиСД • Запись 8 (Тягульская Л.А.)</div>
+    <h1>АВЛ-деревья и повороты балансировки</h1>
+    <p class="hero-desc">
+      Интерактивный путеводитель по самобалансирующимся деревьям поиска: фактор баланса, малые и большие повороты (L, R, LR, RL) и строгие доказательства $O(\log n)$.
+    </p>
+
+    <!-- SECTION 1: Суть АВЛ-дерева -->
+    <div class="section-card" id="intro">
+      <div class="section-title">
+        <span>⚖️</span> 1. Зачем балансировать деревья поиска?
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.92rem;">
+        В обычном двоичном дереве поиска (BST) последовательная вставка возрастающих чисел (1, 2, 3, 4, 5) вырождает дерево в линейный список высотой $n$. Сложность поиска падает с $O(\log n)$ до катастрофического $O(n)$!
+      </p>
+      <div class="grid-2">
+        <div class="feature-box">
+          <h4>📐 Инвариант Адельсона-Вельского и Ландиса (1962)</h4>
+          <p>Для <strong>каждого</strong> узла дерева высоты правого и левого поддеревьев отличаются не более чем на 1:</p>
+          <p style="color: var(--accent-cyan); font-weight: 700; font-family: monospace;">bf(x) = height(x.right) - height(x.left) &in; {-1, 0, 1}</p>
+        </div>
+        <div class="feature-box">
+          <h4>🚀 Гарантия высоты $O(\log n)$</h4>
+          <p>Даже в худшем случае (деревья Фибоначчи) высота АВЛ-дерева строго ограничена формулой:</p>
+          <p style="color: var(--accent-emerald); font-weight: 700; font-family: monospace;">h &lt; 1.44 &middot; log2(n + 2)</p>
+          <p>Поиск, вставка и удаление строго гарантированы за $O(\log n)$!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: 4 типа поворотов -->
+    <div class="section-card" id="rotations">
+      <div class="section-title">
+        <span>🔄</span> 2. Четыре типа поворотов балансировки
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.92rem;">
+        Цитата из лекции: <em>«Если правое дерево перевешивает вправо — одинарный левый поворот. Если левое влево — одинарный правый поворот. А если правое влево или левое вправо — то нужен двойной (большой) поворот!»</em>
+      </p>
+
+      <div class="grid-2">
+        <div class="feature-box">
+          <h4 style="color: var(--accent-amber);">1. Одинарный левый поворот (Small Left, RR)</h4>
+          <p><strong>Условие:</strong> $bf(A) = +2$ и $bf(B) = +1$ (правый потомок правого поддерева перевесил).</p>
+          <p><strong>Действие:</strong> Правый узел $B$ поднимается в корень, $A$ становится его левым сыном, а левое поддерево $B$ уходит правым сыном к $A$.</p>
+        </div>
+        <div class="feature-box">
+          <h4 style="color: var(--accent-amber);">2. Одинарный правый поворот (Small Right, LL)</h4>
+          <p><strong>Условие:</strong> $bf(A) = -2$ и $bf(B) = -1$ (левый потомок левого поддерева перевесил).</p>
+          <p><strong>Действие:</strong> Левый узел $B$ становится новым корнем, $A$ опускается вправо, правое поддерево $B$ отдается узлу $A$.</p>
+        </div>
+        <div class="feature-box">
+          <h4 style="color: var(--accent-purple);">3. Большой левый поворот (Big Left / RL)</h4>
+          <p><strong>Условие:</strong> $bf(A) = +2$, но $bf(B) = -1$ (зигзаг вправо-влево).</p>
+          <p><strong>Действие:</strong> Сначала правый поворот вокруг $B$, затем левый поворот вокруг $A$.</p>
+        </div>
+        <div class="feature-box">
+          <h4 style="color: var(--accent-purple);">4. Большой правый поворот (Big Right / LR)</h4>
+          <p><strong>Условие:</strong> $bf(A) = -2$, но $bf(B) = +1$ (зигзаг влево-вправо).</p>
+          <p><strong>Действие:</strong> Сначала левый поворот вокруг $B$, затем правый поворот вокруг $A$.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: Интерактивный симулятор АВЛ-дерева -->
+    <div class="section-card" id="simulator">
+      <div class="section-title">
+        <span>🎮</span> 3. Интерактивная песочница: АВЛ-дерево
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.92rem;">
+        Вставляйте ключи по одному или загрузите пресеты для демонстрации каждого поворота:
+      </p>
+
+      <div class="sim-box">
+        <div class="sim-controls">
+          <input type="number" id="avl-input" placeholder="Ключ (число)">
+          <button class="btn primary" onclick="insertUserKey()">Вставить узел</button>
+          <button class="btn" onclick="loadPresetRR()">Пресет: Левый поворот (RR)</button>
+          <button class="btn" onclick="loadPresetLL()">Пресет: Правый поворот (LL)</button>
+          <button class="btn" onclick="loadPresetLR()">Пресет: Большой LR поворот</button>
+          <button class="btn" onclick="loadPresetRL()">Пресет: Большой RL поворот</button>
+          <button class="btn danger" onclick="clearTree()">Очистить</button>
+        </div>
+
+        <div class="tree-canvas" id="tree-canvas">
+          <svg id="avl-svg" style="width:100%; height:320px;"></svg>
+        </div>
+
+        <div class="log-box" id="avl-log">Дерево пусто. Добавьте узел для начала.</div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: Билеты защиты Тягульской Л.А. -->
+    <div class="section-card" id="defense">
+      <div class="section-title">
+        <span>⚡</span> 4. 30-секундные ответы на устном экзамене
+      </div>
+
+      <div class="callout-exam">
+        <h4>Вопрос: Почему АВЛ-дерево балансируется по высоте, а не по числу узлов?</h4>
+        <p><strong>Ответ:</strong> Балансировка по количеству узлов (весовая балансировка) при каждой вставке или удалении может требовать глобальной перестройки всего дерева за $O(n)$. Балансировка по высоте ($|bf| \le 1$) локализует дисбаланс: при вставке требуется <strong>максимум один поворот</strong> (малый или большой) вдоль пути подъема к корню, что гарантирует работу за $O(\log n)$.</p>
+      </div>
+
+      <div class="callout-exam">
+        <h4>Вопрос: Как по коэффициентам баланса понять, нужен малый или большой поворот?</h4>
+        <p><strong>Ответ:</strong> Смотрим на знаки коэффициентов баланса родителя и проблемного потомка:<br>
+        &bull; <strong>Одинаковые знаки</strong> ($+2$ и $+1$ либо $-2$ и $-1$) — перекос в одну сторону (палка), выполняется <em>одинарный поворот</em>.<br>
+        &bull; <strong>Разные знаки</strong> ($+2$ и $-1$ либо $-2$ и $+1$) — зигзаг («колено»), выполняется <em>двойной поворот</em>.</p>
+      </div>
+    </div>
+
+    <!-- SECTION 5: Тест самопроверки -->
+    <div class="section-card" id="quiz">
+      <div class="section-title">
+        <span>📝</span> 5. Проверка понимания (10 вопросов)
+      </div>
+      <div id="quiz-container"></div>
+    </div>
+
+  </div>
+
+  <div class="bottom-bar">
+    <a href="#intro" class="active"><span>⚖️</span>Инвариант</a>
+    <a href="#rotations"><span>🔄</span>Повороты</a>
+    <a href="#simulator"><span>🎮</span>Симулятор</a>
+    <a href="#defense"><span>⚡</span>Экзамен</a>
+    <a href="#quiz"><span>📝</span>Тест</a>
+  </div>
+
+  <script>
+    // AVL Tree implementation
+    class Node {
+      constructor(val) {
+        this.val = val;
+        this.left = null;
+        this.right = null;
+        this.height = 1;
+      }
+    }
+
+    let root = null;
+    let rotationLog = [];
+
+    function getHeight(node) {
+      return node ? node.height : 0;
+    }
+
+    function getBalance(node) {
+      return node ? getHeight(node.right) - getHeight(node.left) : 0;
+    }
+
+    function updateHeight(node) {
+      if (node) {
+        node.height = 1 + Math.max(getHeight(node.left), getHeight(node.right));
+      }
+    }
+
+    function rotateRight(y) {
+      const x = y.left;
+      const T2 = x.right;
+      x.right = y;
+      y.left = T2;
+      updateHeight(y);
+      updateHeight(x);
+      rotationLog.push(`Выполнен малый правый поворот (Right Rotation) вокруг узла ${y.val}`);
+      return x;
+    }
+
+    function rotateLeft(x) {
+      const y = x.right;
+      const T2 = y.left;
+      y.left = x;
+      x.right = T2;
+      updateHeight(x);
+      updateHeight(y);
+      rotationLog.push(`Выполнен малый левый поворот (Left Rotation) вокруг узла ${x.val}`);
+      return y;
+    }
+
+    function insert(node, val) {
+      if (!node) return new Node(val);
+      if (val < node.val) {
+        node.left = insert(node.left, val);
+      } else if (val > node.val) {
+        node.right = insert(node.right, val);
+      } else {
+        rotationLog.push(`Ключ ${val} уже присутствует в дереве.`);
+        return node;
+      }
+
+      updateHeight(node);
+      const bf = getBalance(node);
+
+      // LL Case -> Right Rotation
+      if (bf < -1 && val < node.left.val) {
+        return rotateRight(node);
+      }
+
+      // RR Case -> Left Rotation
+      if (bf > 1 && val > node.right.val) {
+        return rotateLeft(node);
+      }
+
+      // LR Case -> Left-Right Rotation
+      if (bf < -1 && val > node.left.val) {
+        rotationLog.push(`Дисбаланс LR у узла ${node.val}: сначала левый поворот вокруг ${node.left.val}, затем правый`);
+        node.left = rotateLeft(node.left);
+        return rotateRight(node);
+      }
+
+      // RL Case -> Right-Left Rotation
+      if (bf > 1 && val < node.right.val) {
+        rotationLog.push(`Дисбаланс RL у узла ${node.val}: сначала правый поворот вокруг ${node.right.val}, затем левый`);
+        node.right = rotateRight(node.right);
+        return rotateLeft(node);
+      }
+
+      return node;
+    }
+
+    function renderTree() {
+      const svg = document.getElementById('avl-svg');
+      svg.innerHTML = '';
+      if (!root) {
+        document.getElementById('avl-log').textContent = 'Дерево пусто.';
+        return;
+      }
+
+      const svgWidth = svg.clientWidth || 800;
+      const levels = getHeight(root);
+      svg.setAttribute('height', Math.max(300, levels * 75 + 40));
+
+      const nodesToDraw = [];
+      const linesToDraw = [];
+
+      function assignCoords(node, depth, xMin, xMax) {
+        if (!node) return;
+        const x = (xMin + xMax) / 2;
+        const y = depth * 70 + 40;
+        node._x = x;
+        node._y = y;
+        nodesToDraw.push(node);
+
+        if (node.left) {
+          linesToDraw.push({ x1: x, y1: y, x2: (xMin + x) / 2, y2: (depth + 1) * 70 + 40 });
+          assignCoords(node.left, depth + 1, xMin, x);
+        }
+        if (node.right) {
+          linesToDraw.push({ x1: x, y1: y, x2: (x + xMax) / 2, y2: (depth + 1) * 70 + 40 });
+          assignCoords(node.right, depth + 1, x, xMax);
+        }
+      }
+
+      assignCoords(root, 0, 20, svgWidth - 20);
+
+      // Draw lines
+      linesToDraw.forEach(l => {
+        svg.innerHTML += `<line x1="${l.x1}" y1="${l.y1}" x2="${l.x2}" y2="${l.y2}" stroke="var(--border-color)" stroke-width="2"/>`;
+      });
+
+      // Draw nodes
+      nodesToDraw.forEach(n => {
+        const bf = getBalance(n);
+        let color = 'var(--accent-cyan)';
+        if (bf !== 0) color = 'var(--accent-amber)';
+        svg.innerHTML += `
+          <g>
+            <circle cx="${n._x}" cy="${n._y}" r="20" fill="var(--bg-surface-elevated)" stroke="${color}" stroke-width="2.5"/>
+            <text x="${n._x}" y="${n._y + 5}" fill="var(--text-main)" font-family="monospace" font-weight="bold" font-size="14" text-anchor="middle">${n.val}</text>
+            <text x="${n._x}" y="${n._y - 24}" fill="var(--text-muted)" font-family="monospace" font-size="10" text-anchor="middle">bf:${bf > 0 ? '+' + bf : bf} h:${n.height}</text>
+          </g>
+        `;
+      });
+
+      const logText = rotationLog.length > 0 ? rotationLog.join(' | ') : `Дерево сбалансировано. Высота: ${root.height}, узлов корень: ${root.val}.`;
+      document.getElementById('avl-log').textContent = logText;
+      rotationLog = [];
+    }
+
+    function insertUserKey() {
+      const inp = document.getElementById('avl-input');
+      const val = parseInt(inp.value, 10);
+      if (isNaN(val)) return;
+      rotationLog = [`Вставка ключа ${val}`];
+      root = insert(root, val);
+      inp.value = '';
+      renderTree();
+    }
+
+    function loadPresetRR() {
+      root = null;
+      rotationLog = ['Загрузка пресета RR (10, 20, 30): вызывает одинарный левый поворот'];
+      [10, 20, 30].forEach(k => root = insert(root, k));
+      renderTree();
+    }
+
+    function loadPresetLL() {
+      root = null;
+      rotationLog = ['Загрузка пресета LL (30, 20, 10): вызывает одинарный правый поворот'];
+      [30, 20, 10].forEach(k => root = insert(root, k));
+      renderTree();
+    }
+
+    function loadPresetLR() {
+      root = null;
+      rotationLog = ['Загрузка пресета LR (30, 10, 20): колено влево-вправо, вызывает большой поворот'];
+      [30, 10, 20].forEach(k => root = insert(root, k));
+      renderTree();
+    }
+
+    function loadPresetRL() {
+      root = null;
+      rotationLog = ['Загрузка пресета RL (10, 30, 20): колено вправо-влево, вызывает большой поворот'];
+      [10, 30, 20].forEach(k => root = insert(root, k));
+      renderTree();
+    }
+
+    function clearTree() {
+      root = null;
+      renderTree();
+    }
+
+    // Quiz Data
+    const quizData = [
+      {
+        q: "1. Чему равен допустимый диапазон фактора баланса (bf) любого узла в АВЛ-дереве?",
+        opts: [
+          "Строго {-1, 0, 1}",
+          "Любое число от -2 до +2",
+          "Только строго 0 (идеальный баланс)",
+          "Пропорционален общему числу листьев"
+        ],
+        c: 0,
+        exp: "По определению Адельсона-Вельского и Ландиса, разность высот правого и левого поддеревьев не должна превышать 1."
+      },
+      {
+        q: "2. Какой поворот выполняется, если у корня bf = +2, а у его правого сына bf = +1?",
+        opts: [
+          "Одинарный левый поворот (Small Left)",
+          "Одинарный правый поворот (Small Right)",
+          "Большой правый поворот (LR)",
+          "Большой левый поворот (RL)"
+        ],
+        c: 0,
+        exp: "Одинаковые положительные знаки (+2 и +1) означают линейный перекос вправо, который устраняется одним левым поворотом."
+      },
+      {
+        q: "3. Какой поворот необходим при ситуации 'колена' (зигзага), когда bf = +2, а у правого сына bf = -1?",
+        opts: [
+          "Большой левый поворот (Right-Left, RL)",
+          "Одинарный левый поворот",
+          "Одинарный правый поворот",
+          "Повороты не требуются"
+        ],
+        c: 0,
+        exp: "При разных знаках (+2 и -1) простой поворот не восстановит баланс, требуется двойной поворот RL (сначала правый, затем левый)."
+      },
+      {
+        q: "4. Сколько поворотов максимум требуется выполнить для восстановления баланса АВЛ-дерева при одной вставке?",
+        opts: [
+          "Не более одного малого или одного большого поворота",
+          "Ровно n поворотов по числу всех элементов",
+          "Пропорционально квадрату высоты дерева O(h^2)",
+          "Поворот требуется для каждого узла дерева"
+        ],
+        c: 0,
+        exp: "При вставке один поворот (одинарный или двойной) полностью восстанавливает исходную высоту поддерева, останавливая распространение дисбаланса вверх."
+      },
+      {
+        q: "5. Какова асимптотическая временная сложность поиска элемента в АВЛ-дереве из n узлов в худшем случае?",
+        opts: [
+          "Строго O(log n)",
+          "O(n) линейное время",
+          "O(1) константное время",
+          "O(n log n) квазилинейное время"
+        ],
+        c: 0,
+        exp: "Благодаря строгой логарифмической границе высоты h < 1.44 log2(n), поиск даже в худшем случае занимает O(log n)."
+      }
+    ];
+
+    function renderQuiz() {
+      const container = document.getElementById('quiz-container');
+      container.innerHTML = '';
+      quizData.forEach((item, qIdx) => {
+        const card = document.createElement('div');
+        card.className = 'quiz-card';
+        card.innerHTML = `
+          <div class="quiz-q">${item.q}</div>
+          <div class="quiz-opts" id="q-opts-${qIdx}"></div>
+          <div class="quiz-exp" id="q-exp-${qIdx}"></div>
+        `;
+        container.appendChild(card);
+
+        const optsBox = card.querySelector(`#q-opts-${qIdx}`);
+        const expBox = card.querySelector(`#q-exp-${qIdx}`);
+
+        item.opts.forEach((optText, oIdx) => {
+          const btn = document.createElement('button');
+          btn.className = 'quiz-opt';
+          btn.textContent = optText;
+          btn.onclick = () => {
+            optsBox.querySelectorAll('.quiz-opt').forEach(b => b.disabled = true);
+            if (oIdx === item.c) {
+              btn.classList.add('correct');
+              expBox.style.color = 'var(--accent-emerald)';
+              expBox.innerHTML = `✓ <strong>Верно!</strong> ${item.exp}`;
+            } else {
+              btn.classList.add('wrong');
+              optsBox.querySelectorAll('.quiz-opt')[item.c].classList.add('correct');
+              expBox.style.color = 'var(--accent-rose)';
+              expBox.innerHTML = `✕ <strong>Неверно.</strong> ${item.exp}`;
+            }
+            expBox.style.display = 'block';
+          };
+          optsBox.appendChild(btn);
+        });
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadPresetRR();
+      renderQuiz();
+    });
+  </script>
+</body>
+</html>
