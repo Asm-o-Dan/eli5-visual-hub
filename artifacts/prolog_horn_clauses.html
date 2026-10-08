@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ELI5: Дизъюнкты Хорна и Visual Prolog</title>
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1a2234;
+      --border-color: #243049;
+      --text-main: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #38bdf8;
+      --accent-blue: #3b82f6;
+      --accent-emerald: #10b981;
+      --accent-purple: #a855f7;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --code-bg: #06090f;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 14, 23, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-brand {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(168, 85, 247, 0.1);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      color: var(--accent-purple);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 2.1rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #fff 0%, #a855f7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      margin-bottom: 24px;
+    }
+
+    .section-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .feature-box {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .feature-box h4 {
+      color: var(--accent-purple);
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+
+    .feature-box p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .callout-exam {
+      background: rgba(245, 158, 11, 0.08);
+      border-left: 4px solid var(--accent-amber);
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 20px 0;
+    }
+
+    .callout-exam h4 {
+      color: var(--accent-amber);
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+    }
+
+    .callout-exam p {
+      font-size: 0.88rem;
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    .code-block {
+      background: #06090f;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: monospace;
+      font-size: 0.88rem;
+      color: #38bdf8;
+      overflow-x: auto;
+      margin: 12px 0;
+    }
+
+    /* Interactive Prolog Sandbox */
+    .sim-panel {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 18px;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 14px 0;
+    }
+
+    .btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: var(--border-color); }
+    .btn.active { background: var(--accent-purple); border-color: #c084fc; color: #fff; }
+
+    .terminal-out {
+      background: #05080e;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: monospace;
+      font-size: 0.86rem;
+      color: #10b981;
+      min-height: 90px;
+      white-space: pre-wrap;
+    }
+
+    /* Quiz styles */
+    .quiz-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .quiz-q { font-weight: 600; font-size: 0.95rem; margin-bottom: 12px; }
+    .quiz-opts { display: flex; flex-direction: column; gap: 8px; }
+    .quiz-opt {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      text-align: left;
+      cursor: pointer;
+    }
+    .quiz-opt:hover:not(:disabled) { border-color: var(--accent-purple); color: var(--text-main); }
+    .quiz-opt.correct {
+      background: rgba(16, 185, 129, 0.15) !important;
+      border-color: var(--accent-emerald) !important;
+      color: var(--text-main) !important;
+      font-weight: 600;
+    }
+    .quiz-opt.wrong {
+      background: rgba(244, 63, 94, 0.15) !important;
+      border-color: var(--accent-rose) !important;
+      color: var(--accent-rose) !important;
+    }
+    .quiz-exp {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.84rem;
+      line-height: 1.45;
+      background: #0a0e17;
+      border: 1px solid var(--border-color);
+    }
+
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 14, 23, 0.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border-color);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 99;
+    }
+    .bottom-bar a {
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .bottom-bar a.active { color: var(--accent-purple); font-weight: 700; }
+  </style>
+</head>
+<body>
+
+  <nav class="top-nav">
+    <div class="nav-brand">
+      <span>🔮</span> ELI5 Visual Hub • ПГУ им. Шевченко
+    </div>
+    <div style="font-size: 0.88rem; display: flex; gap: 14px;">
+      <a href="https://asm-o-dan.github.io/eli5-visual-hub/">Все курсы</a>
+      <a href="https://asm-o-dan.github.io/eli5-visual-hub/artifacts/aisd_avl_trees.html">АВЛ-деревья</a>
+      <a href="https://asm-o-dan.github.io/eli5-visual-hub/artifacts/otu_intro_frequency_response.html">ОТУ: АЧХ</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="hero-badge">Лекция МЗЯП • Логический ЯП.m4a</div>
+    <h1>Дизъюнкты Хорна и декларативная модель Пролога</h1>
+    <p class="hero-desc">
+      Интерактивный путеводитель: фразы Хорна, унификация переменных, резолюция с откатом (backtracking) и анонимная переменная в Visual Prolog 5.2.
+    </p>
+
+    <!-- SECTION 1: Что такое дизъюнкт Хорна -->
+    <div class="section-card" id="horn">
+      <div class="section-title">
+        <span>📜</span> 1. Математический базис: Дизъюнкты Хорна
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.92rem;">
+        Цитата из лекции: <em>«В основе описания фактов и знаний, которые у нас есть, используются фразы Хорна. Дизъюнкт Хорна — это дизъюнкция литералов, содержащая не более одного положительного литерала!»</em>
+      </p>
+
+      <div class="code-block">
+A &or; &not;B1 &or; &not;B2 &or; ... &or; &not;Bn  &equiv;  A &larr; (B1 &and; B2 &and; ... &and; Bn)
+Синтаксис Пролога:   Head :- Body1, Body2, ..., BodyN.
+      </div>
+
+      <div class="grid-2">
+        <div class="feature-box">
+          <h4>1. Факт (Fact)</h4>
+          <p>Дизъюнкт без отрицательных литералов ($n = 0$). Безусловная истина:</p>
+          <div class="code-block">parent(ivan, olga).
+parent(ivan, fedor).</div>
+        </div>
+        <div class="feature-box">
+          <h4>2. Правило (Rule)</h4>
+          <p>Ровно один положительный литерал (голова) и список посылок (тело):</p>
+          <div class="code-block">ancestor(X, Y) :- parent(X, Y).
+ancestor(X, Y) :- parent(X, Z), ancestor(Z, Y).</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: Анонимная переменная -->
+    <div class="section-card" id="anonymous">
+      <div class="section-title">
+        <span>👤</span> 2. Ловушка лекции: Именованная vs Анонимная переменная (_)
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.92rem;">
+        Лектор подчеркивает ключевое различие при формировании целей (Goal):
+      </p>
+
+      <div class="grid-2">
+        <div class="feature-box">
+          <h4 style="color: var(--accent-cyan);">Цель с переменной: Goal: parent(ivan, X).</h4>
+          <p>Пролог находит <strong>все конкретные связывания</strong> (унификации):</p>
+          <div class="code-block">X = olga
+X = fedor
+2 Solutions</div>
+        </div>
+        <div class="feature-box">
+          <h4 style="color: var(--accent-amber);">Цель с анонимной: Goal: parent(ivan, _).</h4>
+          <p>«Нам не важно, кто конкретно его дети, нам важен сам факт родительства!» Пролог отвечает мгновенно:</p>
+          <div class="code-block">Yes (True)
+1 Solution</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: Интерактивный терминал Visual Prolog -->
+    <div class="section-card" id="simulator">
+      <div class="section-title">
+        <span>💻</span> 3. Интерактивная песочница Visual Prolog
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.92rem;">
+        База знаний содержит факты: <code>parent(ivan, olga)</code>, <code>parent(ivan, fedor)</code>, <code>parent(olga, anna)</code>. Выберите цель:
+      </p>
+
+      <div class="sim-panel">
+        <div class="btn-row">
+          <button class="btn active" onclick="runProlog('q1', this)">parent(ivan, X).</button>
+          <button class="btn" onclick="runProlog('q2', this)">parent(ivan, _).</button>
+          <button class="btn" onclick="runProlog('q3', this)">grandparent(ivan, X).</button>
+          <button class="btn" onclick="runProlog('q4', this)">parent(fedor, X).</button>
+        </div>
+
+        <div class="terminal-out" id="terminal-out"></div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: Билеты устного экзамена -->
+    <div class="section-card" id="defense">
+      <div class="section-title">
+        <span>⚡</span> 4. 30-секундные ответы на экзамене по МЗЯП
+      </div>
+
+      <div class="callout-exam">
+        <h4>Вопрос: Почему именно дизъюнкты Хорна легли в основу Пролога?</h4>
+        <p><strong>Ответ:</strong> Произвольная формула логики предикатов первого порядка алгоритмически неразрешима или требует экспоненциального времени перебора. Ограничение дизъюнктами Хорна (не более одного утвердительного литерала) позволяет применить линейный алгоритм <strong>SLD-резолюции</strong>, работающий за полиномиальное время и эквивалентный вызову процедур в императивных языках.</p>
+      </div>
+
+      <div class="callout-exam">
+        <h4>Вопрос: Что такое откат (Backtracking) в Прологе?</h4>
+        <p><strong>Ответ:</strong> Если при доказательстве подцели Пролог сталкивается с неудачей (Fail) или пользователь запрашивает следующее решение клавишей <code>;</code>, машина логического вывода откатывается назад к последней точке выбора (Choice Point), отменяет связывание переменных и пытается доказать цель через следующее подходящее правило.</p>
+      </div>
+    </div>
+
+    <!-- SECTION 5: Тест -->
+    <div class="section-card" id="quiz">
+      <div class="section-title">
+        <span>📝</span> 5. Проверка знаний (5 вопросов)
+      </div>
+      <div id="quiz-container"></div>
+    </div>
+
+  </div>
+
+  <div class="bottom-bar">
+    <a href="#horn" class="active"><span>📜</span>Дизъюнкты</a>
+    <a href="#anonymous"><span>👤</span>Анонимная</a>
+    <a href="#simulator"><span>💻</span>Терминал</a>
+    <a href="#defense"><span>⚡</span>Экзамен</a>
+    <a href="#quiz"><span>📝</span>Тест</a>
+  </div>
+
+  <script>
+    const queries = {
+      q1: "Goal: parent(ivan, X).
+Evaluating matching clauses for parent/2...
+  Unifying X = olga [Solution 1]
+  Backtracking to choice point...
+  Unifying X = fedor [Solution 2]
+
+2 Solutions found. Execution time: 0.12 ms.",
+      q2: "Goal: parent(ivan, _).
+Evaluating fact: parent(ivan, olga)...
+  Wildcard matched. Concrete binding suppressed!
+
+Yes (True).
+1 Solution found. Execution time: 0.04 ms.",
+      q3: "Goal: grandparent(ivan, X).
+Expanding rule: grandparent(A, C) :- parent(A, B), parent(B, C).
+  Step 1: parent(ivan, olga) -> B = olga.
+  Step 2: parent(olga, X) -> X = anna [Solution 1]
+  Step 3: Backtracking... parent(ivan, fedor) -> B = fedor.
+  Step 4: parent(fedor, X) -> False.
+
+X = anna
+1 Solution found.",
+      q4: "Goal: parent(fedor, X).
+Scanning clauses for parent(fedor, ...)...
+No matching fact found in knowledge base!
+
+No (False).
+0 Solutions found."
+    };
+
+    function runProlog(key, btn) {
+      document.querySelectorAll('.btn-row .btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('terminal-out').textContent = queries[key];
+    }
+
+    const quizData = [
+      {
+        q: "1. Сколько положительных литералов может содержать дизъюнкт Хорна?",
+        opts: [
+          "Не более одного (0 или 1)",
+          "Ровно два положительных литерала",
+          "Любое произвольное количество",
+          "Только строго отрицательные литералы"
+        ],
+        c: 0,
+        exp: "Дизъюнкт Хорна содержит максимум один утвердительный литерал (голову правила) и произвольное число отрицательных литералов (тело)."
+      },
+      {
+        q: "2. Каков результат вычисления цели parent(ivan, _) с анонимной переменной?",
+        opts: [
+          "Ответ 'Yes', без перечисления конкретных имен детей",
+          "Ошибка синтаксиса компилятора Visual Prolog",
+          "Вывод всех имен детей через пробел",
+          "Бесконечный цикл поиска решений"
+        ],
+        c: 0,
+        exp: "Анонимная переменная отбрасывает связывание, отвечая лишь на вопрос истинности факта существования хотя бы одного потомка."
+      },
+      {
+        q: "3. Какой метод логического вывода лежит в основе механизма Пролога?",
+        opts: [
+          "Метод резолюции Робинсона с возвратом (SLD-резолюция)",
+          "Прямой численный градиентный спуск",
+          "Случайный метод Монте-Карло",
+          "Квадратичное пробирование слотов"
+        ],
+        c: 0,
+        exp: "Пролог использует SLD-резолюцию (Selected Linear Definite clause resolution) на дизъюнктах Хорна."
+      },
+      {
+        q: "4. С какого символа обязаны начинаться переменные в Прологе?",
+        opts: [
+          "С заглавной буквы (A-Z) или знака подчеркивания (_)",
+          "Строго со строчной буквы (a-z)",
+          "С цифры от 0 до 9",
+          "Со знака амперсанда (&)"
+        ],
+        c: 0,
+        exp: "Идентификаторы с заглавной буквы или знака подчеркивания считаются переменными. Имена с маленькой буквы — константами и предикатами."
+      },
+      {
+        q: "5. Что делает оператор отсечения (Cut, '!') в Прологе?",
+        opts: [
+          "Запрещает бэктрекинг назад через точку вызова отсечения",
+          "Немедленно завершает работу всей программы аварийно",
+          "Удаляет базу знаний из оперативной памяти",
+          "Инвертирует логическое значение предиката"
+        ],
+        c: 0,
+        exp: "Отсечение фиксирует текущие связывания переменных и отсекает альтернативные ветви перебора."
+      }
+    ];
+
+    function renderQuiz() {
+      const container = document.getElementById('quiz-container');
+      container.innerHTML = '';
+      quizData.forEach((item, qIdx) => {
+        const card = document.createElement('div');
+        card.className = 'quiz-card';
+        card.innerHTML = `
+          <div class="quiz-q">${item.q}</div>
+          <div class="quiz-opts" id="q-opts-${qIdx}"></div>
+          <div class="quiz-exp" id="q-exp-${qIdx}"></div>
+        `;
+        container.appendChild(card);
+
+        const optsBox = card.querySelector(`#q-opts-${qIdx}`);
+        const expBox = card.querySelector(`#q-exp-${qIdx}`);
+
+        item.opts.forEach((optText, oIdx) => {
+          const btn = document.createElement('button');
+          btn.className = 'quiz-opt';
+          btn.textContent = optText;
+          btn.onclick = () => {
+            optsBox.querySelectorAll('.quiz-opt').forEach(b => b.disabled = true);
+            if (oIdx === item.c) {
+              btn.classList.add('correct');
+              expBox.style.color = 'var(--accent-emerald)';
+              expBox.innerHTML = `✓ <strong>Верно!</strong> ${item.exp}`;
+            } else {
+              btn.classList.add('wrong');
+              optsBox.querySelectorAll('.quiz-opt')[item.c].classList.add('correct');
+              expBox.style.color = 'var(--accent-rose)';
+              expBox.innerHTML = `✕ <strong>Неверно.</strong> ${item.exp}`;
+            }
+            expBox.style.display = 'block';
+          };
+          optsBox.appendChild(btn);
+        });
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      runProlog('q1', document.querySelector('.btn-row .btn'));
+      renderQuiz();
+    });
+  </script>
+</body>
+</html>
