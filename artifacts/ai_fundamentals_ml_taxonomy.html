@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ELI5: Основы ИИ — Тест Тьюринга, Китайская комната и Таксономия ML</title>
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1a2234;
+      --border-color: #243049;
+      --text-main: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #38bdf8;
+      --accent-blue: #3b82f6;
+      --accent-emerald: #10b981;
+      --accent-purple: #a855f7;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --code-bg: #06090f;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 14, 23, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-brand {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--accent-cyan);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 2.1rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #fff 0%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      margin-bottom: 24px;
+    }
+
+    .section-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .feature-box {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .feature-box h4 {
+      color: var(--accent-cyan);
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+
+    .feature-box p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .callout-exam {
+      background: rgba(245, 158, 11, 0.08);
+      border-left: 4px solid var(--accent-amber);
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 20px 0;
+    }
+
+    .callout-exam h4 {
+      color: var(--accent-amber);
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+    }
+
+    .callout-exam p {
+      font-size: 0.88rem;
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    /* Simulator styling */
+    .sim-panel {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 18px;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: var(--border-color); }
+    .btn.primary { background: #166534; border-color: #22c55e; color: #fff; }
+    .btn.active { background: var(--accent-cyan); border-color: #38bdf8; color: #000; }
+
+    .canvas-box {
+      background: #070b12;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      width: 100%;
+      height: 280px;
+      position: relative;
+    }
+
+    .log-display {
+      background: #05080e;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 12px;
+      font-family: monospace;
+      font-size: 0.85rem;
+      color: var(--accent-cyan);
+      margin-top: 14px;
+      min-height: 48px;
+      white-space: pre-wrap;
+    }
+
+    /* Quiz styles */
+    .quiz-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .quiz-q { font-weight: 600; font-size: 0.95rem; margin-bottom: 12px; }
+    .quiz-opts { display: flex; flex-direction: column; gap: 8px; }
+    .quiz-opt {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quiz-opt:hover:not(:disabled) { border-color: var(--accent-cyan); color: var(--text-main); }
+    .quiz-opt.correct {
+      background: rgba(16, 185, 129, 0.15) !important;
+      border-color: var(--accent-emerald) !important;
+      color: var(--text-main) !important;
+      font-weight: 600;
+    }
+    .quiz-opt.wrong {
+      background: rgba(244, 63, 94, 0.15) !important;
+      border-color: var(--accent-rose) !important;
+      color: var(--accent-rose) !important;
+    }
+    .quiz-exp {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.84rem;
+      line-height: 1.45;
+      background: #0a0e17;
+      border: 1px solid var(--border-color);
+    }
+
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 14, 23, 0.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border-color);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 99;
+    }
+    .bottom-bar a {
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .bottom-bar a.active { color: var(--accent-cyan); font-weight: 700; }
+  </style>
+</head>
+<body>
+
+  <nav class="top-nav">
+    <div class="nav-brand">
+      <span>🧠</span> ELI5 Visual Hub • ПГУ им. Шевченко
+    </div>
+    <div style="font-size: 0.88rem; display: flex; gap: 14px;">
+      <a href="https://asm-o-dan.github.io/eli5-visual-hub/">Все курсы</a>
+      <a href="https://asm-o-dan.github.io/eli5-visual-hub/artifacts/prolog_horn_clauses.html">Пролог</a>
+      <a href="https://asm-o-dan.github.io/eli5-visual-hub/artifacts/aisd_avl_trees.html">АВЛ-деревья</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="hero-badge">Лекционный курс • Запись 11 &amp; 12 (Основы ИИ)</div>
+    <h1>Тест Тьюринга, Китайская комната и Таксономия ML</h1>
+    <p class="hero-desc">
+      Интерактивный путеводитель по основам ИИ: мысленные эксперименты Сёрля и Моравека, классификация против регрессии, интерактивная кластеризация K-Means и проблема переобучения.
+    </p>
+
+    <!-- SECTION 1: Тест Тьюринга и Китайская комната -->
+    <div class="section-card" id="turing">
+      <div class="section-title">
+        <span>🤖</span> 1. Мысленные эксперименты: Тест Тьюринга vs Китайская комната
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.92rem;">
+        Лектор разбирает главный философский спор в истории искусственного интеллекта:
+      </p>
+
+      <div class="grid-2">
+        <div class="feature-box">
+          <h4>🧪 Тест Тьюринга (1950)</h4>
+          <p><strong>Суть:</strong> Человек общается текстом с невидимым собеседником. Если за 5 минут судья не может отличить машину от человека, система признается интеллектуальной.</p>
+          <p><strong>Вариации:</strong></p>
+          <ul style="padding-left:18px; font-size:0.84rem; color:var(--text-secondary);">
+            <li><em>Тотальный тест:</em> добавляет зрение, слух, манипуляцию объектами в физическом мире.</li>
+            <li><em>Обратный тест (CAPTCHA):</em> компьютер тестирует человека, чтобы отличить его от спам-бота.</li>
+          </ul>
+        </div>
+        <div class="feature-box">
+          <h4>📦 Китайская комната Джона Сёрля (1980)</h4>
+          <p><strong>Суть:</strong> Человек сидит в закрытой комнате с книгой правил. Ему просовывают карточки с китайскими иероглифами. По таблице он берет другие иероглифы и отдает наружу. Для внешнего наблюдателя человек «знает китайский», но внутри он <strong>не понимает ни слова</strong>!</p>
+          <p style="color: var(--accent-amber); font-weight: 700; margin-top: 6px;">Вывод: Синтаксис &ne; Семантика! Имитация не равна мышлению.</p>
+        </div>
+      </div>
+
+      <div class="callout-exam">
+        <h4>Парадокс Моравека (Hans Moravec, 1988):</h4>
+        <p>То, что для человека трудно (игра в шахматы, доказательство теорем, расчет интегралов), для компьютера тривиально легко. А то, что легко даже двухлетнему ребенку (узнать лицо матери, поймать мячик, ориентироваться в незнакомой комнате), требует сложнейших нейросетей, потому что сенсомоторные навыки оттачивались миллиардами лет эволюции животных!</p>
+      </div>
+    </div>
+
+    <!-- SECTION 2: Таксономия Машинного Обучения -->
+    <div class="section-card" id="taxonomy">
+      <div class="section-title">
+        <span>🗺️</span> 2. Таксономия Machine Learning: С учителем vs Без учителя vs RL
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.92rem;">
+        В отличие от классического программирования (где человек пишет правила: $Данные + Правила 	o Ответы$), в машинном обучении система сама выводит правила ($Данные + Ответы 	o Правила$).
+      </p>
+
+      <div class="grid-2">
+        <div class="feature-box">
+          <h4 style="color: var(--accent-cyan);">1. Обучение с учителем (Supervised)</h4>
+          <p>Есть размеченные пары $(X, y)$, где $y$ — правильный ответ:</p>
+          <ul style="padding-left:18px; font-size:0.85rem; color:var(--text-secondary);">
+            <li><strong>Классификация:</strong> целевая переменная категориальная (дискретная). Классы известны заранее («Спам / Не спам», типы кузова авто). Отвечает на вопрос: <em>«Какой класс?»</em></li>
+            <li><strong>Регрессия:</strong> целевая переменная непрерывная числовая (прогноз цены жилья, температуры). Отвечает на вопрос: <em>«Сколько?»</em></li>
+          </ul>
+        </div>
+        <div class="feature-box">
+          <h4 style="color: var(--accent-emerald);">2. Обучение без учителя (Unsupervised)</h4>
+          <p>Разметки и учителя нет. Модель ищет скрытые закономерности сама:</p>
+          <ul style="padding-left:18px; font-size:0.85rem; color:var(--text-secondary);">
+            <li><strong>Кластеризация:</strong> разбиение на группы похожих объектов (K-Means, DBSCAN). Классы заранее не заданы (сегментация клиентов, похожие треки в плейлисте).</li>
+            <li><strong>Снижение размерности:</strong> сжатие тысяч признаков в 2-3 главные компоненты (PCA, t-SNE) без потери дисперсии.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="feature-box" style="margin-top: 14px;">
+        <h4 style="color: var(--accent-purple);">3. Обучение с подкреплением (Reinforcement Learning)</h4>
+        <p>Агент действует в среде, совершает действия $a_t$, переходит в состояния $s_t$ и получает скалярный сигнал вознаграждения $r_t$ (награда / штраф). Цель агента — максимизировать суммарную долгосрочную награду (AlphaGo, автопилот Tesla, шагающие роботы Boston Dynamics).</p>
+      </div>
+    </div>
+
+    <!-- SECTION 3: Интерактивный симулятор K-Means кластеризации -->
+    <div class="section-card" id="kmeans">
+      <div class="section-title">
+        <span>📍</span> 3. Интерактивная песочница: Алгоритм K-Means (Кластеризация)
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.92rem;">
+        Нажмите «Сгенерировать точки», затем пошагово нажимайте «Шаг K-Means», чтобы наблюдать пересчет центроидов:
+      </p>
+
+      <div class="sim-panel">
+        <div class="btn-row">
+          <button class="btn primary" onclick="initKMeansPoints()">Сгенерировать данные</button>
+          <button class="btn" onclick="stepKMeans()">Шаг K-Means (Пересчет центроидов)</button>
+          <button class="btn" onclick="runKMeansAuto()">Авто-сходимость</button>
+        </div>
+
+        <canvas id="kmeans-canvas" class="canvas-box"></canvas>
+        <div class="log-display" id="kmeans-log">Нажмите 'Сгенерировать данные' для запуска симуляции.</div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: Переобучение (Overfitting) -->
+    <div class="section-card" id="overfitting">
+      <div class="section-title">
+        <span>📉</span> 4. Проблема переобучения (Overfitting vs Underfitting)
+      </div>
+      <div class="callout-exam">
+        <h4>Что такое переобучение на экзамене?</h4>
+        <p><strong>Определение:</strong> Ситуация, когда модель «зазубрила» обучающую выборку вплоть до случайного шума и единичных выбросов. Ошибка на обучающей выборке падает почти до 0, но на новых тестовых данных ошибка резко возрастает ($Train \ll Test$).</p>
+        <p><strong>Методы борьбы:</strong> Регуляризация (L1 Lasso, L2 Ridge), сбор большего объема данных, кросс-валидация (K-Fold), дропаут (Dropout в нейросетях) и ограничение глубины деревьев решений.</p>
+      </div>
+    </div>
+
+    <!-- SECTION 5: Экзаменационный тест -->
+    <div class="section-card" id="quiz">
+      <div class="section-title">
+        <span>📝</span> 5. Проверка знаний (10 экзаменационных вопросов)
+      </div>
+      <div id="quiz-container"></div>
+    </div>
+
+  </div>
+
+  <div class="bottom-bar">
+    <a href="#turing" class="active"><span>🤖</span>Сёрль</a>
+    <a href="#taxonomy"><span>🗺️</span>ML таксономия</a>
+    <a href="#kmeans"><span>📍</span>K-Means</a>
+    <a href="#overfitting"><span>📉</span>Overfitting</a>
+    <a href="#quiz"><span>📝</span>Тест</a>
+  </div>
+
+  <script>
+    // K-Means simulation
+    const canvas = document.getElementById('kmeans-canvas');
+    const ctx = canvas.getContext('2d');
+    let points = [];
+    const K = 3;
+    let centroids = [];
+    const colors = ['#38bdf8', '#10b981', '#f59e0b'];
+
+    function initKMeansPoints() {
+      const W = canvas.width = canvas.clientWidth;
+      const H = canvas.height = canvas.clientHeight;
+      points = [];
+
+      // 3 clusters of points
+      const centers = [
+        { x: W * 0.25, y: H * 0.35 },
+        { x: W * 0.75, y: H * 0.35 },
+        { x: W * 0.5, y: H * 0.75 }
+      ];
+
+      centers.forEach(c => {
+        for (let i = 0; i < 25; i++) {
+          points.push({
+            x: c.x + (Math.random() - 0.5) * 100,
+            y: c.y + (Math.random() - 0.5) * 90,
+            cluster: -1
+          });
+        }
+      });
+
+      // Random initial centroids
+      centroids = [];
+      for (let k = 0; k < K; k++) {
+        centroids.push({
+          x: Math.random() * (W - 80) + 40,
+          y: Math.random() * (H - 80) + 40
+        });
+      }
+
+      document.getElementById('kmeans-log').textContent = `Сгенерировано 75 точек данных и ${K} случайных начальных центроида.`;
+      drawKMeans();
+    }
+
+    function stepKMeans() {
+      if (points.length === 0) return;
+
+      // 1. Assign points to nearest centroid
+      let changes = 0;
+      points.forEach(p => {
+        let minDist = Infinity;
+        let bestK = -1;
+        centroids.forEach((c, idx) => {
+          const d = Math.hypot(p.x - c.x, p.y - c.y);
+          if (d < minDist) {
+            minDist = d;
+            bestK = idx;
+          }
+        });
+        if (p.cluster !== bestK) {
+          changes++;
+          p.cluster = bestK;
+        }
+      });
+
+      // 2. Update centroids
+      centroids.forEach((c, k) => {
+        const assigned = points.filter(p => p.cluster === k);
+        if (assigned.length > 0) {
+          c.x = assigned.reduce((s, p) => s + p.x, 0) / assigned.length;
+          c.y = assigned.reduce((s, p) => s + p.y, 0) / assigned.length;
+        }
+      });
+
+      document.getElementById('kmeans-log').textContent = `Итерация завершена: переназначено ${changes} точек. Центроиды смещены к средним координатам кластеров.`;
+      drawKMeans();
+    }
+
+    function runKMeansAuto() {
+      for (let i = 0; i < 8; i++) {
+        setTimeout(stepKMeans, i * 200);
+      }
+    }
+
+    function drawKMeans() {
+      const W = canvas.width;
+      const H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+
+      // Draw points
+      points.forEach(p => {
+        ctx.fillStyle = p.cluster === -1 ? '#64748b' : colors[p.cluster];
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4, 0, 2 * Math.PI);
+        ctx.fill();
+      });
+
+      // Draw centroids (big stars/crosses)
+      centroids.forEach((c, k) => {
+        ctx.strokeStyle = '#ffffff';
+        ctx.fillStyle = colors[k];
+        ctx.lineWidth = 2.5;
+
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, 9, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 10px monospace';
+        ctx.fillText(`C${k+1}`, c.x - 7, c.y + 18);
+      });
+    }
+
+    // Quiz Data
+    const quizData = [
+      {
+        q: "1. Что доказал мысленный эксперимент Джона Сёрля 'Китайская комната'?",
+        opts: [
+          "Манипуляция символами по синтаксическим правилам не тождественна семантическому пониманию",
+          "Любой компьютер способен выучить китайский язык быстрее человека",
+          "Тест Тьюринга является абсолютно достаточным доказательством наличия разума",
+          "Китайские иероглифы принципиально не поддаются цифровой обработке"
+        ],
+        c: 0,
+        exp: "Сёрль показал, что успешное сопоставление ответов по инструкциям (синтаксис) не порождает осознания смысла (семантики)."
+      },
+      {
+        q: "2. В чем сущность парадокса Моравека?",
+        opts: [
+          "Трудные для человека логические задачи легки для ИИ, а простые сенсомоторные навыки — трудны",
+          "Любая нейросеть при увеличении параметров начинает самопроизвольно деградировать",
+          "Компьютеры никогда не смогут превзойти гроссмейстеров в игре в шахматы",
+          "Обучение без учителя всегда требует больше вычислений, чем обучение с учителем"
+        ],
+        c: 0,
+        exp: "Эволюция человека миллионы лет оптимизировала зрение и моторику, поэтому для человека это 'легко', а для ИИ требует миллиардов операций."
+      },
+      {
+        q: "3. Чем задача классификации фундаментально отличается от задачи кластеризации?",
+        opts: [
+          "В классификации классы известны заранее, а в кластеризации группы формируются автоматически",
+          "Классификация работает только с числами, а кластеризация — исключительно с текстом",
+          "В кластеризации всегда есть размеченная обучающая выборка с учителем",
+          "Классификация применима только в обучении с подкреплением"
+        ],
+        c: 0,
+        exp: "Классификация — это Supervised Learning (классы фиксированы). Кластеризация — Unsupervised Learning (поиск скрытых групп без разметки)."
+      },
+      {
+        q: "4. К какому типу относится задача прогнозирования рыночной стоимости квартиры в долларах?",
+        opts: [
+          "Задача регрессии (Regression)",
+          "Задача бинарной классификации",
+          "Обучение с подкреплением (RL)",
+          "Задача снижения размерности"
+        ],
+        c: 0,
+        exp: "Целевая переменная — непрерывная числовая величина (цена), поэтому это задача регрессии."
+      },
+      {
+        q: "5. Что происходит при переобучении (Overfitting) модели машинного обучения?",
+        opts: [
+          "Модель заучивает шум обучающей выборки и плохо работает на новых данных",
+          "Модель слишком проста и не способна выявить даже базовые тренды",
+          "Размер обучающей выборки автоматически уменьшается до нуля",
+          "Точность модели на тесте становится равной 100%"
+        ],
+        c: 0,
+        exp: "Overfitting означает потерю обобщающей способности: Train accuracy стремится к 100%, а Test accuracy катастрофически падает."
+      }
+    ];
+
+    function renderQuiz() {
+      const container = document.getElementById('quiz-container');
+      container.innerHTML = '';
+      quizData.forEach((item, qIdx) => {
+        const card = document.createElement('div');
+        card.className = 'quiz-card';
+        card.innerHTML = `
+          <div class="quiz-q">${item.q}</div>
+          <div class="quiz-opts" id="q-opts-${qIdx}"></div>
+          <div class="quiz-exp" id="q-exp-${qIdx}"></div>
+        `;
+        container.appendChild(card);
+
+        const optsBox = card.querySelector(`#q-opts-${qIdx}`);
+        const expBox = card.querySelector(`#q-exp-${qIdx}`);
+
+        item.opts.forEach((optText, oIdx) => {
+          const btn = document.createElement('button');
+          btn.className = 'quiz-opt';
+          btn.textContent = optText;
+          btn.onclick = () => {
+            optsBox.querySelectorAll('.quiz-opt').forEach(b => b.disabled = true);
+            if (oIdx === item.c) {
+              btn.classList.add('correct');
+              expBox.style.color = 'var(--accent-emerald)';
+              expBox.innerHTML = `✓ <strong>Верно!</strong> ${item.exp}`;
+            } else {
+              btn.classList.add('wrong');
+              optsBox.querySelectorAll('.quiz-opt')[item.c].classList.add('correct');
+              expBox.style.color = 'var(--accent-rose)';
+              expBox.innerHTML = `✕ <strong>Неверно.</strong> ${item.exp}`;
+            }
+            expBox.style.display = 'block';
+          };
+          optsBox.appendChild(btn);
+        });
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initKMeansPoints();
+      renderQuiz();
+    });
+  </script>
+</body>
+</html>
