@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ELI5: Основы теории управления, RC-цепочки и АЧХ</title>
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1a2234;
+      --border-color: #243049;
+      --text-main: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #38bdf8;
+      --accent-blue: #3b82f6;
+      --accent-emerald: #10b981;
+      --accent-purple: #a855f7;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --code-bg: #06090f;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 14, 23, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-brand {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--accent-cyan);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 2.1rem;
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      margin-bottom: 24px;
+    }
+
+    .section-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .feature-box {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .feature-box h4 {
+      color: var(--accent-cyan);
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+
+    .feature-box p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .callout-exam {
+      background: rgba(245, 158, 11, 0.08);
+      border-left: 4px solid var(--accent-amber);
+      padding: 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 20px 0;
+    }
+
+    .callout-exam h4 {
+      color: var(--accent-amber);
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+    }
+
+    .callout-exam p {
+      font-size: 0.88rem;
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    /* Simulator Controls */
+    .sim-panel {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 18px;
+    }
+
+    .slider-row {
+      margin-bottom: 16px;
+    }
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.88rem;
+      margin-bottom: 6px;
+    }
+
+    input[type=range] {
+      width: 100%;
+      height: 6px;
+      background: var(--border-color);
+      border-radius: 3px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      cursor: pointer;
+    }
+
+    .plot-canvas {
+      background: #070b12;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      width: 100%;
+      height: 220px;
+      margin-top: 12px;
+    }
+
+    .calc-metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .metric-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 10px 14px;
+    }
+    .metric-card .val {
+      font-family: monospace;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+    .metric-card .label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    /* Quiz Container */
+    .quiz-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .quiz-q {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+    }
+
+    .quiz-opts {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .quiz-opt {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quiz-opt:hover:not(:disabled) {
+      border-color: var(--accent-cyan);
+      color: var(--text-main);
+    }
+    .quiz-opt.correct {
+      background: rgba(16, 185, 129, 0.15) !important;
+      border-color: var(--accent-emerald) !important;
+      color: var(--text-main) !important;
+      font-weight: 600;
+    }
+    .quiz-opt.wrong {
+      background: rgba(244, 63, 94, 0.15) !important;
+      border-color: var(--accent-rose) !important;
+      color: var(--accent-rose) !important;
+    }
+    .quiz-exp {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.84rem;
+      line-height: 1.45;
+      background: #0a0e17;
+      border: 1px solid var(--border-color);
+    }
+
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 14, 23, 0.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border-color);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 99;
+    }
+    .bottom-bar a {
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .bottom-bar a.active {
+      color: var(--accent-cyan);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="top-nav">
+    <div class="nav-brand">
+      <span>🎛️</span> ELI5 Visual Hub • ПГУ им. Шевченко
+    </div>
+    <div style="font-size: 0.88rem; display: flex; gap: 14px;">
+      <a href="https://asm-o-dan.github.io/eli5-visual-hub/">Все курсы</a>
+      <a href="https://asm-o-dan.github.io/eli5-visual-hub/artifacts/otu_lab1_complex_laplace.html">ОТУ ЛБ1</a>
+      <a href="https://asm-o-dan.github.io/eli5-visual-hub/artifacts/otu_lab2_laplace_ode.html">ОТУ ЛБ2</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="hero-badge">Лекции ОТУ • Запись (Автосохранение) &amp; (7)</div>
+    <h1>Теория управления, RC-цепочки и АЧХ/ФЧХ</h1>
+    <p class="hero-desc">
+      Интерактивный путеводитель: кибернетический подход «черного ящика», передаточные функции и частотный анализ инерционных звеньев.
+    </p>
+
+    <!-- SECTION 1: Кибернетический подход -->
+    <div class="section-card" id="principles">
+      <div class="section-title">
+        <span>📦</span> 1. Информационный подход: Объект как преобразователь
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.92rem;">
+        Цитата из лекции: <em>«Мы будем опираться на информационный подход, при котором объект управления рассматривается как преобразователь входных сигналов в выходные. Мы не обращаем внимания на физическую или химическую природу объекта — будь то электроника, гидродинамика или теплообменник!»</em>
+      </p>
+
+      <div class="grid-2">
+        <div class="feature-box">
+          <h4>⚡ Электрическая RC-цепочка</h4>
+          <p>Вход: напряжение $U_{in}(t)$. Выход: напряжение на конденсаторе $U_C(t)$.</p>
+          <p style="font-family: monospace; color: var(--accent-cyan); font-size: 0.88rem;">R &middot; C &middot; (dU_C / dt) + U_C(t) = U_{in}(t)</p>
+          <p>Постоянная времени: $T = R \cdot C$ (секунды).</p>
+        </div>
+        <div class="feature-box">
+          <h4>🌊 Гидравлический бак с водой</h4>
+          <p>Вход: подача воды $Q_{in}(t)$. Выход: уровень воды в баке $h(t)$.</p>
+          <p style="font-family: monospace; color: var(--accent-emerald); font-size: 0.88rem;">S &middot; R_{гидр} &middot; (dh / dt) + h(t) = k &middot; Q_{in}(t)</p>
+          <p>Уравнение абсолютно тождественно! Природа разная, математика — одна!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: Передаточная функция и частотный спектр -->
+    <div class="section-card" id="math">
+      <div class="section-title">
+        <span>📐</span> 2. Математика: От диффуравнения к АЧХ и ФЧХ
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.92rem;">
+        Применяя преобразование Лапласа при нулевых начальных условиях:
+      </p>
+      <div style="background: #090d13; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; font-family: monospace; font-size: 0.95rem; color: var(--accent-cyan); margin-bottom: 14px;">
+        W(s) = Y(s) / X(s) = k / (T &middot; s + 1)   [Апериодическое звено 1-го порядка]
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.92rem;">
+        Подставляя $s = j\omega$, переходим в частотную область (комплексный коэффициент передачи):
+      </p>
+      <div class="grid-2">
+        <div class="feature-box">
+          <h4 style="color: var(--accent-amber);">Амплитудно-частотная (АЧХ)</h4>
+          <p>Модуль коэффициента передачи (показывает коэффициент ослабления/усиления сигнала на частоте $\omega$):</p>
+          <p style="font-family: monospace; color: var(--accent-amber); font-weight: 700;">A(&omega;) = |W(j&omega;)| = k / &radic;(1 + &omega;&sup2; T&sup2;)</p>
+        </div>
+        <div class="feature-box">
+          <h4 style="color: var(--accent-purple);">Фазо-частотная (ФЧХ)</h4>
+          <p>Аргумент комплексного числа (показывает фазовое запаздывание гармоники на выходе):</p>
+          <p style="font-family: monospace; color: var(--accent-purple); font-weight: 700;">&phi;(&omega;) = arg(W(j&omega;)) = -arctan(&omega; &middot; T)</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 3: Интерактивный симулятор АЧХ / ФЧХ -->
+    <div class="section-card" id="simulator">
+      <div class="section-title">
+        <span>🎚️</span> 3. Интерактивная лаборатория: Анализатор частотных характеристик
+      </div>
+
+      <div class="sim-panel">
+        <div class="slider-row">
+          <div class="slider-label">
+            <span>Постоянная времени T (секунды):</span>
+            <span id="t-val" style="color: var(--accent-cyan); font-weight: 700;">T = 1.0 с</span>
+          </div>
+          <input type="range" id="t-slider" min="0.1" max="5.0" step="0.1" value="1.0" oninput="updatePlot()">
+        </div>
+
+        <div class="slider-row">
+          <div class="slider-label">
+            <span>Тестовая частота входного сигнала &omega; (рад/с):</span>
+            <span id="w-val" style="color: var(--accent-amber); font-weight: 700;">&omega; = 1.0 рад/с</span>
+          </div>
+          <input type="range" id="w-slider" min="0.05" max="10.0" step="0.05" value="1.0" oninput="updatePlot()">
+        </div>
+
+        <canvas id="bode-canvas" class="plot-canvas"></canvas>
+
+        <div class="calc-metrics">
+          <div class="metric-card">
+            <div class="label">Коэффициент передачи A(&omega;)</div>
+            <div class="val" id="metric-a">0.707 (-3 dB)</div>
+          </div>
+          <div class="metric-card">
+            <div class="label">Сдвиг фазы &phi;(&omega;)</div>
+            <div class="val" id="metric-phi">-45.0&deg;</div>
+          </div>
+          <div class="metric-card">
+            <div class="label">Частота среза &omega;_ср (1/T)</div>
+            <div class="val" id="metric-wc">1.00 рад/с</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: Устный экзамен -->
+    <div class="section-card" id="defense">
+      <div class="section-title">
+        <span>⚡</span> 4. 30-секундные ответы на экзамене по ОТУ
+      </div>
+
+      <div class="callout-exam">
+        <h4>Вопрос: Что физически означает частота среза &omega;_ср = 1/T?</h4>
+        <p><strong>Ответ:</strong> На частоте среза $\omega = 1/T$ знаменатель равен $\sqrt{1 + 1} = \sqrt{2} pprox 1.414$. Амплитуда выходного сигнала падает до $1/\sqrt{2} pprox 0.707$ (уровень -3 дБ, мощность падает ровно в 2 раза), а фазовый сдвиг составляет ровно $-45^\circ$.</p>
+      </div>
+
+      <div class="callout-exam">
+        <h4>Вопрос: Почему RC-цепочка называется фильтром низких частот (ФНЧ)?</h4>
+        <p><strong>Ответ:</strong> При $\omega 	o 0$ (постоянный ток) конденсатор представляет бесконечное сопротивление, и $A(0) = 1$ (сигнал проходит без ослабления). При $\omega 	o \infty$ реактивное сопротивление конденсатора $X_C = 1/(\omega C) 	o 0$, шунтируя выход на землю, поэтому $A(\omega) 	o 0$. Звено пропускает низкие частоты и подавляет высокие.</p>
+      </div>
+    </div>
+
+    <!-- SECTION 5: Тест -->
+    <div class="section-card" id="quiz">
+      <div class="section-title">
+        <span>📝</span> 5. Проверка знаний (5 контрольных вопросов)
+      </div>
+      <div id="quiz-container"></div>
+    </div>
+
+  </div>
+
+  <div class="bottom-bar">
+    <a href="#principles" class="active"><span>📦</span>Подход</a>
+    <a href="#math"><span>📐</span>АЧХ/ФЧХ</a>
+    <a href="#simulator"><span>🎚️</span>Симулятор</a>
+    <a href="#defense"><span>⚡</span>Экзамен</a>
+    <a href="#quiz"><span>📝</span>Тест</a>
+  </div>
+
+  <script>
+    function updatePlot() {
+      const T = parseFloat(document.getElementById('t-slider').value);
+      const w = parseFloat(document.getElementById('w-slider').value);
+
+      document.getElementById('t-val').textContent = `T = ${T.toFixed(1)} с`;
+      document.getElementById('w-val').textContent = `&omega; = ${w.toFixed(2)} рад/с`;
+
+      const A = 1.0 / Math.sqrt(1 + (w * T) * (w * T));
+      const phiRad = -Math.atan(w * T);
+      const phiDeg = (phiRad * 180 / Math.PI);
+      const wc = 1.0 / T;
+
+      document.getElementById('metric-a').textContent = `${A.toFixed(3)} (${(20 * Math.log10(A)).toFixed(1)} dB)`;
+      document.getElementById('metric-phi').textContent = `${phiDeg.toFixed(1)}°`;
+      document.getElementById('metric-wc').textContent = `${wc.toFixed(2)} рад/с`;
+
+      // Draw plot
+      const canvas = document.getElementById('bode-canvas');
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width = canvas.clientWidth;
+      const H = canvas.height = canvas.clientHeight;
+
+      ctx.clearRect(0, 0, W, H);
+
+      // Grid
+      ctx.strokeStyle = '#243049';
+      ctx.lineWidth = 1;
+      for (let y = 30; y < H; y += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(W, y);
+        ctx.stroke();
+      }
+
+      // Draw A(w) curve
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+
+      const maxW = 10.0;
+      for (let px = 0; px < W; px++) {
+        const curW = (px / W) * maxW;
+        const curA = 1.0 / Math.sqrt(1 + (curW * T) * (curW * T));
+        const py = H - (curA * (H - 40) + 20);
+        if (px === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+
+      // Current point dot
+      const curPx = (w / maxW) * W;
+      const curPy = H - (A * (H - 40) + 20);
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.arc(curPx, curPy, 6, 0, 2 * Math.PI);
+      ctx.fill();
+
+      // Text labels
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '11px sans-serif';
+      ctx.fillText('АЧХ A(ω): [0 .. 1.0]', 14, 20);
+      ctx.fillText(`Текущая точка: A=${A.toFixed(2)}`, curPx + 10, curPy - 8);
+    }
+
+    const quizData = [
+      {
+        q: "1. Чему равен коэффициент передачи апериодического звена A(ω) на постоянном сигнале (ω = 0)?",
+        opts: [
+          "Строго равен коэффициенту усиления k (при k=1 равен 1.0)",
+          "Всегда строго равен нулю",
+          "Стремится к плюс бесконечности",
+          "Равен постоянной времени T"
+        ],
+        c: 0,
+        exp: "При ω = 0 корень в знаменателе обращается в 1, поэтому A(0) = k. Постоянный сигнал проходит без частотного затухания."
+      },
+      {
+        q: "2. Каков фазовый сдвиг φ(ω) на частоте среза ω = 1/T?",
+        opts: [
+          "-45 градусов (отставание на π/4)",
+          "0 градусов (в фазе)",
+          "-90 градусов (отставание на π/2)",
+          "+180 градусов (противофаза)"
+        ],
+        c: 0,
+        exp: "φ = -arctan(ω T) = -arctan(1) = -45°."
+      },
+      {
+        q: "3. Что объединяет электрическую RC-цепочку и гидравлический резервуар в кибернетическом подходе?",
+        opts: [
+          "Они описываются идентичными дифференциальными уравнениями 1-го порядка",
+          "Они сделаны из одних и тех же конструкционных материалов",
+          "Они имеют абсолютно одинаковую себестоимость в производстве",
+          "Они оба питаются от электрической сети напряжением 220 Вольт"
+        ],
+        c: 0,
+        exp: "Информационный подход рассматривает объект как преобразователь вход-выход: математическая модель обоих объектов — апериодическое звено 1-го порядка."
+      },
+      {
+        q: "4. К какому значению стремится фазовый сдвиг φ(ω) при бесконечно высокой частоте (ω → ∞)?",
+        opts: [
+          "К -90 градусам (-π/2)",
+          "К 0 градусов",
+          "К -180 градусам (-π)",
+          "К плюс бесконечности"
+        ],
+        c: 0,
+        exp: "При ω → ∞ arctan(∞) = 90°, поэтому предельное отставание по фазе для звена первого порядка равно -90°."
+      },
+      {
+        q: "5. Во сколько раз падает мощность сигнала на частоте среза ω_ср?",
+        opts: [
+          "Ровно в 2 раза (уровень -3 дБ)",
+          "Ровно в 10 раз (уровень -10 дБ)",
+          "Мощность сигнала не изменяется вовсе",
+          "Падает до нуля"
+        ],
+        c: 0,
+        exp: "Поскольку амплитуда напряжения падает в √2 раз, мощность (пропорциональная квадрату амплитуды) уменьшается ровно в 2 раза."
+      }
+    ];
+
+    function renderQuiz() {
+      const container = document.getElementById('quiz-container');
+      container.innerHTML = '';
+      quizData.forEach((item, qIdx) => {
+        const card = document.createElement('div');
+        card.className = 'quiz-card';
+        card.innerHTML = `
+          <div class="quiz-q">${item.q}</div>
+          <div class="quiz-opts" id="q-opts-${qIdx}"></div>
+          <div class="quiz-exp" id="q-exp-${qIdx}"></div>
+        `;
+        container.appendChild(card);
+
+        const optsBox = card.querySelector(`#q-opts-${qIdx}`);
+        const expBox = card.querySelector(`#q-exp-${qIdx}`);
+
+        item.opts.forEach((optText, oIdx) => {
+          const btn = document.createElement('button');
+          btn.className = 'quiz-opt';
+          btn.textContent = optText;
+          btn.onclick = () => {
+            optsBox.querySelectorAll('.quiz-opt').forEach(b => b.disabled = true);
+            if (oIdx === item.c) {
+              btn.classList.add('correct');
+              expBox.style.color = 'var(--accent-emerald)';
+              expBox.innerHTML = `✓ <strong>Верно!</strong> ${item.exp}`;
+            } else {
+              btn.classList.add('wrong');
+              optsBox.querySelectorAll('.quiz-opt')[item.c].classList.add('correct');
+              expBox.style.color = 'var(--accent-rose)';
+              expBox.innerHTML = `✕ <strong>Неверно.</strong> ${item.exp}`;
+            }
+            expBox.style.display = 'block';
+          };
+          optsBox.appendChild(btn);
+        });
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      updatePlot();
+      renderQuiz();
+    });
+  </script>
+</body>
+</html>
