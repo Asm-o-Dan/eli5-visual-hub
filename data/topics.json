@@ -1,5 +1,20 @@
 [
   {
+    "id": "matplotlib-seaborn-visual-constructor",
+    "title": "Конструктор Диаграмм & Инспектор Параметров",
+    "description": "Интерактивный конструктор графиков Matplotlib/Seaborn, таксономия параметров и хоткеи IDE",
+    "category": "Data Science",
+    "tags": [
+      "Matplotlib",
+      "Seaborn",
+      "EDA",
+      "Python",
+      "Interactive"
+    ],
+    "date": "2026-10-16",
+    "file": "artifacts/matplotlib-seaborn-visual-constructor.html"
+  },
+  {
     "id": "ai_fundamentals_ml_taxonomy",
     "title": "Основы ИИ: Тест Тьюринга, Китайская комната и Таксономия ML",
     "description": "Интерактивный тренажер по основам ИИ (Тест Тьюринга, Китайская комната Сёрля, K-Means кластеризация, регрессия, классификация и переобучение) по лекциям Запись 11 & 12",

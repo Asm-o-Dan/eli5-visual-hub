@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Конструктор Диаграмм & Инспектор Параметров Matplotlib / Seaborn | ELI5</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #111827;
+      --card-border: #1f2937;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --accent: #38bdf8;
+      --accent-hover: #0284c7;
+      --accent-glow: rgba(56, 189, 248, 0.15);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --purple: #a855f7;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      padding-bottom: 60px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Nav */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(11, 15, 25, 0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .top-nav a {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+    }
+    .top-nav a:hover { color: #fff; }
+    .badge-pill {
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--accent);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    /* Hero Header */
+    .hero {
+      text-align: center;
+      margin-bottom: 36px;
+      padding: 20px 0;
+    }
+    .hero h1 {
+      font-size: clamp(26px, 4vw, 40px);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #ffffff 30%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      color: var(--text-muted);
+      font-size: clamp(15px, 2vw, 17px);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* Section Headers */
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin: 36px 0 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+    }
+    .section-title span.icon {
+      font-size: 24px;
+    }
+
+    /* Card Box */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Decision Grid */
+    .decision-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .decision-card {
+      background: rgba(17, 24, 39, 0.7);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .decision-card:hover, .decision-card.active {
+      border-color: var(--accent);
+      background: rgba(56, 189, 248, 0.06);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px var(--accent-glow);
+    }
+    .decision-card h4 {
+      color: #fff;
+      font-size: 16px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .decision-card p {
+      color: var(--text-muted);
+      font-size: 13px;
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
+    .decision-card .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .mini-tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: #1f2937;
+      color: #93c5fd;
+      font-family: var(--font-mono);
+    }
+
+    /* MAIN CONSTRUCTOR LAYOUT */
+    .constructor-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .constructor-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Controls Panel */
+    .controls-panel {
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 20px;
+    }
+    .control-group {
+      margin-bottom: 18px;
+    }
+    .control-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .control-select, .control-input {
+      width: 100%;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #fff;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .control-select:focus, .control-input:focus {
+      border-color: var(--accent);
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: #e2e8f0;
+      cursor: pointer;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #334155;
+      transition: .3s;
+      border-radius: 24px;
+    }
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+    input:checked + .toggle-slider { background-color: var(--accent); }
+    input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+    .range-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .range-input {
+      flex: 1;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .range-val {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--accent);
+      min-width: 38px;
+      text-align: right;
+    }
+
+    /* Live Preview & Code Panel */
+    .preview-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .canvas-container {
+      background: #030712;
+      border: 1px solid #1f2937;
+      border-radius: 14px;
+      padding: 16px;
+      min-height: 380px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.4);
+    }
+    #chartCanvas {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+    }
+
+    /* Code Block */
+    .code-box {
+      background: #030712;
+      border: 1px solid #1f2937;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+    .code-header {
+      background: #0f172a;
+      border-bottom: 1px solid #1f2937;
+      padding: 8px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    .copy-btn {
+      background: #1e293b;
+      color: var(--text);
+      border: 1px solid #334155;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .copy-btn:hover {
+      background: var(--accent);
+      color: #030712;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+    pre.code-content {
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.5;
+      color: #e2e8f0;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    /* Parameter Taxonomy (Universal vs Unique) */
+    .param-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+    .param-table th, .param-table td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .param-table th {
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .param-table td code {
+      font-family: var(--font-mono);
+      color: #38bdf8;
+      background: #1e293b;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    .badge-universal {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .badge-unique {
+      background: rgba(168, 85, 247, 0.15);
+      color: #c084fc;
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    /* IDE Shortcuts Cards */
+    .shortcut-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .shortcut-card {
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 18px;
+      border-left: 4px solid var(--accent);
+    }
+    .shortcut-card.colab { border-left-color: #f59e0b; }
+    .shortcut-card.jetbrains { border-left-color: #38bdf8; }
+    .shortcut-card.python-cli { border-left-color: #10b981; }
+    .shortcut-card h4 {
+      color: #fff;
+      font-size: 16px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .key-badge {
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #f8fafc;
+      font-family: var(--font-mono);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: 0 2px 0 #334155;
+    }
+    .shortcut-card ul {
+      list-style: none;
+      margin-top: 10px;
+    }
+    .shortcut-card li {
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: #cbd5e1;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    /* Interactive Quiz */
+    .quiz-question {
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+    .quiz-question h4 {
+      font-size: 15px;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .quiz-opt {
+      background: #1e293b;
+      border: 1px solid #334155;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #cbd5e1;
+      transition: all 0.2s;
+    }
+    .quiz-opt:hover {
+      border-color: var(--accent);
+      background: #273549;
+    }
+    .quiz-opt.correct {
+      background: rgba(16, 185, 129, 0.2) !important;
+      border-color: #10b981 !important;
+      color: #34d399 !important;
+      font-weight: 600;
+    }
+    .quiz-opt.incorrect {
+      background: rgba(239, 68, 68, 0.2) !important;
+      border-color: #ef4444 !important;
+      color: #fca5a5 !important;
+    }
+    .quiz-feedback {
+      margin-top: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      display: none;
+    }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.correct { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .quiz-feedback.incorrect { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
+
+    /* Highlights */
+    .highlight-box {
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 20px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .highlight-box .icon { font-size: 24px; }
+    .highlight-box p { font-size: 14px; color: #bae6fd; }
+
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <nav class="top-nav">
+    <a href="../index.html">← В Каталог ELI5 Hub</a>
+    <span class="badge-pill">ОИИ 26/27 • Визуализация Данных</span>
+  </nav>
+
+  <div class="container">
+
+    <!-- Hero -->
+    <header class="hero">
+      <h1>Конструктор Диаграмм & Инспектор Параметров</h1>
+      <p>Как выбрать идеальный график, понять универсальные и уникальные параметры Matplotlib/Seaborn и мгновенно узнавать их прямо в IDE.</p>
+    </header>
+
+    <!-- SECTION 1: THE 0.3-SECOND MENTAL MODEL -->
+    <h2 class="section-title"><span class="icon">🧭</span> Ментальная модель: как выбрать правильный график</h2>
+    
+    <div class="decision-grid">
+      <div class="decision-card active" onclick="selectChartType('bar')">
+        <h4>📊 Сравнение (Comparison)</h4>
+        <p>Сравнить категории между собой по дискретному показателю.</p>
+        <div class="tag-row">
+          <span class="mini-tag">plt.bar</span>
+          <span class="mini-tag">plt.barh</span>
+          <span class="mini-tag">sns.barplot</span>
+        </div>
+      </div>
+
+      <div class="decision-card" onclick="selectChartType('hist')">
+        <h4>📉 Распределение (Distribution)</h4>
+        <p>Понять форму данных, разброс, нормальность и выбросы.</p>
+        <div class="tag-row">
+          <span class="mini-tag">sns.histplot</span>
+          <span class="mini-tag">sns.kdeplot</span>
+          <span class="mini-tag">plt.hist</span>
+        </div>
+      </div>
+
+      <div class="decision-card" onclick="selectChartType('scatter')">
+        <h4>🔵 Связь и Тренд (Correlation)</h4>
+        <p>Зависимость двух непрерывных числовых величин + регрессия.</p>
+        <div class="tag-row">
+          <span class="mini-tag">sns.regplot</span>
+          <span class="mini-tag">plt.scatter</span>
+          <span class="mini-tag">sns.scatterplot</span>
+        </div>
+      </div>
+
+      <div class="decision-card" onclick="selectChartType('pie')">
+        <h4>🥧 Доли и Состав (Composition)</h4>
+        <p>Показать структуру целого (только при 3-5 крупных секторах!).</p>
+        <div class="tag-row">
+          <span class="mini-tag">plt.pie</span>
+        </div>
+      </div>
+
+      <div class="decision-card" onclick="selectChartType('heatmap')">
+        <h4>🗺️ Матрица плотности (Density)</h4>
+        <p>Двумерное пересечение категорий (например, Город x Месяц).</p>
+        <div class="tag-row">
+          <span class="mini-tag">sns.heatmap</span>
+          <span class="mini-tag">plt.imshow</span>
+        </div>
+      </div>
+
+      <div class="decision-card" onclick="selectChartType('box')">
+        <h4>📦 Квартили и Разброс (Boxplot)</h4>
+        <p>Медиана, межквартильный размах (IQR) и выбросы категорий.</p>
+        <div class="tag-row">
+          <span class="mini-tag">sns.boxplot</span>
+          <span class="mini-tag">sns.violinplot</span>
+        </div>
+      </div>
+
+      <div class="decision-card" onclick="selectChartType('line')">
+        <h4>📈 Временной ряд (Time Series)</h4>
+        <p>Непрерывное изменение метрики по времени или шагам.</p>
+        <div class="tag-row">
+          <span class="mini-tag">plt.plot</span>
+          <span class="mini-tag">sns.lineplot</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: INTERACTIVE LIVE CONSTRUCTOR -->
+    <h2 class="section-title"><span class="icon">🛠️</span> Интерактивный Live-Конструктор диаграмм</h2>
+
+    <div class="card">
+      <div class="constructor-layout">
+        
+        <!-- Controls Sidebar -->
+        <div class="controls-panel">
+          <div class="control-group">
+            <label>Тип графика</label>
+            <select id="chartSelect" class="control-select" onchange="onSelectChartChange(this.value)">
+              <option value="bar">Столбчатая диаграмма (Barplot)</option>
+              <option value="hist">Гистограмма + Плотность (Hist+KDE)</option>
+              <option value="pie">Круговая диаграмма (Pie Chart)</option>
+              <option value="scatter">Точечная + Тренд (Scatter+Trend)</option>
+              <option value="heatmap">Тепловая карта (Heatmap)</option>
+              <option value="box">Ящик с усами (Boxplot)</option>
+              <option value="line">Линейный график (Lineplot)</option>
+            </select>
+          </div>
+
+          <!-- Common controls -->
+          <div class="control-group">
+            <label>Цветовая схема</label>
+            <select id="colorScheme" class="control-select" onchange="updateChart()">
+              <option value="blue">Electric Blue (#38bdf8)</option>
+              <option value="emerald">Emerald Green (#10b981)</option>
+              <option value="crimson">Crimson Rose (#f43f5e)</option>
+              <option value="purple">Royal Purple (#a855f7)</option>
+              <option value="amber">Warm Amber (#f59e0b)</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label>Прозрачность (alpha)</label>
+            <div class="range-row">
+              <input type="range" id="alphaRange" class="range-input" min="0.2" max="1" step="0.1" value="0.8" oninput="updateRangeLabel('alphaVal', this.value); updateChart();">
+              <span id="alphaVal" class="range-val">0.8</span>
+            </div>
+          </div>
+
+          <!-- Dynamic Controls Section -->
+          <div id="dynamicControls"></div>
+
+          <!-- Toggles -->
+          <div class="control-group" style="margin-top: 16px;">
+            <label>Универсальные переключатели</label>
+            <div class="toggle-row">
+              <span>Сетка (plt.grid)</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="showGrid" checked onchange="updateChart()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <span>Числовые аннотации</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="showAnnotations" checked onchange="updateChart()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Preview & Code -->
+        <div class="preview-panel">
+          <div class="canvas-container">
+            <canvas id="chartCanvas" width="700" height="380"></canvas>
+          </div>
+
+          <!-- Generated Python Code Box -->
+          <div class="code-box">
+            <div class="code-header">
+              <span>Python (Matplotlib + Seaborn)</span>
+              <button class="copy-btn" onclick="copyPythonCode()">📋 Копировать код</button>
+            </div>
+            <pre class="code-content" id="pythonCodeOutput"></pre>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SECTION 3: PARAMETERS TAXONOMY -->
+    <h2 class="section-title"><span class="icon">🧬</span> Анатомия параметров: «Общие» vs «Уникальные»</h2>
+
+    <div class="card">
+      <p style="color: var(--text-muted); margin-bottom: 16px;">
+        В Matplotlib и Seaborn параметры делятся на две категории: <strong>универсальные</strong> (работают почти для любого графика через объект <code>Axes</code> или <code>Figure</code>) и <strong>уникальные</strong> (специфичные для конкретной геометрии графика).
+      </p>
+
+      <table class="param-table">
+        <thead>
+          <tr>
+            <th>Параметр</th>
+            <th>Тип</th>
+            <th>Где применяется</th>
+            <th>Что делает / Значение по умолчанию</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>figsize=(w, h)</code></td>
+            <td><span class="badge-universal">Универсальный</span></td>
+            <td><code>plt.figure()</code></td>
+            <td>Размер холста в дюймах. Без него графики получаются сжатыми.</td>
+          </tr>
+          <tr>
+            <td><code>color / palette</code></td>
+            <td><span class="badge-universal">Универсальный</span></td>
+            <td>Все графики</td>
+            <td>Цвет одного элемента или палитра (в Seaborn: <code>palette='muted'</code> / <code>'YlGnBu'</code>).</td>
+          </tr>
+          <tr>
+            <td><code>alpha</code></td>
+            <td><span class="badge-universal">Универсальный</span></td>
+            <td>Все графики</td>
+            <td>Прозрачность от <code>0.0</code> (невидимый) до <code>1.0</code> (глухой). Предотвращает перекрытие точек.</td>
+          </tr>
+          <tr>
+            <td><code>plt.grid(axis='...')</code></td>
+            <td><span class="badge-universal">Универсальный</span></td>
+            <td>Все (кроме Pie)</td>
+            <td>Сетка: <code>axis='x'</code>, <code>axis='y'</code> или <code>'both'</code>, стиль <code>linestyle='--'</code>.</td>
+          </tr>
+          <tr>
+            <td><code>plt.tight_layout()</code></td>
+            <td><span class="badge-universal">Универсальный</span></td>
+            <td>Перед <code>plt.show()</code></td>
+            <td>Автоматически настраивает поля, чтобы подписи осей не обрезались краями холста.</td>
+          </tr>
+          <tr>
+            <td><code>bins=35</code></td>
+            <td><span class="badge-unique">Уникальный</span></td>
+            <td><code>hist / histplot</code></td>
+            <td>Количество корзин (интервалов) для разбивки непрерывных данных.</td>
+          </tr>
+          <tr>
+            <td><code>kde=True</code></td>
+            <td><span class="badge-unique">Уникальный</span></td>
+            <td><code>sns.histplot</code></td>
+            <td>Накладывает кривую ядерной оценки плотности (Kernel Density Estimation).</td>
+          </tr>
+          <tr>
+            <td><code>autopct='%1.1f%%'</code></td>
+            <td><span class="badge-unique">Уникальный</span></td>
+            <td><code>plt.pie</code></td>
+            <td>Строка форматирования процентов на секторах круговой диаграммы.</td>
+          </tr>
+          <tr>
+            <td><code>explode=(0.05, ...)</code></td>
+            <td><span class="badge-unique">Уникальный</span></td>
+            <td><code>plt.pie</code></td>
+            <td>Кортеж смещения каждого сектора от центра (эффект выдвинутого кусочка пиццы).</td>
+          </tr>
+          <tr>
+            <td><code>annot=True, fmt='d'</code></td>
+            <td><span class="badge-unique">Уникальный</span></td>
+            <td><code>sns.heatmap</code></td>
+            <td>Вывод числовых значений прямо в ячейках матрицы (<code>fmt='d'</code> — целые, <code>'.2f'</code> — дроби).</td>
+          </tr>
+          <tr>
+            <td><code>scatter_kws / line_kws</code></td>
+            <td><span class="badge-unique">Уникальный</span></td>
+            <td><code>sns.regplot</code></td>
+            <td>Словари параметров для раздельной настройки точек (размер <code>s</code>) и линии тренда (цвет, ширина).</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- SECTION 4: HOW TO DISCOVER PARAMETERS IN IDE -->
+    <h2 class="section-title"><span class="icon">⚡</span> Секретные хоткеи: как мгновенно узнавать параметры в IDE</h2>
+
+    <div class="shortcut-grid">
+      <!-- Colab / Jupyter -->
+      <div class="shortcut-card colab">
+        <h4>Google Colab & Jupyter <span class="key-badge">Shift + Tab</span></h4>
+        <ul>
+          <li><strong>Shift + Tab</strong> — всплывающее окно с сигнатурой функции и списком всех параметров прямо во время ввода.</li>
+          <li><strong>Shift + Tab + Tab</strong> — развернуть полную документацию на весь экран.</li>
+          <li><code>sns.histplot?</code> — напечатать знак вопроса перед/после функции и запустить ячейку — откроется официальный docstring.</li>
+          <li><code>??sns.histplot</code> — два знака вопроса открывают <strong>исходный код реализации</strong> функции на чистом Python!</li>
+        </ul>
+      </div>
+
+      <!-- JetBrains / VS Code -->
+      <div class="shortcut-card jetbrains">
+        <h4>DataGrip, PyCharm, VS Code <span class="key-badge">Ctrl + P</span></h4>
+        <ul>
+          <li><strong>Ctrl + P</strong> (Parameter Info) — мгновенный список ожидаемых аргументов внутри круглых скобок вызова.</li>
+          <li><strong>Ctrl + Q</strong> (PyCharm/DataGrip) или <strong>Ctrl + Space</strong> (VS Code) — быстрая документация с типами аргументов.</li>
+          <li><strong>Ctrl + Click</strong> (или <strong>F12</strong>) — переход прямо к определению функции в библиотеке.</li>
+          <li><strong>Alt + Enter</strong> — быстрые исправления импортов и параметров.</li>
+        </ul>
+      </div>
+
+      <!-- Python REPL -->
+      <div class="shortcut-card python-cli">
+        <h4>Python CLI / Консоль <span class="key-badge">help()</span></h4>
+        <ul>
+          <li><code>help(plt.barh)</code> — выводит текстовую документацию в терминал со списком всех аргументов и примерами.</li>
+          <li><code>dir(sns)</code> — список всех доступных функций модуля.</li>
+          <li>В IPython: <code>plt.plot?</code> или <code>import inspect; inspect.signature(plt.pie)</code>.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="highlight-box">
+      <div class="icon">💡</div>
+      <div>
+        <strong>Золотое правило инженеров:</strong> Никогда не заучивайте параметры наизусть. Достаточно помнить: <em>«Какую идею я визуализирую?»</em>, а список аргументов извлекается за 0.5 секунды комбинацией <code>Shift+Tab</code> в Colab или <code>Ctrl+P</code> в DataGrip/PyCharm.
+      </div>
+    </div>
+
+    <!-- SECTION 5: KNOWLEDGE CHECK (DEFENSE TRAINER) -->
+    <h2 class="section-title"><span class="icon">🎓</span> Тренажер к защите лабораторной</h2>
+
+    <div class="card">
+      <div class="quiz-question" id="q1">
+        <h4>1. Какой параметр в <code>sns.histplot</code> отвечает за отображение плавной линии оценки плотности вероятности?</h4>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="checkAnswer(1, this, false)">A) <code>density_curve=True</code></div>
+          <div class="quiz-opt" onclick="checkAnswer(1, this, true)">B) <code>kde=True</code></div>
+          <div class="quiz-opt" onclick="checkAnswer(1, this, false)">C) <code>smooth=True</code></div>
+          <div class="quiz-opt" onclick="checkAnswer(1, this, false)">D) <code>line=True</code></div>
+        </div>
+        <div class="quiz-feedback" id="fb1"></div>
+      </div>
+
+      <div class="quiz-question" id="q2">
+        <h4>2. Почему в горизонтальном <code>plt.barh(categories[::-1], values[::-1])</code> часто используют срез <code>[::-1]</code>?</h4>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="checkAnswer(2, this, false)">A) Чтобы отфильтровать отрицательные значения.</div>
+          <div class="quiz-opt" onclick="checkAnswer(2, this, true)">B) Чтобы лидер по выручке отображался сверху, а не на самом дне графика.</div>
+          <div class="quiz-opt" onclick="checkAnswer(2, this, false)">C) Это требование синтаксиса Matplotlib для предотвращения ошибки.</div>
+          <div class="quiz-opt" onclick="checkAnswer(2, this, false)">D) Чтобы отсортировать значения по алфавиту.</div>
+        </div>
+        <div class="quiz-feedback" id="fb2"></div>
+      </div>
+
+      <div class="quiz-question" id="q3">
+        <h4>3. Как в Google Colab за одну секунду подсмотреть доступные аргументы функции, не открывая браузер?</h4>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="checkAnswer(3, this, false)">A) Нажать F5.</div>
+          <div class="quiz-opt" onclick="checkAnswer(3, this, false)">B) Ввести команду <code>!show args</code>.</div>
+          <div class="quiz-opt" onclick="checkAnswer(3, this, true)">C) Поставить курсор внутрь скобок и нажать Shift + Tab.</div>
+          <div class="quiz-opt" onclick="checkAnswer(3, this, false)">D) Перезапустить среду выполнения.</div>
+        </div>
+        <div class="quiz-feedback" id="fb3"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // State of Constructor
+    const state = {
+      chartType: 'bar',
+      colorScheme: 'blue',
+      alpha: 0.8,
+      showGrid: true,
+      showAnnotations: true,
+      // unique params:
+      barHorizontal: true,
+      histBins: 25,
+      histKde: true,
+      pieExplode: 0.05,
+      scatterTrend: true,
+      heatmapAnnot: true
+    };
+
+    const colorPalettes = {
+      blue: { main: '#38bdf8', secondary: '#0284c7', dark: '#0369a1', fill: 'rgba(56, 189, 248, ' },
+      emerald: { main: '#10b981', secondary: '#059669', dark: '#047857', fill: 'rgba(16, 185, 129, ' },
+      crimson: { main: '#f43f5e', secondary: '#e11d48', dark: '#be123c', fill: 'rgba(244, 63, 94, ' },
+      purple: { main: '#a855f7', secondary: '#9333ea', dark: '#7e22ce', fill: 'rgba(168, 85, 247, ' },
+      amber: { main: '#f59e0b', secondary: '#d97706', dark: '#b45309', fill: 'rgba(245, 158, 11, ' }
+    };
+
+    function updateRangeLabel(id, val) {
+      document.getElementById(id).textContent = val;
+    }
+
+    function selectChartType(type) {
+      document.getElementById('chartSelect').value = type;
+      onSelectChartChange(type);
+      
+      // Update decision cards active state
+      document.querySelectorAll('.decision-card').forEach(c => c.classList.remove('active'));
+      const activeCard = Array.from(document.querySelectorAll('.decision-card')).find(c => c.getAttribute('onclick').includes(type));
+      if (activeCard) activeCard.classList.add('active');
+
+      // Scroll to constructor smoothly
+      document.querySelector('.constructor-layout').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function onSelectChartChange(type) {
+      state.chartType = type;
+      renderDynamicControls();
+      updateChart();
+    }
+
+    function renderDynamicControls() {
+      const container = document.getElementById('dynamicControls');
+      container.innerHTML = '';
+
+      if (state.chartType === 'bar') {
+        container.innerHTML = `
+          <div class="control-group">
+            <label>Ориентация столбцов</label>
+            <div class="toggle-row">
+              <span>Горизонтальный (plt.barh)</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="barHoriz" ${state.barHorizontal ? 'checked' : ''} onchange="state.barHorizontal = this.checked; updateChart();">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        `;
+      } else if (state.chartType === 'hist') {
+        container.innerHTML = `
+          <div class="control-group">
+            <label>Число корзин (bins)</label>
+            <div class="range-row">
+              <input type="range" class="range-input" min="10" max="40" step="5" value="${state.histBins}" oninput="state.histBins = parseInt(this.value); updateRangeLabel('binsVal', this.value); updateChart();">
+              <span id="binsVal" class="range-val">${state.histBins}</span>
+            </div>
+          </div>
+          <div class="control-group">
+            <div class="toggle-row">
+              <span>Плотность KDE (kde=True)</span>
+              <label class="toggle-switch">
+                <input type="checkbox" ${state.histKde ? 'checked' : ''} onchange="state.histKde = this.checked; updateChart();">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        `;
+      } else if (state.chartType === 'pie') {
+        container.innerHTML = `
+          <div class="control-group">
+            <label>Смещение секторов (explode)</label>
+            <div class="range-row">
+              <input type="range" class="range-input" min="0" max="0.15" step="0.02" value="${state.pieExplode}" oninput="state.pieExplode = parseFloat(this.value); updateRangeLabel('expVal', this.value); updateChart();">
+              <span id="expVal" class="range-val">${state.pieExplode}</span>
+            </div>
+          </div>
+        `;
+      } else if (state.chartType === 'scatter') {
+        container.innerHTML = `
+          <div class="control-group">
+            <div class="toggle-row">
+              <span>Линия тренда (регрессия)</span>
+              <label class="toggle-switch">
+                <input type="checkbox" ${state.scatterTrend ? 'checked' : ''} onchange="state.scatterTrend = this.checked; updateChart();">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        `;
+      } else if (state.chartType === 'heatmap') {
+        container.innerHTML = `
+          <div class="control-group">
+            <div class="toggle-row">
+              <span>Числа в ячейках (annot=True)</span>
+              <label class="toggle-switch">
+                <input type="checkbox" ${state.heatmapAnnot ? 'checked' : ''} onchange="state.heatmapAnnot = this.checked; updateChart();">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function updateChart() {
+      state.colorScheme = document.getElementById('colorScheme').value;
+      state.alpha = parseFloat(document.getElementById('alphaRange').value);
+      state.showGrid = document.getElementById('showGrid').checked;
+      state.showAnnotations = document.getElementById('showAnnotations').checked;
+
+      drawCanvas();
+      generatePythonCode();
+    }
+
+    function drawCanvas() {
+      const canvas = document.getElementById('chartCanvas');
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      const pal = colorPalettes[state.colorScheme];
+
+      // Clear background
+      ctx.fillStyle = '#030712';
+      ctx.fillRect(0, 0, w, h);
+
+      // Draw Grid if enabled
+      if (state.showGrid && state.chartType !== 'pie') {
+        ctx.strokeStyle = '#1f2937';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+
+        for (let x = 60; x < w - 40; x += 60) {
+          ctx.beginPath();
+          ctx.moveTo(x, 40);
+          ctx.lineTo(x, h - 50);
+          ctx.stroke();
+        }
+        for (let y = 60; y < h - 40; y += 50) {
+          ctx.beginPath();
+          ctx.moveTo(60, y);
+          ctx.lineTo(w - 40, y);
+          ctx.stroke();
+        }
+        ctx.setLineDash([]);
+      }
+
+      // Draw Specific Chart
+      if (state.chartType === 'bar') {
+        drawBarChart(ctx, w, h, pal);
+      } else if (state.chartType === 'hist') {
+        drawHistChart(ctx, w, h, pal);
+      } else if (state.chartType === 'pie') {
+        drawPieChart(ctx, w, h, pal);
+      } else if (state.chartType === 'scatter') {
+        drawScatterChart(ctx, w, h, pal);
+      } else if (state.chartType === 'heatmap') {
+        drawHeatmapChart(ctx, w, h, pal);
+      } else if (state.chartType === 'box') {
+        drawBoxChart(ctx, w, h, pal);
+      } else if (state.chartType === 'line') {
+        drawLineChart(ctx, w, h, pal);
+      }
+    }
+
+    function drawBarChart(ctx, w, h, pal) {
+      const cats = ['Meat', 'Beverages', 'Produce', 'Dairy', 'Confections'];
+      const vals = [1378, 964, 824, 734, 642];
+      const maxVal = 1500;
+
+      if (state.barHorizontal) {
+        const barH = 36;
+        const startY = 70;
+        const startX = 140;
+        const maxBarW = w - startX - 80;
+
+        vals.forEach((v, i) => {
+          const y = startY + i * 55;
+          const barW = (v / maxVal) * maxBarW;
+
+          // Bar
+          ctx.fillStyle = pal.fill + state.alpha + ')';
+          ctx.strokeStyle = pal.main;
+          ctx.lineWidth = 1.5;
+          ctx.fillRect(startX, y, barW, barH);
+          ctx.strokeRect(startX, y, barW, barH);
+
+          // Label Y
+          ctx.fillStyle = '#f3f4f6';
+          ctx.font = '13px sans-serif';
+          ctx.textAlign = 'right';
+          ctx.fillText(cats[i], startX - 15, y + 23);
+
+          // Annotation
+          if (state.showAnnotations) {
+            ctx.fillStyle = pal.main;
+            ctx.font = 'bold 12px monospace';
+            ctx.textAlign = 'left';
+            ctx.fillText('$' + v, startX + barW + 10, y + 23);
+          }
+        });
+      } else {
+        const barW = 55;
+        const startX = 90;
+        const baseY = h - 60;
+        const maxBarH = h - 130;
+
+        vals.forEach((v, i) => {
+          const x = startX + i * 105;
+          const barH = (v / maxVal) * maxBarH;
+          const y = baseY - barH;
+
+          ctx.fillStyle = pal.fill + state.alpha + ')';
+          ctx.strokeStyle = pal.main;
+          ctx.lineWidth = 1.5;
+          ctx.fillRect(x, y, barW, barH);
+          ctx.strokeRect(x, y, barW, barH);
+
+          // Label X
+          ctx.fillStyle = '#f3f4f6';
+          ctx.font = '12px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(cats[i], x + barW / 2, baseY + 20);
+
+          // Annotation
+          if (state.showAnnotations) {
+            ctx.fillStyle = pal.main;
+            ctx.font = 'bold 11px monospace';
+            ctx.fillText('$' + v, x + barW / 2, y - 8);
+          }
+        });
+      }
+
+      // Title
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 15px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Средняя выручка по категориям товаров (Barplot)', w / 2, 35);
+    }
+
+    function drawHistChart(ctx, w, h, pal) {
+      const baseY = h - 60;
+      const startX = 70;
+      const chartW = w - 120;
+      const numBins = state.histBins;
+      const binW = chartW / numBins;
+
+      ctx.fillStyle = pal.fill + (state.alpha * 0.7) + ')';
+      ctx.strokeStyle = pal.dark;
+      ctx.lineWidth = 1;
+
+      // Draw bell-curve histogram bins
+      for (let i = 0; i < numBins; i++) {
+        const x = (i - numBins / 2) / (numBins / 5);
+        const norm = Math.exp(-0.5 * x * x);
+        const barH = norm * 220 * (0.85 + Math.sin(i * 3) * 0.1);
+        const bx = startX + i * binW;
+        const by = baseY - barH;
+
+        ctx.fillRect(bx, by, binW - 2, barH);
+        ctx.strokeRect(bx, by, binW - 2, barH);
+      }
+
+      // Draw KDE Curve
+      if (state.histKde) {
+        ctx.beginPath();
+        ctx.strokeStyle = pal.main;
+        ctx.lineWidth = 3;
+        for (let i = 0; i < chartW; i += 4) {
+          const xIdx = i / binW;
+          const xVal = (xIdx - numBins / 2) / (numBins / 5);
+          const norm = Math.exp(-0.5 * xVal * xVal);
+          const y = baseY - (norm * 220);
+          if (i === 0) ctx.moveTo(startX + i, y);
+          else ctx.lineTo(startX + i, y);
+        }
+        ctx.stroke();
+      }
+
+      // Mean Line
+      ctx.beginPath();
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.moveTo(startX + chartW / 2, 45);
+      ctx.lineTo(startX + chartW / 2, baseY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = '#ef4444';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Среднее: 942 шт.', startX + chartW / 2, 40);
+
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 15px sans-serif';
+      ctx.fillText('Гистограмма + Плотность (Histogram + KDE)', w / 2, 25);
+    }
+
+    function drawPieChart(ctx, w, h, pal) {
+      const centerX = w / 2;
+      const centerY = h / 2 + 10;
+      const radius = 120;
+      const data = [
+        { label: '5%-15%', pct: 0.395, color: pal.main },
+        { label: '> 15%', pct: 0.376, color: '#f43f5e' },
+        { label: '<= 5%', pct: 0.229, color: '#a855f7' }
+      ];
+
+      let currentAngle = -0.5 * Math.PI;
+
+      data.forEach(slice => {
+        const sliceAngle = slice.pct * 2 * Math.PI;
+        const middleAngle = currentAngle + sliceAngle / 2;
+        const exp = state.pieExplode * 60;
+        const dx = Math.cos(middleAngle) * exp;
+        const dy = Math.sin(middleAngle) * exp;
+
+        ctx.beginPath();
+        ctx.moveTo(centerX + dx, centerY + dy);
+        ctx.arc(centerX + dx, centerY + dy, radius, currentAngle, currentAngle + sliceAngle);
+        ctx.closePath();
+
+        ctx.fillStyle = slice.color;
+        ctx.fill();
+        ctx.strokeStyle = '#030712';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // Label
+        const textDist = radius * 0.7;
+        const tx = centerX + dx + Math.cos(middleAngle) * textDist;
+        const ty = centerY + dy + Math.sin(middleAngle) * textDist;
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText((slice.pct * 100).toFixed(1) + '%', tx, ty);
+
+        currentAngle += sliceAngle;
+      });
+
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 15px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Структура уровней скидки (Pie Chart)', w / 2, 35);
+    }
+
+    function drawScatterChart(ctx, w, h, pal) {
+      const startX = 70;
+      const baseY = h - 60;
+      const chartW = w - 120;
+      const chartH = h - 130;
+
+      // Draw Points
+      const points = [
+        { m: 1, v: 26696 }, { m: 2, v: 26950 }, { m: 3, v: 25498 }, { m: 4, v: 26813 },
+        { m: 5, v: 28041 }, { m: 6, v: 27516 }, { m: 7, v: 27248 }, { m: 8, v: 27665 },
+        { m: 9, v: 27500 }, { m: 10, v: 27521 }, { m: 11, v: 26935 }, { m: 12, v: 28098 }
+      ];
+
+      const minV = 25000, maxV = 29000;
+
+      // Trend line
+      if (state.scatterTrend) {
+        ctx.beginPath();
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 3;
+        const y1 = baseY - ((26300 - minV) / (maxV - minV)) * chartH;
+        const y2 = baseY - ((28100 - minV) / (maxV - minV)) * chartH;
+        ctx.moveTo(startX, y1);
+        ctx.lineTo(startX + chartW, y2);
+        ctx.stroke();
+      }
+
+      points.forEach(p => {
+        const px = startX + ((p.m - 1) / 11) * chartW;
+        const py = baseY - ((p.v - minV) / (maxV - minV)) * chartH;
+
+        ctx.beginPath();
+        ctx.arc(px, py, 6, 0, Math.PI * 2);
+        ctx.fillStyle = pal.main;
+        ctx.fill();
+        ctx.strokeStyle = '#030712';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        if (state.showAnnotations) {
+          ctx.fillStyle = '#94a3b8';
+          ctx.font = '10px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText('$' + Math.round(p.v / 1000) + 'k', px, py - 12);
+        }
+      });
+
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 15px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Выручка от месяца заказа + Линия тренда (Scatter+Trend)', w / 2, 35);
+    }
+
+    function drawHeatmapChart(ctx, w, h, pal) {
+      const cities = ['London', 'México D.F.', 'Sao Paulo', 'Buenos Aires', 'Rio'];
+      const months = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+      const rows = 5, cols = 12;
+
+      const startX = 110;
+      const startY = 70;
+      const cellW = (w - startX - 40) / cols;
+      const cellH = 45;
+
+      for (let r = 0; r < rows; r++) {
+        // City label
+        ctx.fillStyle = '#f3f4f6';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText(cities[r], startX - 10, startY + r * cellH + 28);
+
+        for (let c = 0; c < cols; c++) {
+          const val = Math.floor(25 + 75 * Math.sin(r + c * 0.7) * Math.sin(r + c * 0.7));
+          const intensity = val / 100;
+          const x = startX + c * cellW;
+          const y = startY + r * cellH;
+
+          ctx.fillStyle = pal.fill + (0.15 + intensity * 0.85) + ')';
+          ctx.fillRect(x, y, cellW - 2, cellH - 2);
+
+          if (state.heatmapAnnot) {
+            ctx.fillStyle = intensity > 0.6 ? '#030712' : '#ffffff';
+            ctx.font = 'bold 11px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(val, x + cellW / 2, y + 27);
+          }
+        }
+      }
+
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 15px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Тепловая карта заказов по городам и месяцам (Heatmap)', w / 2, 35);
+    }
+
+    function drawBoxChart(ctx, w, h, pal) {
+      const cats = ['Beverages', 'Produce', 'Dairy', 'Seafood'];
+      const startX = 80;
+      const chartW = w - 120;
+      const baseY = h - 60;
+      const stepX = chartW / 4;
+
+      cats.forEach((cat, i) => {
+        const cx = startX + i * stepX + stepX / 2;
+        const q1 = baseY - 80;
+        const q3 = baseY - 180;
+        const med = baseY - 120;
+        const minW = baseY - 40;
+        const maxW = baseY - 220;
+
+        // Whiskers line
+        ctx.beginPath();
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 2;
+        ctx.moveTo(cx, minW);
+        ctx.lineTo(cx, maxW);
+        ctx.stroke();
+
+        // Box
+        ctx.fillStyle = pal.fill + state.alpha + ')';
+        ctx.strokeStyle = pal.main;
+        ctx.lineWidth = 2;
+        ctx.fillRect(cx - 30, q3, 60, q1 - q3);
+        ctx.strokeRect(cx - 30, q3, 60, q1 - q3);
+
+        // Median line
+        ctx.beginPath();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3;
+        ctx.moveTo(cx - 30, med);
+        ctx.lineTo(cx + 30, med);
+        ctx.stroke();
+
+        // Label
+        ctx.fillStyle = '#f3f4f6';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(cat, cx, baseY + 20);
+      });
+
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 15px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Распределение и размах по категориям (Boxplot)', w / 2, 35);
+    }
+
+    function drawLineChart(ctx, w, h, pal) {
+      const startX = 70;
+      const baseY = h - 60;
+      const chartW = w - 120;
+      const vals = [20, 25, 45, 30, 60, 80, 75, 90, 85, 110, 105, 130];
+      const maxVal = 140;
+
+      ctx.beginPath();
+      ctx.strokeStyle = pal.main;
+      ctx.lineWidth = 3;
+
+      vals.forEach((v, i) => {
+        const x = startX + (i / 11) * chartW;
+        const y = baseY - (v / maxVal) * 200;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      // Points
+      vals.forEach((v, i) => {
+        const x = startX + (i / 11) * chartW;
+        const y = baseY - (v / maxVal) * 200;
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = pal.main;
+        ctx.fill();
+        ctx.strokeStyle = '#030712';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 15px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Динамика показателя во времени (Lineplot)', w / 2, 35);
+    }
+
+    function generatePythonCode() {
+      let code = '';
+      const hex = colorPalettes[state.colorScheme].main;
+
+      if (state.chartType === 'bar') {
+        if (state.barHorizontal) {
+          code = `# 1. Горизонтальный Barplot
+plt.figure(figsize=(10, 5))
+bars = plt.barh(df['Category'][::-1], df['Revenue'][::-1], color='${hex}', alpha=${state.alpha})
+plt.title('Средняя выручка по категориям')
+plt.xlabel('Выручка ($)')
+plt.ylabel('Категория')
+${state.showGrid ? "plt.grid(axis='x', linestyle='--', alpha=0.7)" : "# plt.grid отключен"}
+${state.showAnnotations ? `for bar in bars:
+    w = bar.get_width()
+    plt.text(w + 10, bar.get_y() + bar.get_height()/2, f'\${w:.2f}', va='center', fontweight='bold')` : ""}
+plt.tight_layout()
+plt.show()`;
+        } else {
+          code = `# 1. Вертикальный Barplot
+plt.figure(figsize=(10, 5))
+bars = plt.bar(df['Category'], df['Revenue'], color='${hex}', alpha=${state.alpha})
+plt.title('Выручка по категориям')
+plt.ylabel('Выручка ($)')
+plt.xticks(rotation=45)
+${state.showGrid ? "plt.grid(axis='y', linestyle='--', alpha=0.7)" : "# plt.grid отключен"}
+plt.tight_layout()
+plt.show()`;
+        }
+      } else if (state.chartType === 'hist') {
+        code = `# 2. Гистограмма + Оценка плотности (KDE)
+plt.figure(figsize=(10, 5))
+sns.histplot(
+    data=df, 
+    x='TotalUnits', 
+    bins=${state.histBins}, 
+    kde=${state.histKde ? 'True' : 'False'}, 
+    color='${hex}', 
+    alpha=${state.alpha}
+)
+plt.title('Распределение товаров в заказе')
+plt.xlabel('Количество (шт.)')
+plt.ylabel('Плотность / Частота')
+${state.showGrid ? "plt.grid(True, linestyle='--', alpha=0.5)" : ""}
+plt.tight_layout()
+plt.show()`;
+      } else if (state.chartType === 'pie') {
+        code = `# 3. Круговая диаграмма со смещением (Pie Chart)
+plt.figure(figsize=(8, 7))
+explode = (${state.pieExplode}, ${state.pieExplode}, ${(state.pieExplode * 1.5).toFixed(2)})
+
+plt.pie(
+    df['Counts'], 
+    labels=df['Tiers'], 
+    autopct='%1.1f%%', 
+    startangle=140, 
+    explode=explode, 
+    colors=['${hex}', '#f43f5e', '#a855f7'], 
+    shadow=True
+)
+plt.title('Структура уровней скидки')
+plt.tight_layout()
+plt.show()`;
+      } else if (state.chartType === 'scatter') {
+        code = `# 4. Scatter plot с линией линейного тренда
+plt.figure(figsize=(10, 5))
+${state.scatterTrend ? `sns.regplot(
+    data=monthly_df, 
+    x='MonthNum', 
+    y='AvgRevenue', 
+    scatter_kws={'s': 90, 'color': '${hex}', 'alpha': ${state.alpha}}, 
+    line_kws={'color': '#ef4444', 'linewidth': 2.5, 'label': 'Тренд'}
+)
+plt.legend()` : `plt.scatter(monthly_df['MonthNum'], monthly_df['AvgRevenue'], color='${hex}', s=80, alpha=${state.alpha})`}
+plt.title('Зависимость выручки от месяца')
+plt.xlabel('Месяц')
+plt.ylabel('Выручка ($)')
+${state.showGrid ? "plt.grid(True, linestyle='--', alpha=0.6)" : ""}
+plt.tight_layout()
+plt.show()`;
+      } else if (state.chartType === 'heatmap') {
+        code = `# 5. Тепловая карта (Heatmap)
+plt.figure(figsize=(12, 7))
+sns.heatmap(
+    pivot_table, 
+    annot=${state.heatmapAnnot ? 'True' : 'False'}, 
+    fmt='d', 
+    cmap='YlGnBu', 
+    linewidths=0.5, 
+    cbar_kws={'label': 'Число заказов'}
+)
+plt.title('Тепловая карта заказов по городам и месяцам')
+plt.xlabel('Месяц')
+plt.ylabel('Город')
+plt.tight_layout()
+plt.show()`;
+      } else if (state.chartType === 'box') {
+        code = `# 6. Ящик с усами (Boxplot)
+plt.figure(figsize=(10, 5))
+sns.boxplot(
+    data=df, 
+    x='Category', 
+    y='UnitPrice', 
+    color='${hex}', 
+    showmeans=True
+)
+plt.title('Разброс цен по категориям')
+${state.showGrid ? "plt.grid(axis='y', linestyle='--', alpha=0.6)" : ""}
+plt.tight_layout()
+plt.show()`;
+      } else if (state.chartType === 'line') {
+        code = `# 7. Линейный график динамики
+plt.figure(figsize=(10, 5))
+plt.plot(df['Date'], df['Value'], marker='o', color='${hex}', linewidth=2.5, alpha=${state.alpha})
+plt.title('Динамика показателя во времени')
+plt.xlabel('Дата')
+plt.ylabel('Значение')
+${state.showGrid ? "plt.grid(True, linestyle='--', alpha=0.7)" : ""}
+plt.tight_layout()
+plt.show()`;
+      }
+
+      document.getElementById('pythonCodeOutput').textContent = code;
+    }
+
+    function copyPythonCode() {
+      const code = document.getElementById('pythonCodeOutput').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        const btn = document.querySelector('.copy-btn');
+        btn.textContent = '✅ Скопировано!';
+        setTimeout(() => { btn.textContent = '📋 Копировать код'; }, 2000);
+      });
+    }
+
+    function checkAnswer(qNum, element, isCorrect) {
+      const parent = document.getElementById('q' + qNum);
+      const opts = parent.querySelectorAll('.quiz-opt');
+      opts.forEach(o => {
+        o.onclick = null; // disable further clicks
+        o.classList.remove('correct', 'incorrect');
+      });
+
+      const fb = document.getElementById('fb' + qNum);
+      if (isCorrect) {
+        element.classList.add('correct');
+        fb.className = 'quiz-feedback show correct';
+        fb.innerHTML = '<strong>Верно!</strong> Отличный ответ, именно так и следует отвечать преподавателю.';
+      } else {
+        element.classList.add('incorrect');
+        opts.forEach(o => {
+          if (o.textContent.includes('B)') || (qNum === 3 && o.textContent.includes('C)'))) {
+            o.classList.add('correct');
+          }
+        });
+        fb.className = 'quiz-feedback show incorrect';
+        fb.innerHTML = '<strong>Не совсем так.</strong> Правильный вариант подсвечен зелёным цветом.';
+      }
+    }
+
+    // Initialize
+    window.onload = function() {
+      renderDynamicControls();
+      updateChart();
+    };
+  </script>
+</body>
+</html>
