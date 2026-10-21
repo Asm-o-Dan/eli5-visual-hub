@@ -992,6 +992,54 @@
       </div>
     </div>
 
+    
+    <!-- SECTION 2.5: Сквозной пример на 10 чисел -->
+    <div class="section-card" id="example10">
+      <div class="section-title">
+        <span>🏆</span> 2.5. Сквозной пример: 10 чисел и ВСЕ 4 типа поворотов
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 16px;">
+        Уникальная последовательность чисел <strong>[10, 20, 30, 5, 3, 25, 27, 26, 40, 35]</strong>, в которой наглядно активируются <strong>все 4 существующих типа поворотов</strong> АВЛ-дерева в рамках одной сессии!
+      </p>
+
+      <div class="grid-2" style="margin-bottom: 20px;">
+        <div class="feature-box" style="border-left: 3px solid var(--accent-amber);">
+          <h4 style="color: var(--accent-amber);">⚡ Малые повороты (1-ходовые)</h4>
+          <p>• <strong>Шаг 3 (Вставка 30):</strong> перевес вправо $	o$ <strong>RR (Малый левый)</strong> вокруг <code>10</code>.<br>
+          • <strong>Шаг 5 (Вставка 3):</strong> перевес влево $	o$ <strong>LL (Малый правый)</strong> вокруг <code>10</code>.</p>
+        </div>
+        <div class="feature-box" style="border-left: 3px solid var(--accent-purple);">
+          <h4 style="color: var(--accent-purple);">⚡ Большие повороты (2-ходовые)</h4>
+          <p>• <strong>Шаг 7 (Вставка 27):</strong> колено влево-вправо $	o$ <strong>LR (Большой правый)</strong> вокруг <code>30</code>.<br>
+          • <strong>Шаг 10 (Вставка 35):</strong> колено вправо-влево $	o$ <strong>RL (Большой левый)</strong> вокруг <code>30</code>.</p>
+        </div>
+      </div>
+
+      <!-- Interactive Stepper -->
+      <div style="background: var(--bg-surface-elevated); border: 1px solid var(--border-color); border-radius: 10px; padding: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+          <div>
+            <span id="step-badge" style="background:rgba(56,189,248,0.15); color:var(--accent-cyan); border:1px solid rgba(56,189,248,0.3); font-family:monospace; font-size:0.8rem; font-weight:700; padding:4px 10px; border-radius:6px;">
+              ШАГ 1 / 10
+            </span>
+            <h4 id="step-title" style="margin-top:6px; font-size:1.05rem; color:var(--text-main);">Вставка ключа 10</h4>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn" onclick="prevStep10()">← Назад</button>
+            <button class="btn primary" onclick="nextStep10()">Вперёд →</button>
+          </div>
+        </div>
+
+        <div style="background:#070b12; border:1px solid var(--border-color); border-radius:8px; padding:16px; font-family:ui-monospace, monospace; font-size:0.85rem; color:#cbd5e1; min-height:130px;" id="step-tree-display">
+          <!-- Tree text rendering -->
+        </div>
+
+        <div id="step-explanation" style="margin-top:12px; font-size:0.88rem; color:var(--text-secondary); line-height:1.5;">
+          <!-- Explanation -->
+        </div>
+      </div>
+    </div>
+
     <!-- SECTION 3: Интерактивный симулятор АВЛ-дерева -->
     <div class="section-card" id="simulator">
       <div class="section-title">
@@ -1009,6 +1057,8 @@
           <button class="btn" onclick="loadPresetLL()">Пресет: Правый поворот (LL)</button>
           <button class="btn" onclick="loadPresetLR()">Пресет: Большой LR поворот</button>
           <button class="btn" onclick="loadPresetRL()">Пресет: Большой RL поворот</button>
+          <button class="btn" style="border-color:var(--accent-purple); color:#c084fc; font-weight:700;" onclick="loadPreset10()">⚡ 10 чисел (Все 4 поворота)</button>
+          <button class="btn" style="border-color:var(--accent-cyan); color:var(--accent-cyan);" onclick="loadPresetSeq10()">📈 1..10 (Защита от O(n))</button>
           <button class="btn danger" onclick="clearTree()">Очистить</button>
         </div>
 
@@ -1232,6 +1282,123 @@
       renderTree();
     }
 
+    
+    // 10-Number Stepper Data
+    const stepData10 = [
+      {
+        num: 10,
+        title: "Вставка 10",
+        rot: "Баланс идеален",
+        tree: "10 (bf:0, h:1)",
+        exp: "Дерево состоит из единственного корневого узла 10. Фактор баланса = 0."
+      },
+      {
+        num: 20,
+        title: "Вставка 20",
+        rot: "Баланс в норме",
+        tree: "10 (bf:+1, h:2)\n  └── 20 (bf:0, h:1)",
+        exp: "20 > 10, уходит в правое поддерево. bf(10) = +1. Допустимо (в пределах {-1, 0, 1})."
+      },
+      {
+        num: 30,
+        title: "Вставка 30: ⚡ Поворот RR (Малый левый)",
+        rot: "Малый левый поворот вокруг 10",
+        tree: "    20 (bf:0, h:2)\n   /  \\\n 10    30",
+        exp: "30 уходит вправо от 20. У узла 10 правая высота = 2, левая = 0 (bf = +2). Перевес RR (вправо-вправо). Выполняем <strong>rotateLeft(10)</strong>: узел 20 становится корнем, 10 и 30 — сыновьями!"
+      },
+      {
+        num: 5,
+        title: "Вставка 5",
+        rot: "Баланс в норме",
+        tree: "      20 (bf:-1, h:3)\n     /  \\\n   10    30\n  /\n 5",
+        exp: "5 < 20 и 5 < 10, становится левым сыном 10. Высота левого поддерева 20 стала 2, правого — 1. bf(20) = -1. Балансировка не требуется."
+      },
+      {
+        num: 3,
+        title: "Вставка 3: ⚡ Поворот LL (Малый правый)",
+        rot: "Малый правый поворот вокруг 10",
+        tree: "        20 (bf:-1, h:3)\n       /  \\\n      5    30\n     / \\\n    3   10",
+        exp: "3 < 5, узел 10 получает перевес слева: bf(10) = -2, bf(5) = -1. Одинаковые знаки (- -) — чистый случай LL! Выполняем <strong>rotateRight(10)</strong>: узел 5 поднимается на место 10."
+      },
+      {
+        num: 25,
+        title: "Вставка 25",
+        rot: "Баланс в норме",
+        tree: "        20 (bf:0, h:3)\n       /  \\\n      5    30\n     / \\  /\n    3  10 25",
+        exp: "25 > 20, но 25 < 30. Становится левым потомком 30. bf(30) = -1, дерево идеально сбалансировано (bf корня 20 = 0)."
+      },
+      {
+        num: 27,
+        title: "Вставка 27: ⚡ Поворот LR (Большой правый)",
+        rot: "Большой правый поворот вокруг 30",
+        tree: "        20 (bf:0, h:3)\n       /  \\\n      5    27 (bf:0)\n     / \\  /  \\\n    3  10 25   30",
+        exp: "27 > 25, уходит вправо от 25. У узла 30 возникает перекос влево-вправо: bf(30) = -2, но bf(25) = +1 (разные знаки!). Одинарный поворот не поможет: сначала <strong>rotateLeft(25)</strong>, затем <strong>rotateRight(30)</strong>. Узел 27 встает в корень поддерева!"
+      },
+      {
+        num: 26,
+        title: "Вставка 26",
+        rot: "Баланс в норме",
+        tree: "          20 (bf:+1, h:4)\n         /  \\\n        5    27\n       / \\  /  \\\n      3  10 25   30\n             \\\n              26",
+        exp: "26 > 25, становится правым сыном 25. Дерево слегка накренилось вправо, но ни один узел не превысил |bf| <= 1. Поворотов нет."
+      },
+      {
+        num: 40,
+        title: "Вставка 40",
+        rot: "Баланс в норме",
+        tree: "          20 (bf:+1, h:4)\n         /  \\\n        5    27\n       / \\  /  \\\n      3  10 25   30\n             \\    \\\n              26    40",
+        exp: "40 > 30, становится правым потомком 30. Высота поддерева 30 увеличилась до 2 (bf = +1)."
+      },
+      {
+        num: 35,
+        title: "Вставка 35: ⚡ Поворот RL (Большой левый)",
+        rot: "Большой левый поворот вокруг 30",
+        tree: "          20 (bf:+1, h:4)\n         /  \\\n        5    27\n       / \\  /  \\\n      3  10 25   35\n             \\  /  \\\n              26 30  40",
+        exp: "35 > 30, но 35 < 40. У узла 30 возникает колено вправо-влево: bf(30) = +2, а bf(40) = -1. Разные знаки! Выполняем большой поворот RL: сначала <strong>rotateRight(40)</strong>, затем <strong>rotateLeft(30)</strong>. В корень поддерева встает 35!"
+      }
+    ];
+
+    let currentStepIdx = 0;
+
+    function renderStep10() {
+      const data = stepData10[currentStepIdx];
+      document.getElementById('step-badge').textContent = `ШАГ ${currentStepIdx + 1} / 10`;
+      document.getElementById('step-title').innerHTML = `${data.title} <span style="font-size:0.8rem; color:${data.rot.includes('⚡') || data.rot.includes('поворот') ? 'var(--accent-amber)' : 'var(--accent-emerald)'};">(${data.rot})</span>`;
+      document.getElementById('step-tree-display').innerHTML = `<pre style="margin:0; font-family:monospace; line-height:1.4;">${data.tree}</pre>`;
+      document.getElementById('step-explanation').innerHTML = data.exp;
+    }
+
+    function prevStep10() {
+      if (currentStepIdx > 0) {
+        currentStepIdx--;
+        renderStep10();
+      }
+    }
+
+    function nextStep10() {
+      if (currentStepIdx < stepData10.length - 1) {
+        currentStepIdx++;
+        renderStep10();
+      }
+    }
+
+    function loadPreset10() {
+      root = null;
+      rotationLog = ['Вставка 10 чисел с демонстрацией ВСЕХ 4 типов поворотов (RR, LL, LR, RL)'];
+      const nums = [10, 20, 30, 5, 3, 25, 27, 26, 40, 35];
+      nums.forEach(k => root = insert(root, k));
+      renderTree();
+      document.getElementById('example10').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function loadPresetSeq10() {
+      root = null;
+      rotationLog = ['Вставка последовательности 1..10 (в обычном BST была бы палка h=10, в АВЛ h=4 благодаря RR поворотам)'];
+      for (let i = 1; i <= 10; i++) {
+        root = insert(root, i);
+      }
+      renderTree();
+    }
+
     function loadPresetRR() {
       root = null;
       rotationLog = ['Загрузка пресета RR (10, 20, 30): вызывает одинарный левый поворот'];
@@ -1366,6 +1533,7 @@
     window.addEventListener('DOMContentLoaded', () => {
       loadPresetRR();
       renderQuiz();
+    renderStep10();
     });
   </script>
 </body>
