@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ELI5: Соединение звеньев и устойчивость САУ (ОТУ Лаб 4)</title>
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1a2234;
+      --border-color: #243049;
+      --text-main: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #38bdf8;
+      --accent-blue: #3b82f6;
+      --accent-emerald: #10b981;
+      --accent-purple: #a855f7;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --code-bg: #06090f;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 14, 23, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-brand {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--accent-cyan);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #f8fafc 20%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      margin-bottom: 24px;
+    }
+
+    .section-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .formula-box {
+      background: var(--code-bg);
+      border-left: 4px solid var(--accent-blue);
+      padding: 14px 18px;
+      border-radius: 0 8px 8px 0;
+      margin: 14px 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.95rem;
+      color: #38bdf8;
+      overflow-x: auto;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .card-item {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .card-item h4 {
+      color: #fff;
+      font-size: 1rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge-tag {
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+
+    .badge-blue { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+    .badge-green { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .badge-amber { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+    .badge-rose { background: rgba(244, 63, 94, 0.2); color: #fb7185; }
+
+    /* Interactive Simulator */
+    .sim-panel {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 20px;
+      margin-top: 16px;
+    }
+
+    .slider-container {
+      margin: 16px 0;
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    input[type=range] {
+      width: 100%;
+      height: 8px;
+      border-radius: 4px;
+      background: #243049;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+    }
+
+    .status-banner {
+      padding: 14px 18px;
+      border-radius: 10px;
+      font-weight: 700;
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1rem;
+    }
+
+    .status-stable {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+
+    .status-unstable {
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.4);
+      color: #fb7185;
+    }
+
+    .status-crit {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: #fbbf24;
+    }
+
+    /* Canvas styling */
+    canvas {
+      width: 100%;
+      height: 280px;
+      background: #06090f;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      display: block;
+      margin-top: 14px;
+    }
+
+    /* Quiz styling */
+    .quiz-q {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 14px;
+    }
+
+    .quiz-opt {
+      background: #1e293b;
+      border: 1px solid #334155;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin: 8px 0;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.95rem;
+    }
+
+    .quiz-opt:hover { background: #273549; }
+    .quiz-opt.correct { background: rgba(16, 185, 129, 0.25); border-color: #10b981; color: #34d399; font-weight: 600; }
+    .quiz-opt.wrong { background: rgba(244, 63, 94, 0.25); border-color: #f43f5e; color: #fb7185; font-weight: 600; }
+
+    .quiz-hint {
+      margin-top: 8px;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      display: none;
+    }
+
+    .callout-exam {
+      background: rgba(56, 189, 248, 0.08);
+      border-left: 4px solid var(--accent-cyan);
+      padding: 14px 18px;
+      border-radius: 0 10px 10px 0;
+      margin: 16px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-nav">
+    <div class="nav-brand">
+      <span>⚡</span> ELI5: Основы теории управления (ОТУ)
+    </div>
+    <div>
+      <a href="../index.html">&larr; В хаб артефактов</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="hero-badge">Лабораторная работа № 4 &bull; Вариант 18</div>
+    <h1>Соединение звеньев и устойчивость САУ</h1>
+    <p class="hero-desc">
+      Интерактивный симулятор преобразования структурных схем, анализ разомкнутой и замкнутой систем,
+      годограф Найквиста, критерий Гурвица и феномен срыва устойчивости при обратной связи.
+    </p>
+
+    <!-- SECTION 1: ТРИ ТИПА СОЕДИНЕНИЙ -->
+    <div class="section-card">
+      <div class="section-title">
+        <span>🧩</span> 1. Базовые правила соединения звеньев
+      </div>
+      <p style="color: var(--text-secondary); margin-bottom: 12px;">
+        Любая сложная система автоматического регулирования сводится к комбинации трех элементарных типов соединений:
+      </p>
+
+      <div class="grid-3">
+        <div class="card-item">
+          <h4><span class="badge-tag badge-blue">1. Посл.</span> Последовательное</h4>
+          <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px;">
+            Выход одного звена подается на вход следующего.
+          </p>
+          <div class="formula-box">W_об(p) = W₁ · W₂ · W₃</div>
+          <p style="font-size: 0.85rem; color: #94a3b8;">
+            Полюса системы — это совокупность полюсов всех звеньев. Устойчива только если устойчивы ВСЕ звенья.
+          </p>
+        </div>
+
+        <div class="card-item">
+          <h4><span class="badge-tag badge-green">2. Парал.</span> Параллельное согласное</h4>
+          <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px;">
+            Один общий вход, выходы суммируются: y = y₁ + y₂ + y₃.
+          </p>
+          <div class="formula-box">W_об(p) = W₁ + W₂ + W₃</div>
+          <p style="font-size: 0.85rem; color: #94a3b8;">
+            Передаточные функции складываются при общем знаменателе.
+          </p>
+        </div>
+
+        <div class="card-item">
+          <h4><span class="badge-tag badge-rose">3. ОС</span> Встречно-параллельное</h4>
+          <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px;">
+            Выход через звено обратной связи возвращается на вход.
+          </p>
+          <div class="formula-box">W_зам = W₁ / (1 ± W₁·W₂)</div>
+          <p style="font-size: 0.85rem; color: #94a3b8;">
+            «+» — отрицательная ОС (ООС). Полюса смещаются! Устойчивая разомкнутая система может стать неустойчивой!
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 2: ВАРИАНТ 18 АНАЛИТИКА -->
+    <div class="section-card">
+      <div class="section-title">
+        <span>📐</span> 2. Аналитический расчет Варианта 18
+      </div>
+
+      <div class="callout-exam">
+        <h4 style="color: #38bdf8; margin-bottom: 6px;">Структура Варианта 18:</h4>
+        <p>Прямой канал: W₁(p) = 10 / (1 + 0.2p), W₂(p) = 20 / (p + 20), W₃(p) = 5 / (1 + 0.04p).</p>
+        <p>Цепь обратной связи: единичная отрицательная обратная связь (W_ос(p) = 1).</p>
+      </div>
+
+      <h4 style="color: #fff; margin-top: 14px;">1. Разомкнутая система:</h4>
+      <div class="formula-box">
+W_раз(p) = W₁ · W₂ · W₃ = 1000 / [ (1 + 0.2p) · (p + 20) · (1 + 0.04p) ]
+Нормализованная форма: W_раз(p) = 125000 / [ p³ + 50p² + 725p + 2500 ]
+Полюса разомкнутой цепи: p₁ = -5,  p₂ = -20,  p₃ = -25  (Все Re < 0 => УСТОЙЧИВА!)
+      </div>
+
+      <h4 style="color: #fff; margin-top: 14px;">2. Замкнутая система:</h4>
+      <div class="formula-box">
+W_зам(p) = W_раз(p) / [ 1 + W_раз(p) ] = 125000 / [ p³ + 50p² + 725p + 127500 ]
+Характеристическое уравнение: p³ + 50p² + 725p + 127500 = 0
+Определитель Гурвица: Δ₂ = a₁·a₂ - a₀·a₃ = 50 · 725 - 1 · 127500 = -91250 < 0  (НЕУСТОЙЧИВА!)
+Полюса замкнутой системы: p₁ = -67.35,  p₂,₃ = +8.67 ± j42.64  (Re > 0 => Автоколебания!)
+Критический коэффициент: K_крит = 270. При K = 1000 система глубоко неустойчива.
+      </div>
+    </div>
+
+    <!-- SECTION 3: ИНТЕРАКТИВНЫЙ СИМУЛЯТОР УСТОЙЧИВОСТИ -->
+    <div class="section-card">
+      <div class="section-title">
+        <span>🎛️</span> 3. Интерактивный симулятор: Управление усилением K
+      </div>
+      <p style="color: var(--text-secondary);">
+        Подвигайте ползунок суммарного коэффициента усиления K = k₁·k₂·k₃, чтобы в реальном времени увидеть
+        смещение полюсов замкнутой системы через мнимую ось и охват критической точки (-1; j0) на годографе Найквиста:
+      </p>
+
+      <div class="sim-panel">
+        <div class="slider-container">
+          <div class="slider-label">
+            <span>Общий коэффициент усиления K:</span>
+            <span id="k-val" style="color: var(--accent-cyan); font-family: monospace; font-size: 1.1rem;">K = 1000</span>
+          </div>
+          <input type="range" id="k-slider" min="50" max="1500" value="1000" step="10" oninput="updateSim(this.value)">
+        </div>
+
+        <div id="sim-status" class="status-banner status-unstable">
+          <span>❌</span> <span>Система НЕУСТОЙЧИВА (K = 1000 > K_крит = 270). Определитель Гурвица Δ₂ = -91250 < 0.</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px;">
+          <div>
+            <h5 style="color: #fff; margin-bottom: 6px;">Годограф Найквиста W_раз(jω):</h5>
+            <canvas id="nyquistCanvas"></canvas>
+          </div>
+          <div>
+            <h5 style="color: #fff; margin-bottom: 6px;">Карта полюсов замкнутой САУ:</h5>
+            <canvas id="polesCanvas"></canvas>
+          </div>
+        </div>
+
+        <div style="margin-top: 12px; font-size: 0.88rem; color: #94a3b8;" id="sim-details">
+          Пересечение отрицательной вещественной оси при ω_π = 26.93 рад/с: Re = -3.704 (точка -1 охвачена).
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 4: ЭКЗАМЕНАЦИОННЫЙ ТРЕНАЖЕР -->
+    <div class="section-card">
+      <div class="section-title">
+        <span>📝</span> 4. Экзаменационный тренажер защиты (10 вопросов)
+      </div>
+      <div id="quiz-container"></div>
+    </div>
+
+  </div>
+
+  <script>
+    // Nyquist & Poles Interactive Simulation
+    const K_CRIT = 270.0;
+    const OMEGA_PI = Math.sqrt(725); // 26.926
+
+    function updateSim(kVal) {
+      kVal = parseFloat(kVal);
+      document.getElementById('k-val').innerText = 'K = ' + kVal;
+      
+      const banner = document.getElementById('sim-status');
+      const details = document.getElementById('sim-details');
+      
+      const a0 = 1.0;
+      const a1 = 50.0;
+      const a2 = 725.0;
+      const a3 = 2500.0 + kVal / 0.008;
+      const delta2 = a1 * a2 - a0 * a3;
+      const reCross = -kVal / 270.0;
+
+      if (kVal < K_CRIT - 5) {
+        banner.className = 'status-banner status-stable';
+        banner.innerHTML = `<span>✅</span> <span>Система УСТОЙЧИВА (K = ${kVal} < K_крит = 270). Полюса в левой полуплоскости.</span>`;
+      } else if (Math.abs(kVal - K_CRIT) <= 5) {
+        banner.className = 'status-banner status-crit';
+        banner.innerHTML = `<span>⚠️</span> <span>ГРАНИЦА УСТОЙЧИВОСТИ (K ≈ 270). Незатухающие автоколебания при ω = 26.9 рад/с.</span>`;
+      } else {
+        banner.className = 'status-banner status-unstable';
+        banner.innerHTML = `<span>❌</span> <span>Система НЕУСТОЙЧИВА (K = ${kVal} > K_крит = 270). Δ₂ = ${delta2.toFixed(0)} < 0.</span>`;
+      }
+
+      details.innerHTML = `Пересечение действительной оси: Re(jω_π) = <strong>${reCross.toFixed(3)}</strong> | Критическая точка (-1; j0) ${reCross < -1 ? '<span style="color:#f43f5e">ОХВАЧЕНА</span>' : '<span style="color:#10b981">НЕ ОХВАЧЕНА</span>'}.`;
+
+      drawNyquist(kVal, reCross);
+      drawPoles(kVal, delta2);
+    }
+
+    function drawNyquist(kVal, reCross) {
+      const cv = document.getElementById('nyquistCanvas');
+      const ctx = cv.getContext('2d');
+      const w = cv.width = cv.clientWidth * 2;
+      const h = cv.height = cv.clientHeight * 2;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Origin center: mapped so -5..10 fits
+      const ox = w * 0.45;
+      const oy = h * 0.5;
+      const scale = w / 18.0;
+
+      // Axes
+      ctx.strokeStyle = '#243049';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, oy); ctx.lineTo(w, oy);
+      ctx.moveTo(ox, 0); ctx.lineTo(ox, h);
+      ctx.stroke();
+
+      // Critical Point (-1, 0)
+      const cx = ox - 1.0 * scale;
+      const cy = oy;
+      ctx.fillStyle = '#f43f5e';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 6, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.font = '22px sans-serif';
+      ctx.fillText('(-1,0)', cx - 35, cy - 14);
+
+      // Nyquist curve
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+
+      let first = true;
+      for (let omega = 0.05; omega < 150; omega += 0.2) {
+        // W(jw) = 125000 * (kVal/1000) / ( (2500 - 50 w^2) + j(725 w - w^3) )
+        const num = (kVal / 0.008);
+        const reD = 2500 - 50 * omega * omega;
+        const imD = 725 * omega - Math.pow(omega, 3);
+        const denMod = reD * reD + imD * imD;
+        const reH = (num * reD) / denMod;
+        const imH = (-num * imD) / denMod;
+
+        const px = ox + reH * scale;
+        const py = oy - imH * scale;
+
+        if (first) { ctx.moveTo(px, py); first = false; }
+        else { ctx.lineTo(px, py); }
+      }
+      ctx.stroke();
+
+      // Mark intersection
+      const pxCross = ox + reCross * scale;
+      ctx.fillStyle = reCross < -1 ? '#f43f5e' : '#10b981';
+      ctx.beginPath();
+      ctx.arc(pxCross, oy, 8, 0, 2*Math.PI);
+      ctx.fill();
+    }
+
+    function drawPoles(kVal, delta2) {
+      const cv = document.getElementById('polesCanvas');
+      const ctx = cv.getContext('2d');
+      const w = cv.width = cv.clientWidth * 2;
+      const h = cv.height = cv.clientHeight * 2;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const ox = w * 0.7; // Imaginary axis
+      const oy = h * 0.5;
+      const scale = w / 110.0;
+
+      // Fill right half plane (unstable zone)
+      ctx.fillStyle = 'rgba(244, 63, 94, 0.08)';
+      ctx.fillRect(ox, 0, w - ox, h);
+
+      // Axes
+      ctx.strokeStyle = '#f43f5e';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(ox, 0); ctx.lineTo(ox, h); // Im axis
+      ctx.stroke();
+
+      ctx.strokeStyle = '#243049';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, oy); ctx.lineTo(w, oy); // Re axis
+      ctx.stroke();
+
+      // Approx complex conjugate poles trajectory
+      // Re(p) approx proportional to (K - 270)
+      const sigma = (kVal - 270.0) / 84.0;
+      const omega = 26.9 + Math.sqrt(Math.max(0, kVal - 100)) * 0.5;
+      const realPole = -50 - (kVal / 50.0);
+
+      // Draw real pole
+      ctx.fillStyle = '#60a5fa';
+      ctx.beginPath();
+      ctx.arc(ox + realPole * scale, oy, 7, 0, 2*Math.PI);
+      ctx.fill();
+
+      // Draw complex poles
+      ctx.fillStyle = sigma > 0 ? '#f43f5e' : '#34d399';
+      ctx.beginPath();
+      ctx.arc(ox + sigma * scale, oy - omega * scale, 8, 0, 2*Math.PI);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(ox + sigma * scale, oy + omega * scale, 8, 0, 2*Math.PI);
+      ctx.fill();
+
+      ctx.font = '22px monospace';
+      ctx.fillText(`p1=${realPole.toFixed(1)}`, ox + realPole * scale - 40, oy + 28);
+      ctx.fillText(`p2,3=${sigma.toFixed(1)}±j${omega.toFixed(1)}`, ox + sigma * scale + 14, oy - omega * scale);
+    }
+
+    // 10 Quiz Questions
+    const quizData = [
+      {
+        q: "1. Как вычисляется передаточная функция трех последовательно соединенных звеньев?",
+        opts: ["W = W₁ + W₂ + W₃", "W = W₁ · W₂ · W₃", "W = W₁ / (W₂ · W₃)", "W = (W₁ + W₂) · W₃"],
+        c: 1,
+        h: "При последовательном соединении звеньев их передаточные функции перемножаются."
+      },
+      {
+        q: "2. Каково необходимое и достаточное условие асимптотической устойчивости линейного динамического звена?",
+        opts: [
+          "Все нули находятся в правой полуплоскости",
+          "Все полюса находятся строго в левой части комплексной плоскости (Re < 0)",
+          "Коэффициент передачи равен 1",
+          "Хотя бы один корень равен нулю"
+        ],
+        c: 1,
+        h: "Для устойчивости необходимо и достаточно, чтобы вещественные части всех полюсов были отрицательны."
+      },
+      {
+        q: "3. Каковы полюса разомкнутой системы в варианте 18?",
+        opts: ["p = -1, -2, -3", "p = -5, -20, -25", "p = +5, +20, +25", "p = 0, -10, -20"],
+        c: 1,
+        h: "1 + 0.2p = 0 => p=-5; p + 20 = 0 => p=-20; 1 + 0.04p = 0 => p=-25."
+      },
+      {
+        q: "4. Устойчива ли разомкнутая система в варианте 18?",
+        opts: ["Да, устойчива (все полюса в левой полуплоскости)", "Нет, неустойчива", "Находится на границе устойчивости", "Нельзя определить"],
+        c: 0,
+        h: "Так как p₁=-5, p₂=-20, p₃=-25 — все корни вещественные и отрицательные, разомкнутая система асимптотически устойчива."
+      },
+      {
+        q: "5. По какой формуле определяется передаточная функция системы с единичной отрицательной обратной связью?",
+        opts: ["W_зам = W_раз / (1 - W_раз)", "W_зам = W_раз / (1 + W_раз)", "W_зам = 1 + W_раз", "W_зам = W_раз²"],
+        c: 1,
+        h: "При единичной отрицательной обратной связи W_зам(p) = W_раз(p) / [1 + W_раз(p)]."
+      },
+      {
+        q: "6. Какой результат дает критерий Гурвица для замкнутой системы Варианта 18 (при K=1000)?",
+        opts: [
+          "Δ₂ = +91250 > 0 (система устойчива)",
+          "Δ₂ = -91250 < 0 (система НЕУСТОЙЧИВА)",
+          "Δ₂ = 0 (граница устойчивости)",
+          "Критерий Гурвица неприменим"
+        ],
+        c: 1,
+        h: "Δ₂ = a₁·a₂ - a₀·a₃ = 50·725 - 127500 = -91250 < 0, что свидетельствует о неустойчивости."
+      },
+      {
+        q: "7. Почему замкнутая система стала неустойчивой, если все составляющие звенья устойчивы?",
+        opts: [
+          "Из-за сбоя в делении на ноль",
+          "Из-за фазового сдвига в -180° и чрезмерного усиления K=1000, превратившего ООС в синфазную ПОС",
+          "Потому что звенья были соединены параллельно",
+          "Из-за отсутствия интегратора"
+        ],
+        c: 1,
+        h: "Три апериодических звена на частоте сопряжения дают фазовый сдвиг -180°. Высокое усиление вызывает самовозбуждение."
+      },
+      {
+        q: "8. Чему равен критический коэффициент передачи K_крит для Варианта 18?",
+        opts: ["K_крит = 100", "K_крит = 270", "K_крит = 1000", "K_крит = 50"],
+        c: 1,
+        h: "Условие Δ₂ = 0 дает K_крит = 33750 · 0.008 = 270."
+      },
+      {
+        q: "9. Что показывает годограф Найквиста для замкнутой системы при K=1000?",
+        opts: [
+          "Годограф не охватывает точку (-1; j0)",
+          "Годограф охватывает точку (-1; j0), пересекая действительную ось в точке Re = -3.704",
+          "Годограф проходит строго через (0, 0)",
+          "Годограф лежит только в первом квадранте"
+        ],
+        c: 1,
+        h: "При ω = √725 годограф пересекает ось в Re = -3.704 < -1, охватывая критическую точку (-1; j0)."
+      },
+      {
+        q: "10. Каким образом можно восстановить устойчивость системы в Варианте 18?",
+        opts: [
+          "Увеличить K до 2000",
+          "Уменьшить общий коэффициент передачи K < 270 (например, K=150) или ввести корректирующее фазоопережающее звено",
+          "Заменить ООС на ПОС",
+          "Удалить сумматор"
+        ],
+        c: 1,
+        h: "Снижение усиления ниже K_крит = 270 или введение дифференцирующего звена возвращает полюса в левую полуплоскость."
+      }
+    ];
+
+    function initQuiz() {
+      const container = document.getElementById('quiz-container');
+      container.innerHTML = quizData.map((item, idx) => `
+        <div class="quiz-q" id="q-${idx}">
+          <p style="font-weight: 700; color: #fff; margin-bottom: 8px;">${item.q}</p>
+          ${item.opts.map((opt, oIdx) => `
+            <div class="quiz-opt" onclick="checkAnswer(${idx}, ${oIdx})">${opt}</div>
+          `).join('')}
+          <div class="quiz-hint" id="hint-${idx}">💡 ${item.h}</div>
+        </div>
+      `).join('');
+    }
+
+    function checkAnswer(qIdx, optIdx) {
+      const qDiv = document.getElementById(`q-${qIdx}`);
+      const opts = qDiv.querySelectorAll('.quiz-opt');
+      const hint = document.getElementById(`hint-${qIdx}`);
+      const correctIdx = quizData[qIdx].c;
+
+      opts.forEach((o, i) => {
+        o.onclick = null;
+        if (i === correctIdx) o.className = 'quiz-opt correct';
+        else if (i === optIdx) o.className = 'quiz-opt wrong';
+      });
+
+      hint.style.display = 'block';
+    }
+
+    window.onload = function() {
+      initQuiz();
+      updateSim(1000);
+    };
+  </script>
+</body>
+</html>
