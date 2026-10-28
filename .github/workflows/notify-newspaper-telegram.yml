@@ -5,28 +5,44 @@ on:
     workflows: ["Deploy GitHub Pages"]
     types: [completed]
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      issue_file:
+        description: "Путь к выпуску; оставьте пустым, чтобы отправить последний"
+        required: false
+        type: string
 
 permissions:
   contents: read
 
 jobs:
   notify:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout deployed revision
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
           fetch-depth: 0
 
-      - name: Find a changed newspaper issue
+      - name: Find a newspaper issue
         id: issue
         env:
+          EVENT_NAME: ${{ github.event_name }}
           DEPLOY_SHA: ${{ github.event.workflow_run.head_sha }}
+          MANUAL_ISSUE: ${{ inputs.issue_file }}
         shell: bash
         run: |
-          file="$(git diff-tree --no-commit-id --name-only -r "$DEPLOY_SHA" | grep -E '^artifacts/utrenniy-list-[0-9]{4}-[0-9]{2}-[0-9]{2}\.html$' | head -n 1 || true)"
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            file="$MANUAL_ISSUE"
+            if [ -z "$file" ]; then
+              name="$(find artifacts -maxdepth 1 -type f -name 'utrenniy-list-*.html' -printf '%f\\n' | sort -r | head -n 1)"
+              file="artifacts/$name"
+            fi
+          else
+            file="$(git diff-tree --no-commit-id --name-only -r "$DEPLOY_SHA" | grep -E '^artifacts/utrenniy-list-[0-9]{4}-[0-9]{2}-[0-9]{2}\\.html$' | head -n 1 || true)"
+          fi
           echo "file=$file" >> "$GITHUB_OUTPUT"
 
       - name: Send issue link to Telegram
