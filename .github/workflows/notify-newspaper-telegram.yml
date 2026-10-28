@@ -37,11 +37,11 @@ jobs:
           if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
             file="$MANUAL_ISSUE"
             if [ -z "$file" ]; then
-              name="$(find artifacts -maxdepth 1 -type f -name 'utrenniy-list-*.html' -printf '%f\\n' | sort -r | head -n 1)"
+              name="$(find artifacts -maxdepth 1 -type f -name 'utrenniy-list-*.html' -printf '%f\n' | sort -r | head -n 1)"
               file="artifacts/$name"
             fi
           else
-            file="$(git diff-tree --no-commit-id --name-only -r "$DEPLOY_SHA" | grep -E '^artifacts/utrenniy-list-[0-9]{4}-[0-9]{2}-[0-9]{2}\\.html$' | head -n 1 || true)"
+            file="$(git diff-tree --no-commit-id --name-only -r "$DEPLOY_SHA" | grep -E '^artifacts/utrenniy-list-[0-9]{4}-[0-9]{2}-[0-9]{2}\.html$' | head -n 1 || true)"
           fi
           echo "file=$file" >> "$GITHUB_OUTPUT"
 
