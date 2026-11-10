@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>ELI5: Критерии устойчивости Гурвица и Рауса (ОТУ Лаб 5)</title>
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1a2234;
+      --border-color: #243049;
+      --text-main: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #38bdf8;
+      --accent-blue: #3b82f6;
+      --accent-emerald: #10b981;
+      --accent-purple: #a855f7;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --code-bg: #06090f;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(10, 14, 23, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .top-nav a { font-weight: 600; font-size: 0.95rem; }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 24px 20px;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 30px 20px;
+      background: linear-gradient(180deg, rgba(56, 189, 248, 0.08) 0%, transparent 100%);
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-radius: 20px;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-cyan);
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      line-height: 1.25;
+      background: linear-gradient(135deg, #f1f5f9 0%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 750px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+
+    .card h2 {
+      font-size: 1.4rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-main);
+    }
+
+    .math-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border-color);
+      border-left: 4px solid var(--accent-cyan);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 14px 0;
+      font-family: "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.95rem;
+      overflow-x: auto;
+    }
+
+    .highlight-red { color: var(--accent-rose); font-weight: bold; }
+    .highlight-green { color: var(--accent-emerald); font-weight: bold; }
+    .highlight-cyan { color: var(--accent-cyan); font-weight: bold; }
+
+    /* Interactive Table */
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.95rem;
+    }
+
+    table.data-table th, table.data-table td {
+      border: 1px solid var(--border-color);
+      padding: 10px 14px;
+      text-align: center;
+    }
+
+    table.data-table th {
+      background: var(--bg-surface-elevated);
+      color: var(--accent-cyan);
+      font-weight: 600;
+    }
+
+    table.data-table tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Slider section */
+    .sim-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 20px 0;
+      background: var(--bg-surface-elevated);
+      padding: 16px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .slider-row label {
+      font-weight: 600;
+      min-width: 140px;
+    }
+
+    .slider-row input[type="range"] {
+      flex: 1;
+      min-width: 200px;
+      accent-color: var(--accent-cyan);
+    }
+
+    .slider-val {
+      font-family: monospace;
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--accent-cyan);
+      min-width: 60px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 320px;
+      background: #050811;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-top: 14px;
+    }
+
+    /* Quiz styles */
+    .quiz-item {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .quiz-q {
+      font-weight: 600;
+      margin-bottom: 12px;
+      font-size: 1rem;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .quiz-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 10px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: left;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    .quiz-btn:hover {
+      border-color: var(--accent-cyan);
+      background: rgba(56, 189, 248, 0.05);
+    }
+
+    .quiz-btn.correct {
+      background: rgba(16, 185, 129, 0.15) !important;
+      border-color: var(--accent-emerald) !important;
+      color: var(--accent-emerald) !important;
+      font-weight: 600;
+    }
+
+    .quiz-btn.wrong {
+      background: rgba(244, 63, 94, 0.15) !important;
+      border-color: var(--accent-rose) !important;
+      color: var(--accent-rose) !important;
+    }
+
+    .quiz-feedback {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      display: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="top-nav">
+    <a href="../index.html">← Назад к витрине ELI5</a>
+    <span style="color: var(--text-muted); font-size: 0.85rem;">ОТУ | Лабораторная работа № 5</span>
+  </nav>
+
+  <div class="container">
+    <header class="hero">
+      <div class="badge">Вариант 18 • ФТИ ПГУ им. Т.Г. Шевченко</div>
+      <h1>Критерии устойчивости Гурвица и Рауса</h1>
+      <p class="subtitle">Интерактивный симулятор, аналитический расчет всех определителей, Routh-таблицы и тренажер защиты для студента Даниила Гандапаса (гр. ФТ24ДР62ПИ1)</p>
+    </header>
+
+    <!-- РАЗДЕЛ 1: ЗАДАНИЕ 1 ГУРВИЦ -->
+    <section class="card">
+      <h2>1. Задание 1: Исследование устойчивости 5-го порядка по Гурвицу</h2>
+      <p>Дано характеристическое уравнение 5-го порядка (Вариант 18):</p>
+      <div class="math-block">
+        A(p) = p⁵ + 6p⁴ + 4p³ + 16p² + 20p + 4 = 0<br>
+        Коэффициенты: a₅ = 1, a₄ = 6, a₃ = 4, a₂ = 16, a₁ = 20, a₀ = 4
+      </div>
+      <p>Необходимое условие Стодолы: все <code>aᵢ &gt; 0</code> выполняются (все коэффициенты строго положительны).</p>
+
+      <h3 style="margin: 16px 0 8px; font-size: 1.1rem; color: var(--accent-cyan);">Матрица Гурвица 5×5:</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Строка</th>
+            <th>Столбец 1</th>
+            <th>Столбец 2</th>
+            <th>Столбец 3</th>
+            <th>Столбец 4</th>
+            <th>Столбец 5</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1</strong></td>
+            <td style="background: rgba(56, 189, 248, 0.1);"><strong>6</strong> (a₄)</td>
+            <td>16 (a₂)</td>
+            <td>4 (a₀)</td>
+            <td>0</td>
+            <td>0</td>
+          </tr>
+          <tr>
+            <td><strong>2</strong></td>
+            <td>1 (a₅)</td>
+            <td style="background: rgba(56, 189, 248, 0.1);"><strong>4</strong> (a₃)</td>
+            <td>20 (a₁)</td>
+            <td>0</td>
+            <td>0</td>
+          </tr>
+          <tr>
+            <td><strong>3</strong></td>
+            <td>0</td>
+            <td>6 (a₄)</td>
+            <td style="background: rgba(56, 189, 248, 0.1);"><strong>16</strong> (a₂)</td>
+            <td>4 (a₀)</td>
+            <td>0</td>
+          </tr>
+          <tr>
+            <td><strong>4</strong></td>
+            <td>0</td>
+            <td>1 (a₅)</td>
+            <td>4 (a₃)</td>
+            <td style="background: rgba(56, 189, 248, 0.1);"><strong>20</strong> (a₁)</td>
+            <td>0</td>
+          </tr>
+          <tr>
+            <td><strong>5</strong></td>
+            <td>0</td>
+            <td>0</td>
+            <td>6 (a₄)</td>
+            <td>16 (a₂)</td>
+            <td style="background: rgba(56, 189, 248, 0.1);"><strong>4</strong> (a₀)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="margin: 16px 0 8px; font-size: 1.1rem; color: var(--accent-cyan);">Расчет главных диагональных миноров:</h3>
+      <div class="math-block">
+        Δ₁ = |6| = <span class="highlight-green">+6 &gt; 0</span><br><br>
+        Δ₂ = | 6  16 | = 6·4 - 1·16 = 24 - 16 = <span class="highlight-green">+8 &gt; 0</span><br>
+             | 1   4 |<br><br>
+        Δ₃ = | 6  16   4 | = 6·(4·16 - 20·4) - 16·(1·16 - 0) + 4·(1·4 - 0)<br>
+             | 1   4  20 | = 6·(-16) - 16·16 + 4·4 = -96 - 256 + 16 = <span class="highlight-red">-568 &lt; 0 ! (Крах устойчивости)</span><br>
+             | 0   6  16 |<br><br>
+        Δ₄ = <span class="highlight-red">-11 024 &lt; 0</span><br>
+        Δ₅ = a₀ · Δ₄ = 4 · (-11024) = <span class="highlight-red">-44 096 &lt; 0</span>
+      </div>
+
+      <div style="background: rgba(244, 63, 94, 0.1); border: 1px solid var(--accent-rose); border-radius: 8px; padding: 14px; margin-top: 14px;">
+        <strong style="color: var(--accent-rose);">ВЫВОД ПО ЗАДАНИЮ 1:</strong><br>
+        Поскольку минор <code>Δ₃ = -568 &lt; 0</code>, условие критерия Гурвица нарушено. <strong>Система НЕУСТОЙЧИВА.</strong><br>
+        Численные корни полинома подтверждают это: <code>p₂,₃ = +0.4377 ± j1.6834</code> имеют строго положительную действительную часть (Re &gt; 0).
+      </div>
+    </section>
+
+    <!-- РАЗДЕЛ 2: ЗАДАНИЕ 2 КРИТИЧЕСКИЙ КОЭФФИЦИЕНТ УСИЛЕНИЯ -->
+    <section class="card">
+      <h2>2. Задание 2: Определение диапазона устойчивости по усилению k</h2>
+      <p>Замкнутая система с тремя последовательными звеньями и единичной отрицательной обратной связью (Вариант 18):</p>
+      <div class="math-block">
+        W₁(p) = (p + 5) / (50p + 1)<br>
+        W₂(p) = 12 / (25p + 2)<br>
+        W₃(p) = 20k / (7p + 10)<br>
+        W_раз(p) = W₁ · W₂ · W₃ = [ 240k·(p + 5) ] / [ (50p + 1)(25p + 2)(7p + 10) ]
+      </div>
+
+      <p>Характеристическое уравнение замкнутой системы <code>1 + W_раз(p) = 0</code>:</p>
+      <div class="math-block">
+        A(p) = 8750 p³ + 13375 p² + (1264 + 240k) p + (20 + 1200k) = 0<br>
+        a₃ = 8750 &gt; 0<br>
+        a₂ = 13375 &gt; 0<br>
+        a₁ = 1264 + 240k<br>
+        a₀ = 20 + 1200k
+      </div>
+
+      <p>Критический определитель Гурвица для n = 3:</p>
+      <div class="math-block">
+        Δ₂ = a₂ · a₁ - a₃ · a₀ = 13375 · (1264 + 240k) - 8750 · (20 + 1200k)<br>
+        Δ₂(k) = 16 731 000 - 7 290 000 · k &gt; 0<br><br>
+        k &lt; 16 731 000 / 7 290 000 = <span class="highlight-cyan">1859 / 810 ≈ 2.295</span>
+      </div>
+
+      <!-- ИНТЕРАКТИВНЫЙ СИМУЛЯТОР -->
+      <div class="sim-controls">
+        <div class="slider-row">
+          <label for="kSlider">Коэффициент k:</label>
+          <input type="range" id="kSlider" min="0.1" max="4.5" step="0.05" value="1.0">
+          <span class="slider-val" id="kVal">1.00</span>
+          <span id="kStatus" class="badge" style="background: rgba(16, 185, 129, 0.2); color: var(--accent-emerald);">УСТОЙЧИВА</span>
+        </div>
+        <div style="font-size: 0.9rem; color: var(--text-secondary);">
+          Определитель Δ₂(k): <strong id="delta2Val" style="color: var(--accent-cyan);">+9.441 × 10⁶</strong> | 
+          Критическое значение: <code>k_крит = 2.295</code>
+        </div>
+      </div>
+
+      <canvas id="simCanvas"></canvas>
+      <div style="font-size: 0.85rem; color: var(--text-muted); text-align: center; margin-top: 6px;">
+        Слева: переходная характеристика h(t). Справа: перемещение полюсов на комплексной плоскости.
+      </div>
+    </section>
+
+    <!-- РАЗДЕЛ 3: ЗАДАНИЕ 3 КРИТЕРИЙ РАУСА -->
+    <section class="card">
+      <h2>3. Задание 3: Исследование устойчивости по таблицам Рауса</h2>
+
+      <h3 style="margin-bottom: 10px; color: var(--accent-cyan);">Уравнение 1 (5-й порядок): 4p⁵ + 6p⁴ + 3p³ + 24p² + 20p + 12 = 0</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Строка</th>
+            <th>C_i1 (Столбец 1)</th>
+            <th>C_i2</th>
+            <th>C_i3</th>
+            <th>Множитель λ</th>
+            <th>Знак C_i1</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><strong>4.0000</strong></td>
+            <td>3.0000</td>
+            <td>20.0000</td>
+            <td>—</td>
+            <td style="color: var(--accent-emerald);">+ (плюс)</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><strong>6.0000</strong></td>
+            <td>24.0000</td>
+            <td>12.0000</td>
+            <td>λ₁ = 4/6 = 0.6667</td>
+            <td style="color: var(--accent-emerald);">+ (плюс)</td>
+          </tr>
+          <tr style="background: rgba(244, 63, 94, 0.1);">
+            <td>3</td>
+            <td style="color: var(--accent-rose); font-weight: bold;">-13.0000</td>
+            <td>12.0000</td>
+            <td>0</td>
+            <td>λ₂ = 6/(-13) = -0.4615</td>
+            <td style="color: var(--accent-rose);">− (1-я смена знака!)</td>
+          </tr>
+          <tr style="background: rgba(16, 185, 129, 0.1);">
+            <td>4</td>
+            <td style="color: var(--accent-emerald); font-weight: bold;">+29.5385</td>
+            <td>12.0000</td>
+            <td>0</td>
+            <td>λ₃ = -13/(384/13) = -0.4401</td>
+            <td style="color: var(--accent-emerald);">+ (2-я смена знака!)</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td><strong>+17.2813</strong></td>
+            <td>0</td>
+            <td>0</td>
+            <td>λ₄ = (384/13)/(553/32) = 1.7093</td>
+            <td style="color: var(--accent-emerald);">+ (плюс)</td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td><strong>+12.0000</strong></td>
+            <td>0</td>
+            <td>0</td>
+            <td>—</td>
+            <td style="color: var(--accent-emerald);">+ (плюс)</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="math-block">
+        Последовательность знаков 1-го столбца: [ +, +, <span class="highlight-red">−</span>, <span class="highlight-green">+</span>, +, + ]<br>
+        Число перемен знака: <strong>2 перемены</strong> (+ на −, затем − на +).<br>
+        <strong>Вывод:</strong> Система неустойчива. Ровно <strong>2 корня</strong> лежат в правой полуплоскости (Re &gt; 0).
+      </div>
+
+      <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 24px 0;">
+
+      <h3 style="margin-bottom: 10px; color: var(--accent-cyan);">Уравнение 2 (4-й порядок): 2p⁴ + 3p³ + 14p² + 20p + 18 = 0</h3>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Строка</th>
+            <th>C_i1 (Столбец 1)</th>
+            <th>C_i2</th>
+            <th>C_i3</th>
+            <th>Множитель λ</th>
+            <th>Знак C_i1</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><strong>2.0000</strong></td>
+            <td>14.0000</td>
+            <td>18.0000</td>
+            <td>—</td>
+            <td style="color: var(--accent-emerald);">+ (плюс)</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><strong>3.0000</strong></td>
+            <td>20.0000</td>
+            <td>0</td>
+            <td>λ₁ = 2/3 = 0.6667</td>
+            <td style="color: var(--accent-emerald);">+ (плюс)</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><strong>+0.6667</strong> (2/3)</td>
+            <td>18.0000</td>
+            <td>0</td>
+            <td>λ₂ = 3/(2/3) = 4.5000</td>
+            <td style="color: var(--accent-emerald);">+ (плюс)</td>
+          </tr>
+          <tr style="background: rgba(244, 63, 94, 0.1);">
+            <td>4</td>
+            <td style="color: var(--accent-rose); font-weight: bold;">-61.0000</td>
+            <td>0</td>
+            <td>0</td>
+            <td>λ₃ = (2/3)/(-61) = -0.0109</td>
+            <td style="color: var(--accent-rose);">− (1-я смена знака!)</td>
+          </tr>
+          <tr style="background: rgba(16, 185, 129, 0.1);">
+            <td>5</td>
+            <td style="color: var(--accent-emerald); font-weight: bold;">+18.0000</td>
+            <td>0</td>
+            <td>0</td>
+            <td>—</td>
+            <td style="color: var(--accent-emerald);">+ (2-я смена знака!)</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="math-block">
+        Последовательность знаков 1-го столбца: [ +, +, +, <span class="highlight-red">−</span>, <span class="highlight-green">+</span> ]<br>
+        Число перемен знака: <strong>2 перемены</strong>.<br>
+        <strong>Вывод:</strong> Система неустойчива. Ровно <strong>2 корня</strong> лежат в правой полуплоскости (Re &gt; 0).
+      </div>
+    </section>
+
+    <!-- РАЗДЕЛ 4: ВОПРОСЫ К ЗАЩИТЕ ЛАБОРАТОРНОЙ -->
+    <section class="card">
+      <h2>4. Экспресс-тренажер к устной защите (8 вопросов программы)</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 20px;">
+        Проверьте свою готовность к коварным вопросам преподавателя на защите.
+      </p>
+
+      <div class="quiz-item" data-correct="1">
+        <div class="quiz-q">1. В чем состоит главное условие устойчивости линейной САУ по расположению полюсов?</div>
+        <div class="quiz-options">
+          <button class="quiz-btn" onclick="checkQuiz(this, 0)">Все полюса должны лежать на мнимой оси jω.</button>
+          <button class="quiz-btn" onclick="checkQuiz(this, 1)">Все полюса передаточной функции обязаны строго принадлежать левой части комплексной плоскости (Re &lt; 0).</button>
+          <button class="quiz-btn" onclick="checkQuiz(this, 2)">Хотя бы один полюс должен быть отрицательным действительным числом.</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz-item" data-correct="2">
+        <div class="quiz-q">2. Что произойдет, если один из главных диагональных миноров Гурвица равен нулю, а остальные положительны?</div>
+        <div class="quiz-options">
+          <button class="quiz-btn" onclick="checkQuiz(this, 0)">Система станет абсолютно устойчивой с нулевым временем регулирования.</button>
+          <button class="quiz-btn" onclick="checkQuiz(this, 1)">Система немедленно войдет в экспоненциальный разгон.</button>
+          <button class="quiz-btn" onclick="checkQuiz(this, 2)">Система находится на границе устойчивости (нейтральная система, возникают незатухающие гармонические колебания).</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz-item" data-correct="0">
+        <div class="quiz-q">3. Почему критерий Гурвица не рекомендуется применять при порядке системы n &gt; 5-6?</div>
+        <div class="quiz-options">
+          <button class="quiz-btn" onclick="checkQuiz(this, 0)">Из-за резкого роста вычислительной сложности ручного раскрытия определителей высоких порядков (O(n!)).</button>
+          <button class="quiz-btn" onclick="checkQuiz(this, 1)">Потому что для n &gt; 5 критерий перестает быть математически верным.</button>
+          <button class="quiz-btn" onclick="checkQuiz(this, 2)">Потому что характеристические уравнения выше 5-го порядка не имеют корней.</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz-item" data-correct="1">
+        <div class="quiz-q">4. Что показывает количество перемен знака в первом столбце таблицы Рауса?</div>
+        <div class="quiz-options">
+          <button class="quiz-btn" onclick="checkQuiz(this, 0)">Порядок астатизма системы.</button>
+          <button class="quiz-btn" onclick="checkQuiz(this, 1)">Количество корней характеристического уравнения, лежащих в правой (неустойчивой) полуплоскости (Re &gt; 0).</button>
+          <button class="quiz-btn" onclick="checkQuiz(this, 2)">Количество вещественных отрицательных корней.</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <div class="quiz-item" data-correct="2">
+        <div class="quiz-q">5. Чему равен критический коэффициент усиления k_крит в Задании 2 (Вариант 18)?</div>
+        <div class="quiz-options">
+          <button class="quiz-btn" onclick="checkQuiz(this, 0)">k_крит = 10.0</button>
+          <button class="quiz-btn" onclick="checkQuiz(this, 1)">k_крит = 0.52</button>
+          <button class="quiz-btn" onclick="checkQuiz(this, 2)">k_крит = 1859 / 810 ≈ 2.295</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Slider simulation
+    const kSlider = document.getElementById('kSlider');
+    const kVal = document.getElementById('kVal');
+    const kStatus = document.getElementById('kStatus');
+    const delta2Val = document.getElementById('delta2Val');
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = 320;
+      drawSim();
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    kSlider.addEventListener('input', () => {
+      drawSim();
+    });
+
+    function drawSim() {
+      const k = parseFloat(kSlider.value);
+      kVal.textContent = k.toFixed(2);
+
+      // Delta 2 = 16731000 - 7290000*k
+      const d2 = 16731000 - 7290000 * k;
+      delta2Val.textContent = (d2 > 0 ? "+" : "") + (d2 / 1e6).toFixed(3) + " × 10⁶";
+
+      if (k < 2.290) {
+        kStatus.textContent = "УСТОЙЧИВА";
+        kStatus.style.background = "rgba(16, 185, 129, 0.2)";
+        kStatus.style.color = "var(--accent-emerald)";
+      } else if (Math.abs(k - 2.295) <= 0.05) {
+        kStatus.textContent = "НЕЙТРАЛЬНА (ГРАНИЦА)";
+        kStatus.style.background = "rgba(245, 158, 11, 0.2)";
+        kStatus.style.color = "var(--accent-amber)";
+      } else {
+        kStatus.textContent = "НЕУСТОЙЧИВА";
+        kStatus.style.background = "rgba(244, 63, 94, 0.2)";
+        kStatus.style.color = "var(--accent-rose)";
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const halfW = canvas.width / 2;
+      const h = canvas.height;
+
+      // 1. LEFT HALF: Step response h(t)
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, 0, halfW, h);
+      ctx.clip();
+
+      // Axes
+      ctx.strokeStyle = '#243049';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(30, h - 30);
+      ctx.lineTo(halfW - 10, h - 30);
+      ctx.moveTo(30, 20);
+      ctx.lineTo(30, h - 30);
+      ctx.stroke();
+
+      // Target line y = 1.0 (approx at y = h - 100)
+      const targetY = h - 120;
+      ctx.strokeStyle = '#64748b';
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(30, targetY);
+      ctx.lineTo(halfW - 10, targetY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '11px sans-serif';
+      ctx.fillText('h(t) — переходный процесс', 40, 25);
+      ctx.fillText('t, c', halfW - 35, h - 12);
+      ctx.fillText('1.0', 10, targetY + 4);
+
+      // Simulate step response
+      const points = 250;
+      ctx.beginPath();
+      ctx.lineWidth = 2.2;
+      if (k < 2.29) {
+        ctx.strokeStyle = '#10b981'; // green
+      } else if (k > 2.30) {
+        ctx.strokeStyle = '#f43f5e'; // red
+      } else {
+        ctx.strokeStyle = '#f59e0b'; // orange
+      }
+
+      // Root damping factor sigma approx proportional to (2.295 - k)
+      const sigma = (2.295 - k) * 0.25;
+      const omega = 0.8 + 0.3 * Math.sqrt(k);
+
+      for (let i = 0; i < points; i++) {
+        const t = (i / points) * 20; // 0..20s
+        const px = 30 + (i / points) * (halfW - 50);
+        
+        let val = 1.0 - Math.exp(-sigma * t) * (Math.cos(omega * t) + (sigma/omega)*Math.sin(omega * t));
+        if (sigma < 0) {
+          // divergence clamp for visualization
+          val = 1.0 - Math.exp(-sigma * t) * Math.cos(omega * t);
+        }
+        const py = targetY - (val - 1.0) * 50;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      // Divider line
+      ctx.strokeStyle = '#243049';
+      ctx.beginPath();
+      ctx.moveTo(halfW, 0);
+      ctx.lineTo(halfW, h);
+      ctx.stroke();
+
+      // 2. RIGHT HALF: Root Locus (Complex plane)
+      ctx.save();
+      ctx.translate(halfW, 0);
+      const rlW = halfW;
+      const originX = rlW * 0.7; // origin moved right so left half-plane has more space
+      const originY = h / 2;
+
+      // Half-plane tints
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.05)';
+      ctx.fillRect(0, 0, originX, h);
+      ctx.fillStyle = 'rgba(244, 63, 94, 0.05)';
+      ctx.fillRect(originX, 0, rlW - originX, h);
+
+      // Axes
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(originX, 15);
+      ctx.lineTo(originX, h - 15);
+      ctx.moveTo(15, originY);
+      ctx.lineTo(rlW - 15, originY);
+      ctx.stroke();
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '11px sans-serif';
+      ctx.fillText('jω (Im)', originX + 6, 25);
+      ctx.fillText('σ (Re)', rlW - 40, originY - 8);
+      ctx.fillText('Комплексная плоскость p', 20, 25);
+
+      // Draw pole movement
+      // Re part moves with (k - 2.295)
+      const poleRe = (k - 2.295) * 45;
+      const poleIm = 75;
+
+      // Draw conjugate pair
+      ctx.fillStyle = (k < 2.29) ? '#10b981' : ((k > 2.30) ? '#f43f5e' : '#f59e0b');
+      
+      // Upper pole
+      ctx.beginPath();
+      ctx.arc(originX + poleRe, originY - poleIm, 7, 0, 2*Math.PI);
+      ctx.fill();
+
+      // Lower pole
+      ctx.beginPath();
+      ctx.arc(originX + poleRe, originY + poleIm, 7, 0, 2*Math.PI);
+      ctx.fill();
+
+      // Real pole
+      ctx.beginPath();
+      ctx.arc(originX - 110, originY, 6, 0, 2*Math.PI);
+      ctx.fill();
+
+      ctx.fillStyle = '#f1f5f9';
+      ctx.font = 'bold 10px monospace';
+      const signRe = poleRe >= 0 ? "+" : "-";
+      ctx.fillText(`p₁,₂ = ${signRe}${(Math.abs(poleRe)/45 * 0.1).toFixed(2)} ± j${(poleIm/50).toFixed(2)}`, originX + poleRe + 12, originY - poleIm + 4);
+
+      ctx.restore();
+    }
+
+    // Quiz logic
+    function checkQuiz(btn, selectedIdx) {
+      const parent = btn.closest('.quiz-item');
+      const correctIdx = parseInt(parent.dataset.correct);
+      const buttons = parent.querySelectorAll('.quiz-btn');
+      const feedback = parent.querySelector('.quiz-feedback');
+
+      buttons.forEach((b, idx) => {
+        b.disabled = true;
+        if (idx === correctIdx) {
+          b.classList.add('correct');
+        } else if (idx === selectedIdx) {
+          b.classList.add('wrong');
+        }
+      });
+
+      feedback.style.display = 'block';
+      if (selectedIdx === correctIdx) {
+        feedback.style.background = 'rgba(16, 185, 129, 0.15)';
+        feedback.style.color = 'var(--accent-emerald)';
+        feedback.innerHTML = '<strong>Верно!</strong> Отличный ответ для сдачи преподавателю.';
+      } else {
+        feedback.style.background = 'rgba(244, 63, 94, 0.15)';
+        feedback.style.color = 'var(--accent-rose)';
+        feedback.innerHTML = '<strong>Неверно.</strong> Правильный вариант подсвечен зеленым цветом.';
+      }
+    }
+
+    // Init
+    resizeCanvas();
+  </script>
+</body>
+</html>
