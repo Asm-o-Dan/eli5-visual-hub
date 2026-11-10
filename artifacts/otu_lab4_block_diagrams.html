@@ -230,6 +230,27 @@
       color: #fbbf24;
     }
 
+    /* Tables */
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 0.92rem;
+    }
+    table.data-table th, table.data-table td {
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      text-align: center;
+    }
+    table.data-table th {
+      background: var(--bg-surface-elevated);
+      color: var(--accent-cyan);
+      font-weight: 600;
+    }
+    table.data-table tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
     /* Canvas styling */
     canvas {
       width: 100%;
@@ -368,10 +389,81 @@ W_раз(p) = W₁ · W₂ · W₃ = 1000 / [ (1 + 0.2p) · (p + 20) · (1 + 0.0
       <div class="formula-box">
 W_зам(p) = W_раз(p) / [ 1 + W_раз(p) ] = 125000 / [ p³ + 50p² + 725p + 127500 ]
 Характеристическое уравнение: p³ + 50p² + 725p + 127500 = 0
-Определитель Гурвица: Δ₂ = a₁·a₂ - a₀·a₃ = 50 · 725 - 1 · 127500 = -91250 < 0  (НЕУСТОЙЧИВА!)
 Полюса замкнутой системы: p₁ = -67.35,  p₂,₃ = +8.67 ± j42.64  (Re > 0 => Автоколебания!)
 Критический коэффициент: K_крит = 270. При K = 1000 система глубоко неустойчива.
       </div>
+
+      <h5 style="color: var(--accent-cyan); margin-top: 16px;">Матрица Гурвица замкнутой системы 3×3:</h5>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Строка</th>
+            <th>Столбец 1</th>
+            <th>Столбец 2</th>
+            <th>Столбец 3</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td style="background: rgba(56, 189, 248, 0.15); font-weight: bold;">50 (a₂)</td>
+            <td>127 500 (a₀)</td>
+            <td>0</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>1 (a₃)</td>
+            <td style="background: rgba(56, 189, 248, 0.15); font-weight: bold;">725 (a₁)</td>
+            <td>0</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>0</td>
+            <td>50 (a₂)</td>
+            <td style="background: rgba(56, 189, 248, 0.15); font-weight: bold;">127 500 (a₀)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h5 style="color: var(--accent-cyan); margin-top: 16px;">Главные диагональные миноры Гурвица:</h5>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Минор</th>
+            <th>Формула</th>
+            <th>Расчет</th>
+            <th>Значение</th>
+            <th>Знак</th>
+            <th>Оценка</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Δ₁</strong></td>
+            <td>a₂</td>
+            <td>| 50 |</td>
+            <td>+50</td>
+            <td style="color: var(--accent-emerald); font-weight: bold;">&gt; 0</td>
+            <td style="color: var(--accent-emerald);">Устойчиво</td>
+          </tr>
+          <tr style="background: rgba(244, 63, 94, 0.12);">
+            <td><strong>Δ₂</strong></td>
+            <td>a₂·a₁ - a₃·a₀</td>
+            <td>50 · 725 - 1 · 127 500</td>
+            <td style="color: var(--accent-rose); font-weight: bold;">-91 250</td>
+            <td style="color: var(--accent-rose); font-weight: bold;">&lt; 0</td>
+            <td style="color: var(--accent-rose); font-weight: bold;">НЕУСТОЙЧИВА!</td>
+          </tr>
+          <tr>
+            <td><strong>Δ₃</strong></td>
+            <td>a₀ · Δ₂</td>
+            <td>127 500 · (-91 250)</td>
+            <td>-1,163·10¹⁰</td>
+            <td style="color: var(--accent-rose); font-weight: bold;">&lt; 0</td>
+            <td style="color: var(--accent-rose);">НЕУСТОЙЧИВА</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <!-- SECTION 3: ИНТЕРАКТИВНЫЙ СИМУЛЯТОР УСТОЙЧИВОСТИ -->
