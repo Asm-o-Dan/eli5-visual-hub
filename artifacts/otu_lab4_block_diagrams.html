@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>ELI5: Соединение звеньев и устойчивость САУ (ОТУ Лаб 4)</title>
+  <title>ELI5: Соединение звеньев, АЧХ, ФЧХ и устойчивость (ОТУ Лаб 4)</title>
   <style>
     :root {
       --bg: #0a0e17;
@@ -82,9 +82,9 @@
     h1 {
       font-size: clamp(1.8rem, 4vw, 2.4rem);
       font-weight: 800;
-      line-height: 1.25;
+      line-height: 1.2;
       margin-bottom: 12px;
-      background: linear-gradient(135deg, #f8fafc 20%, #38bdf8 100%);
+      background: linear-gradient(135deg, #f8fafc 30%, #38bdf8 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -92,7 +92,7 @@
     .hero-desc {
       color: var(--text-secondary);
       font-size: 1.05rem;
-      margin-bottom: 24px;
+      margin-bottom: 28px;
     }
 
     .section-card {
@@ -101,36 +101,24 @@
       border-radius: 16px;
       padding: 24px;
       margin-bottom: 24px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
     }
 
     .section-title {
       font-size: 1.25rem;
       font-weight: 700;
-      color: var(--accent-cyan);
-      margin-bottom: 16px;
+      color: #fff;
       display: flex;
       align-items: center;
       gap: 10px;
-    }
-
-    .formula-box {
-      background: var(--code-bg);
-      border-left: 4px solid var(--accent-blue);
-      padding: 14px 18px;
-      border-radius: 0 8px 8px 0;
-      margin: 14px 0;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      font-size: 0.95rem;
-      color: #38bdf8;
-      overflow-x: auto;
+      margin-bottom: 16px;
     }
 
     .grid-3 {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 16px;
-      margin-top: 16px;
+      margin-top: 14px;
     }
 
     .card-item {
@@ -140,157 +128,29 @@
       padding: 16px;
     }
 
-    .card-item h4 {
-      color: #fff;
-      font-size: 1rem;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
     .badge-tag {
       font-size: 0.72rem;
       padding: 2px 8px;
-      border-radius: 4px;
+      border-radius: 6px;
       font-weight: 700;
+      display: inline-block;
+      margin-bottom: 8px;
     }
-
     .badge-blue { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
     .badge-green { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .badge-purple { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
     .badge-amber { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
-    .badge-rose { background: rgba(244, 63, 94, 0.2); color: #fb7185; }
 
-    /* Interactive Simulator */
-    .sim-panel {
-      background: var(--bg-surface-elevated);
+    .formula-box {
+      background: var(--code-bg);
       border: 1px solid var(--border-color);
-      border-radius: 14px;
-      padding: 20px;
-      margin-top: 16px;
-    }
-
-    .slider-container {
-      margin: 16px 0;
-    }
-
-    .slider-label {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
-      font-weight: 600;
-      font-size: 0.95rem;
-    }
-
-    input[type=range] {
-      width: 100%;
-      height: 8px;
-      border-radius: 4px;
-      background: #243049;
-      outline: none;
-      -webkit-appearance: none;
-    }
-
-    input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: var(--accent-cyan);
-      cursor: pointer;
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
-    }
-
-    .status-banner {
-      padding: 14px 18px;
-      border-radius: 10px;
-      font-weight: 700;
-      margin-top: 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 1rem;
-    }
-
-    .status-stable {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      color: #34d399;
-    }
-
-    .status-unstable {
-      background: rgba(244, 63, 94, 0.15);
-      border: 1px solid rgba(244, 63, 94, 0.4);
-      color: #fb7185;
-    }
-
-    .status-crit {
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid rgba(245, 158, 11, 0.4);
-      color: #fbbf24;
-    }
-
-    /* Tables */
-    table.data-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 14px 0;
-      font-size: 0.92rem;
-    }
-    table.data-table th, table.data-table td {
-      border: 1px solid var(--border-color);
-      padding: 8px 12px;
-      text-align: center;
-    }
-    table.data-table th {
-      background: var(--bg-surface-elevated);
-      color: var(--accent-cyan);
-      font-weight: 600;
-    }
-    table.data-table tr:nth-child(even) {
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    /* Canvas styling */
-    canvas {
-      width: 100%;
-      height: 280px;
-      background: #06090f;
-      border-radius: 10px;
-      border: 1px solid var(--border-color);
-      display: block;
-      margin-top: 14px;
-    }
-
-    /* Quiz styling */
-    .quiz-q {
-      background: var(--bg-surface-elevated);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 16px 20px;
-      margin-bottom: 14px;
-    }
-
-    .quiz-opt {
-      background: #1e293b;
-      border: 1px solid #334155;
-      padding: 10px 14px;
       border-radius: 8px;
-      margin: 8px 0;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-size: 0.95rem;
-    }
-
-    .quiz-opt:hover { background: #273549; }
-    .quiz-opt.correct { background: rgba(16, 185, 129, 0.25); border-color: #10b981; color: #34d399; font-weight: 600; }
-    .quiz-opt.wrong { background: rgba(244, 63, 94, 0.25); border-color: #f43f5e; color: #fb7185; font-weight: 600; }
-
-    .quiz-hint {
-      margin-top: 8px;
-      font-size: 0.88rem;
-      color: var(--text-muted);
-      display: none;
+      padding: 12px 16px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.92rem;
+      color: #38bdf8;
+      margin: 10px 0;
+      overflow-x: auto;
     }
 
     .callout-exam {
@@ -299,6 +159,107 @@
       padding: 14px 18px;
       border-radius: 0 10px 10px 0;
       margin: 16px 0;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      font-size: 0.88rem;
+    }
+    .data-table th, .data-table td {
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      text-align: center;
+    }
+    .data-table th {
+      background: var(--bg-surface-elevated);
+      color: var(--accent-cyan);
+      font-weight: 600;
+    }
+    .data-table tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .sim-panel {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 18px;
+      margin-top: 16px;
+    }
+
+    .slider-container {
+      margin-bottom: 16px;
+    }
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+    input[type=range] {
+      width: 100%;
+      accent-color: var(--accent-cyan);
+    }
+
+    canvas {
+      width: 100%;
+      height: 280px;
+      background: #06090f;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      display: block;
+    }
+
+    .quiz-card {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    .quiz-q {
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+    }
+    .quiz-opt {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      padding: 8px 14px;
+      border-radius: 6px;
+      color: var(--text-main);
+      cursor: pointer;
+      margin-bottom: 6px;
+      font-size: 0.88rem;
+      transition: all 0.2s;
+    }
+    .quiz-opt:hover {
+      background: rgba(56, 189, 248, 0.1);
+      border-color: var(--accent-cyan);
+    }
+    .quiz-opt.correct {
+      background: rgba(16, 185, 129, 0.25) !important;
+      border-color: var(--accent-emerald) !important;
+      color: #34d399 !important;
+      font-weight: 700;
+    }
+    .quiz-opt.wrong {
+      background: rgba(244, 63, 94, 0.25) !important;
+      border-color: var(--accent-rose) !important;
+      color: #fb7185 !important;
+    }
+    .quiz-hint {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: var(--accent-cyan);
+      display: none;
     }
   </style>
 </head>
@@ -315,201 +276,174 @@
 
   <div class="container">
     <div class="hero-badge">Лабораторная работа № 4 &bull; Вариант 18</div>
-    <h1>Соединение звеньев и устойчивость САУ</h1>
+    <h1>Соединение звеньев, АЧХ, ФЧХ и устойчивость</h1>
     <p class="hero-desc">
-      Интерактивный симулятор преобразования структурных схем, анализ разомкнутой и замкнутой систем,
-      годограф Найквиста, критерий Гурвица и феномен срыва устойчивости при обратной связи.
+      Интерактивный конспект и тренажер по всем 5 пунктам задания: вывод передаточных функций,
+      аналитические АЧХ и ФЧХ, частотный годограф (АФЧХ), полюса и доказательство устойчивости разомкнутой цепи.
     </p>
 
     <!-- SECTION 1: ТРИ ТИПА СОЕДИНЕНИЙ -->
     <div class="section-card">
       <div class="section-title">
-        <span>🧩</span> 1. Базовые правила соединения звеньев
+        <span>🧩</span> 1. Базовые правила структурных преобразований
       </div>
       <p style="color: var(--text-secondary); margin-bottom: 12px;">
-        Любая сложная система автоматического регулирования сводится к комбинации трех элементарных типов соединений:
+        Любая сложная динамическая система декомпозируется на три элементарных типа соединений звеньев:
       </p>
 
       <div class="grid-3">
         <div class="card-item">
           <h4><span class="badge-tag badge-blue">1. Посл.</span> Последовательное</h4>
           <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px;">
-            Выход одного звена подается на вход следующего.
+            Выход одного звена подается на вход последующего.
           </p>
           <div class="formula-box">W_об(p) = W₁ · W₂ · W₃</div>
           <p style="font-size: 0.85rem; color: #94a3b8;">
-            Полюса системы — это совокупность полюсов всех звеньев. Устойчива только если устойчивы ВСЕ звенья.
+            Полюса соединения — это объединение полюсов звеньев. Устойчиво тогда и только тогда, когда устойчивы ВСЕ звенья!
           </p>
         </div>
 
         <div class="card-item">
           <h4><span class="badge-tag badge-green">2. Парал.</span> Параллельное согласное</h4>
           <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px;">
-            Один общий вход, выходы суммируются: y = y₁ + y₂ + y₃.
+            Общий вход, выходы суммируются: y = y₁ + y₂ + y₃.
           </p>
           <div class="formula-box">W_об(p) = W₁ + W₂ + W₃</div>
           <p style="font-size: 0.85rem; color: #94a3b8;">
-            Передаточные функции складываются при общем знаменателе.
+            Передаточные функции складываются при приведении к общему знаменателю.
           </p>
         </div>
 
         <div class="card-item">
-          <h4><span class="badge-tag badge-rose">3. ОС</span> Встречно-параллельное</h4>
+          <h4><span class="badge-tag badge-purple">3. ОС</span> Встречно-параллельное</h4>
           <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px;">
             Выход через звено обратной связи возвращается на вход.
           </p>
           <div class="formula-box">W_зам = W₁ / (1 ± W₁·W₂)</div>
           <p style="font-size: 0.85rem; color: #94a3b8;">
-            «+» — отрицательная ОС (ООС). Полюса смещаются! Устойчивая разомкнутая система может стать неустойчивой!
+            При единичной отрицательной ОС (ООС): W_зам = W_раз / [1 + W_раз]. Знаменатель меняется!
           </p>
         </div>
       </div>
     </div>
 
-    <!-- SECTION 2: ВАРИАНТ 18 АНАЛИТИКА -->
+    <!-- SECTION 2: 5 ПУНКТОВ ЗАДАНИЯ ВАРИАНТА 18 -->
     <div class="section-card">
       <div class="section-title">
-        <span>📐</span> 2. Аналитический расчет Варианта 18
+        <span>📐</span> 2. Результаты выполнения 5 пунктов задания (Вариант 18)
       </div>
 
       <div class="callout-exam">
-        <h4 style="color: #38bdf8; margin-bottom: 6px;">Структура Варианта 18:</h4>
-        <p>Прямой канал: W₁(p) = 10 / (1 + 0.2p), W₂(p) = 20 / (p + 20), W₃(p) = 5 / (1 + 0.04p).</p>
-        <p>Цепь обратной связи: единичная отрицательная обратная связь (W_ос(p) = 1).</p>
+        <h4 style="color: #38bdf8; margin-bottom: 6px;">Исходные параметры Варианта 18:</h4>
+        <p>• Звено 1: W₁(p) = 10 / (1 + 0.2p) = 50 / (p + 5), где k₂ = 10, T₂ = 0.2 с</p>
+        <p>• Звено 2: W₂(p) = 20 / (p + 20), где k₁ = 20</p>
+        <p>• Звено 3: W₃(p) = 5 / (1 + 0.04p) = 125 / (p + 25), где k₃ = 5, T₁ = 0.04 с</p>
       </div>
 
-      <h4 style="color: #fff; margin-top: 14px;">1. Разомкнутая система:</h4>
+      <h4 style="color: #fff; margin-top: 14px;">Пункт 1. Передаточная функция разомкнутой системы W_раз(p):</h4>
       <div class="formula-box">
-W_раз(p) = W₁ · W₂ · W₃ = 1000 / [ (1 + 0.2p) · (p + 20) · (1 + 0.04p) ]
-Нормализованная форма: W_раз(p) = 125000 / [ p³ + 50p² + 725p + 2500 ]
-Полюса разомкнутой цепи: p₁ = -5,  p₂ = -20,  p₃ = -25  (Все Re < 0 => УСТОЙЧИВА!)
+W_раз(p) = W₁(p) · W₂(p) · W₃(p) = 1000 / [ (1 + 0.2p)(p + 20)(1 + 0.04p) ]
+Стандартная форма:  W_раз(p) = 1000 / [ 0.008p³ + 0.4p² + 5.8p + 20 ]
+Нормированная форма: W_раз(p) = 125000 / [ p³ + 50p² + 725p + 2500 ]
+Статическое усиление: k₀ = W_раз(0) = 50 (33.98 дБ)
       </div>
 
-      <h4 style="color: #fff; margin-top: 14px;">2. Замкнутая система:</h4>
+      <h4 style="color: #fff; margin-top: 14px;">Пункт 2. Передаточная функция замкнутой системы W_зам(p):</h4>
       <div class="formula-box">
-W_зам(p) = W_раз(p) / [ 1 + W_раз(p) ] = 125000 / [ p³ + 50p² + 725p + 127500 ]
-Характеристическое уравнение: p³ + 50p² + 725p + 127500 = 0
-Полюса замкнутой системы: p₁ = -67.35,  p₂,₃ = +8.67 ± j42.64  (Re > 0 => Автоколебания!)
-Критический коэффициент: K_крит = 270. При K = 1000 система глубоко неустойчива.
+W_зам(p) = W_раз(p) / [ 1 + W_раз(p) ] = 1000 / [ 0.008p³ + 0.4p² + 5.8p + 1020 ]
+Нормированная форма: W_зам(p) = 125000 / [ p³ + 50p² + 725p + 127500 ]
+Статический коэффициент передачи: k_зам = 125000 / 127500 ≈ 0.9804 (ошибка 1.96%)
       </div>
 
-      <h5 style="color: var(--accent-cyan); margin-top: 16px;">Матрица Гурвица замкнутой системы 3×3:</h5>
+      <h4 style="color: #fff; margin-top: 14px;">Пункт 3. Частотные характеристики разомкнутой цепи:</h4>
+      <div class="formula-box">
+Комплексный коэффициент: W_раз(jω) = 1000 / [ (1 + 0.2jω) · (20 + jω) · (1 + 0.04jω) ]
+АЧХ:  A(ω) = 1000 / [ √(1 + 0.04ω²) · √(400 + ω²) · √(1 + 0.0016ω²) ]
+ФЧХ:  φ(ω) = -arctg(0.2ω) - arctg(ω / 20) - arctg(0.04ω)
+Частота φ = -90°:  ω = √50 ≈ 7.071 рад/с  (P = 0, Q ≈ -26.19)
+Частота φ = -180°: ω_π = √725 ≈ 26.926 рад/с (Q = 0, P ≈ -3.704)
+      </div>
+
+      <h5 style="color: var(--accent-cyan); margin-top: 16px;">Таблица расчета частотных характеристик:</h5>
       <table class="data-table">
         <thead>
           <tr>
-            <th>Строка</th>
-            <th>Столбец 1</th>
-            <th>Столбец 2</th>
-            <th>Столбец 3</th>
+            <th>Частота ω, рад/с</th>
+            <th>АЧХ A(ω)</th>
+            <th>ФЧХ φ(ω), град</th>
+            <th>Re: P(ω)</th>
+            <th>Im: Q(ω)</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td style="background: rgba(56, 189, 248, 0.15); font-weight: bold;">50 (a₂)</td>
-            <td>127 500 (a₀)</td>
-            <td>0</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>1 (a₃)</td>
-            <td style="background: rgba(56, 189, 248, 0.15); font-weight: bold;">725 (a₁)</td>
-            <td>0</td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td>0</td>
-            <td>50 (a₂)</td>
-            <td style="background: rgba(56, 189, 248, 0.15); font-weight: bold;">127 500 (a₀)</td>
-          </tr>
+          <tr><td>0.00</td><td>50.000</td><td>0.00°</td><td>+50.000</td><td>0.000</td></tr>
+          <tr><td>1.00</td><td>48.929</td><td>-16.46°</td><td>+46.923</td><td>-13.866</td></tr>
+          <tr><td>2.00</td><td>46.046</td><td>-32.09°</td><td>+39.013</td><td>-24.459</td></tr>
+          <tr><td>5.00</td><td>33.634</td><td>-70.35°</td><td>+11.312</td><td>-31.674</td></tr>
+          <tr style="background: rgba(56, 189, 248, 0.1);"><td><strong>7.07 (√50)</strong></td><td>26.189</td><td><strong>-90.00°</strong></td><td>0.000</td><td>-26.189</td></tr>
+          <tr><td>10.00</td><td>18.570</td><td>-111.80°</td><td>-6.897</td><td>-17.241</td></tr>
+          <tr><td>15.00</td><td>10.847</td><td>-139.40°</td><td>-8.235</td><td>-7.059</td></tr>
+          <tr><td>20.00</td><td>6.696</td><td>-159.62°</td><td>-6.277</td><td>-2.331</td></tr>
+          <tr style="background: rgba(245, 158, 11, 0.1);"><td><strong>26.93 (√725)</strong></td><td>3.704</td><td><strong>-180.00°</strong></td><td>-3.704</td><td>0.000</td></tr>
+          <tr><td>35.00</td><td>2.039</td><td>-196.59°</td><td>-1.954</td><td>+0.582</td></tr>
+          <tr><td>50.00</td><td>0.826</td><td>-215.92°</td><td>-0.669</td><td>+0.485</td></tr>
+          <tr><td>100.00</td><td>0.119</td><td>-241.79°</td><td>-0.056</td><td>+0.105</td></tr>
         </tbody>
       </table>
 
-      <h5 style="color: var(--accent-cyan); margin-top: 16px;">Главные диагональные миноры Гурвица:</h5>
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Минор</th>
-            <th>Формула</th>
-            <th>Расчет</th>
-            <th>Значение</th>
-            <th>Знак</th>
-            <th>Оценка</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Δ₁</strong></td>
-            <td>a₂</td>
-            <td>| 50 |</td>
-            <td>+50</td>
-            <td style="color: var(--accent-emerald); font-weight: bold;">&gt; 0</td>
-            <td style="color: var(--accent-emerald);">Устойчиво</td>
-          </tr>
-          <tr style="background: rgba(244, 63, 94, 0.12);">
-            <td><strong>Δ₂</strong></td>
-            <td>a₂·a₁ - a₃·a₀</td>
-            <td>50 · 725 - 1 · 127 500</td>
-            <td style="color: var(--accent-rose); font-weight: bold;">-91 250</td>
-            <td style="color: var(--accent-rose); font-weight: bold;">&lt; 0</td>
-            <td style="color: var(--accent-rose); font-weight: bold;">НЕУСТОЙЧИВА!</td>
-          </tr>
-          <tr>
-            <td><strong>Δ₃</strong></td>
-            <td>a₀ · Δ₂</td>
-            <td>127 500 · (-91 250)</td>
-            <td>-1,163·10¹⁰</td>
-            <td style="color: var(--accent-rose); font-weight: bold;">&lt; 0</td>
-            <td style="color: var(--accent-rose);">НЕУСТОЙЧИВА</td>
-          </tr>
-        </tbody>
-      </table>
+      <h4 style="color: #fff; margin-top: 18px;">Пункты 4 и 5. Характеристическое уравнение, полюса и устойчивость:</h4>
+      <div class="formula-box">
+Характеристическое уравнение: A_раз(p) = (1 + 0.2p)(p + 20)(1 + 0.04p) = 0
+Полюса:
+• p₁ = -1 / 0.2  = -5 с⁻¹   (Re = -5 < 0, левая полуплоскость)
+• p₂ = -20 с⁻¹             (Re = -20 < 0, левая полуплоскость)
+• p₃ = -1 / 0.04 = -25 с⁻¹  (Re = -25 < 0, левая полуплоскость)
+
+Вывод об устойчивости:
+Так как ВСЕ полюса p₁, p₂, p₃ имеют строго отрицательную вещественную часть (Re < 0),
+РАЗОМКНУТАЯ СИСТЕМА ЯВЛЯЕТСЯ АСИМПТОТИЧЕСКИ УСТОЙЧИВОЙ!
+      </div>
     </div>
 
-    <!-- SECTION 3: ИНТЕРАКТИВНЫЙ СИМУЛЯТОР УСТОЙЧИВОСТИ -->
+    <!-- SECTION 3: ИНТЕРАКТИВНЫЙ ГРАФИК АЧХ/ФЧХ И ГОДОГРАФА -->
     <div class="section-card">
       <div class="section-title">
-        <span>🎛️</span> 3. Интерактивный симулятор: Управление усилением K
+        <span>🎛️</span> 3. Интерактивная визуализация: АЧХ, ФЧХ и частотный годограф
       </div>
-      <p style="color: var(--text-secondary);">
-        Подвигайте ползунок суммарного коэффициента усиления K = k₁·k₂·k₃, чтобы в реальном времени увидеть
-        смещение полюсов замкнутой системы через мнимую ось и охват критической точки (-1; j0) на годографе Найквиста:
+      <p style="color: var(--text-secondary); margin-bottom: 14px;">
+        Перемещайте ползунок частоты ω, чтобы наблюдать изменение рабочей точки на характеристиках разомкнутой системы:
       </p>
 
       <div class="sim-panel">
         <div class="slider-container">
           <div class="slider-label">
-            <span>Общий коэффициент усиления K:</span>
-            <span id="k-val" style="color: var(--accent-cyan); font-family: monospace; font-size: 1.1rem;">K = 1000</span>
+            <span>Круговая частота ω:</span>
+            <span id="w-val" style="color: var(--accent-cyan); font-family: monospace; font-size: 1.1rem; font-weight: bold;">ω = 10.00 рад/с</span>
           </div>
-          <input type="range" id="k-slider" min="50" max="1500" value="1000" step="10" oninput="updateSim(this.value)">
+          <input type="range" id="w-slider" min="0" max="60" value="10" step="0.5" oninput="updateFreq(this.value)">
         </div>
 
-        <div id="sim-status" class="status-banner status-unstable">
-          <span>❌</span> <span>Система НЕУСТОЙЧИВА (K = 1000 > K_крит = 270). Определитель Гурвица Δ₂ = -91250 < 0.</span>
+        <div id="freq-status" style="background: rgba(56, 189, 248, 0.1); border: 1px solid var(--accent-cyan); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 0.92rem;">
+          <span id="freq-metrics">A(10.0) = 18.57, φ(10.0) = -111.8°, P = -6.90, Q = -17.24</span>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
           <div>
-            <h5 style="color: #fff; margin-bottom: 6px;">Годограф Найквиста W_раз(jω):</h5>
-            <canvas id="nyquistCanvas"></canvas>
+            <h5 style="color: #fff; margin-bottom: 6px;">АЧХ A(ω) и ФЧХ φ(ω):</h5>
+            <canvas id="bodeCanvas"></canvas>
           </div>
           <div>
-            <h5 style="color: #fff; margin-bottom: 6px;">Карта полюсов замкнутой САУ:</h5>
-            <canvas id="polesCanvas"></canvas>
+            <h5 style="color: #fff; margin-bottom: 6px;">Частотный годограф (АФЧХ) W_раз(jω):</h5>
+            <canvas id="hodographCanvas"></canvas>
           </div>
-        </div>
-
-        <div style="margin-top: 12px; font-size: 0.88rem; color: #94a3b8;" id="sim-details">
-          Пересечение отрицательной вещественной оси при ω_π = 26.93 рад/с: Re = -3.704 (точка -1 охвачена).
         </div>
       </div>
     </div>
 
-    <!-- SECTION 4: ЭКЗАМЕНАЦИОННЫЙ ТРЕНАЖЕР -->
+    <!-- SECTION 4: ТРЕНАЖЕР ЗАЩИТЫ -->
     <div class="section-card">
       <div class="section-title">
-        <span>📝</span> 4. Экзаменационный тренажер защиты (10 вопросов)
+        <span>📝</span> 4. Экспресс-тренажер защиты (10 контрольных вопросов)
       </div>
       <div id="quiz-container"></div>
     </div>
@@ -517,269 +451,315 @@ W_зам(p) = W_раз(p) / [ 1 + W_раз(p) ] = 125000 / [ p³ + 50p² + 725p 
   </div>
 
   <script>
-    // Nyquist & Poles Interactive Simulation
-    const K_CRIT = 270.0;
-    const OMEGA_PI = Math.sqrt(725); // 26.926
-
-    function updateSim(kVal) {
-      kVal = parseFloat(kVal);
-      document.getElementById('k-val').innerText = 'K = ' + kVal;
+    // Freq response calculation
+    function calcW(w) {
+      if (w === 0) return { A: 50.0, phi: 0.0, P: 50.0, Q: 0.0 };
       
-      const banner = document.getElementById('sim-status');
-      const details = document.getElementById('sim-details');
-      
-      const a0 = 1.0;
-      const a1 = 50.0;
-      const a2 = 725.0;
-      const a3 = 2500.0 + kVal / 0.008;
-      const delta2 = a1 * a2 - a0 * a3;
-      const reCross = -kVal / 270.0;
-
-      if (kVal < K_CRIT - 5) {
-        banner.className = 'status-banner status-stable';
-        banner.innerHTML = `<span>✅</span> <span>Система УСТОЙЧИВА (K = ${kVal} < K_крит = 270). Полюса в левой полуплоскости.</span>`;
-      } else if (Math.abs(kVal - K_CRIT) <= 5) {
-        banner.className = 'status-banner status-crit';
-        banner.innerHTML = `<span>⚠️</span> <span>ГРАНИЦА УСТОЙЧИВОСТИ (K ≈ 270). Незатухающие автоколебания при ω = 26.9 рад/с.</span>`;
-      } else {
-        banner.className = 'status-banner status-unstable';
-        banner.innerHTML = `<span>❌</span> <span>Система НЕУСТОЙЧИВА (K = ${kVal} > K_крит = 270). Δ₂ = ${delta2.toFixed(0)} < 0.</span>`;
-      }
-
-      details.innerHTML = `Пересечение действительной оси: Re(jω_π) = <strong>${reCross.toFixed(3)}</strong> | Критическая точка (-1; j0) ${reCross < -1 ? '<span style="color:#f43f5e">ОХВАЧЕНА</span>' : '<span style="color:#10b981">НЕ ОХВАЧЕНА</span>'}.`;
-
-      drawNyquist(kVal, reCross);
-      drawPoles(kVal, delta2);
+      const num = 1000.0;
+      // denom = (1 + 0.2jw)*(20 + jw)*(1 + 0.04jw)
+      // = (20 - 0.2w^2 + j 21w)*(1 + 0.04jw)
+      // or using polynomial: D(jw) = (2500 - 50*w^2) + j*(725*w - w^3) / 125
+      const Re_D = 20.0 - 0.4*w*w;
+      const Im_D = 5.8*w - 0.008*w*w*w;
+      const magD2 = Re_D*Re_D + Im_D*Im_D;
+      const P = (num * Re_D) / magD2;
+      const Q = (-num * Im_D) / magD2;
+      const A = Math.sqrt(P*P + Q*Q);
+      let phi = Math.atan2(Q, P) * 180 / Math.PI;
+      if (phi > 5) phi -= 360;
+      return { A, phi, P, Q };
     }
 
-    function drawNyquist(kVal, reCross) {
-      const cv = document.getElementById('nyquistCanvas');
-      const ctx = cv.getContext('2d');
-      const w = cv.width = cv.clientWidth * 2;
-      const h = cv.height = cv.clientHeight * 2;
+    function updateFreq(wVal) {
+      wVal = parseFloat(wVal);
+      document.getElementById('w-val').innerText = 'ω = ' + wVal.toFixed(2) + ' рад/с';
+      
+      const res = calcW(wVal);
+      let extra = '';
+      if (Math.abs(wVal - 7.07) < 1.0) extra = ' (Пересечение оси jQ, φ ≈ -90°)';
+      if (Math.abs(wVal - 26.93) < 1.0) extra = ' (Пересечение отриц. оси Re, φ ≈ -180°)';
+      
+      document.getElementById('freq-metrics').innerHTML = 
+        `<strong>A(ω) = ${res.A.toFixed(2)}</strong> | <strong>φ(ω) = ${res.phi.toFixed(1)}°</strong> | Re = ${res.P.toFixed(2)}, Im = ${res.Q.toFixed(2)}${extra}`;
 
-      ctx.clearRect(0, 0, w, h);
+      drawBode(wVal);
+      drawHodograph(wVal);
+    }
 
-      // Origin center: mapped so -5..10 fits
-      const ox = w * 0.45;
-      const oy = h * 0.5;
-      const scale = w / 18.0;
+    function drawBode(curW) {
+      const c = document.getElementById('bodeCanvas');
+      if (!c) return;
+      const ctx = c.getContext('2d');
+      const W = c.width = c.clientWidth;
+      const H = c.height = c.clientHeight;
 
-      // Axes
-      ctx.strokeStyle = '#243049';
-      ctx.lineWidth = 1.5;
+      ctx.fillStyle = '#06090f';
+      ctx.fillRect(0, 0, W, H);
+
+      // Grid
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1;
+      for (let x = 40; x < W; x += 50) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+      }
+      for (let y = 20; y < H; y += 40) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+      }
+
+      // Curve A(w)
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2.5;
       ctx.beginPath();
-      ctx.moveTo(0, oy); ctx.lineTo(w, oy);
-      ctx.moveTo(ox, 0); ctx.lineTo(ox, h);
+      for (let px = 0; px < W; px++) {
+        const w = (px / W) * 60.0;
+        const pt = calcW(w);
+        // map A: 0..55 -> H/2 .. 10
+        const py = (H / 2) - (pt.A / 55.0) * ((H / 2) - 15);
+        if (px === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
       ctx.stroke();
 
-      // Critical Point (-1, 0)
-      const cx = ox - 1.0 * scale;
-      const cy = oy;
-      ctx.fillStyle = '#f43f5e';
-      ctx.beginPath();
-      ctx.arc(cx, cy, 6, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.font = '22px sans-serif';
-      ctx.fillText('(-1,0)', cx - 35, cy - 14);
-
-      // Nyquist curve
+      // Curve Phi(w)
       ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-
-      let first = true;
-      for (let omega = 0.05; omega < 150; omega += 0.2) {
-        // W(jw) = 125000 * (kVal/1000) / ( (2500 - 50 w^2) + j(725 w - w^3) )
-        const num = (kVal / 0.008);
-        const reD = 2500 - 50 * omega * omega;
-        const imD = 725 * omega - Math.pow(omega, 3);
-        const denMod = reD * reD + imD * imD;
-        const reH = (num * reD) / denMod;
-        const imH = (-num * imD) / denMod;
-
-        const px = ox + reH * scale;
-        const py = oy - imH * scale;
-
-        if (first) { ctx.moveTo(px, py); first = false; }
-        else { ctx.lineTo(px, py); }
-      }
-      ctx.stroke();
-
-      // Mark intersection
-      const pxCross = ox + reCross * scale;
-      ctx.fillStyle = reCross < -1 ? '#f43f5e' : '#10b981';
-      ctx.beginPath();
-      ctx.arc(pxCross, oy, 8, 0, 2*Math.PI);
-      ctx.fill();
-    }
-
-    function drawPoles(kVal, delta2) {
-      const cv = document.getElementById('polesCanvas');
-      const ctx = cv.getContext('2d');
-      const w = cv.width = cv.clientWidth * 2;
-      const h = cv.height = cv.clientHeight * 2;
-
-      ctx.clearRect(0, 0, w, h);
-
-      const ox = w * 0.7; // Imaginary axis
-      const oy = h * 0.5;
-      const scale = w / 110.0;
-
-      // Fill right half plane (unstable zone)
-      ctx.fillStyle = 'rgba(244, 63, 94, 0.08)';
-      ctx.fillRect(ox, 0, w - ox, h);
-
-      // Axes
-      ctx.strokeStyle = '#f43f5e';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(ox, 0); ctx.lineTo(ox, h); // Im axis
+      for (let px = 0; px < W; px++) {
+        const w = (px / W) * 60.0;
+        const pt = calcW(w);
+        // map phi: 0..-270 -> H/2 .. H - 10
+        const py = (H / 2) + (-pt.phi / 270.0) * ((H / 2) - 15);
+        if (px === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
       ctx.stroke();
 
-      ctx.strokeStyle = '#243049';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(0, oy); ctx.lineTo(w, oy); // Re axis
-      ctx.stroke();
+      // Current frequency line
+      const curPx = (curW / 60.0) * W;
+      ctx.strokeStyle = '#fbbf24';
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.moveTo(curPx, 0); ctx.lineTo(curPx, H); ctx.stroke();
+      ctx.setLineDash([]);
 
-      // Approx complex conjugate poles trajectory
-      // Re(p) approx proportional to (K - 270)
-      const sigma = (kVal - 270.0) / 84.0;
-      const omega = 26.9 + Math.sqrt(Math.max(0, kVal - 100)) * 0.5;
-      const realPole = -50 - (kVal / 50.0);
+      // Current points
+      const curPt = calcW(curW);
+      const curPyA = (H / 2) - (curPt.A / 55.0) * ((H / 2) - 15);
+      const curPyPhi = (H / 2) + (-curPt.phi / 270.0) * ((H / 2) - 15);
 
-      // Draw real pole
-      ctx.fillStyle = '#60a5fa';
-      ctx.beginPath();
-      ctx.arc(ox + realPole * scale, oy, 7, 0, 2*Math.PI);
-      ctx.fill();
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath(); ctx.arc(curPx, curPyA, 5, 0, Math.PI*2); ctx.fill();
 
-      // Draw complex poles
-      ctx.fillStyle = sigma > 0 ? '#f43f5e' : '#34d399';
-      ctx.beginPath();
-      ctx.arc(ox + sigma * scale, oy - omega * scale, 8, 0, 2*Math.PI);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(ox + sigma * scale, oy + omega * scale, 8, 0, 2*Math.PI);
-      ctx.fill();
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath(); ctx.arc(curPx, curPyPhi, 5, 0, Math.PI*2); ctx.fill();
 
-      ctx.font = '22px monospace';
-      ctx.fillText(`p1=${realPole.toFixed(1)}`, ox + realPole * scale - 40, oy + 28);
-      ctx.fillText(`p2,3=${sigma.toFixed(1)}±j${omega.toFixed(1)}`, ox + sigma * scale + 14, oy - omega * scale);
+      // Legend
+      ctx.font = '10px sans-serif';
+      ctx.fillStyle = '#ef4444';
+      ctx.fillText('АЧХ A(ω)', 10, 18);
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillText('ФЧХ φ(ω)', 10, H/2 + 16);
     }
 
-    // 10 Quiz Questions
+    function drawHodograph(curW) {
+      const c = document.getElementById('hodographCanvas');
+      if (!c) return;
+      const ctx = c.getContext('2d');
+      const W = c.width = c.clientWidth;
+      const H = c.height = c.clientHeight;
+
+      ctx.fillStyle = '#06090f';
+      ctx.fillRect(0, 0, W, H);
+
+      // Origin mapping: Re in [-15, 55], Im in [-35, 10]
+      const originX = W * 0.28;
+      const originY = H * 0.25;
+      const scale = W / 80.0;
+
+      // Axes
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(0, originY); ctx.lineTo(W, originY); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(originX, 0); ctx.lineTo(originX, H); ctx.stroke();
+
+      // Labels
+      ctx.font = '10px monospace';
+      ctx.fillStyle = '#64748b';
+      ctx.fillText('+Re', W - 25, originY - 6);
+      ctx.fillText('-jIm', originX + 6, H - 8);
+      ctx.fillText('(0,0)', originX + 4, originY - 4);
+
+      // Hodograph curve
+      ctx.strokeStyle = '#a855f7';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      for (let i = 0; i <= 200; i++) {
+        const w = (i / 200.0) * 100.0;
+        const pt = calcW(w);
+        const px = originX + pt.P * scale;
+        const py = originY - pt.Q * scale;
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+
+      // Specific marker: (50, 0)
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath(); ctx.arc(originX + 50 * scale, originY, 4, 0, Math.PI*2); ctx.fill();
+      ctx.fillText('ω=0', originX + 50 * scale - 12, originY + 14);
+
+      // Current point
+      const curPt = calcW(curW);
+      const cPx = originX + curPt.P * scale;
+      const cPy = originY - curPt.Q * scale;
+
+      // Vector from origin
+      ctx.strokeStyle = 'rgba(251, 191, 36, 0.4)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(originX, originY); ctx.lineTo(cPx, cPy); ctx.stroke();
+
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath(); ctx.arc(cPx, cPy, 6, 0, Math.PI*2); ctx.fill();
+    }
+
+    // Quiz generator
     const quizData = [
       {
-        q: "1. Как вычисляется передаточная функция трех последовательно соединенных звеньев?",
-        opts: ["W = W₁ + W₂ + W₃", "W = W₁ · W₂ · W₃", "W = W₁ / (W₂ · W₃)", "W = (W₁ + W₂) · W₃"],
-        c: 1,
-        h: "При последовательном соединении звеньев их передаточные функции перемножаются."
-      },
-      {
-        q: "2. Каково необходимое и достаточное условие асимптотической устойчивости линейного динамического звена?",
+        q: "1. Как находится передаточная функция последовательного соединения динамических звеньев?",
         opts: [
-          "Все нули находятся в правой полуплоскости",
-          "Все полюса находятся строго в левой части комплексной плоскости (Re < 0)",
-          "Коэффициент передачи равен 1",
-          "Хотя бы один корень равен нулю"
+          "W_об(p) = W₁(p) · W₂(p) · ... · W_n(p) (перемножением)",
+          "W_об(p) = W₁(p) + W₂(p) + ... + W_n(p) (сложением)",
+          "W_об(p) = W₁(p) / [1 + W₂(p)]",
+          "W_об(p) = max(W₁(p), W₂(p))"
         ],
-        c: 1,
-        h: "Для устойчивости необходимо и достаточно, чтобы вещественные части всех полюсов были отрицательны."
+        ans: 0,
+        hint: "При последовательном соединении выход предыдущего звена подается на вход последующего, поэтому коэффициенты и передаточные функции перемножаются."
       },
       {
-        q: "3. Каковы полюса разомкнутой системы в варианте 18?",
-        opts: ["p = -1, -2, -3", "p = -5, -20, -25", "p = +5, +20, +25", "p = 0, -10, -20"],
-        c: 1,
-        h: "1 + 0.2p = 0 => p=-5; p + 20 = 0 => p=-20; 1 + 0.04p = 0 => p=-25."
-      },
-      {
-        q: "4. Устойчива ли разомкнутая система в варианте 18?",
-        opts: ["Да, устойчива (все полюса в левой полуплоскости)", "Нет, неустойчива", "Находится на границе устойчивости", "Нельзя определить"],
-        c: 0,
-        h: "Так как p₁=-5, p₂=-20, p₃=-25 — все корни вещественные и отрицательные, разомкнутая система асимптотически устойчива."
-      },
-      {
-        q: "5. По какой формуле определяется передаточная функция системы с единичной отрицательной обратной связью?",
-        opts: ["W_зам = W_раз / (1 - W_раз)", "W_зам = W_раз / (1 + W_раз)", "W_зам = 1 + W_раз", "W_зам = W_раз²"],
-        c: 1,
-        h: "При единичной отрицательной обратной связи W_зам(p) = W_раз(p) / [1 + W_раз(p)]."
-      },
-      {
-        q: "6. Какой результат дает критерий Гурвица для замкнутой системы Варианта 18 (при K=1000)?",
+        q: "2. Чему равна передаточная функция замкнутой системы с единичной отрицательной обратной связью?",
         opts: [
-          "Δ₂ = +91250 > 0 (система устойчива)",
-          "Δ₂ = -91250 < 0 (система НЕУСТОЙЧИВА)",
-          "Δ₂ = 0 (граница устойчивости)",
-          "Критерий Гурвица неприменим"
+          "W_зам(p) = W_раз(p) / [ 1 + W_раз(p) ]",
+          "W_зам(p) = W_раз(p) / [ 1 - W_раз(p) ]",
+          "W_зам(p) = 1 + W_раз(p)",
+          "W_зам(p) = W_раз(p) · [ 1 + W_раз(p) ]"
         ],
-        c: 1,
-        h: "Δ₂ = a₁·a₂ - a₀·a₃ = 50·725 - 127500 = -91250 < 0, что свидетельствует о неустойчивости."
+        ans: 0,
+        hint: "Каноническая формула замкнутого контура с единичной ООС: W_зам = W_раз / (1 + W_раз)."
       },
       {
-        q: "7. Почему замкнутая система стала неустойчивой, если все составляющие звенья устойчивы?",
+        q: "3. Каковы численные значения полюсов разомкнутой системы в Варианте 18?",
         opts: [
-          "Из-за сбоя в делении на ноль",
-          "Из-за фазового сдвига в -180° и чрезмерного усиления K=1000, превратившего ООС в синфазную ПОС",
-          "Потому что звенья были соединены параллельно",
-          "Из-за отсутствия интегратора"
+          "p₁ = -5 с⁻¹, p₂ = -20 с⁻¹, p₃ = -25 с⁻¹",
+          "p₁ = +5 с⁻¹, p₂ = +20 с⁻¹, p₃ = +25 с⁻¹",
+          "p₁ = -0.2 с⁻¹, p₂ = -20 с⁻¹, p₃ = -0.04 с⁻¹",
+          "p₁ = -10 с⁻¹, p₂ = -20 с⁻¹, p₃ = -5 с⁻¹"
         ],
-        c: 1,
-        h: "Три апериодических звена на частоте сопряжения дают фазовый сдвиг -180°. Высокое усиление вызывает самовозбуждение."
+        ans: 0,
+        hint: "Знаменатель: (1 + 0.2p)(p + 20)(1 + 0.04p) = 0 => p₁ = -1/0.2 = -5, p₂ = -20, p₃ = -1/0.04 = -25."
       },
       {
-        q: "8. Чему равен критический коэффициент передачи K_крит для Варианта 18?",
-        opts: ["K_крит = 100", "K_крит = 270", "K_крит = 1000", "K_крит = 50"],
-        c: 1,
-        h: "Условие Δ₂ = 0 дает K_крит = 33750 · 0.008 = 270."
-      },
-      {
-        q: "9. Что показывает годограф Найквиста для замкнутой системы при K=1000?",
+        q: "4. Устойчива ли разомкнутая система по Варианту 18?",
         opts: [
-          "Годограф не охватывает точку (-1; j0)",
-          "Годограф охватывает точку (-1; j0), пересекая действительную ось в точке Re = -3.704",
-          "Годограф проходит строго через (0, 0)",
-          "Годограф лежит только в первом квадранте"
+          "Да, асимптотически устойчива, так как все три полюса лежат в левой полуплоскости (Re < 0)",
+          "Нет, система неустойчива",
+          "Система находится на нейтральной границе устойчивости",
+          "Устойчивость зависит от знака входного воздействия"
         ],
-        c: 1,
-        h: "При ω = √725 годограф пересекает ось в Re = -3.704 < -1, охватывая критическую точку (-1; j0)."
+        ans: 0,
+        hint: "По теореме Ляпунова, если Re(p_i) < 0 для всех полюсов, свободный процесс затухает и система устойчива."
       },
       {
-        q: "10. Каким образом можно восстановить устойчивость системы в Варианте 18?",
+        q: "5. Чему равен статический коэффициент передачи разомкнутой цепи k₀ = W_раз(0)?",
         opts: [
-          "Увеличить K до 2000",
-          "Уменьшить общий коэффициент передачи K < 270 (например, K=150) или ввести корректирующее фазоопережающее звено",
-          "Заменить ООС на ПОС",
-          "Удалить сумматор"
+          "50 (1000 / 20 = 50)",
+          "1000",
+          "20",
+          "0.98"
         ],
-        c: 1,
-        h: "Снижение усиления ниже K_крит = 270 или введение дифференцирующего звена возвращает полюса в левую полуплоскость."
+        ans: 0,
+        hint: "k₀ = (k₁ · k₂ · k₃) / (1 · 20 · 1) = (20 · 10 · 5) / 20 = 1000 / 20 = 50."
+      },
+      {
+        q: "6. Какой характер имеет переходная характеристика h(t) разомкнутой системы Варианта 18?",
+        opts: [
+          "Монотонный апериодический затухающий процесс без перерегулирования и колебаний",
+          "Колебательный с перерегулированием более 50%",
+          "Экспоненциально нарастающий (автоколебания)",
+          "Гармонические незатухающие колебания"
+        ],
+        ans: 0,
+        hint: "Так как все полюса вещественные и отрицательные (без мнимых частей), переходный процесс представляет собой сумму убывающих экспонент без колебаний."
+      },
+      {
+        q: "7. На какой частоте суммарный фазовый сдвиг ФЧХ разомкнутой системы достигает -180°?",
+        opts: [
+          "ω_π = √725 ≈ 26.93 рад/с",
+          "ω = √50 ≈ 7.07 рад/с",
+          "ω = 10 рад/с",
+          "ω = 50 рад/с"
+        ],
+        ans: 0,
+        hint: "Мнимая часть знаменателя 725·ω - ω³ = 0 => ω_π = √725 ≈ 26.926 рад/с."
+      },
+      {
+        q: "8. В какой квадрант комплексной плоскости выходит частотный годограф из точки (50; 0) при малых частотах?",
+        opts: [
+          "В IV квадрант (P > 0, Q < 0, фазовое запаздывание φ < 0)",
+          "В I квадрант (P > 0, Q > 0)",
+          "В II квадрант (P < 0, Q > 0)",
+          "В III квадрант (P < 0, Q < 0)"
+        ],
+        ans: 0,
+        hint: "При малых частотах вещественная часть P ≈ 50 > 0, а мнимая часть Q < 0 (фаза отрицательна), что соответствует IV квадранту."
+      },
+      {
+        q: "9. Почему при последовательном соединении устойчивых звеньев результат ВСЕГДА устойчив?",
+        opts: [
+          "Потому что знаменатель общего соединения равен произведению знаменателей звеньев, и все полюса остаются в левой полуплоскости",
+          "Потому что перемножаются коэффициенты передачи",
+          "Потому что отсутствует сумматор",
+          "Это справедливо только для звеньев первого порядка"
+        ],
+        ans: 0,
+        hint: "A_об(p) = A₁(p)·A₂(p)·... Корни общего полинома — это просто объединение корней исходных звеньев. Если все корни были слева, они там и остаются."
+      },
+      {
+        q: "10. Каков физический смысл амплитудно-частотной характеристики (АЧХ)?",
+        opts: [
+          "Показывает отношение амплитуды выходного синусоидального сигнала к входному в установившемся режиме на частоте ω",
+          "Показывает скорость затухания свободного процесса",
+          "Определяет статическую ошибку слежения",
+          "Показывает время регулирования системы"
+        ],
+        ans: 0,
+        hint: "АЧХ A(ω) = |W(jω)| определяет коэффициент усиления (или ослабления) синусоидального сигнала системой на частоте ω."
       }
     ];
 
     function initQuiz() {
-      const container = document.getElementById('quiz-container');
-      container.innerHTML = quizData.map((item, idx) => `
-        <div class="quiz-q" id="q-${idx}">
-          <p style="font-weight: 700; color: #fff; margin-bottom: 8px;">${item.q}</p>
-          ${item.opts.map((opt, oIdx) => `
-            <div class="quiz-opt" onclick="checkAnswer(${idx}, ${oIdx})">${opt}</div>
-          `).join('')}
-          <div class="quiz-hint" id="hint-${idx}">💡 ${item.h}</div>
-        </div>
-      `).join('');
+      const cont = document.getElementById('quiz-container');
+      cont.innerHTML = '';
+      quizData.forEach((q, idx) => {
+        const card = document.createElement('div');
+        card.className = 'quiz-card';
+        card.innerHTML = `
+          <div class="quiz-q">${q.q}</div>
+          <div class="quiz-opts" id="opts-${idx}">
+            ${q.opts.map((opt, oIdx) => `
+              <button class="quiz-opt" onclick="checkAnswer(${idx}, ${oIdx})">${opt}</button>
+            `).join('')}
+          </div>
+          <div class="quiz-hint" id="hint-${idx}">💡 ${q.hint}</div>
+        `;
+        cont.appendChild(card);
+      });
     }
 
     function checkAnswer(qIdx, optIdx) {
-      const qDiv = document.getElementById(`q-${qIdx}`);
-      const opts = qDiv.querySelectorAll('.quiz-opt');
+      const q = quizData[qIdx];
+      const optsCont = document.getElementById(`opts-${qIdx}`);
       const hint = document.getElementById(`hint-${qIdx}`);
-      const correctIdx = quizData[qIdx].c;
+      const btns = optsCont.querySelectorAll('.quiz-opt');
 
-      opts.forEach((o, i) => {
-        o.onclick = null;
-        if (i === correctIdx) o.className = 'quiz-opt correct';
+      btns.forEach((o, i) => {
+        o.disabled = true;
+        if (i === q.ans) o.className = 'quiz-opt correct';
         else if (i === optIdx) o.className = 'quiz-opt wrong';
       });
 
@@ -788,7 +768,7 @@ W_зам(p) = W_раз(p) / [ 1 + W_раз(p) ] = 125000 / [ p³ + 50p² + 725p 
 
     window.onload = function() {
       initQuiz();
-      updateSim(1000);
+      updateFreq(10);
     };
   </script>
 </body>
